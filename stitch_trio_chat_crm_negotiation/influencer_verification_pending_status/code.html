@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Influencer Verification Pending</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2e5cb8",
+                        "success": "#3DB060",
+                        "background-light": "#f1f2f4",
+                        "background-dark": "#16181d",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1f2937",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            },
+        }
+    </script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Custom smooth appearance */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .dark .glass-card {
+            background: rgba(31, 41, 55, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#121417] dark:text-gray-100 min-h-screen flex flex-col">
+<!-- Top Navbar -->
+<header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#16181d]/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<!-- Logo Area -->
+<div class="flex items-center gap-3">
+<div class="size-8 flex items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">InfluencerHub</h2>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span>Support</span>
+</div>
+<div class="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
+<button class="flex items-center justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-white dark:ring-gray-800 shadow-sm cursor-pointer" data-alt="User profile avatar showing a smiling person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDKQsiXU1Q2I1HFXNKwjPiif3Uwd3fWUvy2NuTprW7U2MY59UAEMgJOK1wNeTXSyl8z73YDo8g44BAIhwQeHrhcwsiasJedOd72x_WsPcV-m0r7OkCOqjC4iDXEpmuXYDY92NaeGpkDv9quuO1vzWV4ZEMfsCG3Z9a24XxliqCO2SKm7I3LZlx1EarYN-eiZNOzIBDTRbMVwrKsV-xH9x9IA6hZdgjQRbiQ5MW2kZKnQOLrpPYxIAjskd1EQuI4DVht3FVjNzG6z-z_");'>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center py-12 px-4 sm:px-6 relative overflow-hidden">
+<!-- Abstract Background Decoration -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[500px] bg-gradient-to-b from-primary/5 to-transparent rounded-full blur-3xl -z-10 pointer-events-none"></div>
+<div class="w-full max-w-[600px] space-y-8 relative z-10">
+<!-- Status Card -->
+<div class="glass-card rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none overflow-hidden">
+<!-- Status Header Area -->
+<div class="p-8 pb-0 flex flex-col items-center text-center">
+<!-- Pulse Icon Wrapper -->
+<div class="relative mb-6">
+<!-- Ripple Effect -->
+<div class="absolute inset-0 rounded-full bg-primary/20 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+<div class="absolute inset-0 rounded-full bg-primary/10 animate-[pulse_3s_ease-in-out_infinite]"></div>
+<!-- Main Icon -->
+<div class="relative bg-white dark:bg-gray-800 rounded-full h-20 w-20 flex items-center justify-center shadow-sm border border-primary/10">
+<span class="material-symbols-outlined text-primary text-[40px] filled">shield_lock</span>
+</div>
+</div>
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Verification in Progress</h1>
+<p class="text-gray-500 dark:text-gray-400 text-base max-w-sm mx-auto leading-relaxed">
+                        Thanks for submitting your details. Our team is currently reviewing your profile to ensure marketplace quality.
+                    </p>
+</div>
+<!-- Timeline Section -->
+<div class="px-8 py-8">
+<div class="relative pl-4 space-y-0">
+<!-- Connecting Line Layer -->
+<div class="absolute left-[27px] top-3 bottom-8 w-[2px] bg-gray-100 dark:bg-gray-700 h-[calc(100%-40px)] -z-10"></div>
+<!-- Step 1: Completed -->
+<div class="flex gap-4 pb-8 group">
+<div class="relative flex-none">
+<div class="h-6 w-6 rounded-full bg-success flex items-center justify-center ring-4 ring-white dark:ring-gray-800">
+<span class="material-symbols-outlined text-white text-[16px] font-bold">check</span>
+</div>
+</div>
+<div class="flex-1 pt-[2px]">
+<h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-none">Registration Completed</h4>
+<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Account created successfully</p>
+</div>
+</div>
+<!-- Step 2: Completed -->
+<div class="flex gap-4 pb-8 group">
+<div class="relative flex-none">
+<div class="h-6 w-6 rounded-full bg-success flex items-center justify-center ring-4 ring-white dark:ring-gray-800">
+<span class="material-symbols-outlined text-white text-[16px] font-bold">check</span>
+</div>
+</div>
+<div class="flex-1 pt-[2px]">
+<h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-none">KYC Documents Uploaded</h4>
+<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">ID and tax forms submitted</p>
+</div>
+</div>
+<!-- Step 3: Active -->
+<div class="flex gap-4">
+<div class="relative flex-none">
+<div class="h-6 w-6 rounded-full bg-white dark:bg-gray-800 border-2 border-primary flex items-center justify-center ring-4 ring-white dark:ring-gray-800">
+<div class="h-2.5 w-2.5 rounded-full bg-primary animate-pulse"></div>
+</div>
+</div>
+<div class="flex-1 pt-[2px]">
+<h4 class="text-sm font-semibold text-primary leading-none">Admin Review</h4>
+<p class="text-xs text-primary/70 mt-1 font-medium">Currently in progress</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Meta -->
+<div class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-gray-400 text-lg">schedule</span>
+<p class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        Expected completion: <span class="text-gray-900 dark:text-gray-200 font-semibold">24-48 hours</span>
+</p>
+</div>
+</div>
+<!-- "What can you do now?" Section -->
+<div class="space-y-4 animate-[fadeIn_0.5s_ease-out_0.2s_both]">
+<div class="flex items-center gap-3 px-2">
+<h3 class="text-sm font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">While you wait</h3>
+<div class="h-px bg-gray-200 dark:bg-gray-700 flex-grow"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Action Card 1 -->
+<a class="group relative flex flex-col p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 cursor-pointer overflow-hidden" href="#">
+<div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</div>
+<div class="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">folder_special</span>
+</div>
+<h4 class="text-base font-bold text-gray-900 dark:text-white mb-1">Complete Portfolio</h4>
+<p class="text-sm text-gray-500 dark:text-gray-400">Add past collaborations to stand out when you go live.</p>
+</a>
+<!-- Action Card 2 -->
+<a class="group relative flex flex-col p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-primary/30 transition-all duration-200 cursor-pointer overflow-hidden" href="#">
+<div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</div>
+<div class="h-10 w-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<div class="flex items-center gap-2 mb-1">
+<h4 class="text-base font-bold text-gray-900 dark:text-white">Browse Open Briefs</h4>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-gray-700 text-gray-500 uppercase tracking-wide">Read-only</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400">See what campaigns are currently active.</p>
+</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="py-6 text-center">
+<p class="text-xs text-gray-400 dark:text-gray-600">© 2023 InfluencerHub Inc. All rights reserved.</p>
+</footer>
+</body></html>

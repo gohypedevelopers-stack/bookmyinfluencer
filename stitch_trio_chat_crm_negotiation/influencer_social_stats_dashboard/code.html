@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Influencer Social Stats Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00bdc7",
+                        "accent-magenta": "#E6007A",
+                        "accent-orange": "#FF8C00",
+                        "background-dark": "#12141A",
+                        "card-dark": "#1F222B",
+                        "text-secondary": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .chart-grid-bg {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-white min-h-screen flex flex-col antialiased selection:bg-primary/30">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-white/5 bg-[#12141A]/80 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center text-white shadow-[0_0_15px_rgba(0,189,199,0.3)]">
+<span class="material-symbols-outlined text-xl">insights</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight">InfluencerPro</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-4 text-sm font-medium text-text-secondary">
+<a class="hover:text-white transition-colors" href="#">Dashboard</a>
+<a class="hover:text-white transition-colors" href="#">Campaigns</a>
+<a class="hover:text-white transition-colors" href="#">Settings</a>
+</div>
+<div class="h-6 w-px bg-white/10"></div>
+<div class="flex items-center gap-3">
+<button class="relative p-2 text-text-secondary hover:text-white transition-colors rounded-full hover:bg-white/5">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-accent-magenta rounded-full border border-background-dark"></span>
+</button>
+<div class="size-9 rounded-full bg-cover bg-center border border-white/10" data-alt="Profile picture of a female influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB8AabzkuVhvljEu-qqMEcbMPDte8Th10aoUnkRp68W7qZ2aGGWi9VSa6nGg8RqMxieK0y37KwqRp8nuLDvcwvHemvmsDcPfR1SWVX0p3Z8kBq9G1x6hDLUouMzyZGquP-ms9-2rKLDKQEPrjKqA-qjX-h6jDLpHtxITMmM8doXNvJ5NuXaMYpOhSM_t2pt1dxRcuLNjvjyRuqdLOs4w6dYKWfBJPJLtWhF_a1S-nLl-w7SvHFenzgh3Gufay0O7FIZs01X0D7c3RnA");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 p-6 lg:px-12 lg:py-8 max-w-[1600px] mx-auto w-full">
+<!-- Header Controls -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-bold">Performance Analytics</h1>
+<p class="text-text-secondary text-sm">Welcome back, Sarah. Your growth is trending up.</p>
+</div>
+<div class="flex flex-wrap items-center gap-4">
+<!-- Platform Selector Pills -->
+<div class="bg-card-dark border border-white/5 p-1 rounded-lg flex">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded shadow-sm text-sm font-bold transition-all">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+                        Instagram
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-white rounded hover:bg-white/5 text-sm font-medium transition-all">
+<span class="material-symbols-outlined text-[18px]">smart_display</span>
+                        YouTube
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-text-secondary hover:text-white rounded hover:bg-white/5 text-sm font-medium transition-all">
+<span class="material-symbols-outlined text-[18px]">music_note</span>
+                        TikTok
+                    </button>
+</div>
+<!-- Date Picker -->
+<div class="relative group">
+<select class="appearance-none bg-card-dark border border-white/5 text-white pl-4 pr-10 py-2.5 rounded-lg text-sm font-medium focus:ring-1 focus:ring-primary focus:border-primary outline-none cursor-pointer hover:border-white/10 transition-colors">
+<option>Last 30 Days</option>
+<option>Last 7 Days</option>
+<option>Last 90 Days</option>
+<option>Year to Date</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-text-secondary">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+</div>
+</div>
+<button class="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg text-white text-sm font-bold transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Export
+                </button>
+</div>
+</div>
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<!-- Card 1: Followers -->
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">group_add</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<span class="text-text-secondary font-medium">Follower Growth</span>
+</div>
+<div class="flex items-end gap-3 mt-4">
+<span class="text-4xl font-bold tracking-tight text-white">14.2k</span>
+<div class="flex items-center text-primary text-sm font-bold bg-primary/10 px-2 py-1 rounded mb-1">
+<span class="material-symbols-outlined text-sm mr-0.5">trending_up</span>
+                            +2.4%
+                        </div>
+</div>
+<p class="text-text-secondary text-xs mt-2">+342 new followers today</p>
+</div>
+<!-- Mini sparkline -->
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50"></div>
+</div>
+<!-- Card 2: Engagement -->
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-accent-magenta">favorite</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<div class="size-8 rounded-full bg-accent-magenta/10 flex items-center justify-center text-accent-magenta">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</div>
+<span class="text-text-secondary font-medium">Avg. Engagement</span>
+</div>
+<div class="flex items-end gap-3 mt-4">
+<span class="text-4xl font-bold tracking-tight text-white">4.8%</span>
+<div class="flex items-center text-accent-magenta text-sm font-bold bg-accent-magenta/10 px-2 py-1 rounded mb-1">
+<span class="material-symbols-outlined text-sm mr-0.5">trending_up</span>
+                            +0.5%
+                        </div>
+</div>
+<p class="text-text-secondary text-xs mt-2">Top 5% of niche</p>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-magenta/50 to-transparent opacity-50"></div>
+</div>
+<!-- Card 3: Reach -->
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-accent-orange">campaign</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<div class="size-8 rounded-full bg-accent-orange/10 flex items-center justify-center text-accent-orange">
+<span class="material-symbols-outlined text-sm">visibility</span>
+</div>
+<span class="text-text-secondary font-medium">Total Reach</span>
+</div>
+<div class="flex items-end gap-3 mt-4">
+<span class="text-4xl font-bold tracking-tight text-white">1.2M</span>
+<div class="flex items-center text-accent-orange text-sm font-bold bg-accent-orange/10 px-2 py-1 rounded mb-1">
+<span class="material-symbols-outlined text-sm mr-0.5">trending_flat</span>
+                            +12%
+                        </div>
+</div>
+<p class="text-text-secondary text-xs mt-2">Impressions up 8% vs last month</p>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent-orange/50 to-transparent opacity-50"></div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Charts (Span 2) -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- Follower Trend Chart -->
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 min-h-[400px] flex flex-col shadow-lg">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-lg text-white">Follower Trend</h3>
+<div class="flex gap-2">
+<button class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded">Growth</button>
+<button class="text-xs font-medium text-text-secondary hover:text-white px-3 py-1 rounded hover:bg-white/5 transition-colors">Lost</button>
+</div>
+</div>
+<!-- CSS Chart Area -->
+<div class="relative flex-1 w-full chart-grid-bg rounded-lg border border-white/5 overflow-hidden">
+<!-- Y-Axis Labels -->
+<div class="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-[10px] text-text-secondary px-2 py-4 text-right">
+<span>15k</span>
+<span>12k</span>
+<span>9k</span>
+<span>6k</span>
+<span>3k</span>
+</div>
+<!-- Chart SVG -->
+<div class="absolute inset-0 left-12 bottom-8 top-4 right-4">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 100 50">
+<defs>
+<lineargradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#00bdc7; stop-opacity:0.3"></stop>
+<stop offset="100%" style="stop-color:#00bdc7; stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,45 Q10,42 20,35 T40,30 T60,20 T80,25 T100,5" fill="url(#gradient)" stroke="none"></path>
+<path d="M0,45 Q10,42 20,35 T40,30 T60,20 T80,25 T100,5" fill="none" stroke="#00bdc7" stroke-linecap="round" stroke-width="0.5"></path>
+<!-- Data Points (Hover simulation) -->
+<circle class="hover:r-2 transition-all cursor-pointer" cx="20" cy="35" fill="#12141A" r="1" stroke="#00bdc7" stroke-width="0.5">
+<title>Mar 5: 9.2k Followers</title>
+</circle>
+<circle class="hover:r-2 transition-all cursor-pointer filter drop-shadow-[0_0_4px_rgba(0,189,199,0.8)]" cx="60" cy="20" fill="#fff" r="1.5" stroke="#00bdc7" stroke-width="0.5"></circle>
+<circle class="hover:r-2 transition-all cursor-pointer" cx="80" cy="25" fill="#12141A" r="1" stroke="#00bdc7" stroke-width="0.5"></circle>
+</svg>
+<!-- Tooltip (Simulated) -->
+<div class="absolute left-[55%] top-[30%] bg-background-dark border border-white/10 p-2 rounded shadow-xl flex flex-col items-center pointer-events-none z-20">
+<span class="text-[10px] text-text-secondary mb-0.5">Mar 15</span>
+<span class="text-sm font-bold text-white">11,402</span>
+</div>
+</div>
+<!-- X-Axis Labels -->
+<div class="absolute bottom-0 left-12 right-4 h-8 flex justify-between items-center text-[10px] text-text-secondary px-2">
+<span>Mar 1</span>
+<span>Mar 5</span>
+<span>Mar 10</span>
+<span>Mar 15</span>
+<span>Mar 20</span>
+<span>Mar 25</span>
+<span>Mar 30</span>
+</div>
+</div>
+</div>
+<!-- Top Performing Posts -->
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 shadow-lg">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-bold text-lg text-white">Top Performing Posts</h3>
+<a class="text-sm text-primary hover:text-primary/80 font-medium" href="#">View All</a>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Post Item 1 -->
+<div class="flex gap-4 items-center group p-2 hover:bg-white/[0.02] rounded-lg transition-colors">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center shrink-0 border border-white/10" data-alt="Social media post thumbnail showing tech gear setup" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCEGHZq1i9Pj9inYDiaJ4GxXE3DontUHhjUwm6DYdiou4mM4GKnHfsmoQyrlFYi7a0W4czPmcYx3YQJ4xzXOlSbiW01hq-hVIaNds5x3dl6s2YFG7goV-Q6OYk7meRDWZ0L1le-ZzoM5eFYg_ofpEksHwVgIOwLi-0JHWp1i9OzCMnmj1Fc_KN7Yh4vvyZxJ-vbGMc6MRvX22lrlWMSFjTrwlrh6GEwLuZY38GHh34tY7coOLS_IUi1i1dH7nXNHd6O1Rvr9bv7XhHc");'></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold truncate text-white">My new desk setup for 2024! 🖥️</h4>
+<span class="text-xs text-text-secondary">2 days ago</span>
+</div>
+<div class="space-y-2 mt-2">
+<div class="flex items-center gap-3 text-xs">
+<div class="w-8 text-right text-accent-magenta font-bold">12.5k</div>
+<div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-accent-magenta w-[85%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-accent-magenta">favorite</span>
+</div>
+<div class="flex items-center gap-3 text-xs">
+<div class="w-8 text-right text-accent-orange font-bold">842</div>
+<div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-accent-orange w-[45%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-accent-orange">chat_bubble</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Post Item 2 -->
+<div class="flex gap-4 items-center group p-2 hover:bg-white/[0.02] rounded-lg transition-colors">
+<div class="w-16 h-16 rounded-lg bg-cover bg-center shrink-0 border border-white/10" data-alt="Social media post thumbnail showing a camera lens" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAprI99To3z8OcSsQOGM56UE99X7gSXTRbkTsYpf1u6F0T5_FkTGoZyaDrtQowuXXNL8yHkRvGu_5Quto_ShwuFF4eZoVE8KFLfREMhHGgHAYQtcW5Ul6IclwfzrdTJTJw61Xfum8dYa-rNvQVeVxbhTs-YC3dMUwFnkTbPtobCpYrChEu2Jp9L7b1mhLUd-cJaxTxR8CRXQ-Ay9NbSun8zVPExsnns_XOKx_zzWksjtHKO-yRRsBPIvGhRRteb4F9K5wi56TDyevgo");'></div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold truncate text-white">Best camera for vlogging? 📸</h4>
+<span class="text-xs text-text-secondary">5 days ago</span>
+</div>
+<div class="space-y-2 mt-2">
+<div class="flex items-center gap-3 text-xs">
+<div class="w-8 text-right text-accent-magenta font-bold">8.2k</div>
+<div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-accent-magenta w-[65%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-accent-magenta">favorite</span>
+</div>
+<div class="flex items-center gap-3 text-xs">
+<div class="w-8 text-right text-accent-orange font-bold">1.2k</div>
+<div class="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-accent-orange w-[70%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-accent-orange">chat_bubble</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar -->
+<div class="lg:col-span-1">
+<div class="bg-card-dark border border-white/5 rounded-xl p-6 h-full flex flex-col gap-8 shadow-lg">
+<h3 class="font-bold text-lg text-white border-b border-white/5 pb-4">Audience Insights</h3>
+<!-- Gender Donut -->
+<div>
+<h4 class="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider text-[10px]">Gender Distribution</h4>
+<div class="flex items-center gap-6">
+<div class="relative size-32 rounded-full shrink-0" style="background: conic-gradient(#E6007A 0% 60%, #00bdc7 60% 100%);">
+<div class="absolute inset-4 bg-card-dark rounded-full flex flex-col items-center justify-center">
+<span class="text-xs text-text-secondary">Primary</span>
+<span class="text-lg font-bold text-white">Female</span>
+</div>
+</div>
+<div class="flex flex-col gap-3 flex-1">
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-accent-magenta"></div>
+<span class="text-white">Female</span>
+</div>
+<span class="font-bold text-accent-magenta">60%</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-primary"></div>
+<span class="text-white">Male</span>
+</div>
+<span class="font-bold text-primary">40%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Age Bars -->
+<div>
+<h4 class="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider text-[10px]">Age Range</h4>
+<div class="space-y-3">
+<div class="group">
+<div class="flex justify-between text-xs mb-1 text-text-secondary group-hover:text-white transition-colors">
+<span>18-24</span>
+<span>45%</span>
+</div>
+<div class="h-2 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-blue-500 w-[45%] rounded-full"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-xs mb-1 text-text-secondary group-hover:text-white transition-colors">
+<span>25-34</span>
+<span>30%</span>
+</div>
+<div class="h-2 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-blue-500 w-[30%] opacity-70 rounded-full"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-xs mb-1 text-text-secondary group-hover:text-white transition-colors">
+<span>35-44</span>
+<span>15%</span>
+</div>
+<div class="h-2 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-blue-500 w-[15%] opacity-40 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Cities -->
+<div class="flex-1">
+<h4 class="text-sm font-medium text-text-secondary mb-4 uppercase tracking-wider text-[10px]">Top Cities</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-1.5 rounded text-primary">
+<span class="material-symbols-outlined text-sm">location_on</span>
+</div>
+<span class="text-sm font-bold text-white">London</span>
+</div>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">22%</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<div class="flex items-center gap-3">
+<div class="bg-white/10 p-1.5 rounded text-text-secondary">
+<span class="material-symbols-outlined text-sm">location_on</span>
+</div>
+<span class="text-sm font-bold text-white">New York</span>
+</div>
+<span class="text-xs font-bold text-text-secondary">15%</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<div class="flex items-center gap-3">
+<div class="bg-white/10 p-1.5 rounded text-text-secondary">
+<span class="material-symbols-outlined text-sm">location_on</span>
+</div>
+<span class="text-sm font-bold text-white">Los Angeles</span>
+</div>
+<span class="text-xs font-bold text-text-secondary">11%</span>
+</div>
+</div>
+<!-- Mini Map Vis (Decorative) -->
+<div class="mt-6 h-32 w-full rounded-lg bg-center bg-cover border border-white/5 relative overflow-hidden" data-location="Map of the world with highlighted cities" style='background-image: url("https://placeholder.pics/svg/300");'>
+<div class="absolute inset-0 bg-background-dark/60"></div>
+<div class="absolute top-1/3 left-1/2 size-2 bg-primary rounded-full animate-ping"></div>
+<div class="absolute top-1/3 left-1/2 size-2 bg-primary rounded-full"></div>
+<div class="absolute top-1/4 left-1/4 size-1.5 bg-primary/50 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

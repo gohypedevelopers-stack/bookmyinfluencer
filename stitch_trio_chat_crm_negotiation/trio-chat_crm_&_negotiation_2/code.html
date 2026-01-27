@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trio-Chat CRM &amp; Negotiation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#12a18e",
+                        "primary-dark": "#0e8574",
+                        "background-light": "#f8fcfb",
+                        "background-dark": "#181d25",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#222831",
+                        "text-main": "#0e1b19",
+                        "text-secondary": "#4e978e",
+                        "border-light": "#e7f3f1",
+                        "border-dark": "#2d3748",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for a cleaner look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-white h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark px-6 py-3 shrink-0 z-20">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-text-main dark:text-white">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">handshake</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Trio-Chat CRM</h2>
+</div>
+<!-- Global Search -->
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+<div class="text-text-secondary flex border-none items-center justify-center pl-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg bg-transparent border-none focus:ring-0 placeholder:text-text-secondary px-3 text-sm font-normal leading-normal dark:text-white" placeholder="Search campaigns..."/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-text-main dark:text-white text-sm font-semibold hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold bg-primary/10 px-3 py-1.5 rounded-full" href="#">Negotiations</a>
+<a class="text-text-main dark:text-white text-sm font-semibold hover:text-primary transition-colors" href="#">Payments</a>
+<a class="text-text-main dark:text-white text-sm font-semibold hover:text-primary transition-colors" href="#">Settings</a>
+</div>
+<div class="flex gap-2 items-center">
+<button class="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-background-light dark:bg-background-dark text-text-main dark:text-white hover:bg-primary/10 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white dark:border-gray-800 shadow-sm" data-alt="User profile avatar showing a smiling person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARRYDe2y6OKZhDO0dp66YAepbiV3e8Qo5rhd52aEHEUYQTH3cszJBH9xxw90k_3SNov5ngVwLJnRusdu2eXRhdzLnhJoDoLMhMxNmLwkdB_pImTLKJMPo1OhZh7TZInWtNCXipR0ph1RSasU9R5kO2dY6sZgvV2ZUDP_AffqMGWJITi_IJ2yWdz5lRwP0u-nSnM4B9eWKIZfG52GE9F2iisfyV1rCU9GAoyY68_0E_oDD5ZMIiaCxQeww_7QYwbBAeqfPqGxVLkPUd");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content Area (3 Panes) -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Pane 1: Left Sidebar (Inquiries List) -->
+<aside class="w-80 flex flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shrink-0 z-10 transition-all duration-300">
+<div class="p-4 border-b border-border-light dark:border-border-dark">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-lg">Inbox</h3>
+<div class="flex gap-1">
+<button class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-text-secondary"><span class="material-symbols-outlined text-[20px]">filter_list</span></button>
+<button class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-text-secondary"><span class="material-symbols-outlined text-[20px]">add_circle</span></button>
+</div>
+</div>
+<!-- Mini Search -->
+<div class="relative">
+<input class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-text-secondary dark:text-white" placeholder="Filter messages..."/>
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-text-secondary text-[18px]">search</span>
+</div>
+</div>
+<!-- Conversation List -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
+<!-- Active Item -->
+<div class="p-3 rounded-xl bg-primary/5 border border-primary/20 cursor-pointer group hover:shadow-sm transition-all relative">
+<div class="flex items-start gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Chloe Styles avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCTGmP6J9bPcS5v36-FvDckG9L7o28r2cYwfkCdpK1O2JQ2MyN-akorw01j2rHPuAFmokqN0Z8ScWaRFiZdK1PnUXaKkz3jWw6BzAYfL6NRFAV0AcNKuClwIHLi3mnowx3bNPsv-He0WUGeKT2UlF6YRtoVzUqSa2WpvCCy0u0YpVIM19pYfpkO50pYDeRr1p4TvxMWaKBfaeHad26fbZ2wIM9bCNV8RH52erSSxv1_FhLl1Dgkl3tSboxCjkjBob-s3bwqs5smSXUX");'></div>
+<span class="absolute -bottom-0.5 -right-0.5 size-3 bg-green-500 border-2 border-white rounded-full"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-sm truncate text-text-main dark:text-white">Chloe Styles</h4>
+<span class="text-xs text-primary font-medium whitespace-nowrap">2m</span>
+</div>
+<p class="text-xs text-text-secondary font-medium truncate mb-1">Summer Lookbook 2024</p>
+<p class="text-xs text-text-main dark:text-gray-300 truncate opacity-90">Thanks! I'll have the draft ready...</p>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wide">Negotiating</span>
+</div>
+</div>
+<!-- Inactive Item -->
+<div class="p-3 rounded-xl hover:bg-background-light dark:hover:bg-gray-800 border border-transparent hover:border-border-light cursor-pointer transition-all">
+<div class="flex items-start gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Tech Reviewer avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC4fY0y0Y2SchfsJx4tfMZunflCecT272ewco1kydFCd5UsD1qp9Oz96tHteMHnTp5MNYjNX2DdHFsdmO3VN9osJRZ1xAMYKZMuC_LtHYdukl9ydeZ-ptQCAsKXnw2M4jUauPsnOY9zkcWUbvhgIfEUSXMCTD718XTrlUi8XE7fTsITmQe2k-UFuPmpQLiUdw9y1IvohH5iO8ggb1m0q9iSIu2C1C9M6lXuzfNr_gLAqEGeieWOrV8oYTyDS9vQ4PwjgVmwW1g_6BY3");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-sm truncate text-text-main dark:text-gray-300">TechReviewer</h4>
+<span class="text-xs text-gray-400 whitespace-nowrap">1h</span>
+</div>
+<p class="text-xs text-text-secondary font-medium truncate mb-1">Gadget Launch Q3</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 truncate">Is the brief updated?</p>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 uppercase tracking-wide">Action Req.</span>
+</div>
+</div>
+<!-- Inactive Item -->
+<div class="p-3 rounded-xl hover:bg-background-light dark:hover:bg-gray-800 border border-transparent hover:border-border-light cursor-pointer transition-all">
+<div class="flex items-start gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Fitness Jane avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBaeMwsCdcM1KgUh6XpLf0fntrcjp5cr57IxVc8jCgo8cMg7nU8H1vAaKhqlhdvtoF-LYO0hhs8iOOyVXvgugCr-XLjOfdeppwlNavMViqGyO9HkyiF9GxRY08CZQCESnBCPfgxbLfs8aYUkbGoUYCej4DPj6UVRMtKZf09Q27kBW5XdR1WegELVieaDr--7fUuFu86e-bnuWbsZeCbvNi2Pf2uwdUvHg6z_FeBa8KkS0vr-7TSKeAEa8KMWYse2UNVFyfuTBwrP1i1");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h4 class="font-bold text-sm truncate text-text-main dark:text-gray-300">FitnessJane</h4>
+<span class="text-xs text-gray-400 whitespace-nowrap">1d</span>
+</div>
+<p class="text-xs text-text-secondary font-medium truncate mb-1">Protein Promo</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 truncate">Payment received, thanks!</p>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase tracking-wide">Completed</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Pane 2: Center Chat Area -->
+<section class="flex-1 flex flex-col min-w-0 relative bg-background-light dark:bg-background-dark/50">
+<!-- Chat Header -->
+<div class="h-16 px-6 border-b border-border-light dark:border-border-dark flex items-center justify-between bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center border border-border-light" data-alt="Chloe Styles avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB4MkM_Xtc5BwC-fX9nMFBNXrwnsNJhrMZ0YI_31L7LI0_Il2kX2keMMZ_iAd-LXJkY3ELJ8k1X6EwBvBBJq_xjoIM37uCwTmKvD6Q0DbFUVWrUZWTDAuJGsmHPepKQFBKba09oKKDiCufc9MtcY0Sfg5kk8pZSjzjoT5iow1FGP6pIslHLQEFlpWY6Vx454-shm5aeb0NBfJzTynFifmspMWTx4wRJBfdMok4uJv9JmH2i9_PX_eqQpyducAqC-AVwaK5qvqXuoVCM");'></div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-text-main dark:text-white leading-tight">Chloe Styles</h3>
+<span class="material-symbols-outlined text-primary text-[16px]" title="Verified Creator">verified</span>
+</div>
+<p class="text-xs text-text-secondary">Summer Lookbook 2024</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-full">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[16px]">shield_person</span>
+<span class="text-xs font-bold text-amber-700 dark:text-amber-400">Moderated Session</span>
+</div>
+<button class="text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Chat Messages -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6 flex flex-col gap-6">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">Yesterday</span>
+</div>
+<!-- System Message -->
+<div class="flex justify-center w-full">
+<div class="flex items-center gap-3 bg-white dark:bg-gray-800 border border-border-light dark:border-gray-700 p-4 rounded-xl shadow-sm max-w-lg">
+<div class="bg-green-100 dark:bg-green-900/30 p-2 rounded-full text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main dark:text-white">Escrow Payment Deposited</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Brand deposited $1,500.00 into secure escrow. Funds are held until deliverables are approved.</span>
+</div>
+</div>
+</div>
+<!-- Admin Message (Moderator) -->
+<div class="flex justify-center w-full">
+<div class="flex flex-col items-center gap-1 max-w-[80%]">
+<div class="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-500 tracking-wider mb-1">Trio Admin • Sarah</div>
+<div class="p-4 rounded-2xl rounded-tl-sm bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 text-text-main dark:text-gray-200 text-sm shadow-sm">
+<p>Hi both! I'm Sarah, your dedicated campaign manager. I've confirmed the escrow deposit. @Chloe please feel free to start drafting the content based on the brief.</p>
+</div>
+</div>
+</div>
+<!-- Message Left (Counterparty) -->
+<div class="flex gap-3 max-w-[70%]">
+<div class="size-8 rounded-full bg-cover bg-center shrink-0 mt-1" data-alt="Chloe Styles avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAxu9KrsmziWSiWnMKZcV0dli1Su57Olf6aZW_IMFAsTpSo-6EHv46sMt9QMikP4bDh9_JofimeHebZ567cOMm3qZbdm1y0d0a8I5IsCkkKM3z21gaaRktSBom27kjFWlRanEN5EMEC2JfSoW_NHOlqaIu5UgG0j8XVXthms4jyApFCjT8ZAyxuKO1GfYj1XinioMUWyLBv0ZKQAdMjyl2xT-MmHC_rhIei_kxzwCp8dJGaKYczvducLwEjJsotnGm1f7Zm5gTRs4Qp");'></div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="text-sm font-bold text-text-main dark:text-white">Chloe Styles</span>
+<span class="text-xs text-gray-400">10:42 AM</span>
+</div>
+<div class="p-4 rounded-2xl rounded-tl-none bg-white dark:bg-surface-dark border border-border-light dark:border-gray-700 text-text-main dark:text-gray-200 text-sm shadow-sm">
+<p>Thanks Sarah! 👋 <br/>Quick question for the brand - do you prefer the Summer vibe to be more "beach day" or "garden party"? I have ideas for both!</p>
+</div>
+</div>
+</div>
+<!-- Message Right (Self) -->
+<div class="flex flex-col items-end gap-1 max-w-[70%] self-end">
+<div class="flex items-baseline gap-2 flex-row-reverse">
+<div class="size-8 rounded-full bg-cover bg-center shrink-0 mt-1" data-alt="Your avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDmv168CD57WpI88qhtXIPO5ShfQC8CwuW_4fmO912B1QxYRN-nIet_4mPnkIkgpAii6do15M_Sq1A5FfcrdlAkr9WXytkLWV8-J0P1_eNwpuBcmlUgcJ39hZebHyxUS4Kgs4sQnfS_KwbxMuFLRyz5PSGLZZ20n3BVyzFi4ldnwjNJNUT0LbUC3pwkd7M2oJ7i_6QwAhWJyY4n3HeMWCiJY-hRqULefB1s8_U5Iqa1p_UtDVdR7Q8AG5AuFI2oocGFuJuUhXqqMygJ");'></div>
+<span class="text-sm font-bold text-text-main dark:text-white">You</span>
+<span class="text-xs text-gray-400">10:55 AM</span>
+</div>
+<div class="p-4 rounded-2xl rounded-tr-none bg-primary text-white text-sm shadow-md">
+<p>Let's go with "Garden Party" 🌿. It fits our new sustainable collection better. Looking forward to seeing the drafts!</p>
+</div>
+</div>
+<!-- Message Left (Counterparty) -->
+<div class="flex gap-3 max-w-[70%]">
+<div class="size-8 rounded-full bg-cover bg-center shrink-0 mt-1" data-alt="Chloe Styles avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD34o4Rm69lf2BrnDxwQAIeiVuillf_L6IERgcW3Jf5H_f_IkSpjIu-qctgQNrf3rvMztCIPOVTzQoxVd2TZTjESU-Bg66WA_cPRfhGi2daYJ7R2f-fh2v3TkNxdz_tXT-2tNMJeeQLdYkSAQkL0KgEDKckb9LSoCNg2mrev3aFAtFQ4cm2Bba9kKD5yT6uxhLCxe3k1_0uila7cW3Dz6SFry6r9ghbJQhjvH6QX2fZhZxfxRlcTxBauYABAtb5Xw6_BVzZmfltNQli");'></div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="text-sm font-bold text-text-main dark:text-white">Chloe Styles</span>
+<span class="text-xs text-gray-400">10:58 AM</span>
+</div>
+<div class="p-4 rounded-2xl rounded-tl-none bg-white dark:bg-surface-dark border border-border-light dark:border-gray-700 text-text-main dark:text-gray-200 text-sm shadow-sm">
+<p>Got it! "Garden Party" it is. 🌸 I'll start shooting tomorrow.</p>
+</div>
+<div class="p-4 rounded-2xl rounded-tl-none bg-white dark:bg-surface-dark border border-border-light dark:border-gray-700 text-text-main dark:text-gray-200 text-sm shadow-sm mt-1">
+<p>Thanks! I'll have the draft ready by Friday.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 border-t border-border-light dark:border-border-dark bg-white dark:bg-surface-dark shrink-0">
+<div class="flex flex-col gap-2 rounded-xl border border-border-light dark:border-gray-700 bg-background-light dark:bg-gray-800 p-2 focus-within:ring-1 focus-within:ring-primary focus-within:border-primary transition-all shadow-sm">
+<div class="flex gap-2 p-1 border-b border-gray-100 dark:border-gray-700">
+<button class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors" title="Bold">
+<span class="material-symbols-outlined text-[18px]">format_bold</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors" title="Italic">
+<span class="material-symbols-outlined text-[18px]">format_italic</span>
+</button>
+<button class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors" title="List">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+</button>
+<div class="w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors" title="Attach">
+<span class="material-symbols-outlined text-[18px]">attach_file</span>
+</button>
+</div>
+<textarea class="w-full bg-transparent border-none focus:ring-0 p-2 text-sm text-text-main dark:text-white resize-none h-16" placeholder="Type your message... Use @ to mention admin"></textarea>
+<div class="flex justify-between items-center px-1">
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+<span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
+</button>
+<button class="bg-primary hover:bg-primary-dark text-white rounded-lg px-4 py-1.5 text-sm font-bold flex items-center gap-2 transition-colors">
+                            Send <span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Pane 3: Right Sidebar (Deal Context) -->
+<aside class="w-80 border-l border-border-light dark:border-border-dark bg-white dark:bg-surface-dark flex flex-col shrink-0 overflow-y-auto custom-scrollbar">
+<div class="p-5 border-b border-border-light dark:border-border-dark bg-background-light dark:bg-surface-dark/50">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-text-secondary uppercase tracking-widest">Active Deal</span>
+<a class="text-xs text-primary font-bold hover:underline" href="#">View Contract</a>
+</div>
+<h2 class="text-xl font-bold text-text-main dark:text-white mb-1">Summer Lookbook 2024</h2>
+<div class="flex items-center gap-2 mt-3">
+<div class="text-3xl font-bold text-text-main dark:text-white tracking-tight">$1,500<span class="text-lg text-gray-400">.00</span></div>
+</div>
+<div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded border border-green-200 dark:border-green-800/50">
+<span class="material-symbols-outlined text-[16px] fill-current">lock</span>
+<span class="text-xs font-bold">Escrow Secured</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-6">
+<!-- Deliverables -->
+<div>
+<h4 class="text-sm font-bold text-text-main dark:text-white mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">assignment_turned_in</span>
+                        Deliverables
+                    </h4>
+<div class="flex flex-col gap-3">
+<label class="flex items-start gap-3 p-3 rounded-lg border border-border-light dark:border-gray-700 hover:bg-background-light dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input checked="" class="peer size-5 cursor-pointer appearance-none rounded border border-gray-300 dark:border-gray-600 checked:border-primary checked:bg-primary transition-all" type="checkbox"/>
+<span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+<svg class="h-3.5 w-3.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-primary transition-colors">Contract Signed</span>
+<span class="text-xs text-text-secondary">Completed 2 days ago</span>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-lg border border-border-light dark:border-gray-700 hover:bg-background-light dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 cursor-pointer appearance-none rounded border border-gray-300 dark:border-gray-600 checked:border-primary checked:bg-primary transition-all" type="checkbox"/>
+<span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+<svg class="h-3.5 w-3.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200">1x Instagram Reel</span>
+<span class="text-xs text-text-secondary">Due: Friday, Oct 24</span>
+</div>
+</label>
+<label class="flex items-start gap-3 p-3 rounded-lg border border-border-light dark:border-gray-700 hover:bg-background-light dark:hover:bg-gray-800 transition-colors cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer size-5 cursor-pointer appearance-none rounded border border-gray-300 dark:border-gray-600 checked:border-primary checked:bg-primary transition-all" type="checkbox"/>
+<span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+<svg class="h-3.5 w-3.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill-rule="evenodd"></path></svg>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200">2x Stories with Link</span>
+<span class="text-xs text-text-secondary">Due: Saturday, Oct 25</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Timeline -->
+<div>
+<h4 class="text-sm font-bold text-text-main dark:text-white mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">timeline</span>
+                        Timeline
+                    </h4>
+<div class="relative pl-4 border-l-2 border-border-light dark:border-gray-700 space-y-6">
+<div class="relative">
+<div class="absolute -left-[21px] top-1 size-3 bg-primary rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
+<p class="text-xs text-gray-500 mb-0.5">Oct 20, 10:00 AM</p>
+<p class="text-sm font-medium text-text-main dark:text-white">Offer Accepted</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 size-3 bg-primary rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
+<p class="text-xs text-gray-500 mb-0.5">Oct 20, 2:30 PM</p>
+<p class="text-sm font-medium text-text-main dark:text-white">Escrow Funded</p>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 size-3 bg-gray-300 dark:bg-gray-600 rounded-full border-2 border-white dark:border-gray-900 shadow-sm"></div>
+<p class="text-xs text-gray-500 mb-0.5">Pending</p>
+<p class="text-sm font-medium text-gray-400">Content Approval</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Action -->
+<div class="mt-auto p-5 border-t border-border-light dark:border-border-dark bg-background-light dark:bg-surface-dark/50">
+<!-- Example: showing actions for Brand (Release Payment) or Influencer (Submit Work) -->
+<!-- Assuming this is Brand View based on the right aligned messages being "Self" -->
+<div class="flex flex-col gap-3">
+<button class="w-full h-12 flex items-center justify-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-primary text-text-main dark:text-white font-bold rounded-xl shadow-sm hover:shadow transition-all group">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">upload_file</span>
+                         View Brief
+                    </button>
+<button class="w-full h-12 flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-lg shadow-primary/30 transition-all opacity-50 cursor-not-allowed" disabled="" title="Waiting for deliverables">
+<span class="material-symbols-outlined">payments</span>
+                         Release Payment
+                    </button>
+<p class="text-[10px] text-center text-gray-400">Action locked until deliverables are submitted.</p>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

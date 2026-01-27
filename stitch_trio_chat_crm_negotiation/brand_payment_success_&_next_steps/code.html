@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment Successful - Influencer CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#23d76e",
+                        "primary-dark": "#1eb85c",
+                        "background-light": "#ffffff",
+                        "background-dark": "#18181b",
+                        "surface-light": "#f8fcf9",
+                        "surface-dark": "#27272a",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(35, 215, 110, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .timeline-line {
+            height: 100%;
+            width: 2px;
+            background: linear-gradient(to bottom, #23d76e 50%, #e5e7eb 50%);
+            background-size: 100% 200%;
+            background-position: bottom;
+            transition: background-position 0.5s ease;
+        }
+        .timeline-item.active .timeline-line {
+            background-position: top;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#121714] dark:text-gray-100 min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f4f2] dark:border-b-gray-800 bg-white dark:bg-[#18181b] px-10 py-4 shadow-sm">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-2xl">handshake</span>
+</div>
+<h2 class="text-[#121714] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Influencer CRM</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+<nav class="flex items-center gap-8">
+<a class="text-[#121714] dark:text-gray-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-[#121714] dark:text-gray-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Campaigns</a>
+<a class="text-[#121714] dark:text-gray-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Marketplace</a>
+<a class="text-[#121714] dark:text-gray-300 hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">Messages</a>
+</nav>
+<div class="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden lg:block">
+<p class="text-xs font-bold text-[#121714] dark:text-white">Alex Morgan</p>
+<p class="text-[10px] text-gray-500 dark:text-gray-400">Brand Manager</p>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-white dark:border-gray-800 shadow-sm" data-alt="User profile avatar showing a professional person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDrAE6IefBICrUzINLK_lZMy95hMQOxGn1SyrY2JQJbfaGKVkopNQYhBSaEsbOjTuCD7QGJ4o_L6shQfB9zayLSzqWQz0zTZLfV_LmtckH32nQXruHPXgLgp8E4LuX7lmbMnwtohlk4MofHdqBcsZqB1Skmx8VmS3jCBKxNVE0Zao_rQXZHnG7YUPzWfcaApvS3ufSZsrJ6pZ4rOpYwlFa5Ks2x7Z_cZoDU9GbgPrD7-QDUGksQpEAGpkdMeqaSjlQni1RL-ThC75M0");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#f8fcf9] dark:bg-background-dark relative overflow-hidden">
+<!-- Abstract Background Decoration -->
+<div class="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<div class="absolute -top-20 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-40 -left-20 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative w-full max-w-[1100px] flex flex-col lg:flex-row gap-8 items-start">
+<!-- Main Success Card -->
+<div class="flex-1 w-full">
+<div class="bg-white dark:bg-surface-dark rounded-2xl shadow-soft dark:shadow-none dark:border dark:border-gray-800 overflow-hidden">
+<!-- Header Section -->
+<div class="flex flex-col items-center pt-12 pb-8 px-8 text-center border-b border-gray-100 dark:border-gray-800 relative">
+<div class="size-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 ring-8 ring-primary/5">
+<span class="material-symbols-outlined text-5xl text-primary animate-bounce" style="animation-duration: 2s;">check_circle</span>
+</div>
+<h1 class="text-2xl md:text-3xl font-extrabold text-[#121714] dark:text-white mb-3">Payment Confirmed &amp; Escrow Initialized</h1>
+<p class="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-base leading-relaxed">
+                            Your funds are securely held. The influencer has been notified to begin work on your campaign.
+                            <span class="inline-flex items-center ml-1 align-text-bottom text-primary cursor-help group relative">
+<span class="material-symbols-outlined text-sm">info</span>
+<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Funds are released only after you approve the content.</span>
+</span>
+</p>
+</div>
+<!-- Details & Timeline Grid -->
+<div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-800">
+<!-- Left Col: Transaction Details -->
+<div class="p-8 flex flex-col justify-center">
+<h3 class="text-xs uppercase tracking-wider text-gray-400 font-bold mb-6">Transaction Summary</h3>
+<div class="space-y-5">
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-gray-50 dark:bg-gray-800 rounded text-gray-500">
+<span class="material-symbols-outlined text-xl">receipt_long</span>
+</div>
+<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Transaction ID</span>
+</div>
+<span class="text-sm font-bold text-[#121714] dark:text-white font-mono bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded">#TRX-883920</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded text-purple-500">
+<span class="material-symbols-outlined text-xl">campaign</span>
+</div>
+<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Campaign</span>
+</div>
+<span class="text-sm font-bold text-[#121714] dark:text-white text-right">Summer Skincare Launch</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-green-50 dark:bg-green-900/20 rounded text-green-600">
+<span class="material-symbols-outlined text-xl">payments</span>
+</div>
+<span class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Amount</span>
+</div>
+<span class="text-lg font-bold text-[#121714] dark:text-white">$2,500.00</span>
+</div>
+</div>
+</div>
+<!-- Right Col: What's Next Timeline -->
+<div class="p-8 bg-gray-50/50 dark:bg-gray-800/20">
+<h3 class="text-xs uppercase tracking-wider text-gray-400 font-bold mb-6">What's Next?</h3>
+<div class="relative pl-2">
+<!-- Step 1 -->
+<div class="flex gap-4 pb-8 relative timeline-item active group">
+<!-- Line -->
+<div class="absolute left-[11px] top-8 bottom-[-8px] w-[2px] bg-gray-200 dark:bg-gray-700"></div>
+<div class="relative z-10 shrink-0">
+<div class="size-6 rounded-full bg-primary flex items-center justify-center text-white shadow-glow">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+</div>
+<div>
+<p class="text-sm font-bold text-[#121714] dark:text-white">Influencer Notification</p>
+<p class="text-xs text-primary font-medium mt-0.5 flex items-center gap-1">
+                                            Active 
+                                            <span class="size-1.5 rounded-full bg-primary animate-pulse"></span>
+                                            Notification Sent
+                                        </p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex gap-4 pb-8 relative timeline-item group">
+<!-- Line -->
+<div class="absolute left-[11px] top-8 bottom-[-8px] w-[2px] bg-gray-200 dark:bg-gray-700"></div>
+<div class="relative z-10 shrink-0">
+<div class="size-6 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400 text-xs">edit_note</span>
+</div>
+</div>
+<div>
+<p class="text-sm font-bold text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">Content Creation</p>
+<p class="text-xs text-gray-400 mt-0.5">Pending influencer action</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex gap-4 relative timeline-item group">
+<div class="relative z-10 shrink-0">
+<div class="size-6 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400 text-xs">lock</span>
+</div>
+</div>
+<div>
+<p class="text-sm font-bold text-gray-500 dark:text-gray-400">Review &amp; Approval</p>
+<p class="text-xs text-gray-400 mt-0.5">Locked until submission</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions Footer -->
+<div class="p-6 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-4 justify-center items-center">
+<button class="w-full sm:w-auto flex items-center justify-center gap-2 h-12 px-8 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20 transform hover:-translate-y-0.5">
+<span>Go to Campaign Dashboard</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+<button class="w-full sm:w-auto flex items-center justify-center gap-2 h-12 px-8 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[#121714] dark:text-white rounded-lg text-sm font-bold tracking-wide transition-colors">
+<span class="material-symbols-outlined text-primary text-lg">chat</span>
+<span>Open Trio-Chat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Side Utility Rail (Desktop: Right Side, Mobile: Bottom) -->
+<div class="w-full lg:w-72 shrink-0 flex flex-col gap-4">
+<!-- Invoice Card -->
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+<div class="flex items-start justify-between mb-3">
+<div class="size-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 group-hover:text-blue-500 transition-colors">download</span>
+</div>
+<h4 class="text-sm font-bold text-[#121714] dark:text-white mb-1">Payment Invoice</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mb-0">Download PDF receipt for your records.</p>
+</div>
+<!-- Support Card -->
+<div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+<div class="flex items-start justify-between mb-3">
+<div class="size-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500">
+<span class="material-symbols-outlined">support_agent</span>
+</div>
+<span class="material-symbols-outlined text-gray-300 group-hover:text-orange-500 transition-colors">arrow_outward</span>
+</div>
+<h4 class="text-sm font-bold text-[#121714] dark:text-white mb-1">Need Help?</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mb-0">Contact our support team for any billing questions.</p>
+</div>
+<!-- Mini Promotion/Tip -->
+<div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/10 dark:border-primary/20 mt-2">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-lg">tips_and_updates</span>
+<h4 class="text-xs font-bold text-primary uppercase tracking-wider">Pro Tip</h4>
+</div>
+<p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        You can add more influencers to this campaign at any time from your dashboard.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="border-t border-gray-100 dark:border-gray-800 py-8 bg-white dark:bg-surface-dark">
+<div class="max-w-[1100px] mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+<p>© 2024 Influencer CRM Inc. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Escrow Agreement</a>
+</div>
+</div>
+</footer>
+</body></html>

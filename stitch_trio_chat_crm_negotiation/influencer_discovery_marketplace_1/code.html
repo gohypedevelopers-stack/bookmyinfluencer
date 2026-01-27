@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Influencer Discovery Marketplace</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#12a18e",
+                        "primary-dark": "#0e8574",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#181d25",
+                        "surface": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "sans": ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(18, 161, 142, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for sidebar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        
+        /* Range Slider Styling Fixes */
+        input[type=range]::-webkit-slider-thumb {
+            pointer-events: all;
+            width: 16px;
+            height: 16px;
+            -webkit-appearance: none;
+            @apply bg-primary rounded-full shadow-md cursor-pointer border-2 border-white;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 font-display antialiased min-h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation -->
+<header class="bg-surface border-b border-slate-200 sticky top-0 z-50 h-16 flex-none">
+<div class="h-full px-6 flex items-center justify-between gap-4">
+<!-- Logo -->
+<div class="flex items-center gap-3 min-w-fit">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<h1 class="text-slate-900 text-xl font-bold tracking-tight">InfluencerHub</h1>
+</div>
+<!-- Search Bar -->
+<div class="hidden md:flex flex-1 max-w-xl mx-auto">
+<div class="relative w-full group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none bg-slate-100 rounded-xl text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all" placeholder="Search creators, niches, locations..." type="text"/>
+</div>
+</div>
+<!-- Nav Links & Actions -->
+<div class="flex items-center justify-end gap-6 min-w-fit">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-primary font-bold text-sm" href="#">Discover</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Campaigns</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Messages</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Analytics</a>
+</nav>
+<div class="h-6 w-px bg-slate-200 mx-2 hidden lg:block"></div>
+<div class="flex items-center gap-3">
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 relative transition-colors">
+<span class="material-symbols-outlined filled text-[22px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white"></span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[22px]">chat_bubble</span>
+</button>
+<button class="pl-2 flex items-center gap-2 hover:opacity-80 transition-opacity">
+<img alt="User Avatar" class="size-9 rounded-full object-cover border border-slate-200" data-alt="User profile picture showing a smiling man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABOy6QjpMB-kRXuJ8r-fF0f56HVNijP-WCrYO3gpROnzYd_GN7PkAqahkdg7gsCsQIWlerj7BSjhgKGIDBOY6XJJ-iP9a4ETRjc2W7070872-VsOOL85c6kQt7arYICCqifYfYFF4hxnG1_T5-sR1BntSQnXsHy4wrWOAQmMcz8sx9PXz4nRGXSTHBPWJDEZSzH58Pw5Uv0YWaICSA8oM1DBWuE9qJfL_6up-GZgj_bgy9gup4Wa6_nzc4wDyPBngnd40jK_FBWCD-"/>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Sidebar (Filters) -->
+<aside class="w-80 bg-surface border-r border-slate-200 hidden lg:flex flex-col h-full overflow-hidden">
+<div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+<h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">filter_list</span> Refine Search
+                </h2>
+<button class="text-xs font-semibold text-slate-400 hover:text-primary transition-colors">Reset</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-8 pb-20">
+<!-- Location Filter -->
+<div class="space-y-3">
+<label class="text-sm font-bold text-slate-900 flex items-center justify-between">
+                        Location
+                        <span class="material-symbols-outlined text-slate-400 text-sm">expand_less</span>
+</label>
+<div class="bg-slate-50 rounded-lg p-3 border border-slate-100 space-y-3">
+<div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+<span class="material-symbols-outlined text-slate-400 text-[18px]">public</span> India
+                        </div>
+<div class="pl-6 space-y-2 border-l-2 border-slate-200 ml-2">
+<div class="flex items-center justify-between text-sm group cursor-pointer">
+<span class="text-primary font-semibold">Maharashtra</span>
+<span class="material-symbols-outlined text-primary text-[16px]">check</span>
+</div>
+<div class="pl-3 mt-1 space-y-1">
+<label class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary cursor-pointer">
+<input checked="" class="rounded text-primary focus:ring-primary border-slate-300 size-4" type="checkbox"/>
+                                    Mumbai
+                                </label>
+<label class="flex items-center gap-2 text-sm text-slate-600 hover:text-primary cursor-pointer">
+<input class="rounded text-primary focus:ring-primary border-slate-300 size-4" type="checkbox"/>
+                                    Pune
+                                </label>
+</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-slate-500 pl-6 border-l-2 border-transparent ml-2 hover:text-slate-900 cursor-pointer">
+                            Karnataka
+                        </div>
+</div>
+</div>
+<!-- Niche Filter -->
+<div class="space-y-3">
+<label class="text-sm font-bold text-slate-900">Niche &amp; Category</label>
+<div class="space-y-2">
+<label class="flex items-center justify-between p-3 border border-primary bg-primary/5 rounded-lg cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">fitness_center</span>
+<span class="text-sm font-medium text-slate-900">Fitness &amp; Health</span>
+</div>
+<input checked="" class="rounded-full text-primary focus:ring-0 border-slate-300 size-4" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 border border-slate-200 hover:border-slate-300 rounded-lg cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[20px]">devices</span>
+<span class="text-sm font-medium text-slate-700">Tech &amp; Gadgets</span>
+</div>
+<input class="rounded-full text-slate-400 focus:ring-0 border-slate-300 size-4" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 border border-slate-200 hover:border-slate-300 rounded-lg cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[20px]">checkroom</span>
+<span class="text-sm font-medium text-slate-700">Fashion</span>
+</div>
+<input class="rounded-full text-slate-400 focus:ring-0 border-slate-300 size-4" type="checkbox"/>
+</label>
+<button class="text-primary text-sm font-semibold hover:underline pl-1 pt-1">+ Show 12 more</button>
+</div>
+</div>
+<!-- Follower Range Slider -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="text-sm font-bold text-slate-900">Followers</label>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">10k - 1M+</span>
+</div>
+<div class="relative h-12 pt-4">
+<div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3 ml-4 rounded-full"></div>
+</div>
+<div class="absolute top-2.5 left-4 size-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer hover:scale-110 transition-transform"></div>
+<div class="absolute top-2.5 right-1/4 size-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer hover:scale-110 transition-transform"></div>
+<div class="flex justify-between text-[10px] text-slate-400 font-medium mt-2 uppercase tracking-wide">
+<span>Nano</span>
+<span>Mega</span>
+</div>
+</div>
+</div>
+<!-- Price Range Slider -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="text-sm font-bold text-slate-900">Price per Post</label>
+<span class="text-xs font-medium text-slate-500">$50 - $5k</span>
+</div>
+<div class="relative h-10 pt-2">
+<div class="h-1.5 w-full bg-slate-200 rounded-full">
+<div class="h-full bg-primary w-1/3 rounded-full"></div>
+</div>
+<div class="absolute top-0.5 left-0 size-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
+<div class="absolute top-0.5 left-1/3 size-4 bg-white border-2 border-primary rounded-full shadow cursor-pointer"></div>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Action -->
+<div class="p-4 border-t border-slate-200 bg-white mt-auto">
+<button class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10">
+                    Apply Filters (24)
+                </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Category Tabs Header -->
+<div class="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-none bg-background-light z-10">
+<div>
+<h2 class="text-2xl font-bold text-slate-900">Explore Creators</h2>
+<p class="text-slate-500 text-sm mt-1">Found <span class="font-bold text-slate-900">1,248</span> creators matching your criteria</p>
+</div>
+<div class="flex items-center gap-2 p-1 bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto max-w-full">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span> Instagram
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">play_circle</span> YouTube
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">tv</span> TV Stars
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 text-slate-500 hover:bg-slate-50 hover:text-slate-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">music_note</span> Musicians
+                    </button>
+</div>
+</div>
+<!-- Scrollable Grid -->
+<div class="flex-1 overflow-y-auto p-8 pt-0 custom-scrollbar">
+<!-- Grid Container -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pb-12">
+<!-- Card 1 -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl">
+<img alt="Influencer Portrait" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Portrait of a female fashion model with sunglasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWUXNgM_O05dpNih-gI9Z6G5XbntfFy6Iqt3eg5VXO4GWr9dLdX6MzRmQFxIGv2AKcqXFhegHiK976APuNEdY-oV68-xby374ACxs92GoicqvQ5TqQR3rDGUy1ss-zDs9suvsszPKMvZvGlHJYKwIcNOPuZ_UdAcVUU0uDxEZtzCUSAKXqwVo6UZ5AShhqYSqarA557dpvjudoqh88t-8RnJSHPV-16SqPp7Pu33QJda_P7A_pAJc9TvswkiLeD0dLNfPQc9Mgn-1B"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+<!-- Badges -->
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-pink-500 text-[16px]">photo_camera</span>
+<span>Fashion</span>
+</div>
+<div class="absolute top-3 right-3 bg-primary/90 text-white backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                                Verified
+                            </div>
+<!-- Bottom Info Over Image -->
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Ananya Singh</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@ananyastyle • Mumbai</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<!-- Metrics -->
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Followers</p>
+<p class="text-slate-900 font-bold text-lg">1.2M</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Eng. Rate</p>
+<p class="text-green-600 font-bold text-lg">4.8%</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Avg. Likes</p>
+<p class="text-slate-900 font-bold text-lg">45k</p>
+</div>
+</div>
+<!-- Tags -->
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Lifestyle</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Beauty</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Travel</span>
+</div>
+<!-- CTA -->
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-primary text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl bg-slate-900">
+<img alt="Influencer Portrait" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" data-alt="Portrait of a fit man in gym attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmC2yhQNDX1D_amwOi3cdMIxW-KXNqosDrPuqYiZo8W_P6_8toVYqLOa4JJY48Lteuu1qpwDBUqiAh53r6XgukyiNlm5jkM9SGA2xNP9eOWJ9oaKJUW7QNkgZDr265VJvriPAb6NucGXHDPCCw7BoIMFDkI1HGHAcht20hIrR-a7X50ZxCvKRqu75S2GmfMNqQqzcj2mIZO5QD1fB7jDQ4MKk7Gd1KTXZNYs52c3Dmx8yl-jTtA1brxVa_w0oX5qy8mlhCSoajkWzJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-red-600 text-[16px]">play_circle</span>
+<span>Fitness</span>
+</div>
+<div class="absolute top-3 right-3 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-wider shadow-sm flex items-center gap-1 border border-white/30">
+                                Rising Star
+                            </div>
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Rahul V.</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@rahulfit • Delhi</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Subs</p>
+<p class="text-slate-900 font-bold text-lg">450k</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Views/Vid</p>
+<p class="text-slate-900 font-bold text-lg">120k</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Price</p>
+<p class="text-slate-900 font-bold text-lg">$1.5k</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Coach</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Health</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Nutrition</span>
+</div>
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-white border border-slate-200 text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary border border-transparent hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined filled">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl">
+<img alt="Music Band" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Group of musicians playing instruments in a studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrhZeqtU_6GnKKLUMqnI537J_ROzUTnwJ9fl_rje30ULGXKy_oeuplXhsu9SnMykgH9rmtNLZzctZWLc8YlfkGo6ASb_7nKFz-tH6Vc2MMK7ciS8lLEj-iqPawLO-58AiZIIinCgdK6Uth3ZhGO7Zyp1UU_BLCjK_aikueSxaGuUyCx3fEeQNwlDdwBknN1g0lnE_VpyNybppOrXbwOs0ZZ-8wh7iCGXgFKoLMtpS4hNl581zMVgl7rHgJUIIhTx8YcHn5Tq89gpKa"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-70"></div>
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-purple-600 text-[16px]">music_note</span>
+<span>Music</span>
+</div>
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Sound Collective</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@soundcollective • Mumbai</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Fans</p>
+<p class="text-slate-900 font-bold text-lg">80k</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Streams</p>
+<p class="text-slate-900 font-bold text-lg">2M+</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Gig</p>
+<p class="text-slate-900 font-bold text-lg">$3k</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Indie</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Rock</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Live</span>
+</div>
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-white border border-slate-200 text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 4 (Tech) -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl">
+<img alt="Tech Reviewer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Man working on a laptop with headphones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT3K0I4QfhHvyqY07rDM3Cpvca_My4Ki1vdVaIvs5Ug2EtIeEuX8nkBNgzS9vPPSkqmocMHi9ftcTJUPNnkXRuuS1scJcsXCLptSqdrMeUyH6a-DkJNT-2AFTWXwt69kGj4yzOy-aSJ7qUTY-66FLmOyTivxuyoeYxtPRg0JCH_-HhMt-FGBXfkrtPYMZ1Q3K49UxbWdImaQRSYTdWQ2RgVgkk2NWoLZowIvQe38n4sR1d3G0AcFjsiIS8g6yEvGqYvNkXvUTN7WIc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-blue-500 text-[16px]">devices</span>
+<span>Tech</span>
+</div>
+<div class="absolute top-3 right-3 bg-primary/90 text-white backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                                Verified
+                            </div>
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Arjun Tech</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@arjuntechreviews • Bangalore</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Followers</p>
+<p class="text-slate-900 font-bold text-lg">2.4M</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Eng. Rate</p>
+<p class="text-green-600 font-bold text-lg">3.2%</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Reels</p>
+<p class="text-slate-900 font-bold text-lg">500k</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Gadgets</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Coding</span>
+</div>
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-white border border-slate-200 text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 5 (Food) -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl">
+<img alt="Food Blogger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Woman taking photo of a nicely plated dish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpj4_YpmhdVdxGzpvnrsvbdOA39FS5K7NZwUbNjTnEq2gUrfIZvmkCdZ_l2rA-rEi7Z_1apDfRKc5pRDihLKy61qRhoiQxDJylCmSiSgvRa7YvXu1fCfJmli44tze2eryBR8V5OFvnH0pJYPktEpbzJD-maFqJ6rHKzVb0bqN5zrsbZztvfSLp10uZYJBeaK2IIiiaPhMdok53jzw2krD73mzrNscXt6ZCbOVKEMiKizSIISviqPUG-vg-MLelm8DkXqDbldQWZHO6"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-orange-500 text-[16px]">restaurant</span>
+<span>Food</span>
+</div>
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Flavor Fiesta</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@flavorfiesta • Jaipur</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Followers</p>
+<p class="text-slate-900 font-bold text-lg">320k</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Eng. Rate</p>
+<p class="text-green-600 font-bold text-lg">6.1%</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Saves</p>
+<p class="text-slate-900 font-bold text-lg">12k</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Street Food</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Reviews</span>
+</div>
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-white border border-slate-200 text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 6 (Travel) -->
+<article class="group bg-white rounded-2xl border border-slate-200 hover:border-primary/30 shadow-sm hover:shadow-soft hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+<div class="relative h-56 w-full overflow-hidden rounded-t-2xl">
+<img alt="Travel Vlogger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Backpacker looking at a mountain landscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3CFJoL0AJlEFXFTt6BpOqRPASzArx4QKvWO1cEhFZvoossphewfFRXDNn4HfS23S4lhoKtYoly_8v5shbZRTwBnsH2HuJU9f9W_pqq2b2aBGh0hmy9WOwedmvQ37Ag232njm5XXTtmbhR1r0oc6tMvkJtFh8zpHITdxRcbXdA-PFBQbwEYCKtOcZQhu1RQUjMvmAbrxnRRMHUXbVvpODD1zwiqMUrzSjQbyvWOVFV-ZxuG4YHNkaKYho19K6QNi6YoTDK1O3bTTNG"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+<div class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-cyan-500 text-[16px]">flight</span>
+<span>Travel</span>
+</div>
+<div class="absolute top-3 right-3 bg-primary/90 text-white backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                                Verified
+                            </div>
+<div class="absolute bottom-3 left-4 text-white">
+<h3 class="font-bold text-lg leading-tight">Wanderlust Vik</h3>
+<p class="text-xs text-slate-200 font-medium opacity-90">@viktravels • Goa</p>
+</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<div class="grid grid-cols-3 gap-2 py-2 mb-4 border-b border-slate-100">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Followers</p>
+<p class="text-slate-900 font-bold text-lg">900k</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Eng. Rate</p>
+<p class="text-green-600 font-bold text-lg">5.5%</p>
+</div>
+<div class="text-center border-l border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Posts</p>
+<p class="text-slate-900 font-bold text-lg">2.1k</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Adventure</span>
+<span class="px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-100">Vlog</span>
+</div>
+<div class="mt-auto flex gap-2">
+<button class="flex-1 bg-white border border-slate-200 text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors">
+                                    View Profile
+                                </button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination -->
+<div class="flex justify-center pb-12">
+<div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm">1</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">2</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">3</button>
+<span class="text-slate-400">...</span>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 font-medium text-sm">12</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-500">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

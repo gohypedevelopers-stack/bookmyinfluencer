@@ -1,0 +1,433 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite doesn't support enums, so we use String fields
+// Valid values are documented in comments on each field
+
+// Core User Models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String?
+  image         String?
+  role          String  @default("INFLUENCER") // BRAND, INFLUENCER, ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  brandProfile      BrandProfile?
+  influencerProfile InfluencerProfile?
+  
+  sentMessages      Message[] @relation("SentMessages")
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+}
+
+model BrandProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  website     String?
+  industry    String?
+  description String?
+  location    String?
+  
+  campaigns   Campaign[]
+  contracts   Contract[]
+}
+
+model InfluencerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  niche       String   // Comma-separated values
+  location    String?
+  bio         String?
+  
+  // Stats
+  instagramHandle String?
+  youtubeHandle   String?
+  tiktokHandle    String?
+  
+  followers   Int      @default(0)
+  engagementRate Float @default(0)
+  
+  // JSON fields for flexibility (stored as String for SQLite compatibility)
+  socialData  String?    // detailed stats
+  pricing     String?    // e.g., { "reel": 1000, "story": 500 }
+  
+  kyc         KYCSubmission?
+  
+  applications CampaignCandidate[]
+  contracts    Contract[]
+  payouts      PayoutRequest[]
+}
+
+model KYCSubmission {
+  id        String    @id @default(cuid())
+  profileId String    @unique
+  profile   InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  status    String @default("NOT_SUBMITTED") // NOT_SUBMITTED, PENDING, APPROVED, REJECTED
+  
+  documentType String?
+  documentUrl  String? // Front
+  documentBackUrl String? // Back
+  panCard      String?
+  bankDetails  String?
+  
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  adminNotes   String?
+}
+
+// Campaign & Kanban
+model Campaign {
+  id          String   @id @default(cuid())
+  brandId     String
+  brand       BrandProfile @relation(fields: [brandId], references: [id])
+  
+  title       String
+  description String?
+  requirements String?
+  budget      Float?
+  status      String @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED, ARCHIVED
+  
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  candidates  CampaignCandidate[]
+}
+
+model CampaignCandidate {
+  id           String   @id @default(cuid())
+  campaignId   String
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  influencerId String
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  
+  status       String @default("CONTACTED") // CONTACTED, IN_NEGOTIATION, HIRED, CONTENT_REVIEW, COMPLETED, REJECTED
+  notes        String?
+  
+  offer        Offer?
+  contract     Contract?
+  
+  chatThread   ChatThread?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([campaignId, influencerId])
+}
+
+// Negotiation & Contracts
+model Offer {
+  id          String   @id @default(cuid())
+  candidateId String   @unique
+  candidate   CampaignCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  
+  amount      Float
+  currency    String   @default("USD")
+  deliverablesDescription String
+  
+  status      String @default("PENDING") // PENDING, ACCEPTED, REJECTED, COUNTERED
+  
+  history     String?    // Array of previous versions/counters
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Contract {
+  id          String   @id @default(cuid())
+  
+  // Link to either candidate flow OR direct hire
+  candidateId String?  @unique
+  candidate   CampaignCandidate? @relation(fields: [candidateId], references: [id])
+  
+  // Direct relations if not via campaign flow (optional, but good for flexibility)
+  brandId     String
+  brand       BrandProfile @relation(fields: [brandId], references: [id])
+  influencerId String
+  influencer  InfluencerProfile @relation(fields: [influencerId], references: [id])
+  
+  totalAmount Float
+  platformFee Float
+  taxAmount   Float    @default(0) // GST/VAT
+  
+  status      String @default("DRAFT") // DRAFT, PENDING_ESCROW, ACTIVE, COMPLETED, CANCELLED, DISPUTED
+  
+  startDate   DateTime?
+  endDate     DateTime?
+  terms       String?
+  
+  deliverables Deliverable[]
+  transactions EscrowTransaction[]
+  disputes     Dispute[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Deliverable {
+  id          String   @id @default(cuid())
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  dueDate     DateTime?
+  
+  status      String @default("PENDING") // PENDING, SUBMITTED, APPROVED, REJECTED
+  submissionUrl String?
+  submissionNotes String?
+  
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  feedback    String?
+}
+
+// Payments
+model EscrowTransaction {
+  id          String   @id @default(cuid())
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id])
+  
+  amount      Float
+  currency    String   @default("USD")
+  type        String   // "DEPOSIT", "RELEASE", "REFUND"
+  
+  status      String @default("PENDING") // PENDING, FUNDED, RELEASED, REFUNDED, DISPUTED
+  
+  paymentGatewayRef String?
+  invoiceUrl  String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PayoutRequest {
+  id            String   @id @default(cuid())
+  influencerId  String
+  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id])
+  
+  amount        Float
+  currency      String   @default("USD")
+  status        String @default("REQUESTED") // REQUESTED, PROCESSING, PAID, FAILED
+  
+  bankReference String?
+  adminNotes    String?
+  
+  requestedAt   DateTime @default(now())
+  processedAt   DateTime?
+}
+
+// Communication
+model ChatThread {
+  id          String   @id @default(cuid())
+  
+  candidateId String?  @unique
+  candidate   CampaignCandidate? @relation(fields: [candidateId], references: [id])
+  
+  // For generic chats not linked to campaign
+  participants String // Comma-separated User IDs
+  
+  messages    Message[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  content   String
+  read      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
+// Support
+model Dispute {
+  id          String   @id @default(cuid())
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id])
+  
+  raiserId    String   // User ID who raised it
+  reason      String
+  description String
+  
+  status      String @default("OPEN") // OPEN, RESOLVED_REFUND, RESOLVED_RELEASE, CLOSED
+  resolution  String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // "OFFER", "MESSAGE", "ESCROW", "SYSTEM"
+  title     String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  
+  action    String
+  entity    String   // "OFFER", "CONTRACT", "USER"
+  entityId  String
+  details   String?
+  
+  createdAt DateTime @default(now())
+}
+
+// OTP onboarding tables (separate from NextAuth users)
+model OtpUser {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  verifiedAt DateTime? @map("verified_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  otps    EmailOtp[]
+  creator Creator?
+
+  @@map("users")
+}
+
+model EmailOtp {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash    String   @map("otp_hash")
+  expiresAt  DateTime @map("expires_at")
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now()) @map("last_sent_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@unique([userId])
+  @@map("email_otps")
+}
+
+model Creator {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  user      OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String?  @map("full_name")
+  phone     String?
+  niche     String?
+  instagramUrl  String?  @map("instagram_url")
+  youtubeUrl    String?  @map("youtube_url")
+
+  // Profile Auto-Fetch Fields
+  profileImageUrl     String? @map("profile_image_url") // Manual override
+  autoProfileImageUrl String? @map("auto_profile_image_url") // Fetched
+  
+  displayName         String? @map("display_name") // Manual override
+  autoDisplayName     String? @map("auto_display_name") // Fetched
+
+  bio                 String? // Manual override
+  autoBio             String? @map("auto_bio") // Fetched
+
+  // New Dashboard Fields
+  pricing             String? // JSON: [{ title: "Reel", price: 100 }]
+  mediaKit            String? @map("media_kit") // JSON: Selected posts provided by user
+  rawSocialData       String? @map("raw_social_data") // JSON: Latest posts from Apify for selection
+
+  lastYoutubeFetchAt   DateTime? @map("last_youtube_fetch_at")
+  lastInstagramFetchAt DateTime? @map("last_instagram_fetch_at")
+
+  socialAccounts CreatorSocialAccount[]
+  metrics        CreatorMetric[]
+  selfReportedMetrics CreatorSelfReportedMetric[]
+
+  @@map("creators")
+}
+
+model CreatorSocialAccount {
+  id            String   @id @default(uuid())
+  creatorId     String   @map("creator_id")
+  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  provider      String   // "youtube", "instagram"
+  providerId    String   @map("provider_id")
+  accessToken   String?  @map("access_token")
+  refreshToken  String?  @map("refresh_token")
+  expiresAt     DateTime? @map("expires_at")
+  username      String?
+  
+  type          String   @default("OAUTH") // "OAUTH", "PUBLIC_API"
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([creatorId, provider])
+  @@map("creator_social_accounts")
+}
+
+model CreatorSelfReportedMetric {
+  id            String   @id @default(uuid())
+  creatorId     String   @map("creator_id")
+  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  provider      String   // "instagram", etc.
+  followersCount Int     @map("followers_count")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([creatorId, provider])
+  @@map("creator_self_reported_metrics")
+}
+
+model CreatorMetric {
+  id            String   @id @default(uuid())
+  creatorId     String   @map("creator_id")
+  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  provider      String   // "youtube", "instagram"
+  date          DateTime @default(now())
+  
+  // Normalized Stats
+  followersCount Int     @default(0) @map("followers_count")
+  engagementRate Float   @default(0) @map("engagement_rate")
+  viewsCount     String? @map("views_count") 
+  mediaCount     Int?    @map("media_count") // Video or Post count
+
+  // Detailed Stats
+  avgLikes       Float?  @map("avg_likes")
+  avgComments    Float?  @map("avg_comments")
+  reach          Int?    // Nullable, do not fake
+  
+  // Metadata
+  source         String? @default("oauth") // "youtube_api", "apify", "oauth"
+  fetchedAt      DateTime @default(now()) @map("fetched_at")
+
+  rawResponse    String? @map("raw_response")
+
+  @@index([creatorId, provider, date])
+  @@map("creator_metrics")
+}

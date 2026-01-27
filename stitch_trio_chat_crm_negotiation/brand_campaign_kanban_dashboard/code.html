@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brand Campaign Kanban Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#29a38f",
+                        "background-light": "#ffffff",
+                        "background-dark": "#17191c",
+                        "surface-light": "#f9fbfb",
+                        "surface-dark": "#23262a",
+                        "column-light": "#F7F8F9",
+                        "column-dark": "#1e2124",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for horizontal scrolling */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .kanban-column {
+            min-width: 320px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#101918] dark:text-gray-100 font-display min-h-screen flex flex-col overflow-hidden">
+<!-- Top Navigation -->
+<header class="flex-none flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e9f1f0] dark:border-white/10 px-8 py-4 bg-background-light dark:bg-background-dark z-20">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-[#101918] dark:text-white">
+<div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">dashboard</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Campaign Manager</h2>
+</div>
+<!-- Search Bar -->
+<label class="hidden md:flex flex-col min-w-40 !h-10 w-96">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full border border-[#e9f1f0] dark:border-white/10 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:ring-2 ring-primary/50 transition-all">
+<div class="text-[#578e85] flex items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#101918] dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent placeholder:text-[#578e85] px-4 text-sm font-normal leading-normal" placeholder="Search influencers, campaigns..."/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary text-white hover:bg-primary/90 transition-colors text-sm font-bold leading-normal tracking-[0.015em] shadow-lg shadow-primary/20">
+<span class="truncate flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        Create Campaign
+                    </span>
+</button>
+<button class="hidden lg:flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 w-10 bg-surface-light dark:bg-surface-dark border border-[#e9f1f0] dark:border-white/10 text-[#101918] dark:text-white hover:bg-[#e9f1f0] dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hidden lg:flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 w-10 bg-surface-light dark:bg-surface-dark border border-[#e9f1f0] dark:border-white/10 text-[#101918] dark:text-white hover:bg-[#e9f1f0] dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-[#e9f1f0] dark:bg-white/10"></div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-10 border-2 border-primary cursor-pointer" data-alt="Profile picture of the logged in user" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC5s8Hr9A_KoCoNg6EN8PPpli1X_SeasAqt16GbckB8sros6Oeh_YdP1aXTwhgsemRxiG4Cj5-p8rQTgwS9pnI8zPkdiUhIxMK4OiBhsicWdDwYUJWUk3UNDD4SVwaUQLDDWhWaa75ieHx0Jz-6PnFo40_ZdszzUCwqaNo9eRWyDhqxTjHWUlP1wW2ZpFbHrI0_cYPZTOqnT0HQS_Vz64LQPBI_2RKaa8vsfgpnfwvIsLrgOui4OqSbp0E6z5RA0g07w4OlAbaxaaFN");'></div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Filters Toolbar -->
+<div class="px-8 py-4 flex-none border-b border-[#e9f1f0] dark:border-white/10 bg-background-light dark:bg-background-dark z-10">
+<div class="flex justify-between items-center">
+<div class="flex gap-3 flex-wrap">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-light dark:bg-surface-dark border border-[#e9f1f0] dark:border-white/10 hover:border-primary/50 transition-colors pl-4 pr-3">
+<p class="text-[#101918] dark:text-gray-200 text-sm font-medium leading-normal">Category: All</p>
+<span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-light dark:bg-surface-dark border border-[#e9f1f0] dark:border-white/10 hover:border-primary/50 transition-colors pl-4 pr-3">
+<p class="text-[#101918] dark:text-gray-200 text-sm font-medium leading-normal">Budget: Any</p>
+<span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-light dark:bg-surface-dark border border-[#e9f1f0] dark:border-white/10 hover:border-primary/50 transition-colors pl-4 pr-3">
+<p class="text-[#101918] dark:text-gray-200 text-sm font-medium leading-normal">Platform: Instagram</p>
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div class="h-9 w-[1px] bg-[#e9f1f0] dark:bg-white/10 mx-1"></div>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg text-primary hover:bg-primary/5 pl-3 pr-3 transition-colors">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+<p class="text-sm font-medium leading-normal">More Filters</p>
+</button>
+</div>
+<div class="flex items-center gap-2 bg-surface-light dark:bg-surface-dark p-1 rounded-lg border border-[#e9f1f0] dark:border-white/10">
+<button class="p-1.5 rounded bg-white dark:bg-background-dark shadow-sm text-primary">
+<span class="material-symbols-outlined text-xl">view_kanban</span>
+</button>
+<button class="p-1.5 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-xl">table_rows</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Kanban Board Container -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden p-8 bg-background-light dark:bg-background-dark">
+<div class="flex h-full gap-6 min-w-max pb-4">
+<!-- Column 1: Contacted -->
+<div class="kanban-column flex flex-col w-[340px] h-full rounded-2xl bg-column-light dark:bg-column-dark border border-transparent dark:border-white/5">
+<!-- Column Header -->
+<div class="flex items-center justify-between p-4 pb-2">
+<div class="flex items-center gap-2">
+<h3 class="text-base font-extrabold text-[#101918] dark:text-white">Contacted</h3>
+<span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-bold rounded-full bg-white dark:bg-white/10 text-gray-500 dark:text-gray-300 border border-gray-100 dark:border-white/5">3</span>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<!-- Column Content -->
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<!-- Card 1 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-transparent hover:border-l-primary">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of Sarah Jenkins influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCbdjAv_w2tz6Oas28vUhVIieoSO5KC-ZAVbYW-tTYZuPHf_uiJ8qugvAfSmBWmYH5v8IfRoa-6zLsuPxLJlJbZF_RIiqqdz7pm2_hmp2WJ0II4u6q3u7WgMQD2rBLTdXcpS36y3hJX2QlF2GHu8Q9GF8juJYxvG4APW0i9MLXJdGi8dM1Ne1Zir2F8SCPyRuuz-6vtwXKF-Z4FL2EZ5AlugBW50Ffto2HityYQry4tlGphzt8fia_-hhOhDFIIsLFkI3h_66oy_GT3");'></div>
+<div class="absolute -bottom-1 -right-1 bg-white dark:bg-surface-dark rounded-full p-0.5">
+<div class="size-4 bg-gradient-to-tr from-yellow-400 to-pink-600 rounded-full flex items-center justify-center text-[10px] text-white">
+<!-- IG Icon simplified -->
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">Sarah Jenkins</h4>
+<p class="text-xs text-gray-500 mt-0.5">@sarahstyles</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">auto_awesome_motion</span>
+                                    2 Stories + 1 Reel
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$400</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Low Effort</span>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-gray-300 w-[10%] rounded-full"></div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-transparent hover:border-l-primary">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of Mike Chen influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAGZ-kkrdfQdMKHUEvE2_CvsR7qtpAEJtVoVErQnhNKq-SluukPwV6SIklTMjIze4tsJic_MZa63q8HPmNThO42xifNV1XCO5fSJic8-GARUEKnEhWgxm4E9znz5XHxWPatQTpLN6kqHmDuhOTzWdgd2pCjoyzXywKlPMlwav0nWE0aYcL3flZEUijaQqwx_vD-tNcDvOWaEfDcTMqLuw556tX_aS3IOjhRmKv8QQMNcq2WOWw1i08iUvUaQelBP8ojpwofjF10IC0U");'></div>
+<div class="absolute -bottom-1 -right-1 bg-white dark:bg-surface-dark rounded-full p-0.5">
+<div class="size-4 bg-black rounded-full flex items-center justify-center text-[10px] text-white">
+<!-- TikTok Icon simplified -->
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">Mike Chen</h4>
+<p class="text-xs text-gray-500 mt-0.5">@mikeyeats</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">videocam</span>
+                                    1 TikTok Video
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$850</span>
+<div class="flex items-center gap-1 text-[10px] text-orange-500 font-bold bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[10px]">timer</span>
+                                    Expiring
+                                </div>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-gray-300 w-[10%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: In Negotiation -->
+<div class="kanban-column flex flex-col w-[340px] h-full rounded-2xl bg-column-light dark:bg-column-dark border border-transparent dark:border-white/5">
+<div class="flex items-center justify-between p-4 pb-2">
+<div class="flex items-center gap-2">
+<h3 class="text-base font-extrabold text-[#101918] dark:text-white">In Negotiation</h3>
+<span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-bold rounded-full bg-white dark:bg-white/10 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-white/5">2</span>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<!-- Card 3 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-orange-400">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Logo of TechReviewer channel" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBWJxhWD_VVu5PvbTGNDF4y0Vm-Cokc_gQb-jSAJCkKANOwMEgRG9hdTIq3U1f9Q09YDCr__WIQZo6HU86Pci7coJY10Q2s3d3dGwlzEFblFRoMsDM2P8Azy4Ntn8_f7YCIPxD5Bz8BfBPSRK7hgzZXxrl68W8vhc_fxMyP9GZz76rmfgDlMm3GiztlaGkWddFpTUxzlf5gfW_08Aay3Cu7vfU97q2aubDo4HY0OMYMcg7ltiUu6AYIUByD59lN2AKkxDHIEl4YCB1c");'></div>
+<div class="absolute -bottom-1 -right-1 bg-white dark:bg-surface-dark rounded-full p-0.5">
+<div class="size-4 bg-red-600 rounded-full flex items-center justify-center text-[10px] text-white">
+<!-- YT Icon simplified -->
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">TechReviewer</h4>
+<p class="text-xs text-gray-500 mt-0.5">@techreview</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">smart_display</span>
+                                    1 YT Integration
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$2,500</span>
+<span class="text-[10px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-500/20 px-2 py-0.5 rounded-full">Counter Offer</span>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400 w-[40%] rounded-full"></div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-orange-400">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of GadgetKing influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDoeE70lW41fpBH1TeZJOsL3ex7TzbZI8hEiXE4Vr8iBXYlFN85TwsuwuwX9gIDkcCHlGRmp1hh81v-sNtJC5Yy-dEHcXjjCFt8J3PqaZ79e9ZvOBxVmd7DTPvip739Z5W_CCfrJLRtltc1TeMaXIc7mgp0afqJEigRn-K5gVXsl6_0Ihg-9PIk4FdM7oWfaM0obeoWHLM74pXlJBhoYwrQTjrv4EsQw-aDxevs9j6PrlLy5cq7FuYkFtwiI9BBULG0FMbMBIcUNGOM");'></div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">GadgetKing</h4>
+<p class="text-xs text-gray-500 mt-0.5">@gadgetking</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">auto_awesome_motion</span>
+                                    2 Reels + Story
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$1,800</span>
+<span class="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">Waiting Reply</span>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400 w-[40%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: Hired/Paid -->
+<div class="kanban-column flex flex-col w-[340px] h-full rounded-2xl bg-column-light dark:bg-column-dark border border-transparent dark:border-white/5">
+<div class="flex items-center justify-between p-4 pb-2">
+<div class="flex items-center gap-2">
+<h3 class="text-base font-extrabold text-[#101918] dark:text-white">Hired/Paid</h3>
+<span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-bold rounded-full bg-white dark:bg-white/10 text-primary border border-teal-100 dark:border-white/5">4</span>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<!-- Card 5 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-primary">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of LifestyleDaily influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgkPyhNv-C4zW-oMfH3fbit3Ms7UM903w9zjIf4wYytuY7YI0g18pu90WLFz7tQxkKXatnR5CScKLCEHAHty9fg-OEsUdYumWZpI4FMxkhgSau4_ZzJrd3JmZsDyRmp7BlIT8F33Jbg3DDUzHoUS9X1vTFsindivJzLjEInNpZ08XY6b6iCMC-0I6PKaet1zaPzofnc_brWh1WS2qeem4y7op4L_emXyBtmSQ1U6Ckeup29naOLslFZQ9LNQ4dJ0ibR_grgrKixIX6");'></div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">LifestyleDaily</h4>
+<p class="text-xs text-gray-500 mt-0.5">@lifestyledaily</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">auto_awesome_motion</span>
+                                    1 Reel
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$1,200</span>
+<div class="flex items-center gap-1 text-[10px] text-primary font-bold bg-teal-50 dark:bg-primary/10 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[12px] fill-current">check_circle</span>
+                                    Paid
+                                </div>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[60%] rounded-full"></div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-primary">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of MomVlogs influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtYrA2NNxBPgkpzmnh5DGIprt5sYF8zfCXWLjOe8heD0NZFqkJD9meSbB52sEZ6DDltzkOaEerN067VGtX_-tzJUqdpSjgVhKew0V2FxV04u1aea6fJr_vrVi-xa_n1KREqawn9vLzaW23IoPMkG6RA7myoCBqsBeMVNJzYrOVdni87OdZDcMS6iq8H-qbyPM-t2juMYW9VdqlMp1MtcvAj37-VBDWXb2lkkVBWtWwe9XYspVoc0doFmwK-vUlW8zoO1CP8wbaseov");'></div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">MomVlogs</h4>
+<p class="text-xs text-gray-500 mt-0.5">@momvlogs</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">videocam</span>
+                                    2 TikToks
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$650</span>
+<div class="flex items-center gap-1 text-[10px] text-gray-500 font-bold bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">
+                                    Processing
+                                </div>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[55%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 4: Content Review -->
+<div class="kanban-column flex flex-col w-[340px] h-full rounded-2xl bg-column-light dark:bg-column-dark border border-transparent dark:border-white/5">
+<div class="flex items-center justify-between p-4 pb-2">
+<div class="flex items-center gap-2">
+<h3 class="text-base font-extrabold text-[#101918] dark:text-white">Content Review</h3>
+<span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-bold rounded-full bg-white dark:bg-white/10 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-white/5">1</span>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<!-- Card 7 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-[0_8px_16px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-1 border-l-4 border-l-purple-500">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of YogaWithJen influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtpjgHQqBgwKfRFE9oZ2px8kST9gwLnK2pCqsUZ91e40j1wLdY3fqoWEt4FyIWJ0aUCO9LgqnfYf7aDeV1oQXRjHrpJKIZZvOR95pJafHAMm41m9vMh2hHuh_zqcnkFDOYG8rdE-RQJmF9aJwspm81bSmFklcdjteL_cyAVMu5HMrLLGeVgHSXTn172_oExUAqO_bbTPM5Px-ab2VJ5bIQoePv2YiY7KQyqCoHkFf_bDKj3N5SWBnuZwGp9srw6CDZvJOiS95eEVSi");'></div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">YogaWithJen</h4>
+<p class="text-xs text-gray-500 mt-0.5">@yogajen</p>
+</div>
+</div>
+<button class="text-gray-300 hover:text-gray-500 dark:hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">videocam</span>
+                                    3 TikToks
+                                </div>
+</div>
+<!-- Action Required Block -->
+<div class="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-lg border border-purple-100 dark:border-purple-800/30">
+<div class="flex items-center gap-2 text-xs text-purple-700 dark:text-purple-300 font-semibold mb-1">
+<span class="material-symbols-outlined text-sm">rate_review</span>
+                                    Review Draft
+                                </div>
+<p class="text-[10px] text-purple-600/80 dark:text-purple-300/60 leading-tight">Submitted 2 hours ago. Needs approval by 5 PM.</p>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$900</span>
+<button class="text-[10px] font-bold text-white bg-purple-500 hover:bg-purple-600 px-3 py-1 rounded-full transition-colors">
+                                    Approve
+                                </button>
+</div>
+<div class="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-purple-500 w-[80%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 5: Completed -->
+<div class="kanban-column flex flex-col w-[340px] h-full rounded-2xl bg-column-light dark:bg-column-dark border border-transparent dark:border-white/5">
+<div class="flex items-center justify-between p-4 pb-2">
+<div class="flex items-center gap-2">
+<h3 class="text-base font-extrabold text-[#101918] dark:text-white">Completed</h3>
+<span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-bold rounded-full bg-white dark:bg-white/10 text-green-600 dark:text-green-400 border border-green-100 dark:border-white/5">12</span>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 opacity-60 hover:opacity-100 transition-opacity duration-300">
+<!-- Card 8 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-none border border-gray-200 dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-md transition-all hover:-translate-y-1">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of GamingPro influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6QLNmz1CSu3YbrqhoEQkxxzuBMgi6vu6VcqzXxvO9h1NKd1nJj5JWKdUY-gq3lPqtbwYPBmjQ0ypb9QI3Xu3k5dgt54QGBTmAjWUEf4aXRq_nxrZCGLU753-cDcTGiQAinshJb6C7uNti9NhBXXYIPjfR5hf19s0GqmaA4AGosbd7jqhz2E8QrptfCy5PQnB6fZ27X-XL0CClbDa098F4i1ZUkDHko7GXbEDIkMU4VJiu2i9yrgI0FjiH5Q47gP5f7UI79xDwQ8c5");'></div>
+<div class="absolute -bottom-1 -right-1 bg-white dark:bg-surface-dark rounded-full p-0.5">
+<div class="size-4 bg-purple-700 rounded-full flex items-center justify-center text-[10px] text-white">
+<!-- Twitch Icon simplified -->
+</div>
+</div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">GamingPro</h4>
+<p class="text-xs text-gray-500 mt-0.5">@gamingpro</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">live_tv</span>
+                                    Twitch Stream
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$500</span>
+<div class="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-50 dark:bg-green-500/20 px-2 py-0.5 rounded-full">
+                                    Live
+                                </div>
+</div>
+<div class="w-full h-1 bg-green-100 dark:bg-green-900/30 rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-[100%] rounded-full"></div>
+</div>
+</div>
+<!-- Card 9 -->
+<div class="group relative flex flex-col gap-3 p-4 bg-white dark:bg-surface-dark rounded-xl shadow-none border border-gray-200 dark:border-white/10 cursor-grab active:cursor-grabbing hover:shadow-md transition-all hover:-translate-y-1">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of AlexCooks influencer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBEtvjb2VJ1h_IIjjPLi6IA0GNcUdCj0-rdMaZKL6Ov6VUhQaqhp-wCmfZ0G7b8cyHKQs9vflrLilVJA-iAF9f03WED3WPpdyhCL0P0Z4hQcjKRH_S3h1pRl1IlS80u3bM6DRBYCS2U-dqctaME7Q1lZYHZmWjwkIR25aawOhgYH0Xy3biyMoNRG_tRfPI99Jl3XxlgGOaUB0s_2aef9Fnp1F2MQKQRHCl-xOfHibpIGKpS-Qa-MjOeOjtcL_sHv6pvcN-9-Zl5aQQy");'></div>
+</div>
+<div>
+<h4 class="text-sm font-bold text-[#101918] dark:text-white leading-tight">AlexCooks</h4>
+<p class="text-xs text-gray-500 mt-0.5">@alexcooks</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-white/5 p-2 rounded-lg">
+<span class="material-symbols-outlined text-base text-primary">auto_awesome_motion</span>
+                                    Reel Series
+                                </div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-sm font-bold text-[#101918] dark:text-white">$2,100</span>
+<div class="flex items-center gap-1 text-[10px] text-green-600 font-bold bg-green-50 dark:bg-green-500/20 px-2 py-0.5 rounded-full">
+                                    Done
+                                </div>
+</div>
+<div class="w-full h-1 bg-green-100 dark:bg-green-900/30 rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-[100%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button for Mobile -->
+<div class="fixed bottom-6 right-6 md:hidden">
+<button class="bg-primary hover:bg-primary/90 text-white rounded-full p-4 shadow-lg shadow-primary/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+</body></html>

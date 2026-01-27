@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Campaign - InfluencerConnect</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#22c3a8",
+              "primary-dark": "#1aa58d",
+              "background-light": "#F8F9FB",
+              "background-dark": "#1f242e",
+              "surface-light": "#FFFFFF",
+              "text-main": "#1f242e",
+              "text-secondary": "#6B7280",
+              "border-light": "#E5E7EB",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem", // rounded-md (8px)
+              "lg": "0.75rem", 
+              "xl": "1rem", 
+              "full": "9999px"
+            },
+            boxShadow: {
+              "soft": "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom Styles for Rich Text Editor mock */
+        .rich-text-content {
+            min-height: 150px;
+        }
+        
+        /* Custom scrollbar for better aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Range slider styling override */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #22c3a8;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #E5E7EB;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main antialiased min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 bg-surface-light/90 backdrop-blur-md border-b border-border-light px-6 py-4">
+<div class="max-w-6xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined">campaign</span>
+</div>
+<h1 class="font-bold text-xl tracking-tight text-text-main">InfluencerConnect</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-bold text-primary" href="#">Campaigns</a>
+<a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="#">Influencers</a>
+<a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full border border-white"></span>
+</button>
+<div class="h-8 w-[1px] bg-border-light"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-text-main">Sarah Jenkins</p>
+<p class="text-xs text-text-secondary">Brand Manager</p>
+</div>
+<div class="size-10 rounded-full bg-cover bg-center border border-border-light" data-alt="Portrait of a professional woman smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCglEHTKHe3arexsyFBPiA1igzsub4Nu1JJ2jkzSyehGhLX46-dEZR2SbpH0CiosJkWJyemkc8dNbYhbbyeUAxytQdHwKx55aEASv-wgZwIgGJ46Ueq0LbzXW9p_6HaQZJW_oHWl5P56BkmRQOgOJo0b4vtOyT6PHppJn_4Q8KD8cJWYiRRL9mTVTIVLDMA-9P10YfwUpgZrKgYGIg6cmzhm2fw9UZDi5_ca3d_GRsGUZlsNatPa86_f0lATsVhRdJNjGYRmcDDgZtN')"></div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Wizard Area -->
+<main class="flex-1 w-full max-w-4xl mx-auto px-4 py-8 pb-32">
+<!-- Progress Steps -->
+<div class="mb-10">
+<div class="flex items-center justify-between relative">
+<!-- Connecting Line -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
+<!-- Step 1: Active -->
+<div class="flex flex-col items-center gap-2 bg-background-light px-2 z-10">
+<div class="size-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-lg shadow-primary/30 ring-4 ring-white">
+<span class="material-symbols-outlined text-xl">check</span>
+</div>
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Basic Info</span>
+</div>
+<!-- Step 2: Active -->
+<div class="flex flex-col items-center gap-2 bg-background-light px-2 z-10">
+<div class="size-10 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-lg shadow-primary/30 ring-4 ring-white">
+                        2
+                    </div>
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Budget</span>
+</div>
+<!-- Step 3: Pending -->
+<div class="flex flex-col items-center gap-2 bg-background-light px-2 z-10">
+<div class="size-10 rounded-full bg-white border-2 border-gray-200 text-text-secondary flex items-center justify-center font-bold ring-4 ring-white">
+                        3
+                    </div>
+<span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Targeting</span>
+</div>
+<!-- Step 4: Pending -->
+<div class="flex flex-col items-center gap-2 bg-background-light px-2 z-10">
+<div class="size-10 rounded-full bg-white border-2 border-gray-200 text-text-secondary flex items-center justify-center font-bold ring-4 ring-white">
+                        4
+                    </div>
+<span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Brief</span>
+</div>
+</div>
+</div>
+<!-- Content Card -->
+<div class="bg-surface-light rounded-xl shadow-soft border border-gray-100 p-8 md:p-12 relative overflow-hidden">
+<!-- Decorative corner accent -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-primary/20 rounded-bl-full -mr-16 -mt-16 pointer-events-none"></div>
+<div class="mb-8">
+<h2 class="text-3xl font-extrabold text-text-main mb-2 tracking-tight">Budget &amp; Timeline</h2>
+<p class="text-text-secondary text-lg">Define the financial scope and duration of your campaign.</p>
+</div>
+<form class="space-y-10">
+<!-- Section: Payment Model -->
+<div class="space-y-4">
+<label class="block text-sm font-bold text-text-main uppercase tracking-wide">Compensation Model</label>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<label class="cursor-pointer group relative">
+<input checked="" class="peer sr-only" name="payment_type" type="radio"/>
+<div class="h-full p-5 rounded-lg border border-gray-200 bg-white hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:shadow-sm transition-all">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">payments</span>
+<span class="font-bold text-text-main">Fixed Pay</span>
+</div>
+<p class="text-xs text-text-secondary">Set a specific amount per deliverable.</p>
+</div>
+<div class="absolute top-3 right-3 hidden peer-checked:block text-primary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer group relative">
+<input class="peer sr-only" name="payment_type" type="radio"/>
+<div class="h-full p-5 rounded-lg border border-gray-200 bg-white hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:shadow-sm transition-all">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">handshake</span>
+<span class="font-bold text-text-main">Negotiable</span>
+</div>
+<p class="text-xs text-text-secondary">Set a range and negotiate with creators.</p>
+</div>
+<div class="absolute top-3 right-3 hidden peer-checked:block text-primary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer group relative">
+<input class="peer sr-only" name="payment_type" type="radio"/>
+<div class="h-full p-5 rounded-lg border border-gray-200 bg-white hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:shadow-sm transition-all">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">card_giftcard</span>
+<span class="font-bold text-text-main">Gifting Only</span>
+</div>
+<p class="text-xs text-text-secondary">Product exchange without cash payment.</p>
+</div>
+<div class="absolute top-3 right-3 hidden peer-checked:block text-primary">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+</div>
+</label>
+</div>
+</div>
+<hr class="border-gray-100"/>
+<!-- Section: Budget Input -->
+<div class="space-y-6">
+<div class="flex justify-between items-end">
+<label class="block text-sm font-bold text-text-main uppercase tracking-wide">Total Budget Cap</label>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">USD</span>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="text-gray-400 text-lg font-medium">$</span>
+</div>
+<input class="block w-full pl-10 pr-12 py-4 text-2xl font-bold text-text-main bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-300" placeholder="5,000" type="number"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+<span class="text-gray-400 text-sm">.00</span>
+</div>
+</div>
+<div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+<div class="flex">
+<div class="flex-shrink-0">
+<span class="material-symbols-outlined text-blue-400">info</span>
+</div>
+<div class="ml-3">
+<p class="text-sm text-blue-700">
+                                    Based on your category, recommended budget for 10 micro-influencers is <strong>$3,500 - $6,000</strong>.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+<hr class="border-gray-100"/>
+<!-- Section: Timeline -->
+<div class="space-y-4">
+<label class="block text-sm font-bold text-text-main uppercase tracking-wide">Campaign Duration</label>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="relative">
+<label class="block text-xs font-medium text-text-secondary mb-1">Start Date</label>
+<div class="relative">
+<input class="block w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-text-main font-medium cursor-pointer" type="date" value="2023-10-24"/>
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-400 text-lg">calendar_today</span>
+</div>
+</div>
+</div>
+<div class="relative">
+<label class="block text-xs font-medium text-text-secondary mb-1">End Date</label>
+<div class="relative">
+<input class="block w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-text-main font-medium cursor-pointer" type="date" value="2023-11-24"/>
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-400 text-lg">event</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<label class="inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+<span class="ms-3 text-sm font-medium text-text-secondary">Flexible dates?</span>
+</label>
+</div>
+</div>
+</form>
+</div>
+</main>
+<!-- Sticky Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)] z-40 py-4 px-6">
+<div class="max-w-4xl mx-auto flex items-center justify-between">
+<button class="flex items-center gap-2 text-text-secondary hover:text-text-main font-bold text-sm px-4 py-2 rounded-lg transition-colors group">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                Back
+            </button>
+<div class="flex items-center gap-4">
+<button class="hidden sm:flex items-center gap-2 text-text-secondary hover:text-primary font-bold text-sm px-6 py-3 border border-gray-200 hover:border-primary hover:bg-primary/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-lg">save</span>
+                    Save Draft
+                </button>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold text-sm px-8 py-3 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all transform hover:-translate-y-0.5">
+                    Next Step
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Toast Notification (Hidden by default, visual representation) -->
+<div class="fixed bottom-24 right-6 bg-text-main text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-500 hover:translate-y-0 hover:opacity-100 cursor-default z-50">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<div>
+<p class="font-bold text-sm">Draft Saved</p>
+<p class="text-xs text-gray-400">Last saved just now</p>
+</div>
+</div>
+</body></html>
