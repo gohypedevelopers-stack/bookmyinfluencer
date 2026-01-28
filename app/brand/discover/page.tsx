@@ -186,8 +186,8 @@ export default function InfluencerDiscovery() {
                                 key={tab.id}
                                 onClick={() => setSelectedTab(tab.id as any)}
                                 className={`flex items-center gap-2 px-6 py-3.5 font-medium transition-colors relative ${selectedTab === tab.id
-                                        ? 'text-teal-600'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'text-teal-600'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 <tab.icon className="w-4 h-4" />
@@ -429,8 +429,8 @@ export default function InfluencerDiscovery() {
                                 <button
                                     key={idx}
                                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${page === 1
-                                            ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'
-                                            : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                                        ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'
+                                        : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
                                         }`}
                                 >
                                     {page}
