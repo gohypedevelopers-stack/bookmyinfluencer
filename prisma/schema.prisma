@@ -3,11 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Note: SQLite doesn't support enums, so we use String fields
+// PostgreSQL configuration for Neon
 // Valid values are documented in comments on each field
 
 // Core User Models
