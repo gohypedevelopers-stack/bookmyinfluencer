@@ -366,9 +366,14 @@ model Creator {
   lastYoutubeFetchAt   DateTime? @map("last_youtube_fetch_at")
   lastInstagramFetchAt DateTime? @map("last_instagram_fetch_at")
 
+  // Verification Status
+  verificationStatus String @default("NOT_SUBMITTED") @map("verification_status") // NOT_SUBMITTED, PENDING, APPROVED, REJECTED
+  verifiedAt         DateTime? @map("verified_at")
+
   socialAccounts CreatorSocialAccount[]
   metrics        CreatorMetric[]
   selfReportedMetrics CreatorSelfReportedMetric[]
+  kycSubmission  CreatorKYCSubmission?
 
   @@map("creators")
 }
@@ -432,4 +437,29 @@ model CreatorMetric {
 
   @@index([creatorId, provider, date])
   @@map("creator_metrics")
+}
+
+// Creator KYC Submission Model
+model CreatorKYCSubmission {
+  id        String   @id @default(uuid())
+  creatorId String   @unique @map("creator_id")
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  // Submitted Data
+  instagramFollowers Int?     @map("instagram_followers")
+  youtubeSubscribers Int?     @map("youtube_subscribers")
+  totalPosts         Int?     @map("total_posts")
+  engagementRate     Float?   @map("engagement_rate")
+  
+  // Admin Review
+  adminNotes         String?  @map("admin_notes")
+  reviewedBy         String?  @map("reviewed_by") // Admin user ID
+  reviewedAt         DateTime? @map("reviewed_at")
+  
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("creator_kyc_submissions")
 }

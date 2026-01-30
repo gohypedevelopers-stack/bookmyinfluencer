@@ -1,266 +1,197 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
+import { ArrowRight, Instagram, Youtube, Lock, RefreshCw, CheckCircle2, HelpCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Users, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export function OnboardingClient() {
   const router = useRouter()
-  const [loading, setLoading] = React.useState(false)
-  const [message, setMessage] = React.useState<string | null>(null)
-  const [fetchPublic, setFetchPublic] = React.useState(false)
-
-  const [formData, setFormData] = React.useState({
-    fullName: "",
-    phone: "",
-    niche: "",
-    instagram: "",
-    youtube: "",
-    portfolioUrl: "",
-    country: "",
-  })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setMessage(null)
-
-    try {
-      const res = await fetch("/api/creator/create", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...formData, fetchPublic }),
-        credentials: "include",
-      })
-      const data = (await res.json()) as { ok: boolean; error?: string }
-
-      if (!res.ok || !data.ok) {
-        if (data.error === "unauthorized") {
-          router.replace("/verify")
-          return
-        }
-        setMessage("Could not save your details. Please check the form and try again.")
-        return
-      }
-
-      router.refresh()
-      router.replace("/creator/dashboard")
-    } catch (err) {
-      setMessage("Something went wrong. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  // Mock data based on reference
+  const instagramData = {
+    handle: "@sarah__creates",
+    followers: "124.5k",
+    engagement: "4.2%",
+    lastSynced: "2m ago",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces"
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Visual Side (Left) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-purple-500 to-purple-700 p-12 flex-col justify-between relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl" />
-        </div>
-
-        <div className="relative z-10">
-          {/* Logo area */}
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Users className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">Bookmyinfluencer</span>
+    <div className="min-h-screen bg-gray-50/50 flex flex-col font-sans">
+      {/* Header */}
+      <header className="bg-white py-3 px-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 text-[#2dd4bf] flex items-center justify-center">
+            {/* Logo Icon */}
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <circle cx="12" cy="12" r="3" />
+              <circle cx="19" cy="12" r="2" opacity="0.5" />
+              <circle cx="5" cy="12" r="2" opacity="0.5" />
+              <circle cx="12" cy="19" r="2" opacity="0.5" />
+              <circle cx="12" cy="5" r="2" opacity="0.5" />
+            </svg>
           </div>
+          <span className="text-lg font-bold text-gray-900 tracking-tight">InfluencerSync</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <button className="text-xs font-medium text-gray-400 hover:text-gray-900 transition-colors">Save Draft</button>
+          <button className="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-1.5 rounded-full text-xs font-bold transition-colors">
+            <HelpCircle className="w-3.5 h-3.5" />
+            Help
+          </button>
+        </div>
+      </header>
 
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-white leading-tight">
-              Turn your passion into a profession.
-            </h1>
-            <p className="text-xl text-purple-100">
-              Complete your profile to start connecting with top brands.
-            </p>
+      {/* Progress Bar Section */}
+      <div className="w-full bg-white relative">
+        <div className="max-w-4xl mx-auto px-6 pt-6 pb-2">
+          <div className="flex justify-between text-[10px] font-bold tracking-widest text-[#24b2a0] uppercase mb-2">
+            <span>Step 2 of 3</span>
+            <span className="text-gray-900">50% Complete</span>
           </div>
         </div>
-
-        <div className="relative z-10 flex -space-x-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="w-14 h-14 rounded-full bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center"
-            />
-          ))}
+        <div className="w-full h-1 bg-gray-100 absolute bottom-0 left-0">
+          <div className="h-full w-1/2 bg-[#2dd4bf]" />
         </div>
       </div>
 
-      {/* Form Side (Right) */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white lg:bg-transparent">
-        <div className="w-full max-w-lg">
-          <Card className="border-none shadow-xl lg:shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">Creator Profile</CardTitle>
-              <CardDescription>
-                Tell us a bit about yourself so we can match you with the right campaigns.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={submit} className="space-y-4">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-8 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-                <div className="grid gap-2">
-                  <label htmlFor="fullName" className="text-sm font-medium">
-                    Full Name
-                  </label>
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    placeholder="Jane Doe"
-                    required
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Let's build your profile</h1>
+          <p className="text-gray-500 text-sm max-w-xl leading-relaxed">
+            Connect your social accounts to automatically import your audience demographics and engagement metrics. This data is what brands look for first.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          {/* Instagram Card (Connected) */}
+          <Card className="p-5 border-none shadow-sm shadow-gray-200/50 bg-white rounded-2xl relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+            {/* Top Border Gradient */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600" />
+
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#fdf2f8] rounded-xl flex items-center justify-center">
+                  <Instagram className="w-6 h-6 text-[#db2777]" />
                 </div>
-
-                <div className="grid gap-2">
-                  <label htmlFor="phone" className="text-sm font-medium">
-                    Phone Number
-                  </label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="+91 99999 99999"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <label htmlFor="country" className="text-sm font-medium">
-                    Country
-                  </label>
-                  <select
-                    id="country"
-                    name="country"
-                    required
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    value={formData.country}
-                    onChange={handleChange}
-                    disabled={loading}
-                  >
-                    <option value="" disabled>Select Country</option>
-                    <option value="India">India</option>
-                    <option value="USA">United States</option>
-                    <option value="UK">United Kingdom</option>
-                    <option value="UAE">UAE</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="grid gap-2">
-                  <label htmlFor="niche" className="text-sm font-medium">
-                    Primary Niche
-                  </label>
-                  <select
-                    id="niche"
-                    name="niche"
-                    required
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    value={formData.niche}
-                    onChange={handleChange}
-                    disabled={loading}
-                  >
-                    <option value="" disabled>Select Niche</option>
-                    <option value="Lifestyle">Lifestyle</option>
-                    <option value="Fashion">Fashion</option>
-                    <option value="Tech">Technology</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Food">Food & Beverage</option>
-                    <option value="Fitness">Fitness</option>
-                    <option value="Entertainment">Entertainment</option>
-                    <option value="Education">Education</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="instagram" className="text-sm font-medium">
-                      Instagram URL
-                    </label>
-                    <Input
-                      id="instagram"
-                      name="instagram"
-                      placeholder="https://instagram.com/username"
-                      value={formData.instagram}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="youtube" className="text-sm font-medium">
-                      YouTube URL
-                    </label>
-                    <Input
-                      id="youtube"
-                      name="youtube"
-                      placeholder="https://youtube.com/@channel"
-                      value={formData.youtube}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
+                <div>
+                  <h3 className="font-bold text-lg text-gray-900">Instagram</h3>
+                  <div className="inline-flex items-center gap-1 bg-[#ecfdf5] px-2 py-0.5 rounded-full mt-0.5">
+                    <div className="w-3 h-3 rounded-full bg-[#10b981] flex items-center justify-center">
+                      <CheckCircle2 className="w-2 h-2 text-white stroke-[3]" />
+                    </div>
+                    <span className="text-[10px] font-bold text-[#059669]">Connected</span>
                   </div>
                 </div>
+              </div>
+              <button className="text-gray-300 hover:text-gray-400 transition-colors bg-transparent p-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              </button>
+            </div>
 
-                <div className="grid gap-2">
-                  <label htmlFor="portfolioUrl" className="text-sm font-medium">
-                    Account URL (Optional)
-                  </label>
-                  <Input
-                    id="portfolioUrl"
-                    name="portfolioUrl"
-                    placeholder="https://yourwebsite.com"
-                    value={formData.portfolioUrl}
-                    onChange={handleChange}
-                    disabled={loading}
-                  />
-                  <div className="flex items-center space-x-2 pt-2">
-                    <input
-                      type="checkbox"
-                      id="fetchPublic"
-                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                      checked={fetchPublic}
-                      onChange={(e) => setFetchPublic(e.target.checked)}
-                      disabled={loading}
-                    />
-                    <label htmlFor="fetchPublic" className="text-sm text-slate-600">
-                      Use these public links for limited metrics (No login required)
-                    </label>
-                  </div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                  <img src={instagramData.avatar} alt="Profile" className="w-full h-full object-cover" />
                 </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-400 font-medium leading-none mb-0.5">Connected as</div>
+                <div className="text-sm font-bold text-gray-900 leading-tight">@sarah__creates</div>
+              </div>
+            </div>
 
-                {message && <p className="text-sm text-red-500">{message}</p>}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="bg-[#f9fafb] rounded-xl p-3">
+                <div className="text-[10px] text-gray-500 mb-0.5">Followers</div>
+                <div className="text-lg font-bold text-gray-900">124.5k</div>
+              </div>
+              <div className="bg-[#f9fafb] rounded-xl p-3">
+                <div className="text-[10px] text-gray-500 mb-0.5">Avg. Engmt</div>
+                <div className="text-lg font-bold text-gray-900">4.2%</div>
+              </div>
+            </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-semibold py-6 mt-4 transition-all hover:shadow-lg hover:shadow-purple-500/25"
-                  disabled={loading}
-                >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Registration"}
-                </Button>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+                <RefreshCw className="w-3 h-3" />
+                <span>Last synced 2m ago</span>
+              </div>
+              <button className="text-[10px] font-bold text-[#2dd4bf] hover:text-[#14b8a6] transition-colors">
+                Refresh Data
+              </button>
+            </div>
+          </Card>
 
+          {/* YouTube Card */}
+          <Card className="p-5 border-none shadow-sm shadow-gray-200/50 bg-white rounded-2xl relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:scale-[1.01] flex flex-col h-full">
+            {/* Top Border Red */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-red-600" />
 
-              </form>
-            </CardContent>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-[#fef2f2] rounded-xl flex items-center justify-center">
+                <Youtube className="w-6 h-6 text-[#dc2626]" />
+              </div>
+              <h3 className="font-bold text-lg text-gray-900">YouTube</h3>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="text-base font-bold text-gray-900 mb-1.5">Connect your channel</h4>
+              <p className="text-xs text-gray-500 leading-relaxed max-w-[240px]">
+                Sync subscribers, average view counts, and video engagement metrics directly from YouTube API.
+              </p>
+            </div>
+
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981]" />
+                <span className="text-xs text-gray-600 font-medium">Verified audience demographics</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981]" />
+                <span className="text-xs text-gray-600 font-medium">Historical performance tracking</span>
+              </div>
+            </div>
+
+            <div className="mt-auto">
+              <Button className="w-full h-10 bg-[#2dd4bf] hover:bg-[#14b8a6] text-white font-bold text-sm rounded-lg shadow-lg shadow-teal-500/20 mb-3 transition-all hover:-translate-y-0.5">
+                Authorize & Fetch Stats
+              </Button>
+              <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-400 font-medium">
+                <Lock className="w-3 h-3" />
+                <span>Read-only access. We cannot post on your behalf.</span>
+              </div>
+            </div>
           </Card>
         </div>
-      </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between pt-6 border-t border-gray-100 mt-auto">
+          <button className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+            Back to Personal Details
+          </button>
+          <div className="flex items-center gap-6">
+            <button className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+              Skip for now
+            </button>
+            <Button
+              onClick={() => router.push('/creator/onboarding/finalize')}
+              className="bg-gray-900 hover:bg-black text-white px-6 h-10 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-gray-900/10 transition-all hover:scale-[1.02]"
+            >
+              Continue
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+      </main>
     </div>
   )
 }
-

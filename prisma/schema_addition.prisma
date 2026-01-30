@@ -1,0 +1,24 @@
+// Creator KYC Submission Model
+model CreatorKYCSubmission {
+  id        String   @id @default(uuid())
+  creatorId String   @unique @map("creator_id")
+  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  // Submitted Data
+  instagramFollowers Int?     @map("instagram_followers")
+  youtubeSubscribers Int?     @map("youtube_subscribers")
+  totalPosts         Int?     @map("total_posts")
+  engagementRate     Float?   @map("engagement_rate")
+  
+  // Admin Review
+  adminNotes         String?  @map("admin_notes")
+  reviewedBy         String?  @map("reviewed_by") // Admin user ID
+  reviewedAt         DateTime? @map("reviewed_at")
+  
+  submittedAt  DateTime @default(now()) @map("submitted_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("creator_kyc_submissions")
+}
