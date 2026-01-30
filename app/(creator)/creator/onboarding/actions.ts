@@ -38,11 +38,26 @@ export async function completeOnboarding(payload?: {
         update: {
             niche: payload?.niche,
             pricing: JSON.stringify(payload?.pricing),
+            verificationStatus: 'PENDING', // Set status to PENDING
+            kycSubmission: {
+                create: {
+                    status: 'PENDING',
+                    submittedAt: new Date(),
+                    // We could include snapshot data here if we had it, but for now we rely on the linked creator relations
+                }
+            }
         },
         create: {
             userId,
             niche: payload?.niche,
             pricing: JSON.stringify(payload?.pricing),
+            verificationStatus: 'PENDING',
+            kycSubmission: {
+                create: {
+                    status: 'PENDING',
+                    submittedAt: new Date(),
+                }
+            }
         },
     })
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Layers, LogIn } from 'lucide-react';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
@@ -42,40 +42,19 @@ export default function LoginPage() {
                 setLoading(false);
             } else {
                 // Successful login - Redirect based on role
-                // The actual redirect logic might be better handled by checking the session or server-side redirect
-                // But for now we push to a default or check user role if we could (we can't easily here without another call)
-                // We'll redirect to a generic dashboard or let middleware handle it.
-                // However, user specifically asked to login to Admin, Creator, Brand.
-                // Since we don't know the role client-side immediately without a session fetch, 
-                // we will redirect to `/dashboard` (or root) and let Middleware/Server redirect to specific dashboard.
-                // OR we can fetch session to be sure.
+                const session = await getSession();
 
-                // For simplicity and speed:
+                if (session?.user?.role === 'ADMIN') {
+                    router.push('/admin');
+                } else if (session?.user?.role === 'INFLUENCER') {
+                    router.push('/creator/dashboard');
+                } else if (session?.user?.role === 'BRAND') {
+                    router.push('/brand/discover');
+                } else {
+                    router.push('/');
+                }
+
                 router.refresh(); // Refresh to update session state
-                router.push('/admin'); // Try admin first, or verify session. 
-                // Better approach: Let's assume the user will be redirected by middleware if they hit a protected route, 
-                // or we can try to guess.
-
-                // Let's manually fetch the session to route correctly? 
-                // No, simpler: Reload the page or go to root, Middleware handles the rest?
-                // Let's try redirecting to /admin as the user requested "login my admin dashboard".
-                // If they are not admin, middleware will kick them.
-                // Actually, let's redirect to `/` and let the app route them.
-                // Or better, let's just go to `/admin` since that was the specific context.
-                // If they are a creator, they should go to `/creator/dashboard`.
-
-                // Let's generic redirect to /dashboard and handle logic there?
-                // Or simply reload.
-
-                // Hardcoding redirect to /admin for this user flow as they just asked for admin.
-                // But generally:
-
-                // Let's rely on a check.
-                // Since we can't easily check, we'll assume /admin for now as per prompt context, 
-                // OR we'll fetch /api/auth/session to decide. 
-
-                // Let's use a simpler approach: Just go to /admin.
-                router.push('/admin');
             }
         } catch (error) {
             console.error(error);
