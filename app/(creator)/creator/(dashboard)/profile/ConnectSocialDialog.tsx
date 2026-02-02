@@ -122,11 +122,39 @@ export function ConnectSocialDialog({
                         {error && <p className="text-sm text-red-500">{error}</p>}
                     </div>
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSubmit} disabled={loading || !url} className={`${config.btnClass} text-white`}>
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Profile"}
-                    </Button>
+                <DialogFooter className="flex sm:justify-between flex-col sm:flex-row gap-2">
+                    {defaultUrl && (
+                        <Button
+                            variant="destructive"
+                            onClick={async () => {
+                                if (!confirm(`Are you sure you want to disconnect ${config.label}?`)) return
+                                setLoading(true)
+                                try {
+                                    const { disconnectSocialProfile } = await import("./actions")
+                                    const result = await disconnectSocialProfile(provider)
+                                    if (result.error) {
+                                        setError(result.error)
+                                    } else {
+                                        setOpen(false)
+                                        router.refresh()
+                                    }
+                                } catch (e) {
+                                    setError("Failed to disconnect")
+                                }
+                                setLoading(false)
+                            }}
+                            disabled={loading}
+                            className="mr-auto"
+                        >
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Disconnect"}
+                        </Button>
+                    )}
+                    <div className="flex gap-2 justify-end w-full sm:w-auto">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSubmit} disabled={loading || !url} className={`${config.btnClass} text-white`}>
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Profile"}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

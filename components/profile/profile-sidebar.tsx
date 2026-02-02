@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import {
     User,
@@ -101,7 +101,11 @@ export function CreatorProfileSidebar() {
                             <div className="text-xs text-gray-500">{session?.user?.role || "Creator"}</div>
                         </div>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        className="text-gray-400 hover:text-red-600 transition-colors"
+                        title="Log Out"
+                    >
                         <LogOut className="w-5 h-5" />
                     </button>
                 </div>

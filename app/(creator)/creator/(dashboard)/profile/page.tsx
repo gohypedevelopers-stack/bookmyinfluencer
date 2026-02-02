@@ -14,9 +14,11 @@ import {
     Link as LinkIcon,
     X,
     Plus,
-    Instagram as InstagramIcon
+    Instagram as InstagramIcon,
+    Youtube as YoutubeIcon
 } from "lucide-react"
 import { ConnectSocialDialog } from "./ConnectSocialDialog"
+import { DisconnectButton } from "./DisconnectButton"
 
 export default async function CreatorProfilePage() {
     const userId = await getVerifiedUserIdFromCookies()
@@ -28,6 +30,7 @@ export default async function CreatorProfilePage() {
             socialAccounts: true,
             user: true,
             metrics: true, // Include metrics for follower counts
+            selfReportedMetrics: true // Include self-reported fallback
         }
     })
 
@@ -46,16 +49,27 @@ export default async function CreatorProfilePage() {
     const userImage = creator.profileImageUrl || creator.autoProfileImageUrl || creator.user.image;
 
     // Helper to get metrics for a provider
+    // Helper to get metrics for a provider
     const getFollowerCount = (provider: string) => {
-        const metric = creator.metrics.find(m => m.provider === provider);
-        // If we have a metric, format it. Otherwise try to find it in self-reported or return null
-        if (metric?.followersCount) {
-            return new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(metric.followersCount);
+        // Sort metrics to get the latest one
+        const metrics = creator.metrics
+            .filter(m => m.provider === provider)
+            .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+        const latestMetric = metrics[0];
+        const selfReported = creator.selfReportedMetrics.find(m => m.provider === provider);
+
+        // Prioritize actual metric, then self-reported
+        const count = latestMetric?.followersCount || selfReported?.followersCount || 0;
+
+        if (count > 0) {
+            return new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(count);
         }
         return "0";
     }
 
     const hasInstagram = creator.socialAccounts.some(acc => acc.provider === 'instagram');
+    const hasYoutube = creator.socialAccounts.some(acc => acc.provider === 'youtube');
 
     return (
         <>
@@ -220,9 +234,7 @@ export default async function CreatorProfilePage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <Button variant="outline" className="border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 font-medium rounded-lg">
-                                        Disconnect
-                                    </Button>
+                                    <DisconnectButton provider={account.provider as "instagram" | "youtube"} />
                                 </div>
                             ))}
 
@@ -230,10 +242,20 @@ export default async function CreatorProfilePage() {
                                 <ConnectSocialDialog provider="instagram">
                                     <div className="border border-dashed border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 rounded-2xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all group">
                                         <div className="w-10 h-10 bg-gray-100 group-hover:bg-white rounded-full flex items-center justify-center text-purple-600 transition-colors">
-                                            {/* Use Instagram Icon here */}
                                             <InstagramIcon className="w-5 h-5" />
                                         </div>
                                         <span className="text-sm font-bold text-gray-600 group-hover:text-gray-900">Connect Instagram</span>
+                                    </div>
+                                </ConnectSocialDialog>
+                            )}
+
+                            {!hasYoutube && (
+                                <ConnectSocialDialog provider="youtube">
+                                    <div className="border border-dashed border-gray-200 hover:border-red-300 hover:bg-red-50/50 rounded-2xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all group">
+                                        <div className="w-10 h-10 bg-gray-100 group-hover:bg-white rounded-full flex items-center justify-center text-red-600 transition-colors">
+                                            <YoutubeIcon className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-600 group-hover:text-gray-900">Connect YouTube</span>
                                     </div>
                                 </ConnectSocialDialog>
                             )}
