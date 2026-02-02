@@ -46,9 +46,21 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
     const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(initialPlatforms.length > 0 ? initialPlatforms : ["instagram"])
 
     const [pricing, setPricing] = useState({
-        instagramReel: "850",
-        youtubeIntegration: "",
-        storyShoutout: "350"
+        // Instagram
+        instaStory: "350",
+        instaReel: "850",
+        instaPost: "500",
+        instaRoyaltyPrices: {
+            "01 Month": "",
+            "6 Month": "",
+            "1 Year": ""
+        } as Record<string, string>,
+        instaRoyaltyDuration: "1 Year",
+
+        // YouTube
+        youtubeShorts: "500",
+        youtubeVideo: "1500",
+        youtubeCommunityPost: "300",
     })
     const [loading, setLoading] = useState(false)
 
@@ -208,64 +220,186 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
                         </div>
 
                         <div className="space-y-4">
-                            {/* Instagram Reel */}
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
-                                <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600 shrink-0">
-                                    <Instagram className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-sm font-bold text-gray-900">Instagram Reel</div>
-                                    <div className="text-xs text-gray-500">60s vertical video + caption</div>
-                                </div>
-                                <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
-                                    <Input
-                                        value={pricing.instagramReel}
-                                        onChange={(e) => setPricing(p => ({ ...p, instagramReel: e.target.value }))}
-                                        className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
-                                </div>
-                            </div>
+                            {/* Instagram Options */}
+                            {selectedPlatforms.includes('instagram') && (
+                                <>
+                                    {/* Instagram Story */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600 shrink-0">
+                                            <div className="w-5 h-5 border-2 border-pink-600 rounded-sm" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">Instagram Story</div>
+                                            <div className="text-xs text-gray-500">24h visibility story post</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.instaStory}
+                                                onChange={(e) => setPricing(p => ({ ...p, instaStory: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
 
-                            {/* YouTube Integration */}
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm opacity-60">
-                                <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600 shrink-0">
-                                    <Youtube className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-sm font-bold text-gray-900">YouTube Integration</div>
-                                    <div className="text-xs text-gray-500">30-60s mid-roll placement</div>
-                                </div>
-                                <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
-                                    <Input
-                                        placeholder="Not selected"
-                                        disabled
-                                        className="pl-7 pr-4 text-right font-medium border-gray-200 bg-gray-50"
-                                    />
-                                </div>
-                            </div>
+                                    {/* Insta Reel */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600 shrink-0">
+                                            <Instagram className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">Insta Reel</div>
+                                            <div className="text-xs text-gray-500">60s vertical video</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.instaReel}
+                                                onChange={(e) => setPricing(p => ({ ...p, instaReel: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
 
-                            {/* Story Shoutout */}
-                            <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
-                                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 shrink-0">
-                                    <div className="w-5 h-5 border-2 border-purple-600 rounded-sm" />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-sm font-bold text-gray-900">Story Shoutout</div>
-                                    <div className="text-xs text-gray-500">3-frame story sequence with link</div>
-                                </div>
-                                <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
-                                    <Input
-                                        value={pricing.storyShoutout}
-                                        onChange={(e) => setPricing(p => ({ ...p, storyShoutout: e.target.value }))}
-                                        className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
-                                </div>
-                            </div>
+                                    {/* Insta Post */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center text-pink-600 shrink-0">
+                                            <div className="w-5 h-5 bg-pink-600 rounded-sm" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">Insta Post</div>
+                                            <div className="text-xs text-gray-500">Static image or carousel</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.instaPost}
+                                                onChange={(e) => setPricing(p => ({ ...p, instaPost: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Insta Royalty / Collaboration */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 shrink-0">
+                                                <Wallet className="w-5 h-5" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm font-bold text-gray-900">Insta Royalty / Collaboration</div>
+                                                <div className="text-xs text-gray-500">Long-term partnership rights</div>
+                                            </div>
+                                            <div className="relative w-32">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                                <Input
+                                                    value={pricing.instaRoyaltyPrices[pricing.instaRoyaltyDuration]}
+                                                    onChange={(e) => setPricing(p => ({
+                                                        ...p,
+                                                        instaRoyaltyPrices: {
+                                                            ...p.instaRoyaltyPrices,
+                                                            [p.instaRoyaltyDuration]: e.target.value
+                                                        }
+                                                    }))}
+                                                    className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Timeline Selector */}
+                                        <div className="pl-14">
+                                            <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Duration</div>
+                                            <div className="flex gap-2">
+                                                {["01 Month", "6 Month", "1 Year"].map((duration) => (
+                                                    <button
+                                                        key={duration}
+                                                        onClick={() => setPricing(p => ({ ...p, instaRoyaltyDuration: duration }))}
+                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex flex-col items-center gap-0.5 ${pricing.instaRoyaltyDuration === duration
+                                                            ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm"
+                                                            : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100"
+                                                            }`}
+                                                    >
+                                                        <span>{duration}</span>
+                                                        {pricing.instaRoyaltyPrices[duration] && (
+                                                            <span className="text-[10px] opacity-80 font-bold">₹{pricing.instaRoyaltyPrices[duration]}</span>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* YouTube Options */}
+                            {selectedPlatforms.includes('youtube') && (
+                                <>
+                                    {/* YouTube Shorts */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600 shrink-0">
+                                            <div className="w-5 h-5 border-2 border-red-600 rounded-sm" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">YouTube Shorts</div>
+                                            <div className="text-xs text-gray-500">60s vertical video</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.youtubeShorts}
+                                                onChange={(e) => setPricing(p => ({ ...p, youtubeShorts: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
+
+                                    {/* YouTube Video */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600 shrink-0">
+                                            <Youtube className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">YouTube Video</div>
+                                            <div className="text-xs text-gray-500">Long-form video placement</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.youtubeVideo}
+                                                onChange={(e) => setPricing(p => ({ ...p, youtubeVideo: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
+
+                                    {/* YouTube Community Post */}
+                                    <div className="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
+                                        <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-600 shrink-0">
+                                            <div className="w-5 h-5 bg-red-600 rounded-sm" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-bold text-gray-900">YouTube Community Post</div>
+                                            <div className="text-xs text-gray-500">Text/Image post on community tab</div>
+                                        </div>
+                                        <div className="relative w-32">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
+                                            <Input
+                                                value={pricing.youtubeCommunityPost}
+                                                onChange={(e) => setPricing(p => ({ ...p, youtubeCommunityPost: e.target.value }))}
+                                                className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
                         </div>
                     </section>
 
@@ -353,7 +487,7 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
                         <div className="flex items-center justify-between pt-6 border-t border-gray-100">
                             <div>
                                 <div className="text-xs text-gray-500 mb-0.5">Starting from</div>
-                                <div className="text-2xl font-bold text-[#2dd4bf]">₹{pricing.storyShoutout || "350"}</div>
+                                <div className="text-2xl font-bold text-[#2dd4bf]">₹{pricing.instaStory || "350"}</div>
                             </div>
                             <Button className="bg-gray-900 text-white rounded-full px-5 h-10 text-sm font-semibold">View Media Kit</Button>
                         </div>

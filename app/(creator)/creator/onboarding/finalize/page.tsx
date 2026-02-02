@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation"
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { FinalizeProfileClient } from "./FinalizeProfileClient"
 
 export default async function FinalizeProfilePage() {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) redirect("/verify")
 
     const creator = await db.creator.findUnique({

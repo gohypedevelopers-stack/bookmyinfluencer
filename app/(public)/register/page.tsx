@@ -23,8 +23,21 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    const [emailVerified, setEmailVerified] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
+
+        // Reset verification if email changes
+        if (name === 'email' && emailVerified) {
+            setEmailVerified(false);
+            setOtpSent(false);
+            setOtp("");
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -33,9 +46,67 @@ export default function RegisterPage() {
 
     const router = useRouter();
 
+    const requestOtp = async () => {
+        if (!formData.email) {
+            setError("Please enter an email address first");
+            return;
+        }
+        setOtpLoading(true);
+        setError("");
+        try {
+            const res = await fetch("/api/auth/request-otp", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ email: formData.email }),
+            });
+            const data = await res.json();
+            if (data.ok) {
+                setOtpSent(true);
+            } else {
+                setError(data.message || data.error || "Failed to send OTP");
+            }
+        } catch (e) {
+            setError("Failed to send OTP");
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const verifyOtp = async () => {
+        if (!otp || otp.length !== 6) {
+            setError("Please enter valid 6-digit OTP");
+            return;
+        }
+        setOtpLoading(true);
+        setError("");
+        try {
+            const res = await fetch("/api/auth/verify-otp", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ email: formData.email, otp }),
+            });
+            const data = await res.json();
+            if (data.ok) {
+                setEmailVerified(true);
+                setOtpSent(false);
+            } else {
+                setError(data.message || data.error || "Invalid OTP");
+            }
+        } catch (e) {
+            setError("Failed to verify OTP");
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (!emailVerified) {
+            setError('Please verify your email address before continuing');
+            return;
+        }
 
         if (!formData.agreeToTerms) {
             setError('Please agree to the Terms of Service and Privacy Policy');
@@ -296,16 +367,24 @@ export default function RegisterPage() {
                                     <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
                                         Email Address
                                     </label>
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="name@creator.com"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            placeholder="name@creator.com"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            className={`w-full px-3 py-2 text-sm border ${emailVerified ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-10`}
+                                            required
+                                            disabled={emailVerified}
+                                        />
+                                        {emailVerified && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
+                                                <CheckCircle className="w-4 h-4" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Password */}
@@ -360,6 +439,69 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
 
+                                {/* Email Verification Section */}
+                                {!emailVerified && (
+                                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="text-xs font-semibold text-purple-900">
+                                                Verify Email Address
+                                            </div>
+                                            {!otpSent ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={requestOtp}
+                                                    disabled={otpLoading || !formData.email}
+                                                    className="w-full py-2 bg-white border border-purple-200 text-purple-600 rounded-md text-xs font-medium hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    {otpLoading ? (
+                                                        <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                                                    ) : (
+                                                        'Send Verification Code'
+                                                    )}
+                                                </button>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] text-purple-600">
+                                                        Enter the 6-digit code sent to {formData.email}
+                                                    </p>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="000000"
+                                                            value={otp}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                                setOtp(val);
+                                                            }}
+                                                            className="flex-1 px-3 py-2 text-sm border border-purple-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-center tracking-widest font-mono"
+                                                            maxLength={6}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={verifyOtp}
+                                                            disabled={otpLoading || otp.length !== 6}
+                                                            className="px-4 py-2 bg-purple-600 text-white rounded-md text-xs font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                                                        >
+                                                            {otpLoading ? (
+                                                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                            ) : (
+                                                                'Verify'
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setOtpSent(false)}
+                                                        className="text-[10px] text-purple-500 hover:text-purple-700 underline"
+                                                    >
+                                                        Change email or resend
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Terms Checkbox */}
                                 <div className="flex items-start gap-2">
                                     <input
@@ -385,8 +527,15 @@ export default function RegisterPage() {
 
                                 {/* Submit Button */}
                                 <button
-                                    type="submit"
-                                    disabled={loading}
+                                    type="button" // Prevent default submission
+                                    onClick={(e) => {
+                                        if (!emailVerified) {
+                                            setError("Please verify your email first");
+                                            return;
+                                        }
+                                        handleSubmit(e as any);
+                                    }}
+                                    disabled={loading || !emailVerified}
                                     className="w-full py-3 bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-lg font-medium text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? (

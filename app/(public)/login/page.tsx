@@ -47,7 +47,7 @@ export default function LoginPage() {
                 if (session?.user?.role === 'ADMIN') {
                     router.push('/admin');
                 } else if (session?.user?.role === 'INFLUENCER') {
-                    router.push('/creator/dashboard');
+                    router.push('/creator/onboarding');
                 } else if (session?.user?.role === 'BRAND') {
                     router.push('/brand/discover');
                 } else {

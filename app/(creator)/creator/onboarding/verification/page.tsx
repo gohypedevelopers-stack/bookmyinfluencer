@@ -1,9 +1,9 @@
 import { VerificationClient } from "./VerificationClient"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { redirect } from "next/navigation"
 
 export default async function VerificationPage() {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) redirect("/verify")
 
     return <VerificationClient />

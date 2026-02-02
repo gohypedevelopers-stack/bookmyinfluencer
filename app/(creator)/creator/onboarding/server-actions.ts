@@ -1,6 +1,6 @@
 'use server'
 
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { db } from "@/lib/db"
 import { runApifyActor } from "@/lib/apify"
 import { normalizeYoutubeMetrics, parseYoutubeChannel } from "@/lib/metrics-util"
@@ -9,8 +9,8 @@ import { revalidatePath } from "next/cache"
 
 // --- YouTube Action ---
 export async function fetchAndSaveYoutubeOnboarding(url: string) {
-    const userId = await getVerifiedUserIdFromCookies()
-    console.log(`[YouTube Onboarding] ID from cookie: ${userId}`);
+    const userId = await getAuthenticatedCreatorId()
+    console.log(`[YouTube Onboarding] ID: ${userId}`);
 
     if (!userId) {
         return { success: false, error: "Unauthorized" }
@@ -133,8 +133,8 @@ export async function fetchAndSaveYoutubeOnboarding(url: string) {
 
 // --- Instagram Action ---
 export async function fetchAndSaveInstagramOnboarding(url: string) {
-    const userId = await getVerifiedUserIdFromCookies()
-    console.log(`[Instagram Onboarding] ID from cookie: ${userId}`);
+    const userId = await getAuthenticatedCreatorId()
+    console.log(`[Instagram Onboarding] ID: ${userId}`);
 
     if (!userId) return { success: false, error: "Unauthorized" }
 

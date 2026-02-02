@@ -18,29 +18,34 @@ export async function registerUserAction(formData: FormData) {
         }
 
         // Check if user already exists
-        const existingOtpUser = await db.otpUser.findUnique({ where: { email } })
+        const existingOtpUser = await db.otpUser.findUnique({
+            where: { email },
+            include: { creator: true }
+        })
         const existingUser = await db.user.findUnique({ where: { email } })
 
-        if (existingOtpUser || existingUser) {
+        if (existingUser) {
             throw new Error("User already exists. Please login.")
+        }
+
+        if (existingOtpUser && existingOtpUser.creator) {
+            throw new Error("Creator account already exists. Please login.")
         }
 
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10)
 
-        // Create OtpUser with verified status (since they registered with password)
-        const newUser = await db.otpUser.create({
-            data: {
-                email,
-                verifiedAt: new Date(),
-            }
-        })
+        // Ensure the user has verified their email via OTP
+        if (!existingOtpUser || !existingOtpUser.verifiedAt) {
+            throw new Error("Phone/Email verification required. Please verify your email first.")
+        }
+
+        const newUser = existingOtpUser;
 
         // Create Creator profile linked to the OtpUser
         await db.creator.create({
             data: {
                 userId: newUser.id,
-                email, // Save email to Creator table
                 fullName,
                 phone: mobileNumber,
                 instagramUrl: instagramUrl || null,

@@ -3,11 +3,11 @@ import { redirect } from "next/navigation"
 export const dynamic = 'force-dynamic'
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { OnboardingClient } from "./OnboardingClient"
 
 export default async function CreatorOnboardingPage() {
-  const userId = await getVerifiedUserIdFromCookies()
+  const userId = await getAuthenticatedCreatorId()
   if (!userId) redirect("/verify")
 
   console.log("Onboarding Page - UserID:", userId);
@@ -16,6 +16,7 @@ export default async function CreatorOnboardingPage() {
     where: { userId },
     select: {
       id: true,
+      niche: true,
       instagramUrl: true,
       youtubeUrl: true,
       lastInstagramFetchAt: true,
@@ -23,6 +24,11 @@ export default async function CreatorOnboardingPage() {
       rawSocialData: true,
     }
   })
+
+  // If creator has already completed onboarding (niche is selected), go to dashboard
+  if (creator?.niche) {
+    redirect("/creator/dashboard")
+  }
 
   console.log("Onboarding Page - Creator Found:", creator);
 
