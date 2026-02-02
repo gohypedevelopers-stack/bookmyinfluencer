@@ -34,9 +34,50 @@ export async function GET(req: NextRequest) {
             }
         });
 
+        // Transform data to include calculated metrics
+        const verifications = pendingVerifications.map((submission) => {
+            const creator = submission.creator;
+
+            // Get latest Instagram metrics
+            const igMetric = creator.metrics.find(m => m.provider === 'instagram');
+            // Get latest YouTube metrics
+            const ytMetric = creator.metrics.find(m => m.provider === 'youtube');
+
+            // Calculate total posts and engagement
+            const totalPosts = (igMetric?.mediaCount || 0) + (ytMetric?.mediaCount || 0);
+
+            // Calculate average engagement rate across platforms
+            const allEngagementRates = creator.metrics
+                .map(m => m.engagementRate)
+                .filter(rate => rate > 0);
+            const avgEngagement = allEngagementRates.length > 0
+                ? allEngagementRates.reduce((a, b) => a + b, 0) / allEngagementRates.length
+                : null;
+
+            return {
+                id: submission.id,
+                submittedAt: submission.submittedAt,
+                status: submission.status,
+                instagramFollowers: igMetric?.followersCount || null,
+                youtubeSubscribers: ytMetric?.followersCount || null,
+                totalPosts: (totalPosts === 0 && !igMetric && !ytMetric) ? null : totalPosts,
+                engagementRate: avgEngagement ? Number(avgEngagement.toFixed(2)) : null,
+                creator: {
+                    id: creator.id,
+                    fullName: creator.fullName,
+                    instagramUrl: creator.instagramUrl,
+                    youtubeUrl: creator.youtubeUrl,
+                    user: {
+                        email: creator.user.email || 'No email'
+                    },
+                    metrics: creator.metrics
+                }
+            };
+        });
+
         return NextResponse.json({
             success: true,
-            verifications: pendingVerifications
+            verifications
         });
 
     } catch (error: any) {

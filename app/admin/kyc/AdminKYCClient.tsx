@@ -1,7 +1,8 @@
 'use client';
 
 import { updateKYCStatus } from "../actions";
-import { KYCSubmission, InfluencerProfile, User, KYCStatus } from "@prisma/client";
+import { KYCSubmission, InfluencerProfile, User } from "@prisma/client";
+import { KYCStatus } from "@prisma/client";
 import { Check, X, Clock } from "lucide-react";
 
 type Submission = KYCSubmission & {

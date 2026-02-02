@@ -184,8 +184,8 @@ export default function CreatorEarningsPage() {
                                 <span className="font-bold text-green-600">{tx.amount}</span>
                                 <div className="text-right">
                                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${tx.status === 'Completed'
-                                            ? 'bg-green-50 text-green-600'
-                                            : 'bg-yellow-50 text-yellow-600'
+                                        ? 'bg-green-50 text-green-600'
+                                        : 'bg-yellow-50 text-yellow-600'
                                         }`}>
                                         {tx.status}
                                     </span>

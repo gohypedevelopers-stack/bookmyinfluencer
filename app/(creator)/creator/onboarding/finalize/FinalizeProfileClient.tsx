@@ -26,16 +26,43 @@ const PLATFORMS = [
     { id: "youtube", name: "YouTube", icon: Youtube, label: "Long-form", color: "text-red-600", bg: "bg-red-50" },
 ]
 
-export function FinalizeProfileClient() {
+
+interface FinalizeProfileClientProps {
+    initialData: any // Using any for simplicity, ideally simpler Creator type
+}
+
+export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProps) {
     const router = useRouter()
-    const [selectedNiche, setSelectedNiche] = useState("Tech & Gadgets")
-    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["instagram"])
+
+    // Determine initial niche
+    const [selectedNiche, setSelectedNiche] = useState(initialData?.niche || "")
+
+    // Determine initial platforms based on connected accounts
+    const initialPlatforms = []
+    if (initialData?.socialAccounts) {
+        if (initialData.socialAccounts.some((a: any) => a.provider === 'instagram')) initialPlatforms.push('instagram')
+        if (initialData.socialAccounts.some((a: any) => a.provider === 'youtube')) initialPlatforms.push('youtube')
+    }
+    const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(initialPlatforms.length > 0 ? initialPlatforms : ["instagram"])
+
     const [pricing, setPricing] = useState({
         instagramReel: "850",
         youtubeIntegration: "",
         storyShoutout: "350"
     })
     const [loading, setLoading] = useState(false)
+
+    // Extract Stats for Preview
+    const igMetric = initialData?.metrics?.find((m: any) => m.provider === 'instagram')
+    const ytMetric = initialData?.metrics?.find((m: any) => m.provider === 'youtube')
+
+    const previewName = initialData?.autoDisplayName || initialData?.fullName || "Your Name"
+    const previewHandle = initialData?.instagramUrl ? "@" + initialData.instagramUrl.split('/').pop() : (initialData?.youtubeUrl ? "@" + initialData.youtubeUrl.split('/').pop() : "@username")
+    const previewImage = initialData?.autoProfileImageUrl || ""
+
+    const followersDisplay = igMetric ? igMetric.followersCount.toLocaleString() : (ytMetric ? ytMetric.followersCount.toLocaleString() : "0")
+    // Calc engagement: for IG use engagementRate, for YT maybe similar
+    const engagementDisplay = igMetric ? `${igMetric.engagementRate.toFixed(1)}%` : (ytMetric ? `${ytMetric.engagementRate.toFixed(1)}%` : "0%")
 
     const togglePlatform = (id: string) => {
         setSelectedPlatforms(prev =>
@@ -177,7 +204,7 @@ export function FinalizeProfileClient() {
                     <section className="mb-12">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900">Service Pricing</h3>
-                            <span className="text-xs text-gray-500">Set your base rates (USD)</span>
+                            <span className="text-xs text-gray-500">Set your base rates (INR)</span>
                         </div>
 
                         <div className="space-y-4">
@@ -191,13 +218,13 @@ export function FinalizeProfileClient() {
                                     <div className="text-xs text-gray-500">60s vertical video + caption</div>
                                 </div>
                                 <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
                                     <Input
                                         value={pricing.instagramReel}
                                         onChange={(e) => setPricing(p => ({ ...p, instagramReel: e.target.value }))}
                                         className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">USD</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
                                 </div>
                             </div>
 
@@ -211,7 +238,7 @@ export function FinalizeProfileClient() {
                                     <div className="text-xs text-gray-500">30-60s mid-roll placement</div>
                                 </div>
                                 <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
                                     <Input
                                         placeholder="Not selected"
                                         disabled
@@ -230,13 +257,13 @@ export function FinalizeProfileClient() {
                                     <div className="text-xs text-gray-500">3-frame story sequence with link</div>
                                 </div>
                                 <div className="relative w-32">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">₹</span>
                                     <Input
                                         value={pricing.storyShoutout}
                                         onChange={(e) => setPricing(p => ({ ...p, storyShoutout: e.target.value }))}
                                         className="pl-7 pr-12 text-right font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf]"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">USD</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
                                 </div>
                             </div>
                         </div>
@@ -264,39 +291,44 @@ export function FinalizeProfileClient() {
                     </div>
 
                     <Card className="p-6 rounded-3xl border-none shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] sticky top-32">
+
                         {/* Profile Header */}
                         <div className="flex items-center gap-4 mb-6">
                             <div className="relative">
                                 <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-md">
-                                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&fit=crop" alt="Profile" className="w-full h-full object-cover" />
-                                </div>
-                                <div className="absolute bottom-0 right-0 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white border-2 border-white">
-                                    <Check className="w-3 h-3" />
+                                    {previewImage ? (
+                                        <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <Youtube className="w-8 h-8" />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900 text-lg leading-tight">Alex Chen</h3>
-                                <div className="text-sm text-gray-500 mb-1.5">@alexch_creator</div>
-                                <div className="flex gap-1.5">
-                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium uppercase">{selectedNiche.split(' ')[0]}</span>
-                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium uppercase">GADGETS</span>
-                                </div>
+                                <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-1">{previewName}</h3>
+                                <div className="text-sm text-gray-500 mb-1.5">{previewHandle}</div>
+                                {selectedNiche && (
+                                    <div className="flex gap-1.5">
+                                        <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium uppercase">{selectedNiche.split(' ')[0]}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-2 mb-6">
                             <div className="bg-gray-50 rounded-xl p-3 text-center">
-                                <div className="font-bold text-gray-900">125K</div>
+                                <div className="font-bold text-gray-900">{followersDisplay}</div>
                                 <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide mt-0.5">Followers</div>
                             </div>
                             <div className="bg-gray-50 rounded-xl p-3 text-center">
-                                <div className="font-bold text-gray-900">4.8%</div>
+                                <div className="font-bold text-gray-900">{engagementDisplay}</div>
                                 <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide mt-0.5">Eng. Rate</div>
                             </div>
                             <div className="bg-gray-50 rounded-xl p-3 text-center">
-                                <div className="font-bold text-gray-900">USA</div>
-                                <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide mt-0.5">Audience</div>
+                                <div className="font-bold text-gray-900">{ytMetric?.mediaCount || igMetric?.mediaCount || 0}</div>
+                                <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wide mt-0.5">Posts</div>
                             </div>
                         </div>
 
@@ -321,7 +353,7 @@ export function FinalizeProfileClient() {
                         <div className="flex items-center justify-between pt-6 border-t border-gray-100">
                             <div>
                                 <div className="text-xs text-gray-500 mb-0.5">Starting from</div>
-                                <div className="text-2xl font-bold text-[#2dd4bf]">${pricing.storyShoutout || "350"}</div>
+                                <div className="text-2xl font-bold text-[#2dd4bf]">₹{pricing.storyShoutout || "350"}</div>
                             </div>
                             <Button className="bg-gray-900 text-white rounded-full px-5 h-10 text-sm font-semibold">View Media Kit</Button>
                         </div>
@@ -332,7 +364,7 @@ export function FinalizeProfileClient() {
                                 <CheckCircle2 className="w-5 h-5" />
                             </div>
                             <div className="text-xs text-cyan-800 leading-relaxed font-medium">
-                                <span className="font-bold">Pro Tip:</span> Profiles with "{selectedNiche}" niche and Reel rates under $1000 see 25% more inquiries this month.
+                                <span className="font-bold">Pro Tip:</span> Profiles {selectedNiche ? `with "${selectedNiche}" niche ` : ''}with Reel rates under ₹80,000 see 25% more inquiries this month.
                             </div>
                         </div>
 

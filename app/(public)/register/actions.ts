@@ -18,12 +18,11 @@ export async function registerUserAction(formData: FormData) {
         }
 
         // Check if user already exists
-        const existingOtpUser = await db.otpUser.findUnique({
-            where: { email }
-        })
+        const existingOtpUser = await db.otpUser.findUnique({ where: { email } })
+        const existingUser = await db.user.findUnique({ where: { email } })
 
-        if (existingOtpUser) {
-            throw new Error("User with this email already exists")
+        if (existingOtpUser || existingUser) {
+            throw new Error("User already exists. Please login.")
         }
 
         // Hash password
@@ -41,6 +40,7 @@ export async function registerUserAction(formData: FormData) {
         await db.creator.create({
             data: {
                 userId: newUser.id,
+                email, // Save email to Creator table
                 fullName,
                 phone: mobileNumber,
                 instagramUrl: instagramUrl || null,

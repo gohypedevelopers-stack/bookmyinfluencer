@@ -189,6 +189,11 @@ export default function RegisterPage() {
 
                             {/* Form */}
                             <form onSubmit={handleSubmit} className="space-y-3">
+                                {error && (
+                                    <div className="p-3 text-sm font-medium text-red-600 bg-red-50 rounded-lg">
+                                        {error}
+                                    </div>
+                                )}
                                 {/* Full Name */}
                                 <div>
                                     <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">

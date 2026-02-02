@@ -1,7 +1,8 @@
 'use client';
 
 import { updatePayoutStatus } from "../actions";
-import { PayoutRequest, InfluencerProfile, User, PayoutStatus } from "@prisma/client";
+import { PayoutRequest, InfluencerProfile, User } from "@prisma/client";
+import { PayoutStatus } from "@prisma/client";
 import { Check, X } from "lucide-react";
 
 type Payout = PayoutRequest & {

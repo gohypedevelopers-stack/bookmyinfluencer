@@ -24,7 +24,7 @@ import {
     X,
     MessageCircle
 } from 'lucide-react';
-import { CampaignCandidate, InfluencerProfile, User, CandidateStatus, Offer } from '@prisma/client';
+import { CampaignCandidate, InfluencerProfile, User, Offer, CandidateStatus } from '@prisma/client';
 import { updateCandidateStatus } from '../actions';
 
 type CandidateWithDetails = CampaignCandidate & {
@@ -88,11 +88,12 @@ export default function CampaignKanbanClient({ candidates }: CampaignKanbanClien
 
                 <div className="flex items-center gap-6">
                     <div className="flex gap-3">
-                        <Link href="/brand/campaigns/new">
-                            <button className="flex items-center justify-center gap-2 h-10 px-4 bg-teal-600 text-white hover:bg-teal-700 transition-colors text-sm font-bold rounded-xl shadow-lg shadow-teal-600/20">
-                                <Plus className="w-5 h-5" />
-                                Create Campaign
-                            </button>
+                        <Link
+                            href="/brand/campaigns/new"
+                            className="flex items-center justify-center gap-2 h-10 px-4 bg-teal-600 text-white hover:bg-teal-700 transition-colors text-sm font-bold rounded-xl shadow-lg shadow-teal-600/20"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Create Campaign
                         </Link>
                         <button className="hidden lg:flex items-center justify-center w-10 h-10 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors text-gray-700">
                             <Settings className="w-5 h-5" />

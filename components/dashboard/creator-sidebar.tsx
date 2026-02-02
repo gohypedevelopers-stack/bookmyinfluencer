@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import {
     BarChart3,
@@ -14,6 +15,7 @@ import {
 
 export function CreatorSidebar() {
     const pathname = usePathname()
+    const { data: session } = useSession()
 
     // Hide global sidebar on profile page as it has its own settings sidebar
     if (pathname === "/creator/profile" || pathname?.startsWith("/creator/profile/")) {
@@ -93,17 +95,26 @@ export function CreatorSidebar() {
                     <Link href="/creator/profile" className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-10 h-10 rounded-lg overflow-hidden relative bg-gradient-to-br from-amber-400 to-yellow-600 flex items-center justify-center text-white font-bold shrink-0">
                             {/* Use an image if available, else initial */}
-                            <Image
-                                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100"
-                                alt="User"
-                                width={40}
-                                height={40}
-                                className="object-cover"
-                            />
+                            {/* Use an image if available, else initial */}
+                            {session?.user?.image ? (
+                                <Image
+                                    src={session.user.image}
+                                    alt={session.user.name || "User"}
+                                    width={40}
+                                    height={40}
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <span className="text-xl">{session?.user?.name?.[0] || "U"}</span>
+                            )}
                         </div>
                         <div className="min-w-0">
-                            <div className="font-bold text-sm text-gray-900 truncate">Alex Sterling</div>
-                            <div className="text-xs text-gray-500 truncate">Diamond Creator</div>
+                            <div className="font-bold text-sm text-gray-900 truncate">
+                                {session?.user?.name || "User"}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                                {session?.user?.role || "Creator"}
+                            </div>
                         </div>
                     </Link>
                     <Link href="/creator/profile">

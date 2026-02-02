@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import {
     User,
@@ -14,6 +15,7 @@ import {
 
 export function CreatorProfileSidebar() {
     const pathname = usePathname()
+    const { data: session } = useSession()
 
     const navItems = [
         {
@@ -65,8 +67,8 @@ export function CreatorProfileSidebar() {
                             <Link href={item.href} key={item.href}>
                                 <div
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${isActive
-                                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                         }`}
                                 >
                                     <item.icon className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-400"}`} />
@@ -82,17 +84,21 @@ export function CreatorProfileSidebar() {
             <div className="p-6 border-t border-gray-100 mb-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden relative">
-                            <Image
-                                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100"
-                                alt="User"
-                                fill
-                                className="object-cover"
-                            />
+                        <div className="w-10 h-10 rounded-full overflow-hidden relative flex items-center justify-center bg-gray-200">
+                            {session?.user?.image ? (
+                                <Image
+                                    src={session.user.image}
+                                    alt={session.user.name || "User"}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <span className="text-xl font-bold text-gray-500">{session?.user?.name?.[0] || "U"}</span>
+                            )}
                         </div>
                         <div>
-                            <div className="font-bold text-sm text-gray-900">Alex Sterling</div>
-                            <div className="text-xs text-gray-500">Pro Plan</div>
+                            <div className="font-bold text-sm text-gray-900">{session?.user?.name || "User"}</div>
+                            <div className="text-xs text-gray-500">{session?.user?.role || "Creator"}</div>
                         </div>
                     </div>
                     <button className="text-gray-400 hover:text-gray-600 transition-colors">

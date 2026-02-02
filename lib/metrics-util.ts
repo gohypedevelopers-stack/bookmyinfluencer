@@ -149,21 +149,62 @@ export function normalizeYoutubeMetrics(items: any[]): any {
     const avgLikes = recentVideos.length ? Math.round(totalLikes / recentVideos.length) : 0;
     const avgComments = recentVideos.length ? Math.round(totalComments / recentVideos.length) : 0;
 
+    // 4. Extract Channel Avatar (not video thumbnail!)
+    // YouTube channel avatars are from yt3.googleusercontent.com
+    let avatarUrl = "";
+
+    console.log("[YouTube Avatar] Checking authorThumbnails:", channel.authorThumbnails);
+    console.log("[YouTube Avatar] Checking avatarUrl:", channel.avatarUrl);
+
+    // Priority 1: Check authorThumbnails array for yt3.googleusercontent.com URLs
+    if (Array.isArray(channel.authorThumbnails)) {
+        const ytAvatar = channel.authorThumbnails.find((t: any) =>
+            t.url && t.url.includes('yt3.googleusercontent.com')
+        );
+        if (ytAvatar) {
+            avatarUrl = ytAvatar.url;
+            console.log("[YouTube Avatar] Found in authorThumbnails:", avatarUrl);
+        }
+    }
+
+    // Priority 2: Check other common avatar fields
+    if (!avatarUrl && channel.avatarUrl?.includes('yt3.googleusercontent.com')) {
+        avatarUrl = channel.avatarUrl;
+        console.log("[YouTube Avatar] Found in avatarUrl:", avatarUrl);
+    }
+
+    // Priority 3: Direct avatar object
+    if (!avatarUrl && channel.avatar?.url?.includes('yt3.googleusercontent.com')) {
+        avatarUrl = channel.avatar.url;
+        console.log("[YouTube Avatar] Found in avatar.url:", avatarUrl);
+    }
+
+    // Fallback: If no yt3.googleusercontent URL found, use first available
+    if (!avatarUrl) {
+        console.log("[YouTube Avatar] No yt3.googleusercontent found, using fallback");
+        avatarUrl = channel.authorThumbnails?.[0]?.url ||
+            channel.avatarUrl ||
+            channel.avatar?.url ||
+            "";
+    }
+
+    console.log("[YouTube Avatar] Final URL:", avatarUrl);
+
     return {
         platform: "youtube",
         channel: channelName,
         channelId: channel.channelId || channel.id || "",
         title: channelName,
         description: channel.description || channel.aboutChannelInfo?.description || "",
-        thumbnailUrl: channel.avatarUrl || channel.thumbnailUrl || "",
+        thumbnailUrl: avatarUrl,
         customUrl: channel.url || channel.channelUrl || "",
 
         // Critical Stats
-        totalViews: String(totalViews), // Ensure string returned if downstream expects it, but parsed as well
+        totalViews: String(totalViews),
         videoCount: videoCount,
-        videos: videoCount, // UI alias
+        videos: videoCount,
         subscribers: subscribers,
-        followers: subscribers, // UI alias
+        followers: subscribers,
 
         avgLikes,
         avgComments,

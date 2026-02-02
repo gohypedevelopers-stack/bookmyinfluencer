@@ -9,8 +9,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// PostgreSQL configuration for Neon
-// Valid values are documented in comments on each field
+// Enums
+enum UserRole {
+  BRAND
+  INFLUENCER
+  ADMIN
+}
+
+enum KYCStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum CandidateStatus {
+  CONTACTED
+  IN_NEGOTIATION
+  HIRED
+  CONTENT_REVIEW
+  COMPLETED
+  REJECTED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+}
+
+enum ContractStatus {
+  DRAFT
+  PENDING_ESCROW
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum DeliverableStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum EscrowTransactionStatus {
+  PENDING
+  FUNDED
+  RELEASED
+  REFUNDED
+  DISPUTED
+}
+
+enum PayoutStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_REFUND
+  RESOLVED_RELEASE
+  CLOSED
+}
 
 // Core User Models
 model User {
@@ -19,7 +92,7 @@ model User {
   email         String    @unique
   passwordHash  String?
   image         String?
-  role          String  @default("INFLUENCER") // BRAND, INFLUENCER, ADMIN
+  role          UserRole  @default(INFLUENCER) 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -78,7 +151,7 @@ model KYCSubmission {
   profileId String    @unique
   profile   InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   
-  status    String @default("NOT_SUBMITTED") // NOT_SUBMITTED, PENDING, APPROVED, REJECTED
+  status    KYCStatus @default(NOT_SUBMITTED)
   
   documentType String?
   documentUrl  String? // Front
@@ -101,7 +174,7 @@ model Campaign {
   description String?
   requirements String?
   budget      Float?
-  status      String @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED, ARCHIVED
+  status      CampaignStatus @default(DRAFT)
   
   startDate   DateTime?
   endDate     DateTime?
@@ -120,7 +193,7 @@ model CampaignCandidate {
   influencerId String
   influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
   
-  status       String @default("CONTACTED") // CONTACTED, IN_NEGOTIATION, HIRED, CONTENT_REVIEW, COMPLETED, REJECTED
+  status       CandidateStatus @default(CONTACTED)
   notes        String?
   
   offer        Offer?
@@ -141,10 +214,10 @@ model Offer {
   candidate   CampaignCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   
   amount      Float
-  currency    String   @default("USD")
+  currency    String   @default("INR")
   deliverablesDescription String
   
-  status      String @default("PENDING") // PENDING, ACCEPTED, REJECTED, COUNTERED
+  status      OfferStatus @default(PENDING)
   
   history     String?    // Array of previous versions/counters
   
@@ -169,7 +242,7 @@ model Contract {
   platformFee Float
   taxAmount   Float    @default(0) // GST/VAT
   
-  status      String @default("DRAFT") // DRAFT, PENDING_ESCROW, ACTIVE, COMPLETED, CANCELLED, DISPUTED
+  status      ContractStatus @default(DRAFT)
   
   startDate   DateTime?
   endDate     DateTime?
@@ -192,7 +265,7 @@ model Deliverable {
   description String?
   dueDate     DateTime?
   
-  status      String @default("PENDING") // PENDING, SUBMITTED, APPROVED, REJECTED
+  status      DeliverableStatus @default(PENDING)
   submissionUrl String?
   submissionNotes String?
   
@@ -208,10 +281,10 @@ model EscrowTransaction {
   contract    Contract @relation(fields: [contractId], references: [id])
   
   amount      Float
-  currency    String   @default("USD")
+  currency    String   @default("INR")
   type        String   // "DEPOSIT", "RELEASE", "REFUND"
   
-  status      String @default("PENDING") // PENDING, FUNDED, RELEASED, REFUNDED, DISPUTED
+  status      EscrowTransactionStatus @default(PENDING)
   
   paymentGatewayRef String?
   invoiceUrl  String?
@@ -226,8 +299,8 @@ model PayoutRequest {
   influencer    InfluencerProfile @relation(fields: [influencerId], references: [id])
   
   amount        Float
-  currency      String   @default("USD")
-  status        String @default("REQUESTED") // REQUESTED, PROCESSING, PAID, FAILED
+  currency      String   @default("INR")
+  status        PayoutStatus @default(REQUESTED)
   
   bankReference String?
   adminNotes    String?
@@ -276,7 +349,7 @@ model Dispute {
   reason      String
   description String
   
-  status      String @default("OPEN") // OPEN, RESOLVED_REFUND, RESOLVED_RELEASE, CLOSED
+  status      DisputeStatus @default(OPEN)
   resolution  String?
   
   createdAt   DateTime @default(now())
@@ -342,6 +415,7 @@ model Creator {
   id        String   @id @default(uuid())
   userId    String   @unique @map("user_id")
   user      OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String?  @map("email")
   fullName  String?  @map("full_name")
   phone     String?
   niche     String?
@@ -360,6 +434,8 @@ model Creator {
 
   // New Dashboard Fields
   pricing             String? // JSON: [{ title: "Reel", price: 100 }]
+  payoutMethods       String? @map("payout_methods") // JSON: [{ type: "BANK", details: {...} }]
+  paymentHistory      String? @map("payment_history") // JSON: [{ title: "Campaign", amount: 1000, date: "...", status: "COMPLETED" }]
   mediaKit            String? @map("media_kit") // JSON: Selected posts provided by user
   rawSocialData       String? @map("raw_social_data") // JSON: Latest posts from Apify for selection
 
@@ -367,7 +443,7 @@ model Creator {
   lastInstagramFetchAt DateTime? @map("last_instagram_fetch_at")
 
   // Verification Status
-  verificationStatus String @default("NOT_SUBMITTED") @map("verification_status") // NOT_SUBMITTED, PENDING, APPROVED, REJECTED
+  verificationStatus KYCStatus @default(NOT_SUBMITTED) @map("verification_status") 
   verifiedAt         DateTime? @map("verified_at")
 
   socialAccounts CreatorSocialAccount[]
@@ -445,7 +521,7 @@ model CreatorKYCSubmission {
   creatorId String   @unique @map("creator_id")
   creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status    KYCStatus   @default(PENDING)
   
   // Submitted Data
   instagramFollowers Int?     @map("instagram_followers")

@@ -16,6 +16,7 @@ import {
     Plus,
     Instagram as InstagramIcon
 } from "lucide-react"
+import { ConnectSocialDialog } from "./ConnectSocialDialog"
 
 export default async function CreatorProfilePage() {
     const userId = await getVerifiedUserIdFromCookies()
@@ -26,15 +27,35 @@ export default async function CreatorProfilePage() {
         include: {
             socialAccounts: true,
             user: true,
+            metrics: true, // Include metrics for follower counts
         }
     })
 
     if (!creator) redirect("/creator/onboarding")
 
-    const userName = creator.fullName || "Alex Sterling";
-    const userTitle = "Lifestyle & Tech Reviewer";
-    const userBio = "Passionate creator focusing on the intersection of minimalist lifestyle and high-end consumer technology. 5+ years of experience collaborating with global brands to create authentic story-driven content.";
-    const niches = ["Technology", "Lifestyle", "Minimalism"];
+    const userName = creator.displayName || creator.autoDisplayName || creator.fullName || "User";
+    const userBio = creator.bio || creator.autoBio || "";
+    // We don't have a specific title field yet, so we'll leave it empty or use the first niche
+    const userTitle = creator.niche ? creator.niche.split(',')[0] : "";
+
+    // Parse niches safely
+    const niches = creator.niche
+        ? creator.niche.split(',').map(n => n.trim()).filter(Boolean)
+        : [];
+
+    const userImage = creator.profileImageUrl || creator.autoProfileImageUrl || creator.user.image;
+
+    // Helper to get metrics for a provider
+    const getFollowerCount = (provider: string) => {
+        const metric = creator.metrics.find(m => m.provider === provider);
+        // If we have a metric, format it. Otherwise try to find it in self-reported or return null
+        if (metric?.followersCount) {
+            return new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(metric.followersCount);
+        }
+        return "0";
+    }
+
+    const hasInstagram = creator.socialAccounts.some(acc => acc.provider === 'instagram');
 
     return (
         <>
@@ -75,26 +96,28 @@ export default async function CreatorProfilePage() {
 
                     <div className="px-8 pb-8 flex items-end relative">
                         <div className="-mt-16 relative">
-                            <div className="w-32 h-32 rounded-2xl border-[6px] border-white shadow-xl overflow-hidden bg-orange-100 flex items-center justify-center">
-                                <span className="text-4xl font-bold text-orange-400">{userName.charAt(0)}</span>
+                            <div className="w-32 h-32 rounded-2xl border-[6px] border-white shadow-xl overflow-hidden bg-orange-100 flex items-center justify-center relative">
+                                {userImage ? (
+                                    <Image
+                                        src={userImage}
+                                        alt={userName}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-4xl font-bold text-orange-400">{userName.charAt(0)}</span>
+                                )}
                             </div>
-                            <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-purple-600 transition-colors border border-gray-100">
-                                <div className="w-4 h-4 relative">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
 
-                        <div className="ml-6 mb-2 flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                                {userName}
-                            </h2>
-                            <div className="mt-2 flex items-center gap-4">
-                                <span className="text-sm font-medium text-purple-600">Profile completeness: 85%</span>
-                                <div className="w-48 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full w-[85%]" />
+                            <div className="ml-6 mb-2 flex-1">
+                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                    {userName}
+                                </h2>
+                                <div className="mt-2 flex items-center gap-4">
+                                    <span className="text-sm font-medium text-purple-600">Profile completeness: 85%</span>
+                                    <div className="w-48 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full w-[85%]" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -138,6 +161,9 @@ export default async function CreatorProfilePage() {
 
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Content Niches</label>
+                            {niches.length === 0 ? (
+                                <p className="text-sm text-gray-500 italic mb-4">No niches added yet.</p>
+                            ) : null}
                             <div className="flex flex-wrap gap-3">
                                 {niches.map((niche, index) => (
                                     <span
@@ -174,19 +200,43 @@ export default async function CreatorProfilePage() {
                             </Button>
                         </div>
 
-                        <div className="flex items-center justify-between p-5 border border-gray-100 rounded-2xl hover:border-gray-200 transition-colors bg-white">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
-                                    <InstagramIcon className="w-6 h-6 text-white" />
+                        <div className="space-y-4">
+                            {creator.socialAccounts.length === 0 && !hasInstagram && (
+                                <p className="text-gray-500 text-center py-4">No social accounts connected.</p>
+                            )}
+                            {creator.socialAccounts.map((account) => (
+                                <div key={account.id} className="flex items-center justify-between p-5 border border-gray-100 rounded-2xl hover:border-gray-200 transition-colors bg-white">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${account.provider === 'instagram' ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' :
+                                            account.provider === 'youtube' ? 'bg-red-600' : 'bg-gray-800'
+                                            }`}>
+                                            {/* We can map icons dynamically or just use a generic one if needed. reusing InstagramIcon for demo or adding others */}
+                                            <InstagramIcon className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-gray-900 capitalize">{account.provider}</div>
+                                            <div className="text-sm text-gray-500 font-medium">
+                                                {getFollowerCount(account.provider)} {account.provider === 'youtube' ? 'Subscribers' : 'Followers'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Button variant="outline" className="border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 font-medium rounded-lg">
+                                        Disconnect
+                                    </Button>
                                 </div>
-                                <div>
-                                    <div className="font-bold text-gray-900">Instagram</div>
-                                    <div className="text-sm text-gray-500 font-medium">234.5k Followers</div>
-                                </div>
-                            </div>
-                            <Button variant="outline" className="border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 font-medium rounded-lg">
-                                Disconnect
-                            </Button>
+                            ))}
+
+                            {!hasInstagram && (
+                                <ConnectSocialDialog provider="instagram">
+                                    <div className="border border-dashed border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 rounded-2xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all group">
+                                        <div className="w-10 h-10 bg-gray-100 group-hover:bg-white rounded-full flex items-center justify-center text-purple-600 transition-colors">
+                                            {/* Use Instagram Icon here */}
+                                            <InstagramIcon className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-600 group-hover:text-gray-900">Connect Instagram</span>
+                                    </div>
+                                </ConnectSocialDialog>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

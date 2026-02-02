@@ -1,7 +1,7 @@
 
 import { db } from "@/lib/db";
 import EarningsClient from "./EarningsClient";
-import { ContractStatus, EscrowStatus } from "@prisma/client";
+import { ContractStatus, EscrowTransactionStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -45,8 +45,8 @@ export default async function EarningsPage() {
             stats.earned += job.totalAmount;
         }
 
-        const funded = job.transactions.find((t) => t.status === EscrowStatus.FUNDED);
-        const released = job.transactions.find((t) => t.status === EscrowStatus.RELEASED);
+        const funded = job.transactions.find((t) => t.status === EscrowTransactionStatus.FUNDED);
+        const released = job.transactions.find((t) => t.status === EscrowTransactionStatus.RELEASED);
 
         if (funded) stats.pending += funded.amount;
         if (released) stats.available += released.amount;

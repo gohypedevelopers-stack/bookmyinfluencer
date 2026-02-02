@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
         if (metricData.username) {
             await db.creator.update({
                 where: { id: creator.id },
-                data: { instagram: `https://instagram.com/${metricData.username}` }
+                data: { instagramUrl: `https://instagram.com/${metricData.username}` }
             });
         }
 

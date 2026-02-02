@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { updateCreatorMediaKit } from "@/app/(creator)/creator/dashboard/actions"
+import { updateCreatorMediaKit } from "@/app/(creator)/creator/(dashboard)/dashboard/actions"
 import { Instagram, Youtube, Image as ImageIcon } from "lucide-react"
 
 interface MediaItem {

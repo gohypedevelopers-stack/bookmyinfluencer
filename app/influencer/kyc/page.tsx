@@ -22,7 +22,7 @@ export default async function KYCPage() {
         return <div>Profile missing.</div>;
     }
 
-    const currentStatus = user.influencerProfile.kyc?.status || KYCStatus.NOT_SUBMITTED;
+    const currentStatus = (user.influencerProfile.kyc?.status || KYCStatus.NOT_SUBMITTED) as KYCStatus;
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
                 autoBio: stats.description?.substring(0, 500),
                 youtubeUrl: stats.customUrl || `https://youtube.com/channel/${finalChannelId}`,
                 // Save filtered videos for Media Kit selection (limit size)
-                rawSocialData: JSON.stringify(items.filter(i => i.type === 'video' || i.likeCount).slice(0, 50)),
+                rawSocialData: JSON.stringify(items.filter((i: any) => i.type === 'video' || i.likeCount).slice(0, 50)),
                 lastYoutubeFetchAt: new Date(),
             }
         });

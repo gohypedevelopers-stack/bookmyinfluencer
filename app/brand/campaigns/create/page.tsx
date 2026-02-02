@@ -41,8 +41,8 @@ export default function CampaignCreation() {
                         <div key={num} className="flex items-center">
                             <div className={`flex flex-col items-center ${num < 4 ? 'mr-8' : ''}`}>
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${step >= num
-                                        ? 'bg-gradient-to-br from-teal-600 to-teal-500 text-white'
-                                        : 'bg-gray-200 text-gray-400'
+                                    ? 'bg-gradient-to-br from-teal-600 to-teal-500 text-white'
+                                    : 'bg-gray-200 text-gray-400'
                                     }`}>
                                     {step > num ? <CheckCircle2 className="w-6 h-6" /> : num}
                                 </div>
@@ -76,14 +76,14 @@ export default function CampaignCreation() {
                                         <button
                                             onClick={() => setCompensationModel('fixed')}
                                             className={`p-5 rounded-xl border-2 transition-all ${compensationModel === 'fixed'
-                                                    ? 'border-teal-500 bg-teal-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-teal-500 bg-teal-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className={` w-5 h-5 rounded-full border-2 flex items-center justify-center ${compensationModel === 'fixed'
-                                                        ? 'border-teal-500 bg-teal-500'
-                                                        : 'border-gray-300'
+                                                    ? 'border-teal-500 bg-teal-500'
+                                                    : 'border-gray-300'
                                                     }`}>
                                                     {compensationModel === 'fixed' && (
                                                         <CheckCircle2 className="w-4 h-4 text-white" />
@@ -98,14 +98,14 @@ export default function CampaignCreation() {
                                         <button
                                             onClick={() => setCompensationModel('negotiable')}
                                             className={`p-5 rounded-xl border-2 transition-all ${compensationModel === 'negotiable'
-                                                    ? 'border-teal-500 bg-teal-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-teal-500 bg-teal-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${compensationModel === 'negotiable'
-                                                        ? 'border-teal-500 bg-teal-500'
-                                                        : 'border-gray-300'
+                                                    ? 'border-teal-500 bg-teal-500'
+                                                    : 'border-gray-300'
                                                     }`}>
                                                     {compensationModel === 'negotiable' && (
                                                         <CheckCircle2 className="w-4 h-4 text-white" />
@@ -122,14 +122,14 @@ export default function CampaignCreation() {
                                         <button
                                             onClick={() => setCompensationModel('gifting')}
                                             className={`p-5 rounded-xl border-2 transition-all ${compensationModel === 'gifting'
-                                                    ? 'border-teal-500 bg-teal-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-teal-500 bg-teal-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${compensationModel === 'gifting'
-                                                        ? 'border-teal-500 bg-teal-500'
-                                                        : 'border-gray-300'
+                                                    ? 'border-teal-500 bg-teal-500'
+                                                    : 'border-gray-300'
                                                     }`}>
                                                     {compensationModel === 'gifting' && (
                                                         <CheckCircle2 className="w-4 h-4 text-white" />
@@ -149,10 +149,10 @@ export default function CampaignCreation() {
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-900 mb-3">
                                         TOTAL BUDGET CAP
-                                        <span className="ml-2 text-gray-400 font-normal text-xs">(USD)</span>
+                                        <span className="ml-2 text-gray-400 font-normal text-xs">(INR)</span>
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">₹</span>
                                         <input
                                             type="number"
                                             placeholder="5,000"
@@ -165,7 +165,7 @@ export default function CampaignCreation() {
                                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                             </svg>
                                             <p className="text-sm text-blue-800">
-                                                <span className="font-semibold">Based on your category,</span> recommended budget for 10 micro-influencers is <span className="font-bold">$3,500 - $6,000</span>
+                                                <span className="font-semibold">Based on your category,</span> recommended budget for 10 micro-influencers is <span className="font-bold">₹2,80,000 - ₹4,80,000</span>
                                             </p>
                                         </div>
                                     </div>

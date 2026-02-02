@@ -1,21 +1,23 @@
-
-import { FinalizeProfileClient } from "./FinalizeProfileClient"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
 import { redirect } from "next/navigation"
-import { db } from "@/lib/db"
 
-export default async function FinalizeOnboardingPage() {
+import { db } from "@/lib/db"
+import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { FinalizeProfileClient } from "./FinalizeProfileClient"
+
+export default async function FinalizeProfilePage() {
     const userId = await getVerifiedUserIdFromCookies()
     if (!userId) redirect("/verify")
 
-    // Optional: Check if already onboarded to prevent re-onboarding
     const creator = await db.creator.findUnique({
         where: { userId },
-        select: { pricing: true }
+        include: {
+            metrics: {
+                orderBy: { date: 'desc' },
+                take: 5 // Take a few to match providers
+            },
+            socialAccounts: true
+        }
     })
 
-    // If pricing exists (our proxy for full onboarding), maybe redirect?
-    // For now, allowing re-entry to edit/finalize 
-
-    return <FinalizeProfileClient />
+    return <FinalizeProfileClient initialData={creator} />
 }

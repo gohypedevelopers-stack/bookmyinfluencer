@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
         if (channel.snippet?.customUrl) {
             await db.creator.update({
                 where: { id: creator.id },
-                data: { youtube: channel.snippet.customUrl }
+                data: { youtubeUrl: channel.snippet.customUrl }
             });
         }
 

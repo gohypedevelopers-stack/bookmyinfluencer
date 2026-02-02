@@ -3,8 +3,9 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog, createNotification } from "@/lib/audit";
+import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus } from "@prisma/client";
 
-export async function updateCandidateStatus(candidateId: string, newStatus: string) {
+export async function updateCandidateStatus(candidateId: string, newStatus: CandidateStatus) {
     try {
         const candidate = await db.campaignCandidate.update({
             where: { id: candidateId },
@@ -41,23 +42,23 @@ export async function fundEscrowTransaction(contractId: string) {
 
         if (!contract) return { success: false, error: "Contract not found" };
 
-        const transaction = contract.transactions.find(t => t.status === 'PENDING') || contract.transactions[0];
+        const transaction = contract.transactions.find(t => t.status === EscrowTransactionStatus.PENDING) || contract.transactions[0];
         if (!transaction) return { success: false, error: "No pending transaction found" };
 
         await db.escrowTransaction.update({
             where: { id: transaction.id },
-            data: { status: 'FUNDED' }
+            data: { status: EscrowTransactionStatus.FUNDED }
         });
 
         await db.contract.update({
             where: { id: contractId },
-            data: { status: 'ACTIVE' }
+            data: { status: ContractStatus.ACTIVE }
         });
 
         if (contract.candidateId) {
             await db.campaignCandidate.update({
                 where: { id: contract.candidateId },
-                data: { status: 'HIRED' }
+                data: { status: CandidateStatus.HIRED }
             });
         }
 
@@ -124,7 +125,7 @@ export async function createCampaign(prevState: any, formData: FormData) {
                 budget,
                 startDate,
                 endDate,
-                status: 'DRAFT'
+                status: CampaignStatus.DRAFT
             }
         });
 

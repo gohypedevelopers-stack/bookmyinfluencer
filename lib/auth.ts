@@ -43,9 +43,9 @@ export const authOptions: NextAuthOptions = {
                         id: user.id,
                         name: user.name,
                         email: user.email,
-                        role: user.role,
+                        role: user.role as UserRole,
                         image: user.image,
-                        kycStatus: user.influencerProfile?.kyc?.status || "NOT_SUBMITTED" as KYCStatus
+                        kycStatus: (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus
                     }
                 } catch (error) {
                     console.error("Auth error:", error);
