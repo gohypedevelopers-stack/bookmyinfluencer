@@ -4,126 +4,58 @@ import { useState } from 'react';
 import { Search, SlidersHorizontal, Instagram, Youtube, TvMinimal, Music, MapPin, Bookmark, BookmarkCheck, TrendingUp, Users, DollarSign, Eye } from 'lucide-react';
 import Link from 'next/link';
 
+import { getPublicCreators } from '../actions';
+import { useEffect } from 'react';
+
 interface Influencer {
-    id: number;
+    id: string; // Changed to string to match userId/uuid
+    dbId: string;
     name: string;
     handle: string;
     niche: string;
     location: string;
     followers: string;
+    followersCount?: number;
     engagementRate: string;
     avgViews: string;
     verified: boolean;
     tags: string[];
     priceRange: string;
     thumbnail: string;
+    profileImage: string;
     saved: boolean;
 }
-
-const mockInfluencers: Influencer[] = [
-    {
-        id: 1,
-        name: 'Ananya Singh',
-        handle: '@ananya_lifestyle',
-        niche: 'Fashion',
-        location: 'Mumbai, India',
-        followers: '1.2M',
-        engagementRate: '8.8%',
-        avgViews: '450k',
-        verified: true,
-        tags: ['Lifestyle', 'Beauty', 'Travel'],
-        priceRange: '$500-1k',
-        thumbnail: 'from-pink-400 to-rose-500',
-        saved: false
-    },
-    {
-        id: 2,
-        name: 'Rahul V',
-        handle: '@rahul_tech',
-        niche: 'Tech & Gadgets',
-        location: 'Bangalore',
-        followers: '450k',
-        engagementRate: '12.0%',
-        avgViews: '120k',
-        verified: true,
-        tags: ['Coach', 'Health', 'Nutrition'],
-        priceRange: '$300-500',
-        thumbnail: 'from-blue-400 to-indigo-500',
-        saved: true
-    },
-    {
-        id: 3,
-        name: 'Sound Collective',
-        handle: '@soundcollective',
-        niche: 'Music',
-        location: 'Delhi',
-        followers: '80k',
-        engagementRate: '15.2%',
-        avgViews: '2M+',
-        verified: false,
-        tags: ['Indie', 'Rock', 'Live'],
-        priceRange: '$200-400',
-        thumbnail: 'from-purple-400 to-pink-500',
-        saved: false
-    },
-    {
-        id: 4,
-        name: 'Arjun Tech',
-        handle: '@arjun_coder',
-        niche: 'Tech',
-        location: 'Bangalore',
-        followers: '2.4M',
-        engagementRate: '3.2%',
-        avgViews: '500k',
-        verified: true,
-        tags: ['Gadgets', 'Coding', 'Reviews'],
-        priceRange: '$800-1.5k',
-        thumbnail: 'from-cyan-400 to-blue-500',
-        saved: false
-    },
-    {
-        id: 5,
-        name: 'Flavor Fiesta',
-        handle: '@flavor_fiesta',
-        niche: 'Food',
-        location: 'Mumbai',
-        followers: '320k',
-        engagementRate: '6.1%',
-        avgViews: '12k',
-        verified: true,
-        tags: ['Street Food', 'Reviews', 'Recipes'],
-        priceRange: '$400-700',
-        thumbnail: 'from-orange-400 to-red-500',
-        saved: false
-    },
-    {
-        id: 6,
-        name: 'Wanderlust Viki',
-        handle: '@wanderlust_viki',
-        niche: 'Travel',
-        location: 'Goa',
-        followers: '900k',
-        engagementRate: '5.5%',
-        avgViews: '2.1k',
-        verified: true,
-        tags: ['Adventure', 'Vlog', 'Travel Tips'],
-        priceRange: '$600-1k',
-        thumbnail: 'from-teal-400 to-green-500',
-        saved: true
-    }
-];
 
 export default function InfluencerDiscovery() {
     const [selectedTab, setSelectedTab] = useState<'instagram' | 'youtube' | 'tv' | 'music'>('instagram');
     const [showFilters, setShowFilters] = useState(true);
-    const [influencers, setInfluencers] = useState(mockInfluencers);
+    const [influencers, setInfluencers] = useState<Influencer[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Filters State
     const [selectedLocation, setSelectedLocation] = useState('India');
     const [selectedCity, setSelectedCity] = useState('Mumbai');
-    const [selectedNiche, setSelectedNiche] = useState('Fashion & Health');
-    const [priceRange, setPriceRange] = useState([50, 80]);
-    const [followersRange, setFollowersRange] = useState([10, 100]);
+    const [selectedNiche, setSelectedNiche] = useState('All'); // Default All
+    const [priceRange, setPriceRange] = useState([50, 5000]);
+    const [followersRange, setFollowersRange] = useState([0, 1000]); // in K
 
-    const toggleSave = (id: number) => {
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const res = await getPublicCreators({
+                niche: selectedNiche === 'All' ? undefined : selectedNiche,
+                // minFollowers: followersRange[0] * 1000, 
+                // maxFollowers: followersRange[1] * 1000 
+            });
+            if (res.success) {
+                setInfluencers(res.data as Influencer[]);
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, [selectedNiche, selectedTab]); // Add other dependencies as filter logic expands
+
+    const toggleSave = (id: string) => {
         setInfluencers(influencers.map(inf =>
             inf.id === id ? { ...inf, saved: !inf.saved } : inf
         ));
@@ -331,7 +263,18 @@ export default function InfluencerDiscovery() {
                             {influencers.map((influencer) => (
                                 <div key={influencer.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                     {/* Thumbnail */}
-                                    <div className={`relative h-48 bg-gradient-to-br ${influencer.thumbnail}`}>
+                                    <div className={`relative h-48 bg-gray-200 overflow-hidden`}>
+                                        {(influencer.thumbnail && (influencer.thumbnail.startsWith('/') || influencer.thumbnail.startsWith('http'))) ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={influencer.thumbnail}
+                                                alt={influencer.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className={`w-full h-full bg-gradient-to-br ${influencer.thumbnail || 'from-gray-300 to-gray-400'}`} />
+                                        )}
+
                                         <div className="absolute top-3 left-3 flex gap-2">
                                             <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 flex items-center gap-1">
                                                 <Instagram className="w-3 h-3" />

@@ -421,6 +421,7 @@ model Creator {
   niche     String?
   instagramUrl  String?  @map("instagram_url")
   youtubeUrl    String?  @map("youtube_url")
+  backgroundImageUrl String? @map("background_image_url")
 
   // Profile Auto-Fetch Fields
   profileImageUrl     String? @map("profile_image_url") // Manual override

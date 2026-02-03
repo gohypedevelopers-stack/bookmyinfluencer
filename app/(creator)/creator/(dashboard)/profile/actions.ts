@@ -240,3 +240,78 @@ export async function disconnectSocialProfile(provider: "instagram" | "youtube")
 export async function updateInstagramUrl(url: string, followersCount: number = 0) {
     return updateSocialProfile("instagram", url, followersCount);
 }
+
+// --- PROFILE UPDATE ACTION ---
+import { writeFile, mkdir } from "fs/promises"
+import { join } from "path"
+
+export async function updateCreatorProfileAction(formData: FormData) {
+    try {
+        const userId = await getVerifiedUserIdFromCookies()
+        if (!userId) return { success: false, error: "Unauthorized" }
+
+        const displayName = formData.get("displayName") as string
+        const niche = formData.get("niche") as string
+        const bio = formData.get("bio") as string
+        const profileImageFile = formData.get("profileImage") as File | null
+        const bannerImageFile = formData.get("bannerImage") as File | null
+
+        const updateData: any = {
+            displayName,
+            niche,
+            bio
+        }
+
+        // Handle File Uploads
+        const uploadDir = join(process.cwd(), "public", "uploads")
+        await mkdir(uploadDir, { recursive: true })
+
+        if (profileImageFile && profileImageFile.size > 0 && profileImageFile.name) {
+            const buffer = Buffer.from(await profileImageFile.arrayBuffer())
+            const filename = `profile-${userId}-${Date.now()}-${profileImageFile.name.replace(/[^a-zA-Z0-9.]/g, "")}`
+            const filepath = join(uploadDir, filename)
+            await writeFile(filepath, buffer)
+            updateData.profileImageUrl = `/uploads/${filename}`
+        }
+
+        // Separate backgroundImageUrl to allow raw update if Prisma Client is stale
+        let bannerUrlFn: string | undefined;
+
+        if (bannerImageFile && bannerImageFile.size > 0 && bannerImageFile.name) {
+            const buffer = Buffer.from(await bannerImageFile.arrayBuffer())
+            const filename = `banner-${userId}-${Date.now()}-${bannerImageFile.name.replace(/[^a-zA-Z0-9.]/g, "")}`
+            const filepath = join(uploadDir, filename)
+            await writeFile(filepath, buffer)
+            // Do NOT add to updateData directly to avoid "Unknown argument"
+            bannerUrlFn = `/uploads/${filename}`
+        }
+
+        await db.creator.update({
+            where: { userId },
+            data: updateData
+        })
+
+        // Execute Raw SQL for background_image_url if we have one
+        // This bypasses Prisma Client validation if the schema hasn't been regenerated
+        if (bannerUrlFn) {
+            // Using $executeRawUnsafe because tagged template with dynamic string from file upload could be tricky
+            // But here we are passing strict string. 
+            // Better to use $executeRaw with parameter.
+            // Note: background_image_url is the column name in DB. userId is user_id.
+            const { Prisma } = await import("@prisma/client")
+            // We need to use Prisma.sql to tag the query if using $executeRaw
+            // Or simpler: use $executeRawUnsafe
+            await db.$executeRawUnsafe(
+                `UPDATE "creators" SET "background_image_url" = $1 WHERE "user_id" = $2`,
+                bannerUrlFn,
+                userId
+            )
+        }
+
+        revalidatePath("/creator/profile")
+        return { success: true }
+    } catch (e: any) {
+        console.error("Profile Update Error:", e)
+        return { success: false, error: e.message }
+    }
+}

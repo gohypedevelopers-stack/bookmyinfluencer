@@ -49,6 +49,20 @@ export const authOptions: NextAuthOptions = {
                     }
                 } catch (error) {
                     console.error("Auth error:", error);
+                    // DEV BYPASS: Allow test login when DB is unreachable
+                    if (process.env.NODE_ENV === 'development' &&
+                        credentials.email === 'test@dev.local' &&
+                        credentials.password === 'dev123') {
+                        console.warn("⚠️ DEV BYPASS: Logging in as test user (DB unreachable)");
+                        return {
+                            id: 'dev-test-user-id',
+                            name: 'Dev Test User',
+                            email: 'test@dev.local',
+                            role: 'BRAND' as UserRole,
+                            image: null,
+                            kycStatus: 'APPROVED' as KYCStatus
+                        }
+                    }
                     return null;
                 }
             }
