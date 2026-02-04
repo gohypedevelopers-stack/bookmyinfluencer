@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function CreateCampaignPage() {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || (session.user.role !== 'BRAND' && session.user.role !== 'ADMIN')) {
+    if (!session || !session.user || (session.user.role !== 'BRAND' && session.user.role !== 'ADMIN' && session.user.role !== 'INFLUENCER')) {
         redirect('/login');
     }
 
