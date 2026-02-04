@@ -220,6 +220,7 @@ export async function getPublicCreators(filter?: {
         // Client Side filtering for ranges if DB query is too complex for now
         let filtered = mapped;
         if (filter?.minFollowers) filtered = filtered.filter((c: any) => c.followersCount >= filter.minFollowers!);
+        if (filter?.maxFollowers) filtered = filtered.filter((c: any) => c.followersCount <= filter.maxFollowers!);
 
         return { success: true, data: filtered };
     } catch (error) {
@@ -357,4 +358,93 @@ export async function inviteInfluencer(campaignId: string, influencerUserId: str
         console.error(error);
         return { success: false, error: "Failed to invite." };
     }
+}
+
+// --- DASHBOARD ACTIONS ---
+
+export async function getBrandStats() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return {
+        totalSpent: 0,
+        activeEscrow: 0,
+        completedCampaigns: 0
+    };
+
+    try {
+        const brand = await db.brandProfile.findUnique({
+            where: { userId: session.user.id },
+            include: {
+                contracts: {
+                    include: { transactions: true }
+                },
+                campaigns: true
+            }
+        });
+
+        if (!brand) return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
+
+        // 1. Total Spent (Escrow Released + Funded?)
+        let totalSpent = 0;
+        let activeEscrow = 0;
+
+        brand.contracts.forEach(contract => {
+            contract.transactions.forEach(tx => {
+                if (tx.status === EscrowTransactionStatus.RELEASED) {
+                    totalSpent += tx.amount;
+                } else if (tx.status === EscrowTransactionStatus.FUNDED) {
+                    activeEscrow += tx.amount;
+                    totalSpent += tx.amount; // Count funded as spent/committed
+                }
+            });
+        });
+
+        // 3. Completed Campaigns
+        const completedCampaigns = brand.campaigns.filter(c => c.status === CampaignStatus.COMPLETED).length;
+
+        return {
+            totalSpent,
+            activeEscrow,
+            completedCampaigns
+        };
+
+    } catch (error) {
+        console.error("Stats Error", error);
+        return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
+    }
+}
+
+export async function getBrandDashboardActivity() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return [];
+
+    try {
+        // Fetch recent notifications as "Activity"
+        const notifications = await db.notification.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+        });
+
+        return notifications.map(n => ({
+            id: n.id,
+            type: n.type, // "OFFER", "MESSAGE", etc.
+            title: n.title,
+            subtitle: n.message,
+            time: formatTimeAgo(n.createdAt),
+            actionLabel: "View",
+            actionLink: n.link || '#'
+        }));
+
+    } catch (error) {
+        console.error("Activity Error", error);
+        return [];
+    }
+}
+
+function formatTimeAgo(date: Date) {
+    const diff = (new Date().getTime() - new Date(date).getTime()) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    return `${Math.floor(diff / 86400)}d`;
 }

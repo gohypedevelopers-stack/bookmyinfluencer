@@ -20,7 +20,7 @@ export function Navbar() {
           <Link href="/discover" className="hover:text-foreground transition-colors">
             Marketplace
           </Link>
-          <Link href="/login" className="hover:text-foreground transition-colors">
+          <Link href="/brand/login" className="hover:text-foreground transition-colors">
             For Brands
           </Link>
           <Link href="/login" className="hover:text-foreground transition-colors">

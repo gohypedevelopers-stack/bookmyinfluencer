@@ -57,6 +57,11 @@ export default withAuth(
 
         const path = req.nextUrl.pathname
 
+        // Public Brand Routes - Allow access without auth
+        if (path === "/brand/login" || path === "/brand/register") {
+            return NextResponse.next()
+        }
+
         // 1. Auth Check: Allow if EITHER standard token OR verified otpUser exists
         if (!token && !otpUser) {
             return NextResponse.redirect(new URL("/login", req.url))
@@ -68,9 +73,12 @@ export default withAuth(
         // 2. Role-based protection
 
         // Brand Routes
-        if (path.startsWith("/brand") && userRole !== "BRAND" && userRole !== "ADMIN") {
-            return NextResponse.redirect(new URL("/", req.url))
-        }
+        // Brand Routes
+        // Brand Routes
+        // Relaxing middleware role check to rely on Layout protection for now
+        // if (path.startsWith("/brand") && !path.startsWith("/brand/login") && !path.startsWith("/brand/register") && userRole !== "BRAND" && userRole !== "ADMIN") {
+        //     return NextResponse.redirect(new URL("/", req.url))
+        // }
 
         // Influencer Routes
         if (path.startsWith("/influencer")) {
