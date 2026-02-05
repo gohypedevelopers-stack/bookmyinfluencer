@@ -11,7 +11,8 @@ import {
     Smile,
     Send,
     CheckCircle2,
-    Loader2
+    Loader2,
+    MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -280,8 +281,8 @@ export default function CreatorMessagesPage() {
                                                     <span className={`text-sm font-bold ${msg.isMe ? 'text-gray-500' : 'text-gray-900'}`}>{msg.senderName}</span>
                                                 </div>
                                                 <div className={`p-5 rounded-2xl shadow-sm leading-relaxed ${msg.isMe
-                                                        ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
-                                                        : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
+                                                    ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
+                                                    : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
                                                     }`}>
                                                     {msg.content}
                                                 </div>
