@@ -48,8 +48,9 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
     const [profileImage, setProfileImage] = useState<string | null>(
         creator.profileImageUrl || creator.autoProfileImageUrl || creator.user?.image || null
     )
+    // Remove hardcoded Unsplash fallback. If null, show placeholder gradient.
     const [bannerImage, setBannerImage] = useState<string | null>(
-        creator.backgroundImageUrl || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1200&h=400"
+        creator.backgroundImageUrl || null
     )
 
     // File Inputs
@@ -73,6 +74,8 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
             setBannerImage(URL.createObjectURL(file))
         }
     }
+
+    // ... (rest of handlers unchanged)
 
     const handleRemoveNiche = (nicheToRemove: string) => {
         setNiches(niches.filter(n => n !== nicheToRemove))
@@ -173,16 +176,18 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
 
             <div className="p-10 max-w-5xl mx-auto space-y-8">
                 {/* Profile Banner */}
-                <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden relative group min-h-[300px] flex items-end">
+                <div className={`rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden relative group min-h-[300px] flex items-end ${!bannerImage ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' : 'bg-white'}`}>
                     {/* Background Image - Absolute to cover full card */}
                     <div className="absolute inset-0">
-                        <Image
-                            src={bannerImage || ""}
-                            alt="Profile Banner"
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1024px) 100vw, 1024px"
-                        />
+                        {bannerImage && (
+                            <Image
+                                src={bannerImage}
+                                alt="Profile Banner"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 1024px) 100vw, 1024px"
+                            />
+                        )}
                         {/* Gradient Overlay for Readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -195,7 +200,7 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                                 onClick={() => bannerInputRef.current?.click()}
                             >
                                 <Camera className="w-4 h-4" />
-                                Change Cover
+                                {bannerImage ? 'Change Cover' : 'Add Cover Image'}
                             </Button>
                         </div>
                         <input

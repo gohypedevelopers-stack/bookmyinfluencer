@@ -19,5 +19,17 @@ export default async function CreatorProfilePage() {
 
     if (!creator) redirect("/creator/onboarding")
 
-    return <ProfileEditor creator={creator} />
+    // Fetch background_image_url manually via raw query to bypass potentially stale Prisma types
+    const rawCreator = await db.$queryRawUnsafe<any[]>(
+        `SELECT background_image_url FROM creators WHERE user_id = $1`,
+        userId
+    )
+
+    // Merge the raw field if found
+    const enhancedCreator = {
+        ...creator,
+        backgroundImageUrl: rawCreator[0]?.background_image_url || (creator as any).backgroundImageUrl
+    }
+
+    return <ProfileEditor creator={enhancedCreator} />
 }
