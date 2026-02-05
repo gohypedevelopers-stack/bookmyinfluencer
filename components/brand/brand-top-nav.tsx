@@ -11,7 +11,8 @@ import {
     ShoppingBag,
     BarChart3,
     Search,
-    Settings
+    Settings,
+    MessageSquare,
 } from "lucide-react"
 import { NotificationPopover } from "./NotificationPopover"
 
@@ -22,6 +23,7 @@ export function BrandTopNav() {
     const navItems = [
         { name: "Dashboard", href: "/brand", icon: LayoutDashboard },
         { name: "Campaigns", href: "/brand/campaigns", icon: Megaphone },
+        { name: "Messages", href: "/brand/chat", icon: MessageSquare },
         { name: "Marketplace", href: "/brand/discover", icon: ShoppingBag },
         { name: "Analytics", href: "/brand/analytics", icon: BarChart3 },
     ]
