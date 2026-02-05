@@ -53,14 +53,33 @@ export async function POST(req: Request) {
         }
 
         // Create Application
-        await db.campaignCandidate.create({
+        const candidate = await db.campaignCandidate.create({
             data: {
                 campaignId,
                 influencerId,
-                status: 'CONTACTED', // or 'APPLIED' if we add that enum, but CONTACTED serves as initial state
+                status: 'CONTACTED',
                 notes: 'Creator applied via marketplace.'
+            },
+            include: {
+                campaign: {
+                    include: { brand: true }
+                }
             }
         });
+
+        // Notify Brand
+        if (candidate.campaign.brand.userId) {
+            await db.notification.create({
+                data: {
+                    userId: candidate.campaign.brand.userId,
+                    type: "COLLAB_REQUEST",
+                    title: "New Collaboration Request",
+                    message: `${legacyUser.name || 'A Creator'} has requested to collaborate on ${candidate.campaign.title}`,
+                    link: `/brand/campaigns?candidateId=${candidate.id}`, // Link to campaigns page, potentially focused on this candidate
+                    read: false
+                }
+            });
+        }
 
         return NextResponse.json({ success: true });
 

@@ -541,3 +541,127 @@ function formatTimeAgo(date: Date) {
     if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
     return `${Math.floor(diff / 86400)}d`;
 }
+
+// --- NOTIFICATION & COLLAB ACTIONS ---
+
+export async function getBrandNotifications() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return [];
+
+    try {
+        const notifications = await db.notification.findMany({
+            where: {
+                userId: session.user.id,
+                read: false
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        return notifications;
+    } catch (error) {
+        console.error("Failed to fetch notifications", error);
+        return [];
+    }
+}
+
+export async function markNotificationRead(notificationId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session) return { success: false };
+
+    try {
+        await db.notification.update({
+            where: { id: notificationId },
+            data: { read: true }
+        });
+        revalidatePath('/brand');
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
+}
+
+export async function handleCollabRequest(notificationId: string, action: 'ACCEPT' | 'REJECT') {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
+
+    try {
+        const notification = await db.notification.findUnique({
+            where: { id: notificationId }
+        });
+
+        if (!notification || !notification.link) return { success: false, error: "Invalid request" };
+
+        // Extract candidateId from link logic (e.g. /brand/campaigns?candidateId=...)
+        const urlParams = new URLSearchParams(notification.link.split('?')[1]);
+        const candidateId = urlParams.get('candidateId');
+
+        if (!candidateId) return { success: false, error: "Candidate not found in request" };
+
+        const candidate = await db.campaignCandidate.findUnique({
+            where: { id: candidateId },
+            include: { campaign: { include: { brand: { include: { user: true } } } }, influencer: { include: { user: true } } }
+        });
+
+        if (!candidate) return { success: false, error: "Candidate record missing" };
+
+        if (action === 'ACCEPT') {
+            // 1. Update Status
+            await db.campaignCandidate.update({
+                where: { id: candidateId },
+                data: { status: CandidateStatus.IN_NEGOTIATION }
+            });
+
+            // 2. Create/Get Chat Thread
+            // Participants: Brand, Influencer, and maybe Admin? For now just Brand + Influencer
+            // Check if thread exists
+            let thread = await db.chatThread.findUnique({
+                where: { candidateId }
+            });
+
+            if (!thread) {
+                thread = await db.chatThread.create({
+                    data: {
+                        candidateId,
+                        participants: `${session.user.id},${candidate.influencer.userId}` // Simple CSV for now as per schema
+                    }
+                });
+            }
+
+            // 3. Send Hello Message
+            await db.message.create({
+                data: {
+                    threadId: thread.id,
+                    senderId: session.user.id,
+                    content: "Hello! We are excited to collaborate with you. Let's discuss the details."
+                }
+            });
+
+            // 4. Notify Creator
+            if (candidate.influencer.userId) {
+                await createNotification(
+                    candidate.influencer.userId,
+                    "Request Accepted",
+                    `${candidate.campaign.brand.companyName} has accepted your collaboration request! Check your messages.`,
+                    "MESSAGE",
+                    `/influencer/messages?threadId=${thread.id}`
+                );
+            }
+
+        } else {
+            // REJECT
+            await db.campaignCandidate.update({
+                where: { id: candidateId },
+                data: { status: CandidateStatus.REJECTED }
+            });
+        }
+
+        // Mark notification handled
+        await markNotificationRead(notificationId);
+
+        revalidatePath('/brand/campaigns');
+        return { success: true };
+
+    } catch (error) {
+        console.error("Handle Collab Error", error);
+        return { success: false, error: "Action failed" };
+    }
+}
