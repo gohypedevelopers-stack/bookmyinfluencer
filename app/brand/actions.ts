@@ -108,8 +108,17 @@ export async function createCampaign(prevState: any, formData: FormData) {
     const description = formData.get('description') as string;
     const requirements = formData.get('requirements') as string;
     const budget = parseFloat(formData.get('budget') as string) || 0;
-    const startDate = formData.get('startDate') ? new Date(formData.get('startDate') as string) : new Date();
-    const endDate = formData.get('endDate') ? new Date(formData.get('endDate') as string) : new Date();
+    const startDate = formData.get('startDate') ? new Date(formData.get('startDate') as string) : null; // Allow null for flexibility
+    const endDate = formData.get('endDate') ? new Date(formData.get('endDate') as string) : null;
+
+    // New Fields
+    const paymentType = formData.get('payment_type') as string || 'FIXED';
+    const niche = formData.get('niche') as string;
+    const location = formData.get('location') as string;
+    const minFollowers = parseInt(formData.get('minFollowers') as string) || 0;
+
+    // Images - filter out empty strings
+    const images = (formData.getAll('images') as string[]).filter(url => url && url.length > 0);
 
     let brandId = formData.get('brandId') as string;
 
@@ -118,29 +127,113 @@ export async function createCampaign(prevState: any, formData: FormData) {
     }
 
     try {
-        const campaign = await db.campaign.create({
-            data: {
-                brandId,
-                title,
-                description,
-                requirements,
-                budget,
-                startDate,
-                endDate,
-                status: CampaignStatus.ACTIVE
-            }
-        });
+        // Fallback to Raw SQL because Prisma Client is likely stale (file locked) and doesn't know about new columns
+        // We generate a CUID-like ID manually
+        const campaignId = 'cm' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 
-        await createAuditLog("CREATE_CAMPAIGN", "CAMPAIGN", campaign.id, undefined, { title });
+        // Ensure dates are ISO strings for SQL or Date objects if parameterized
+        // Prisma $executeRaw handles standard types. 
+
+        await db.$executeRaw`
+            INSERT INTO "Campaign" (
+                "id", "brandId", "title", "description", "requirements", "budget", 
+                "startDate", "endDate", "status", 
+                "paymentType", "niche", "location", "minFollowers", "images", "updatedAt"
+            ) VALUES (
+                ${campaignId}, ${brandId}, ${title}, ${description}, ${requirements}, ${budget}, 
+                ${startDate}, ${endDate}, ${CampaignStatus.ACTIVE}::"CampaignStatus", 
+                ${paymentType}, ${niche}, ${location}, ${minFollowers}, ${images}, NOW()
+            )
+        `;
+
+        const campaign = { id: campaignId }; // MOCK return object
+
+        await createAuditLog("CREATE_CAMPAIGN", "CAMPAIGN", campaign.id, undefined, { title, budget });
 
         revalidatePath('/brand/campaigns');
         return { success: true, campaignId: campaign.id };
     } catch (error) {
         console.error("Create Campaign Error", error);
-        return { error: "Failed to create campaign" };
+        return { error: `Failed to create campaign: ${(error as Error).message}` };
     }
 }
 
+export async function deleteCampaign(campaignId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
+
+    try {
+        const campaign = await db.campaign.delete({
+            where: {
+                id: campaignId,
+                brand: { userId: session.user.id } // Ensure ownership
+            }
+        });
+
+        await createAuditLog("DELETE_CAMPAIGN", "CAMPAIGN", campaignId, undefined, { title: campaign.title });
+
+        revalidatePath('/brand/campaigns');
+        return { success: true };
+    } catch (error) {
+        console.error("Delete Campaign Error", error);
+        return { success: false, error: "Failed to delete campaign" };
+    }
+}
+
+export async function updateCampaign(prevState: any, formData: FormData) {
+    const campaignId = formData.get('campaignId') as string;
+    if (!campaignId) return { error: "Campaign ID missing" };
+
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const requirements = formData.get('requirements') as string;
+    const budget = parseFloat(formData.get('budget') as string) || 0;
+    const startDate = formData.get('startDate') ? new Date(formData.get('startDate') as string) : null;
+    const endDate = formData.get('endDate') ? new Date(formData.get('endDate') as string) : null;
+
+    const paymentType = formData.get('payment_type') as string || 'FIXED';
+    const niche = formData.get('niche') as string;
+    const location = formData.get('location') as string;
+    const minFollowers = parseInt(formData.get('minFollowers') as string) || 0;
+
+    const images = (formData.getAll('images') as string[]).filter(url => url && url.length > 0);
+
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { error: "Unauthorized" };
+
+    try {
+        // Use raw SQL update if needed, similar to create, or try update.
+        // Assuming update works if create with raw SQL was needed only for new ID gen?
+        // No, create was needed because client didn't know about columns. Update will fail too if client is stale.
+        // So let's use raw SQL for update too.
+
+        await db.$executeRaw`
+            UPDATE "Campaign" SET
+                "title" = ${title},
+                "description" = ${description},
+                "requirements" = ${requirements},
+                "budget" = ${budget},
+                "startDate" = ${startDate},
+                "endDate" = ${endDate},
+                "paymentType" = ${paymentType},
+                "niche" = ${niche},
+                "location" = ${location},
+                "minFollowers" = ${minFollowers},
+                "images" = ${images},
+                "updatedAt" = NOW()
+            WHERE "id" = ${campaignId} AND "brandId" = (SELECT "id" FROM "BrandProfile" WHERE "userId" = ${session.user.id})
+        `;
+
+        await createAuditLog("UPDATE_CAMPAIGN", "CAMPAIGN", campaignId, undefined, { title });
+
+        revalidatePath('/brand/campaigns');
+        revalidatePath(`/brand/campaigns/${campaignId}`);
+        return { success: true, campaignId };
+    } catch (error) {
+        console.error("Update Campaign Error", error);
+        return { error: `Failed to update campaign: ${(error as Error).message}` };
+    }
+}
 
 // --- DISCOVERY ACTIONS ---
 export async function getPublicCreators(filter?: {

@@ -63,6 +63,7 @@ export default function BrandLoginPage() {
                         fill
                         className="object-cover opacity-20 mix-blend-overlay"
                         priority
+                        sizes="(max-width: 1024px) 100vw, 50vw"
                     />
                     <div className="absolute inset-0 bg-blue-900/90 mix-blend-multiply" />
                 </div>

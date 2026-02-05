@@ -174,6 +174,15 @@ model Campaign {
   description String?
   requirements String?
   budget      Float?
+  
+  // Targeting & Details
+  niche       String?
+  minFollowers Int?      @default(0)
+  location    String?    // targetLocation
+  paymentType String?    @default("FIXED") // FIXED, NEGOTIABLE, GIFTING
+  
+  images      String[]   @default([])
+
   status      CampaignStatus @default(DRAFT)
   
   startDate   DateTime?

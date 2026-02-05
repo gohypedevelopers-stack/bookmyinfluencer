@@ -61,6 +61,54 @@ export async function sendVerificationApprovedEmail(email: string, creatorName: 
     }
 }
 
+export async function sendOtpEmail(email: string, otp: string) {
+    try {
+        await transporter.sendMail({
+            from: process.env.FROM_EMAIL,
+            to: email,
+            subject: 'Verify Your Email - BookMyInfluencer',
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                        .header h1 { color: white; margin: 0; font-size: 24px; }
+                        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; text-align: center; }
+                        .otp-code { font-size: 36px; font-weight: bold; color: #1f2937; letter-spacing: 8px; padding: 20px; background: #e5e7eb; border-radius: 8px; margin: 20px 0; }
+                        .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>📧 Email Verification</h1>
+                        </div>
+                        <div class="content">
+                            <h2>Your Verification Code</h2>
+                            <p>Use the following OTP to verify your email address:</p>
+                            <div class="otp-code">${otp}</div>
+                            <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+                            <p style="color: #666; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+                        </div>
+                        <div class="footer">
+                            <p>© 2026 BookMyInfluencer. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
+        });
+        console.log(`OTP email sent to ${email}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending OTP email:', error);
+        return { success: false, error: 'Failed to send OTP email' };
+    }
+}
+
 export async function sendVerificationRejectedEmail(email: string, creatorName: string, reason?: string) {
     try {
         await transporter.sendMail({

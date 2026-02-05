@@ -11,7 +11,9 @@ import {
     DollarSign,
     Users,
     TrendingUp,
-    Eye
+    Eye,
+    Edit,
+    Trash2
 } from 'lucide-react';
 
 interface Campaign {
@@ -22,6 +24,7 @@ interface Campaign {
     budget: number | null;
     startDate: string | Date | null;
     endDate: string | Date | null;
+    images: string[];
     createdAt: string | Date;
     _count: {
         candidates: number;
@@ -37,6 +40,12 @@ interface CampaignListClientProps {
 export default function CampaignListClient({ campaigns }: CampaignListClientProps) {
     const [selectedTab, setSelectedTab] = useState<'ALL' | 'ACTIVE' | 'PENDING' | 'COMPLETED'>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
+
+    async function handleDelete(id: string) {
+        const { deleteCampaign } = await import('@/app/brand/actions');
+        await deleteCampaign(id);
+        // Optimistic update handled by server revalidation
+    }
 
     // Mapping prisma status to UI tabs
     // ACTIVE -> Active
@@ -112,8 +121,8 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                 key={tab.id}
                                 onClick={() => setSelectedTab(tab.id as any)}
                                 className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedTab === tab.id
-                                        ? 'bg-blue-50 text-blue-700'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 {tab.label} <span className="ml-1 text-xs opacity-70">({tab.count})</span>
@@ -146,6 +155,7 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100 text-left">
+                                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Image</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Campaign Title</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Applicants</th>
@@ -158,6 +168,15 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                 {filteredCampaigns.length > 0 ? filteredCampaigns.map(campaign => (
                                     <tr key={campaign.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
+                                            <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
+                                                {campaign.images && campaign.images.length > 0 ? (
+                                                    <img src={campaign.images[0]} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-gray-400 text-[10px]">No Img</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <div className="font-bold text-gray-900">{campaign.title}</div>
                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                                 {/* Mock Niche/Platform if empty */}
@@ -167,9 +186,9 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                                    campaign.status === 'DRAFT' ? 'bg-gray-100 text-gray-700' :
-                                                        campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-yellow-100 text-yellow-800'
+                                                campaign.status === 'DRAFT' ? 'bg-gray-100 text-gray-700' :
+                                                    campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-yellow-100 text-yellow-800'
                                                 }`}>
                                                 {campaign.status === 'ACTIVE' && <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>}
                                                 {campaign.status === 'COMPLETED' && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>}
@@ -187,21 +206,42 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                             )}
                                         </td>
                                         <td className="px-6 py-4 font-mono text-sm text-gray-700">
-                                            {campaign.budget ? `$${campaign.budget.toLocaleString()}` : <span className="text-gray-400 italic">Not set</span>}
+                                            {campaign.budget ? `₹${campaign.budget.toLocaleString()}` : <span className="text-gray-400 italic">Not set</span>}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
                                             {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                {/* View Button */}
                                                 <Link
                                                     href={`/brand/campaigns/${campaign.id}`}
-                                                    className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-bold transition-colors"
+                                                    title="View Campaign"
+                                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors group"
                                                 >
-                                                    {campaign.status === 'DRAFT' ? 'Edit Brief' : 'View Applicants'}
+                                                    <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                                 </Link>
-                                                <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100">
-                                                    <MoreVertical className="w-4 h-4" />
+
+                                                {/* Edit Button */}
+                                                <Link
+                                                    href={`/brand/campaigns/${campaign.id}/edit`}
+                                                    title="Edit Campaign"
+                                                    className="p-2 text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors group"
+                                                >
+                                                    <Edit className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                </Link>
+
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm('Are you sure you want to delete this campaign?')) {
+                                                            handleDelete(campaign.id);
+                                                        }
+                                                    }}
+                                                    title="Delete Campaign"
+                                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                                                >
+                                                    <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                                 </button>
                                             </div>
                                         </td>

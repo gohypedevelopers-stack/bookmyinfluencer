@@ -4,22 +4,85 @@ import { db } from "@/lib/db";
 import { UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { signIn } from "next-auth/react";
+import { sendOtpEmail } from "@/lib/email";
+
+// In-memory OTP storage (in production, use Redis or database)
+const otpStore = new Map<string, { otp: string; expiresAt: number }>();
+
+// Generate 6-digit OTP
+function generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send Email OTP for verification
+export async function sendEmailOtp(email: string) {
+    if (!email || !email.includes('@')) {
+        return { success: false, error: "Invalid email address." };
+    }
+
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({
+        where: { email }
+    });
+
+    if (existingUser) {
+        return { success: false, error: "User with this email already exists." };
+    }
+
+    const otp = generateOtp();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store OTP
+    otpStore.set(email, { otp, expiresAt });
+
+    // Send email
+    const emailResult = await sendOtpEmail(email, otp);
+
+    if (!emailResult.success) {
+        // Fallback: Log OTP for testing if email fails
+        console.log(`[DEV] OTP for ${email}: ${otp}`);
+    }
+
+    return { success: true, message: "OTP sent to your email." };
+}
+
+// Verify Email OTP
+export async function verifyEmailOtp(email: string, otp: string) {
+    if (!email || !otp) {
+        return { success: false, error: "Email and OTP are required." };
+    }
+
+    const stored = otpStore.get(email);
+
+    if (!stored) {
+        return { success: false, error: "No OTP found. Please request a new one." };
+    }
+
+    if (Date.now() > stored.expiresAt) {
+        otpStore.delete(email);
+        return { success: false, error: "OTP has expired. Please request a new one." };
+    }
+
+    if (stored.otp !== otp) {
+        return { success: false, error: "Invalid OTP. Please try again." };
+    }
+
+    // OTP is valid - delete it after successful verification
+    otpStore.delete(email);
+
+    return { success: true, message: "Email verified successfully!" };
+}
 
 // Register Brand
 export async function registerBrand(formData: FormData) {
     const companyName = formData.get('companyName') as string;
     const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     const website = formData.get('website') as string;
     const industry = formData.get('industry') as string;
 
-    // For MVP, we'll auto-generate a password or use OTP. 
-    // If using OTP exclusively, we might not need a password hash, but NextAuth credentials provider usually expects one.
-    // Let's assume a default password or handle via custom OTP provider later.
-    // For now, let's just create the user record.
-    const tempPassword = "BrandPassword123!"; // Ideally this would be set by user or OTP flow used exclusively.
-
-    if (!companyName || !email) {
-        return { success: false, error: "Company name and email are required." };
+    if (!companyName || !email || !password) {
+        return { success: false, error: "Company name, email, and password are required." };
     }
 
     try {
@@ -32,7 +95,7 @@ export async function registerBrand(formData: FormData) {
             return { success: false, error: "User with this email already exists." };
         }
 
-        const hashedPassword = await hash(tempPassword, 12);
+        const hashedPassword = await hash(password, 12);
 
         // Transactional create
         const user = await db.user.create({

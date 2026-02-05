@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,16 +8,107 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Star, ShieldCheck, Building2, Box } from "lucide-react"
-import { registerBrand } from "@/app/brand/auth-actions"
+import { Star, ShieldCheck, Building2, Box, CheckCircle2, Loader2, Mail, Eye, EyeOff } from "lucide-react"
+import { registerBrand, sendEmailOtp, verifyEmailOtp } from "@/app/brand/auth-actions"
 
 export default function BrandRegisterPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
     const router = useRouter()
 
+    // OTP States
+    const [email, setEmail] = useState("")
+    const [otp, setOtp] = useState("")
+    const [otpSent, setOtpSent] = useState(false)
+    const [isVerified, setIsVerified] = useState(false)
+    const [isSendingOtp, setIsSendingOtp] = useState(false)
+    const [isVerifyingOtp, setIsVerifyingOtp] = useState(false)
+    const [otpError, setOtpError] = useState("")
+    const [otpSuccess, setOtpSuccess] = useState("")
+    const [timer, setTimer] = useState(0)
+
+    // Password States
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [passwordError, setPasswordError] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+
+    // Timer countdown
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1)
+            }, 1000)
+            return () => clearInterval(interval)
+        }
+    }, [timer])
+
+    // Reset verification when email changes
+    useEffect(() => {
+        if (otpSent || isVerified) {
+            setOtpSent(false)
+            setIsVerified(false)
+            setOtp("")
+            setOtpError("")
+            setOtpSuccess("")
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [email])
+
+    async function handleSendOtp() {
+        setIsSendingOtp(true)
+        setOtpError("")
+        setOtpSuccess("")
+
+        const res = await sendEmailOtp(email)
+
+        if (res.success) {
+            setOtpSent(true)
+            setOtpSuccess("OTP sent to your email!")
+            setTimer(60) // 60 second cooldown
+        } else {
+            setOtpError(res.error || "Failed to send OTP.")
+        }
+
+        setIsSendingOtp(false)
+    }
+
+    async function handleVerifyOtp() {
+        setIsVerifyingOtp(true)
+        setOtpError("")
+
+        const res = await verifyEmailOtp(email, otp)
+
+        if (res.success) {
+            setIsVerified(true)
+            setOtpSuccess("Email verified successfully!")
+        } else {
+            setOtpError(res.error || "Invalid OTP.")
+        }
+
+        setIsVerifyingOtp(false)
+    }
+
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
+
+        if (!isVerified) {
+            setError("Please verify your email before creating an account.")
+            return
+        }
+
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters long.")
+            return
+        }
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.")
+            return
+        }
+
         setIsLoading(true)
         setError("")
 
@@ -45,6 +136,7 @@ export default function BrandRegisterPage() {
                         fill
                         className="object-cover opacity-40 mix-blend-overlay"
                         priority
+                        sizes="(max-width: 1024px) 100vw, 50vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-gray-900/80" />
                 </div>
@@ -74,6 +166,7 @@ export default function BrandRegisterPage() {
                                     alt="User"
                                     fill
                                     className="object-cover"
+                                    sizes="48px"
                                 />
                             </div>
                             <div>
@@ -102,7 +195,7 @@ export default function BrandRegisterPage() {
             </div>
 
             {/* Right Panel - Registration Form */}
-            <div className="flex-1 flex items-center justify-center p-8 bg-white">
+            <div className="flex-1 flex items-center justify-center p-8 bg-white overflow-y-auto">
                 <div className="w-full max-w-md space-y-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Register your brand</h1>
@@ -118,9 +211,132 @@ export default function BrandRegisterPage() {
                                 <Input id="companyName" name="companyName" required placeholder="e.g. Acme Corp" className="h-12 bg-gray-50 border-gray-200" />
                             </div>
 
+                            {/* Email with OTP Verification */}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Business Email</Label>
-                                <Input id="email" name="email" required type="email" placeholder="name@company.com" className="h-12 bg-gray-50 border-gray-200" />
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <Input
+                                            id="email"
+                                            name="email"
+                                            required
+                                            type="email"
+                                            placeholder="name@company.com"
+                                            className={`h-12 bg-gray-50 border-gray-200 pr-10 ${isVerified ? 'border-green-500 bg-green-50' : ''}`}
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            disabled={isVerified}
+                                        />
+                                        {isVerified && (
+                                            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                                        )}
+                                    </div>
+                                    {!isVerified && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="h-12 px-4 whitespace-nowrap border-gray-300 hover:bg-gray-100"
+                                            onClick={handleSendOtp}
+                                            disabled={isSendingOtp || !email || timer > 0}
+                                        >
+                                            {isSendingOtp ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : timer > 0 ? (
+                                                `Resend (${timer}s)`
+                                            ) : otpSent ? (
+                                                "Resend"
+                                            ) : (
+                                                <>
+                                                    <Mail className="w-4 h-4 mr-1" />
+                                                    Verify
+                                                </>
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Hidden input to ensure email is submitted when verified/disabled */}
+                                {isVerified && <input type="hidden" name="email" value={email} />}
+
+                                {/* OTP Input - Shows after OTP is sent */}
+                                {otpSent && !isVerified && (
+                                    <div className="flex gap-2 mt-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="Enter 6-digit OTP"
+                                            maxLength={6}
+                                            className="h-10 bg-gray-50 border-gray-200 font-mono tracking-widest text-center"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                        />
+                                        <Button
+                                            type="button"
+                                            className="h-10 px-4 bg-gray-900 hover:bg-gray-800"
+                                            onClick={handleVerifyOtp}
+                                            disabled={isVerifyingOtp || otp.length !== 6}
+                                        >
+                                            {isVerifyingOtp ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                "Verify OTP"
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* OTP Messages */}
+                                {otpError && (
+                                    <p className="text-sm text-red-600 mt-1">{otpError}</p>
+                                )}
+                                {otpSuccess && !otpError && (
+                                    <p className="text-sm text-green-600 mt-1">{otpSuccess}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        placeholder="••••••••"
+                                        className="h-12 bg-gray-50 border-gray-200 pr-10"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        required
+                                        placeholder="••••••••"
+                                        className="h-12 bg-gray-50 border-gray-200 pr-10"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="space-y-2">
@@ -151,9 +367,21 @@ export default function BrandRegisterPage() {
                             </div>
                         )}
 
-                        <Button disabled={isLoading} className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-semibold text-lg">
+                        <Button
+                            disabled={isLoading || !isVerified}
+                            className={`w-full h-12 font-semibold text-lg transition-all ${isVerified
+                                ? 'bg-gray-900 hover:bg-gray-800 text-white'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                        >
                             {isLoading ? "Creating Account..." : "Create Account →"}
                         </Button>
+
+                        {!isVerified && (
+                            <p className="text-center text-sm text-gray-500">
+                                Please verify your email to continue
+                            </p>
+                        )}
 
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
