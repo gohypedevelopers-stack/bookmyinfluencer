@@ -30,6 +30,31 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 })
   }
 
+  // Development Bypass: Allow '123123' to verify instantly
+  if (process.env.NODE_ENV !== "production" && otp === "123123") {
+    const now = new Date()
+    await db.otpUser.update({
+      where: { id: user.id },
+      data: { verifiedAt: now },
+    })
+
+    // Cleanup any pending OTPs
+    await db.emailOtp.deleteMany({ where: { userId: user.id } })
+
+    const token = signSession(user.id)
+    const res = NextResponse.json({ ok: true })
+
+    res.cookies.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    })
+
+    return res
+  }
+
   const record = await db.emailOtp.findUnique({
     where: { userId: user.id },
     select: { otpHash: true, expiresAt: true, attempts: true },

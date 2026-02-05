@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
   typescript: {
     tsconfigPath: './tsconfig.json',
   },
-};
+  turbopack: {
+    root: process.cwd(),
+  }
+} as any;
 
 export default nextConfig;
