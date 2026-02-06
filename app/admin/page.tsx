@@ -29,7 +29,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="p-6 border-none shadow-sm bg-white">
                     <div className="text-sm font-medium text-gray-500 mb-1">Total Platform Revenue</div>
-                    <div className="text-3xl font-bold text-gray-900 mb-4">$428,500</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-4">₹428,500</div>
                     <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-2 py-0.5 rounded-md font-semibold text-xs">
                             +25.4%
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                                 ></div>
                                 {/* Tooltip */}
                                 <div className="hidden group-hover:block absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded shadow-lg whitespace-nowrap z-10 font-bold">
-                                    ${height * 1200}
+                                    ₹{height * 1200}
                                 </div>
                             </div>
                         ))}
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
                                     <Badge variant="secondary" className="bg-green-50 text-green-700 border-none font-bold text-[10px]">Escrow Release</Badge>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 font-mono text-xs">TXN-1122-094</td>
-                                <td className="px-6 py-4 text-gray-900 font-bold">$1,250.00</td>
+                                <td className="px-6 py-4 text-gray-900 font-bold">₹1,250.00</td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-green-600">
                                         <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
                                     <Badge variant="destructive" className="bg-red-50 text-red-700 hover:bg-red-50 border-none font-bold text-[10px]">Dispute Raised</Badge>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 font-mono text-xs">TXN-4491-332</td>
-                                <td className="px-6 py-4 text-gray-900 font-bold">$3,400.00</td>
+                                <td className="px-6 py-4 text-gray-900 font-bold">₹3,400.00</td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-red-600">
                                         <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
                                     <Badge variant="secondary" className="bg-slate-100 text-slate-700 border-none font-bold text-[10px]">Campaign Lch</Badge>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 font-mono text-xs">TXN-8821-001</td>
-                                <td className="px-6 py-4 text-gray-900 font-bold">$12,000.00</td>
+                                <td className="px-6 py-4 text-gray-900 font-bold">₹12,000.00</td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
                                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>

@@ -194,7 +194,7 @@ export default function DiscoveryClient({ influencers }: DiscoveryClientProps) {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <label className="text-sm font-bold text-gray-900">Price per Post</label>
-                                <span className="text-xs font-medium text-gray-600">$50 - $5k</span>
+                                <span className="text-xs font-medium text-gray-600">₹50 - ₹5k</span>
                             </div>
                             <input
                                 type="range"

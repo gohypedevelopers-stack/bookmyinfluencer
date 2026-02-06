@@ -15,7 +15,7 @@ const caseStudies = [
         results: {
             roi: "450%",
             reach: "2.5M",
-            sales: "$120k+"
+            sales: "₹120k+"
         },
         description: "How TechGizmo leveraged micro-influencers to drive pre-orders for their flagship X1 model.",
         testimonial: '"The ROI on this campaign was incredible. Book My Influencers made it easy to find the right tech enthusiasts."'
@@ -29,7 +29,7 @@ const caseStudies = [
         results: {
             roi: "320%",
             reach: "1.8M",
-            sales: "$85k+"
+            sales: "₹85k+"
         },
         description: "VogueVibe partnered with fashion lifestyle creators to showcase their eco-friendly summer line.",
         testimonial: '"Our brand awareness skyrocketed. The engagement rates were double what we get with traditional ads."'
@@ -43,7 +43,7 @@ const caseStudies = [
         results: {
             roi: "280%",
             reach: "3.2M",
-            sales: "$95k+"
+            sales: "₹95k+"
         },
         description: "A 30-day challenge campaign involving 15 fitness influencers promoting NutriLife supplements.",
         testimonial: '"Authentic content driven real conversions. We are definitely renewing for next quarter."'

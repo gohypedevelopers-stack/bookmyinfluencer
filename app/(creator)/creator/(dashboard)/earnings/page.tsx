@@ -22,9 +22,9 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export default function CreatorEarningsPage() {
     const transactions = [
-        { brand: "Urban Nomads", date: "Oct 24, 2024", amount: "+$2,500.00", status: "Completed" },
-        { brand: "Aura Tech", date: "Oct 20, 2024", amount: "+$1,800.00", status: "Processing" },
-        { brand: "Lumina Skincare", date: "Oct 15, 2024", amount: "+$3,200.00", status: "Completed" },
+        { brand: "Urban Nomads", date: "Oct 24, 2024", amount: "+₹2,500.00", status: "Completed" },
+        { brand: "Aura Tech", date: "Oct 20, 2024", amount: "+₹1,800.00", status: "Processing" },
+        { brand: "Lumina Skincare", date: "Oct 15, 2024", amount: "+₹3,200.00", status: "Completed" },
     ]
 
     return (
@@ -37,7 +37,7 @@ export default function CreatorEarningsPage() {
                         <Wallet className="w-4 h-4" />
                         Available to Withdraw
                     </div>
-                    <h1 className="text-5xl font-bold text-gray-900 mb-2">$12,450.80</h1>
+                    <h1 className="text-5xl font-bold text-gray-900 mb-2">₹12,450.80</h1>
                     <p className="text-gray-400 text-sm">Automatic transfer scheduled for Oct 24, 2024</p>
                 </div>
 
@@ -61,7 +61,7 @@ export default function CreatorEarningsPage() {
                     </div>
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">PENDING ESCROW</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-1">$4,200.00</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-1">₹4,200.00</h2>
                         <p className="text-gray-400 text-sm">Locked for 3 active campaigns</p>
                     </div>
                 </Card>
@@ -72,7 +72,7 @@ export default function CreatorEarningsPage() {
                     </div>
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">LIFETIME EARNINGS</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-1">$84,290.00</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-1">₹84,290.00</h2>
                         <p className="text-green-500 text-xs font-bold">+22% from last year</p>
                     </div>
                 </Card>
@@ -139,17 +139,17 @@ export default function CreatorEarningsPage() {
                     <div className="space-y-4 mb-6 pt-2 border-t border-gray-50">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Service Fee (2%)</span>
-                            <span className="font-bold text-gray-900">-$249.02</span>
+                            <span className="font-bold text-gray-900">-₹249.02</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Platform Tax</span>
-                            <span className="font-bold text-gray-900">-$150.00</span>
+                            <span className="font-bold text-gray-900">-₹150.00</span>
                         </div>
                     </div>
 
                     <div className="flex justify-between items-center pt-6 border-t border-gray-100">
                         <span className="font-bold text-gray-500 text-sm">Net Available</span>
-                        <span className="font-bold text-2xl text-gray-900">$12,051.78</span>
+                        <span className="font-bold text-2xl text-gray-900">₹12,051.78</span>
                     </div>
                 </Card>
             </div>

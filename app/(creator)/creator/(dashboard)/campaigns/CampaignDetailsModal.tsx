@@ -20,7 +20,8 @@ import {
     MapPin,
     Users,
     Calendar,
-    ArrowRight
+    ArrowRight,
+    ShieldCheck
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,9 +30,10 @@ interface CampaignDetailsModalProps {
     onClose: () => void;
     campaign: any;
     isVerified: boolean;
+    followerCount: number;
 }
 
-export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVerified }: CampaignDetailsModalProps) {
+export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVerified, followerCount }: CampaignDetailsModalProps) {
     const [isApplying, setIsApplying] = useState(false);
 
     if (!campaign) return null;
@@ -40,6 +42,13 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
         if (!isVerified) {
             toast.error("Verification Required", {
                 description: "You must complete your profile verification before applying."
+            });
+            return;
+        }
+
+        if (followerCount < 1000) {
+            toast.error("Eligibility Requirement", {
+                description: "You need at least 1000 followers to apply for campaigns."
             });
             return;
         }
@@ -74,7 +83,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 rounded-3xl border-0">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 rounded-3xl border-0 [&>button]:hidden">
                 <DialogTitle className="sr-only">
                     Campaign Details: {campaign.title}
                 </DialogTitle>
@@ -83,12 +92,21 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                 </DialogDescription>
                 <div className="relative">
                     {/* Header Image/Gradient */}
-                    <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 w-full relative overflow-hidden">
+                    <div className="h-32 w-full relative overflow-hidden bg-gray-900">
+                        {campaign.brand.user?.image ? (
+                            <img
+                                src={campaign.brand.user.image}
+                                alt="Cover"
+                                className="w-full h-full object-cover opacity-60 blur-sm scale-110"
+                            />
+                        ) : (
+                            <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                        )}
                         <div className="absolute inset-0 bg-black/10"></div>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute right-4 top-4 text-white hover:bg-white/20 rounded-full"
+                            className="absolute right-4 top-4 text-white hover:bg-white/20 rounded-full z-10"
                             onClick={onClose}
                         >
                             <X className="w-5 h-5" />
@@ -169,14 +187,25 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                             </div>
                         </div>
 
+                        {followerCount < 1000 && (
+                            <div className="mx-8 mb-4 p-2 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="bg-red-500/20 p-1.5 rounded-full animate-pulse">
+                                    <ShieldCheck className="w-4 h-4 text-red-600" />
+                                </div>
+                                <p className="text-red-600 font-bold text-center text-xs tracking-wide">
+                                    You are not Eligible. <span className="opacity-80 font-normal">( Complete your 1000 Follower )</span>
+                                </p>
+                            </div>
+                        )}
+
                         <div className="pt-4 flex justify-end gap-3">
                             <Button variant="outline" onClick={onClose} className="border-gray-200 font-bold rounded-xl h-12 px-6">
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleApply}
-                                disabled={isApplying || !isVerified}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-12 px-8 shadow-lg shadow-indigo-200"
+                                disabled={isApplying || !isVerified || followerCount < 1000}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-12 px-8 shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isApplying ? 'Sending Request...' : 'Request to Collab'}
                                 {!isApplying && <ArrowRight className="w-4 h-4 ml-2" />}

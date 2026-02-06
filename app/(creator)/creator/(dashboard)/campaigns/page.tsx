@@ -11,6 +11,7 @@ export default async function CreatorCampaignsPage() {
     let candidates = [] as any[]
     let activeCampaigns = [] as any[]
     let isVerified = false
+    let followerCount = 0
 
     if (creatorId) {
         const otpUser = await db.otpUser.findUnique({
@@ -53,6 +54,8 @@ export default async function CreatorCampaignsPage() {
                     },
                     orderBy: { updatedAt: 'desc' }
                 })
+
+                followerCount = legacyUser.influencerProfile.followers || 0
             }
         }
 
@@ -73,5 +76,5 @@ export default async function CreatorCampaignsPage() {
         })
     }
 
-    return <CreatorCampaignsClient candidates={candidates} activeCampaigns={activeCampaigns} isVerified={isVerified} />
+    return <CreatorCampaignsClient candidates={candidates} activeCampaigns={activeCampaigns} isVerified={isVerified} followerCount={followerCount} />
 }

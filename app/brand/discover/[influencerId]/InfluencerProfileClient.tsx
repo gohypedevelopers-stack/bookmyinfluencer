@@ -171,7 +171,7 @@ export default function InfluencerProfileClient({
                                             </div>
                                             <h3 className="text-lg font-bold text-gray-900 mb-1">Instagram Story</h3>
                                             <div className="flex items-baseline gap-1 mb-4">
-                                                <span className="text-3xl font-extrabold text-teal-600">${pricing.story || 500}</span>
+                                                <span className="text-3xl font-extrabold text-teal-600">₹{pricing.story || 500}</span>
                                                 <span className="text-gray-500 text-sm">/ set</span>
                                             </div>
                                             <button className="w-full py-2.5 rounded-lg border-2 border-gray-100 text-gray-900 font-bold text-sm hover:border-teal-600 hover:text-teal-600 transition-colors">
@@ -188,7 +188,7 @@ export default function InfluencerProfileClient({
                                             </div>
                                             <h3 className="text-lg font-bold text-gray-900 mb-1">Reel Production</h3>
                                             <div className="flex items-baseline gap-1 mb-4">
-                                                <span className="text-3xl font-extrabold text-teal-600">${pricing.reel || 1200}</span>
+                                                <span className="text-3xl font-extrabold text-teal-600">₹{pricing.reel || 1200}</span>
                                                 <span className="text-gray-500 text-sm">/ video</span>
                                             </div>
                                             <button className="w-full py-2.5 rounded-lg bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-colors shadow-md">

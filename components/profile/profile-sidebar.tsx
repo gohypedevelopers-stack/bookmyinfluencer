@@ -48,13 +48,13 @@ export function CreatorProfileSidebar() {
     return (
         <aside className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shrink-0">
             {/* Branding */}
-            <div className="p-8">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                        E
+            <div className="p-6">
+                <Link href="/creator/dashboard" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-purple-200 group-hover:scale-105 transition-transform">
+                        C
                     </div>
-                    <span className="text-xl font-bold text-gray-900">Elite Hub</span>
-                </div>
+                    <span className="font-bold text-xl text-gray-900 tracking-tight">Creator Hub</span>
+                </Link>
             </div>
 
             <div className="flex-1 px-4 py-4">

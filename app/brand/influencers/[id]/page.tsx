@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Instagram, MapPin, TrendingUp, Users, Eye, Heart, MessageCircle, Bookmark, Share2, CheckCircle2, Star, Calendar, Youtube, Link as LinkIcon, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Instagram, MapPin, TrendingUp, Users, Eye, Heart, MessageCircle, Bookmark, Share2, CheckCircle2, Star, Calendar, Youtube, Link as LinkIcon, Loader2, X, ShieldCheck } from 'lucide-react';
 import { getPublicCreatorById, getBrandCampaigns, inviteInfluencer } from '../../actions';
 
 export default function InfluencerProfile() {
@@ -87,9 +87,15 @@ export default function InfluencerProfile() {
                             <span className="font-semibold text-xs text-gray-500">Back to Discovery</span>
                         </div>
                         <div className="ml-auto flex items-center gap-3">
+                            <Link href={`/brand/checkout/${id}`}>
+                                <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-md hover:shadow-indigo-200">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Hire & Pay Escrow
+                                </button>
+                            </Link>
                             <button
                                 onClick={handleOpenInvite}
-                                className="px-5 py-2 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/30 transition-all"
+                                className="px-5 py-2 bg-white border-2 border-teal-600 text-teal-700 rounded-lg font-bold hover:bg-teal-50 transition-all"
                             >
                                 Request Collaboration
                             </button>
@@ -388,7 +394,7 @@ export default function InfluencerProfile() {
                                                     </ul>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-2xl font-bold text-gray-900">${item.price}</div>
+                                                    <div className="text-2xl font-bold text-gray-900">₹{item.price}</div>
                                                     <button className="mt-2 text-xs bg-gray-900 text-white px-3 py-1 rounded-md hover:bg-gray-700">
                                                         Book
                                                     </button>
@@ -429,14 +435,7 @@ export default function InfluencerProfile() {
                             </div>
                         </div>
 
-                        {/* Connect & Book */}
-                        <div className="bg-gradient-to-br from-teal-600 to-teal-500 rounded-xl shadow-md p-6 text-white">
-                            <h3 className="font-bold mb-2 text-xl">Connect TikTok</h3>
-                            <p className="text-teal-50 text-sm mb-4">Sync analytics to better performance</p>
-                            <button className="w-full py-3 bg-white text-teal-600 rounded-lg font-semibold hover:bg-teal-50 transition-all">
-                                CONNECT NOW
-                            </button>
-                        </div>
+
 
                         {/* Suggested */}
                         <div className="bg-white rounded-xl shadow-md p-6">

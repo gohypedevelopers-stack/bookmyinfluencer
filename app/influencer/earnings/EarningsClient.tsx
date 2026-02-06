@@ -133,7 +133,7 @@ export default function EarningsClient({ stats, jobs, influencerId }: EarningsCl
                                 </div>
                                 <div>
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Earned</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">${stats.earned.toLocaleString()}</p>
+                                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">₹{stats.earned.toLocaleString()}</p>
                                 </div>
                             </div>
 
@@ -146,7 +146,7 @@ export default function EarningsClient({ stats, jobs, influencerId }: EarningsCl
                                 </div>
                                 <div>
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Pending Escrow</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">${stats.pending.toLocaleString()}</p>
+                                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">₹{stats.pending.toLocaleString()}</p>
                                 </div>
                             </div>
 
@@ -161,7 +161,7 @@ export default function EarningsClient({ stats, jobs, influencerId }: EarningsCl
                                 </div>
                                 <div className="relative z-10">
                                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Available</p>
-                                    <p className="text-2xl font-bold text-teal-600 mt-1">${stats.available.toLocaleString()}</p>
+                                    <p className="text-2xl font-bold text-teal-600 mt-1">₹{stats.available.toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +238,7 @@ export default function EarningsClient({ stats, jobs, influencerId }: EarningsCl
                                                         {job.endDate ? new Date(job.endDate).toLocaleDateString() : 'TBD'}
                                                     </span>
                                                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                                    <span className="font-medium text-slate-700 dark:text-slate-300">${job.totalAmount}</span>
+                                                    <span className="font-medium text-slate-700 dark:text-slate-300">₹{job.totalAmount}</span>
                                                 </div>
                                             </div>
                                         </div>

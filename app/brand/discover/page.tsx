@@ -242,7 +242,7 @@ export default function InfluencerDiscovery() {
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-3">
                                             Price per Post
-                                            <span className="ml-2 text-teal-600 text-xs">${priceRange[0]} - ${priceRange[1] === 5000 ? '5k+' : priceRange[1]}</span>
+                                            <span className="ml-2 text-teal-600 text-xs">₹{priceRange[0]} - ₹{priceRange[1] === 5000 ? '5k+' : priceRange[1]}</span>
                                         </label>
                                         <div className="px-2">
                                             <Slider
@@ -255,8 +255,8 @@ export default function InfluencerDiscovery() {
                                                 className="py-4"
                                             />
                                             <div className="flex justify-between mt-2 text-xs text-gray-500">
-                                                <span>$50</span>
-                                                <span>$5k+</span>
+                                                <span>₹50</span>
+                                                <span>₹5k+</span>
                                             </div>
                                         </div>
                                     </div>

@@ -130,7 +130,7 @@ export default async function CreatorDashboardPage({
             </div>
             <p className="text-sm text-gray-500 font-medium mb-1">Total Revenue</p>
             <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-gray-900">$24,850.00</h3>
+              <h3 className="text-3xl font-bold text-gray-900">₹24,850.00</h3>
               <span className="text-sm font-bold text-green-600 mb-1">+12.5%</span>
             </div>
           </Card>

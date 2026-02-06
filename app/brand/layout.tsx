@@ -2,6 +2,7 @@ import { BrandTopNav } from "@/components/brand/brand-top-nav"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { BrandSessionProvider } from "@/components/brand/brand-session-provider"
 
 export default async function BrandLayout({
     children,
@@ -35,21 +36,23 @@ export default async function BrandLayout({
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <BrandTopNav />
-            <main>
-                {children}
-            </main>
-            <footer className="border-t border-gray-200 bg-white py-6 mt-12">
-                <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-                    <span>© 2024 InfluencerCRM. All rights reserved.</span>
-                    <div className="flex items-center gap-6">
-                        <a href="#" className="hover:text-gray-700">Help Center</a>
-                        <a href="#" className="hover:text-gray-700">Privacy Policy</a>
-                        <a href="#" className="hover:text-gray-700">Terms of Service</a>
+        <BrandSessionProvider session={session}>
+            <div className="min-h-screen bg-gray-50">
+                <BrandTopNav />
+                <main>
+                    {children}
+                </main>
+                <footer className="border-t border-gray-200 bg-white py-6 mt-12">
+                    <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+                        <span>© 2024 BrandCRM. All rights reserved.</span>
+                        <div className="flex items-center gap-6">
+                            <a href="#" className="hover:text-gray-700">Help Center</a>
+                            <a href="#" className="hover:text-gray-700">Privacy Policy</a>
+                            <a href="#" className="hover:text-gray-700">Terms of Service</a>
+                        </div>
                     </div>
-                </div>
-            </footer>
-        </div>
+                </footer>
+            </div>
+        </BrandSessionProvider>
     )
 }

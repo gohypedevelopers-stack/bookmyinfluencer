@@ -278,7 +278,7 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                         <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Total Active Spend</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">${totalActiveSpend.toLocaleString()}</div>
+                        <div className="text-3xl font-bold text-gray-900 mb-2">₹{totalActiveSpend.toLocaleString()}</div>
                         <div className="flex items-center text-xs font-medium text-green-600">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             12.5% vs last month

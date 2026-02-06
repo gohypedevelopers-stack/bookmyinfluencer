@@ -11,7 +11,8 @@ import {
     Smile,
     Send,
     CheckCircle2,
-    Loader2
+    Loader2,
+    MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,6 +41,10 @@ interface Message {
     isMe: boolean
 }
 
+import { io } from "socket.io-client"
+
+// ... imports
+
 export default function CreatorMessagesPage() {
     const { data: session } = useSession()
     const [threads, setThreads] = useState<Thread[]>([])
@@ -50,6 +55,7 @@ export default function CreatorMessagesPage() {
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [isSending, setIsSending] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
+    const socketRef = useRef<any>(null)
 
     // Fetch threads on mount
     useEffect(() => {
@@ -70,7 +76,7 @@ export default function CreatorMessagesPage() {
         }
     }
 
-    // Fetch messages when active thread changes
+    // Fetch messages when active thread changes & Real-time via Socket
     useEffect(() => {
         if (!activeThreadId) return
 
@@ -84,14 +90,30 @@ export default function CreatorMessagesPage() {
 
         fetchMessages()
 
-        // Poll for new messages
-        const interval = setInterval(async () => {
-            const data = await getThreadMessages(activeThreadId)
-            setMessages(data as Message[]) // Simple replace for now, could be optimized
-        }, 5000)
+        // Socket.io Connection
+        socketRef.current = io()
+        socketRef.current.emit("join_room", activeThreadId)
 
-        return () => clearInterval(interval)
-    }, [activeThreadId])
+        socketRef.current.on("receive_message", (data: any) => {
+            // Avoid duplicating if we just sent it (though senderId check handles this usually)
+            if (data.senderId !== session?.user?.id) {
+                setMessages((prev) => [...prev, {
+                    id: data.id || Math.random().toString(),
+                    content: data.message,
+                    senderId: data.senderId,
+                    senderName: "Brand", // Simplified
+                    senderImage: null,
+                    createdAt: new Date(),
+                    isMe: false
+                }])
+                setTimeout(scrollToBottom, 100)
+            }
+        })
+
+        return () => {
+            socketRef.current.disconnect()
+        }
+    }, [activeThreadId, session?.user?.id])
 
     const scrollToBottom = () => {
         if (scrollRef.current) {
@@ -99,42 +121,44 @@ export default function CreatorMessagesPage() {
         }
     }
 
-    const handleSendMessage = async () => {
-        if (!activeThreadId || !newMessage.trim()) return
+    async function handleSendMessage() {
+        if (!newMessage.trim() || !activeThreadId) return
 
-        setIsSending(true)
-        // Optimistic update
-        const tempMsg: Message = {
-            id: 'temp-' + Date.now(),
+        const tempId = Math.random().toString()
+        const messagePayload = {
+            id: tempId,
             content: newMessage,
-            senderId: session?.user?.id || 'me',
-            senderName: 'Me',
+            senderId: session?.user?.id || '',
+            senderName: session?.user?.name || 'Me',
             senderImage: session?.user?.image || null,
             createdAt: new Date(),
             isMe: true
         }
-        setMessages(prev => [...prev, tempMsg])
-        const messageToSend = newMessage
-        setNewMessage("")
-        scrollToBottom()
 
+        // Optimistic UI
+        setMessages((prev) => [...prev, messagePayload])
+        setNewMessage("")
+        setTimeout(scrollToBottom, 100)
+
+        // Emit to Socket
+        if (socketRef.current) {
+            socketRef.current.emit("send_message", {
+                room: activeThreadId,
+                message: messagePayload.content,
+                senderId: messagePayload.senderId
+            })
+        }
+
+        // Persist to DB
         try {
-            const result = await sendMessage(activeThreadId, messageToSend)
-            if (result.success) {
-                // Refresh messages to get real ID
-                const data = await getThreadMessages(activeThreadId)
-                setMessages(data as Message[])
-            } else {
-                toast.error("Failed to send")
-                // Remove temp message
-                setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
-            }
+            await sendMessage(activeThreadId, newMessage)
         } catch (error) {
-            toast.error("Error sending message")
-        } finally {
-            setIsSending(false)
+            toast.error("Failed to send message")
+            // Here you might want to remove the optimistic message on failure
         }
     }
+
+
 
     const activeThread = threads.find(t => t.id === activeThreadId)
 
@@ -280,8 +304,8 @@ export default function CreatorMessagesPage() {
                                                     <span className={`text-sm font-bold ${msg.isMe ? 'text-gray-500' : 'text-gray-900'}`}>{msg.senderName}</span>
                                                 </div>
                                                 <div className={`p-5 rounded-2xl shadow-sm leading-relaxed ${msg.isMe
-                                                        ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
-                                                        : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
+                                                    ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
+                                                    : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
                                                     }`}>
                                                     {msg.content}
                                                 </div>

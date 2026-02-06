@@ -19,14 +19,19 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import CampaignDetailsModal from './CampaignDetailsModal';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CreatorCampaignsClientProps {
     candidates: any[];
     activeCampaigns: any[];
     isVerified: boolean;
+    followerCount: number;
 }
 
-export default function CreatorCampaignsClient({ candidates, activeCampaigns, isVerified }: CreatorCampaignsClientProps) {
+export default function CreatorCampaignsClient({ candidates, activeCampaigns, isVerified, followerCount }: CreatorCampaignsClientProps) {
     // Default to DISCOVER if no personal campaigns, otherwise ONGOING
     const [selectedTab, setSelectedTab] = useState<'ONGOING' | 'INVITATIONS' | 'COMPLETED' | 'DISCOVER'>(
         candidates.length > 0 ? 'ONGOING' : 'DISCOVER'
@@ -34,6 +39,13 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Filter State
+    const [filters, setFilters] = useState({
+        minBudget: '',
+        niche: 'ALL',
+        paymentType: 'ALL'
+    });
 
     const handleViewDetails = (campaign: any) => {
         setSelectedCampaign(campaign);
@@ -82,13 +94,34 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
 
     const displayData = getDisplayData();
     const filteredData = displayData.filter(item => {
-        if (selectedTab === 'DISCOVER') {
-            return item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.brand.companyName.toLowerCase().includes(searchQuery.toLowerCase());
-        }
-        return item.campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.campaign.brand.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+        // Normalize campaign object
+        const campaign = selectedTab === 'DISCOVER' ? item : item.campaign;
+
+        // Search Filter
+        const searchTarget = selectedTab === 'DISCOVER' ? item : item.campaign;
+        const searchMatch = searchTarget.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            searchTarget.brand.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // Budget Filter
+        const budgetVal = Number(filters.minBudget);
+        const budgetMatch = !filters.minBudget || (campaign.budget && campaign.budget >= budgetVal);
+
+        // Niche Filter
+        const nicheMatch = filters.niche === 'ALL' || (campaign.niche && campaign.niche.toLowerCase().includes(filters.niche.toLowerCase()));
+
+        // Payment Type Filter
+        const typeMatch = filters.paymentType === 'ALL' || (campaign.paymentType && campaign.paymentType === filters.paymentType);
+
+        return searchMatch && budgetMatch && nicheMatch && typeMatch;
     });
+
+    const resetFilters = () => {
+        setFilters({
+            minBudget: '',
+            niche: 'ALL',
+            paymentType: 'ALL'
+        });
+    };
 
     return (
         <div className="h-full overflow-y-auto p-6 md:p-8 bg-gray-50/50">
@@ -109,10 +142,74 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white shadow-sm transition-all"
                         />
                     </div>
-                    <Button variant="outline" className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 gap-2 h-11 px-5 rounded-xl font-semibold transition-all shadow-sm">
-                        <Filter className="w-4 h-4" />
-                        Filter
-                    </Button>
+
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className={`bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 gap-2 h-11 px-5 rounded-xl font-semibold transition-all shadow-sm ${filters.minBudget || filters.niche !== 'ALL' || filters.paymentType !== 'ALL' ? 'border-indigo-500 text-indigo-600 ring-2 ring-indigo-100' : ''}`}>
+                                <Filter className="w-4 h-4" />
+                                Filter
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-5 rounded-2xl shadow-xl border-gray-100" align="end">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-bold text-gray-900">Filters</h4>
+                                    <button onClick={resetFilters} className="text-xs text-indigo-600 font-bold hover:underline">
+                                        Reset
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-gray-500 uppercase">Min Budget (₹)</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="e.g. 5000"
+                                        value={filters.minBudget}
+                                        onChange={(e) => setFilters({ ...filters, minBudget: e.target.value })}
+                                        className="h-9 rounded-lg"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-gray-500 uppercase">Niche</Label>
+                                    <Select
+                                        value={filters.niche}
+                                        onValueChange={(val) => setFilters({ ...filters, niche: val })}
+                                    >
+                                        <SelectTrigger className="h-9 rounded-lg">
+                                            <SelectValue placeholder="Select Niche" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ALL">All Niches</SelectItem>
+                                            <SelectItem value="tech">Tech & Gaming</SelectItem>
+                                            <SelectItem value="fashion">Fashion & Style</SelectItem>
+                                            <SelectItem value="beauty">Beauty & Makeup</SelectItem>
+                                            <SelectItem value="travel">Travel & Lifestyle</SelectItem>
+                                            <SelectItem value="education">Education & Career</SelectItem>
+                                            <SelectItem value="fitness">Health & Fitness</SelectItem>
+                                            <SelectItem value="business">Business & Finance</SelectItem>
+                                            <SelectItem value="food">Food & Cooking</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-gray-500 uppercase">Payment Type</Label>
+                                    <Select
+                                        value={filters.paymentType}
+                                        onValueChange={(val) => setFilters({ ...filters, paymentType: val })}
+                                    >
+                                        <SelectTrigger className="h-9 rounded-lg">
+                                            <SelectValue placeholder="Select Type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ALL">All Types</SelectItem>
+                                            <SelectItem value="FIXED">Fixed Price</SelectItem>
+                                            <SelectItem value="NEGOTIABLE">Negotiable</SelectItem>
+                                            <SelectItem value="BARTER">Barter / Gift</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </div>
 
@@ -154,20 +251,30 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                     filteredData.length > 0 ? (
                         filteredData.map((campaign: any) => (
                             <Card key={campaign.id} className="rounded-3xl border-gray-100 shadow-sm p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col relative overflow-hidden">
-                                {!isVerified && (
+                                {!isVerified || followerCount < 1000 ? (
                                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-6">
                                         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                                             <ShieldCheck className="w-6 h-6 text-gray-400" />
                                         </div>
                                         <h3 className="font-bold text-gray-900 mb-1">Check Eligibility</h3>
-                                        <p className="text-xs text-gray-500 mb-4">Complete your profile verification to access this campaign.</p>
-                                        <Link href="/creator/profile">
-                                            <Button size="sm" className="rounded-xl font-bold bg-gray-900 text-white hover:bg-black">
-                                                Update Profile
-                                            </Button>
-                                        </Link>
+                                        <p className={`text-xs mb-4 ${!isVerified ? 'text-gray-500' : 'text-red-600 font-bold'}`}>
+                                            {!isVerified
+                                                ? "Complete your profile verification to access this campaign."
+                                                : "You need 1000+ followers to be eligible for collaboration."
+                                            }
+                                        </p>
+                                        <Button
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleViewDetails(campaign);
+                                            }}
+                                            className="rounded-xl font-bold bg-gray-900 text-white hover:bg-black"
+                                        >
+                                            See Campaigns
+                                        </Button>
                                     </div>
-                                )}
+                                ) : null}
 
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="w-14 h-14 bg-gray-900 rounded-2xl flex items-center justify-center text-white text-sm font-bold shadow-md group-hover:shadow-lg transition-shadow flex-shrink-0">
@@ -391,6 +498,7 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                 onClose={handleCloseModal}
                 campaign={selectedCampaign}
                 isVerified={isVerified}
+                followerCount={followerCount}
             />
         </div>
     )

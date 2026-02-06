@@ -96,7 +96,7 @@ export default function LandingPage() {
 
                         {/* Floating stats */}
                         <div className="absolute -top-6 -right-6 bg-white rounded-xl shadow-xl p-4 animate-bounce-slow">
-                            <div className="text-2xl font-bold text-teal-600">$2.5M+</div>
+                            <div className="text-2xl font-bold text-teal-600">₹2.5M+</div>
                             <div className="text-sm text-gray-600">Paid to creators</div>
                         </div>
                     </div>

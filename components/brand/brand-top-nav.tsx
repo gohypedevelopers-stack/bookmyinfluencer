@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import {
     LayoutDashboard,
@@ -13,12 +14,26 @@ import {
     Search,
     Settings,
     MessageSquare,
+    LogOut,
+    User,
+    ChevronDown
 } from "lucide-react"
 import { NotificationPopover } from "./NotificationPopover"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { signOut } from "next-auth/react"
 
 export function BrandTopNav() {
     const pathname = usePathname()
     const { data: session } = useSession()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const navItems = [
         { name: "Dashboard", href: "/brand", icon: LayoutDashboard },
@@ -35,9 +50,9 @@ export function BrandTopNav() {
                 <div className="flex items-center gap-10">
                     <Link href="/brand" className="flex items-center gap-2.5 shrink-0">
                         <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-base shadow-sm">
-                            I
+                            B
                         </div>
-                        <span className="text-lg font-bold text-gray-900">InfluencerCRM</span>
+                        <span className="text-lg font-bold text-gray-900">BrandCRM</span>
                     </Link>
 
                     <nav className="hidden lg:flex items-center gap-1">
@@ -71,25 +86,55 @@ export function BrandTopNav() {
                         />
                     </div>
 
-                    <NotificationPopover />
+                    {mounted && (
+                        <>
+                            <NotificationPopover />
 
-                    <Link href="/brand/settings" className="w-10 h-10 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors">
-                        <Settings className="w-5 h-5" />
-                    </Link>
+                            <Link href="/brand/settings" className="w-10 h-10 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors">
+                                <Settings className="w-5 h-5" />
+                            </Link>
 
-                    <Link href="/brand/settings" className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold border-2 border-white shadow-md">
-                        {session?.user?.image ? (
-                            <Image
-                                src={session.user.image}
-                                alt={session.user.name || "User"}
-                                width={40}
-                                height={40}
-                                className="object-cover"
-                            />
-                        ) : (
-                            <span>{session?.user?.name?.[0] || "B"}</span>
-                        )}
-                    </Link>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <button className="flex items-center gap-2 outline-none group">
+                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold border-2 border-white shadow-md transition-transform group-hover:scale-105">
+                                            {session?.user?.image ? (
+                                                <Image
+                                                    src={session.user.image}
+                                                    alt={session.user.name || "User"}
+                                                    width={40}
+                                                    height={40}
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <span>{session?.user?.name?.[0] || "B"}</span>
+                                            )}
+                                        </div>
+                                    </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-56 p-2" align="end">
+                                    <div className="px-2 py-1.5 mb-1 border-b border-gray-100">
+                                        <p className="text-sm font-semibold text-gray-900">{session?.user?.name || "Brand User"}</p>
+                                        <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Link href="/brand/settings" className="flex items-center gap-2 px-2 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                                            <User className="w-4 h-4 text-gray-500" />
+                                            Account Settings
+                                        </Link>
+                                        <button
+                                            onClick={() => signOut({ callbackUrl: '/' })}
+                                            className="w-full flex items-center gap-2 px-2 py-2 text-sm text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                                        >
+                                            <LogOut className="w-4 h-4" />
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        </>
+                    )}
                 </div>
             </div>
         </header>

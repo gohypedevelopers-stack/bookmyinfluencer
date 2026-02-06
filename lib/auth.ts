@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs"
 import { UserRole, KYCStatus } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
+    debug: process.env.NODE_ENV === 'development',
     session: {
         strategy: "jwt",
     },
@@ -20,24 +22,33 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
+                    console.log('❌ Missing credentials')
                     return null
                 }
 
+                console.log('🔐 Login attempt for:', credentials.email);
+
                 try {
                     const user = await db.user.findUnique({
-                        where: { email: credentials.email },
+                        where: { email: credentials.email.trim().toLowerCase() },
                         include: { influencerProfile: { select: { kyc: true } } }
                     })
 
                     if (!user || !user.passwordHash) {
+                        console.log('❌ User not found or no password hash')
                         return null
                     }
+
+                    console.log('✅ User found:', user.email, '- Role:', user.role)
 
                     const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
 
                     if (!isValid) {
+                        console.log('❌ Password mismatch')
                         return null
                     }
+
+                    console.log('✅ Login successful!')
 
                     return {
                         id: user.id,
