@@ -1,6 +1,6 @@
 
 import { db } from "@/lib/db";
-import DiscoveryClient from "./DiscoveryClient";
+import DiscoveryClient from "../DiscoveryClient";
 export const dynamic = "force-dynamic";
 
 export default async function AdvancedDiscoveryPage({
