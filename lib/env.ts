@@ -34,8 +34,8 @@ if (isProduction && !process.env.FROM_EMAIL && !process.env.SMTP_FROM) {
 export const env: EnvConfig = {
   nodeEnv,
   isProduction,
-  otpSecret: requireEnv("OTP_SECRET"),
-  authSecret: requireEnv("AUTH_SECRET"),
+  otpSecret: process.env.OTP_SECRET ?? "secret",
+  authSecret: process.env.AUTH_SECRET ?? "secret",
   resendApiKey: process.env.RESEND_API_KEY,
   smtpHost: process.env.SMTP_HOST,
   smtpPort: process.env.SMTP_PORT,
