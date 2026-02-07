@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle2, Lock, ShieldCheck, Smartphone, Eye, EyeOff } from "lucide-react"
 
-export default function BrandLoginPage() {
+function BrandLoginForm() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
@@ -52,6 +52,73 @@ export default function BrandLoginPage() {
         }
     }
 
+    return (
+        <>
+            {searchParams.get('registered') && (
+                <p className="text-green-600 font-medium mt-2">
+                    Account created successfully! Please sign in.
+                </p>
+            )}
+            <form className="space-y-8" onSubmit={handleLogin}>
+                <div className="space-y-4">
+                    <Label htmlFor="email">BUSINESS EMAIL</Label>
+                    <div className="relative">
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@company.com"
+                            className="h-12 bg-gray-50 border-gray-200"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <Label htmlFor="password">PASSWORD</Label>
+                        <span className="text-xs text-blue-600 font-bold cursor-pointer hover:underline">Forgot password?</span>
+                    </div>
+                    <div className="relative">
+                        <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder=""
+                            className="h-12 bg-gray-50 border-gray-200 pr-10"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            {showPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                            ) : (
+                                <Eye className="w-5 h-5" />
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
+                        {error}
+                    </div>
+                )}
+
+                <Button disabled={isLoading} className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-200 mt-4">
+                    {isLoading ? "Signing in..." : "Sign In to Dashboard "}
+                </Button>
+            </form>
+        </>
+    )
+}
+
+export default function BrandLoginPage() {
     return (
         <div className="min-h-screen w-full flex">
             {/* Left Panel - Value Props */}
@@ -101,7 +168,7 @@ export default function BrandLoginPage() {
                     </div>
 
                     <div className="mt-20 text-sm text-white/40">
-                        © 2024 InfluencerCRM. All rights reserved.
+                         2024 InfluencerCRM. All rights reserved.
                     </div>
                 </div>
             </div>
@@ -114,68 +181,11 @@ export default function BrandLoginPage() {
                         <p className="text-gray-600">
                             Welcome back. Enter your credentials to access your account.
                         </p>
-                        {searchParams.get('registered') && (
-                            <p className="text-green-600 font-medium mt-2">
-                                Account created successfully! Please sign in.
-                            </p>
-                        )}
                     </div>
 
-                    <form className="space-y-8" onSubmit={handleLogin}>
-                        <div className="space-y-4">
-                            <Label htmlFor="email">BUSINESS EMAIL</Label>
-                            <div className="relative">
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="name@company.com"
-                                    className="h-12 bg-gray-50 border-gray-200"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="password">PASSWORD</Label>
-                                <span className="text-xs text-blue-600 font-bold cursor-pointer hover:underline">Forgot password?</span>
-                            </div>
-                            <div className="relative">
-                                <Input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="••••••••"
-                                    className="h-12 bg-gray-50 border-gray-200 pr-10"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="w-5 h-5" />
-                                    ) : (
-                                        <Eye className="w-5 h-5" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {error && (
-                            <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
-                                {error}
-                            </div>
-                        )}
-
-                        <Button disabled={isLoading} className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-200 mt-4">
-                            {isLoading ? "Signing in..." : "Sign In to Dashboard →"}
-                        </Button>
-                    </form>
+                    <Suspense fallback={<div className="text-gray-500">Loading...</div>}>
+                        <BrandLoginForm />
+                    </Suspense>
 
                     <div className="text-center pt-4">
                         <p className="text-gray-600 text-sm">

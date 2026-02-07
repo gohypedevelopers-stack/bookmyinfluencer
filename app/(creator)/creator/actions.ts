@@ -247,14 +247,12 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
 
             if (!thread) {
                 const brandUserId = candidate.campaign.brand.userId;
-                // @ts-ignore - Prisma types are outdated, schema doesn't have initiatedBy field
                 thread = await db.chatThread.create({
                     data: {
                         candidate: {
                             connect: { id: candidateId }
                         },
-                        participants: `${brandUserId},${userId}`,
-                        initiatedBy: userId // Required by database NOT NULL constraint
+                        participants: `${brandUserId},${userId}`
                     }
                 });
             }

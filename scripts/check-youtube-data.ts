@@ -8,7 +8,7 @@ async function main() {
         include: {
             metrics: {
                 where: { provider: "youtube" },
-                orderBy: { createdAt: 'desc' },
+                orderBy: { fetchedAt: 'desc' },
                 take: 1
             }
         }
