@@ -54,6 +54,8 @@ export default function CreatorMessagesPage() {
     const [isLoadingThreads, setIsLoadingThreads] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [isSending, setIsSending] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [isEditMode, setIsEditMode] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
     const socketRef = useRef<any>(null)
 
@@ -158,6 +160,33 @@ export default function CreatorMessagesPage() {
         }
     }
 
+    // Delete conversation handler
+    async function handleDeleteConversation(threadId: string) {
+        try {
+            // Optimistically remove from UI
+            setThreads(prev => prev.filter(t => t.id !== threadId))
+
+            // If deleted thread was active, clear selection
+            if (activeThreadId === threadId) {
+                setActiveThreadId(null)
+                setMessages([])
+            }
+
+            toast.success("Conversation deleted")
+            // TODO: Add actual API call to delete conversation from database
+            // await deleteThread(threadId)
+        } catch (error) {
+            toast.error("Failed to delete conversation")
+            // Revert on error
+            fetchThreads()
+        }
+    }
+
+    // Filter threads based on search query
+    const filteredThreads = threads.filter(thread =>
+        thread.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
 
 
     const activeThread = threads.find(t => t.id === activeThreadId)
@@ -169,8 +198,18 @@ export default function CreatorMessagesPage() {
                 <div className="p-6 border-b border-gray-100">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">Messages</h2>
-                        <button className="text-gray-400 hover:text-gray-600">
-                            <PenSquare className="w-5 h-5" />
+                        <button
+                            onClick={() => setIsEditMode(!isEditMode)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
+                                    ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                }`}
+                        >
+                            {isEditMode ? (
+                                <span>Cancel</span>
+                            ) : (
+                                <PenSquare className="w-5 h-5" />
+                            )}
                         </button>
                     </div>
                     <div className="relative">
@@ -178,6 +217,8 @@ export default function CreatorMessagesPage() {
                         <Input
                             placeholder="Search brands..."
                             className="pl-9 bg-gray-50 border-gray-100 rounded-xl focus:bg-white transition-all"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                 </div>
@@ -188,19 +229,19 @@ export default function CreatorMessagesPage() {
                             <div className="flex justify-center py-10">
                                 <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                             </div>
-                        ) : threads.length === 0 ? (
+                        ) : filteredThreads.length === 0 ? (
                             <div className="text-center py-10 text-gray-500">
-                                No conversations yet.
+                                {searchQuery ? 'No conversations found.' : 'No conversations yet.'}
                             </div>
                         ) : (
-                            threads.map((conv) => (
+                            filteredThreads.map((conv) => (
                                 <div
                                     key={conv.id}
-                                    onClick={() => setActiveThreadId(conv.id)}
-                                    className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all relative ${activeThreadId === conv.id
+                                    className={`flex items-start gap-4 p-4 rounded-xl transition-all relative ${activeThreadId === conv.id
                                         ? 'bg-purple-50 border border-purple-100 shadow-sm'
                                         : 'hover:bg-gray-50 border border-transparent'
-                                        }`}
+                                        } ${isEditMode ? '' : 'cursor-pointer'}`}
+                                    onClick={() => !isEditMode && setActiveThreadId(conv.id)}
                                 >
                                     {activeThreadId === conv.id && (
                                         <div className="absolute left-0 top-6 bottom-6 w-1 bg-purple-600 rounded-r-lg"></div>
@@ -221,9 +262,18 @@ export default function CreatorMessagesPage() {
                                     <div className="min-w-0 flex-1">
                                         <div className="flex justify-between items-baseline mb-1">
                                             <h3 className="font-bold text-gray-900 truncate pr-2">{conv.name}</h3>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide shrink-0">
-                                                {new Date(conv.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                            </span>
+                                            {isEditMode ? (
+                                                <button
+                                                    onClick={() => handleDeleteConversation(conv.id)}
+                                                    className="px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded transition-colors shrink-0"
+                                                >
+                                                    Delete
+                                                </button>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide shrink-0">
+                                                    {new Date(conv.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                </span>
+                                            )}
                                         </div>
                                         <p className={`text-sm truncate ${activeThreadId === conv.id ? 'text-gray-600 font-medium' : 'text-gray-400'}`}>
                                             {conv.lastMessage}

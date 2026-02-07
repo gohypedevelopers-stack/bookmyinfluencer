@@ -194,3 +194,120 @@ export async function sendMessage(threadId: string, content: string) {
         return { success: false, error: "Failed to send" };
     }
 }
+
+// --- INVITATION RESPONSE ---
+
+export async function respondToInvitation(candidateId: string, action: 'ACCEPT' | 'DECLINE') {
+    const userId = await getCreatorId();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        // Verify the candidate exists and belongs to this creator
+        const candidate = await db.campaignCandidate.findUnique({
+            where: { id: candidateId },
+            include: {
+                campaign: {
+                    include: {
+                        brand: {
+                            include: { user: true }
+                        }
+                    }
+                },
+                influencer: {
+                    include: { user: true }
+                }
+            }
+        });
+
+        if (!candidate) {
+            return { success: false, error: "Invitation not found" };
+        }
+
+        // Check ownership - verify this invitation belongs to the current user
+        // The influencer.userId might be from different auth systems, so we check multiple ways
+        const session = await getServerSession(authOptions);
+        const isOwner = candidate.influencer.userId === userId ||
+            candidate.influencer.user?.email === session?.user?.email;
+
+        if (!isOwner) {
+            return { success: false, error: "Unauthorized - This invitation doesn't belong to you" };
+        }
+
+        if (action === 'ACCEPT') {
+            // 1. Update candidate status to IN_NEGOTIATION
+            await db.campaignCandidate.update({
+                where: { id: candidateId },
+                data: { status: 'IN_NEGOTIATION' }
+            });
+
+            // 2. Create or get chat thread
+            let thread = await db.chatThread.findUnique({
+                where: { candidateId }
+            });
+
+            if (!thread) {
+                const brandUserId = candidate.campaign.brand.userId;
+                thread = await db.chatThread.create({
+                    data: {
+                        candidateId,
+                        participants: `${brandUserId},${userId}`
+                    }
+                });
+            }
+
+            // 3. Send initial message from creator
+            await db.message.create({
+                data: {
+                    threadId: thread.id,
+                    senderId: userId,
+                    content: `Hi! I'm excited about this collaboration opportunity. Let's discuss the details!`
+                }
+            });
+
+            // 4. Notify brand
+            if (candidate.campaign.brand.userId) {
+                await db.notification.create({
+                    data: {
+                        userId: candidate.campaign.brand.userId,
+                        type: 'MESSAGE',
+                        title: 'Invitation Accepted',
+                        message: `${candidate.influencer.user?.name || 'A creator'} has accepted your collaboration invitation for ${candidate.campaign.title}!`,
+                        link: `/brand/messages?threadId=${thread.id}`
+                    }
+                });
+            }
+
+            revalidatePath('/creator/campaigns');
+            revalidatePath('/creator/messages');
+            return { success: true, threadId: thread.id };
+
+        } else {
+            // DECLINE
+            await db.campaignCandidate.update({
+                where: { id: candidateId },
+                data: { status: 'REJECTED' }
+            });
+
+            // Notify brand
+            if (candidate.campaign.brand.userId) {
+                await db.notification.create({
+                    data: {
+                        userId: candidate.campaign.brand.userId,
+                        type: 'SYSTEM',
+                        title: 'Invitation Declined',
+                        message: `${candidate.influencer.user?.name || 'A creator'} has declined your invitation for ${candidate.campaign.title}.`,
+                        link: `/brand/campaigns`
+                    }
+                });
+            }
+
+            revalidatePath('/creator/campaigns');
+            return { success: true };
+        }
+
+    } catch (error) {
+        console.error("Failed to respond to invitation", error);
+        return { success: false, error: "Failed to process your response" };
+    }
+}
+

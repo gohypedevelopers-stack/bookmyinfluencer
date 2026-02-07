@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import CampaignDetailsModal from './CampaignDetailsModal';
+import InvitationDetailsModal from './InvitationDetailsModal';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,8 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedInvitation, setSelectedInvitation] = useState<any>(null);
+    const [isInvitationModalOpen, setIsInvitationModalOpen] = useState(false);
 
     // Filter State
     const [filters, setFilters] = useState({
@@ -462,7 +465,14 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                     </div>
                                 </div>
 
-                                <Button variant="outline" className="w-full border-indigo-100 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 h-11 rounded-xl font-bold tracking-wide transition-colors mt-auto">
+                                <Button
+                                    variant="outline"
+                                    className="w-full border-indigo-100 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 h-11 rounded-xl font-bold tracking-wide transition-colors mt-auto"
+                                    onClick={() => {
+                                        setSelectedInvitation(item);
+                                        setIsInvitationModalOpen(true);
+                                    }}
+                                >
                                     Review Brief
                                 </Button>
                             </Card>
@@ -499,6 +509,12 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                 campaign={selectedCampaign}
                 isVerified={isVerified}
                 followerCount={followerCount}
+            />
+
+            <InvitationDetailsModal
+                isOpen={isInvitationModalOpen}
+                onClose={() => setIsInvitationModalOpen(false)}
+                invitation={selectedInvitation}
             />
         </div>
     )
