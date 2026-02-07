@@ -41,7 +41,7 @@ async function getCreatorId() {
 
     // So for Notifications, we should use `session.user.id`.
 
-    return session.user.id;
+    return session?.user?.id || null;
 }
 
 // --- NOTIFICATIONS ---
@@ -247,10 +247,14 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
 
             if (!thread) {
                 const brandUserId = candidate.campaign.brand.userId;
+                // @ts-ignore - Prisma types are outdated, schema doesn't have initiatedBy field
                 thread = await db.chatThread.create({
                     data: {
-                        candidateId,
-                        participants: `${brandUserId},${userId}`
+                        candidate: {
+                            connect: { id: candidateId }
+                        },
+                        participants: `${brandUserId},${userId}`,
+                        initiatedBy: userId // Required by database NOT NULL constraint
                     }
                 });
             }
@@ -306,8 +310,9 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
         }
 
     } catch (error) {
-        console.error("Failed to respond to invitation", error);
-        return { success: false, error: "Failed to process your response" };
+        console.error("Failed to respond to invitation:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to process your response";
+        return { success: false, error: errorMessage };
     }
 }
 
