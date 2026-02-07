@@ -39,6 +39,10 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
     if (!campaign) return null;
 
     async function handleApply() {
+        console.log('[Frontend] Starting application...');
+        console.log('[Frontend] isVerified:', isVerified);
+        console.log('[Frontend] followerCount:', followerCount);
+
         if (!isVerified) {
             toast.error("Verification Required", {
                 description: "You must complete your profile verification before applying."
@@ -54,6 +58,8 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
         }
 
         setIsApplying(true);
+        console.log('[Frontend] Sending request to API...');
+
         try {
             const response = await fetch('/api/creator/campaigns/apply', {
                 method: 'POST',
@@ -61,11 +67,17 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                 body: JSON.stringify({ campaignId: campaign.id })
             });
 
+            console.log('[Frontend] Response status:', response.status);
+            const data = await response.json();
+            console.log('[Frontend] Response data:', data);
+
             if (!response.ok) {
-                const msg = await response.text();
-                throw new Error(msg || 'Failed to apply');
+                // Show error message from API
+                throw new Error(data.error || 'Failed to apply');
             }
 
+            // Success!
+            console.log('[Frontend] Application successful!');
             toast.success("Application Sent!", {
                 description: "The brand has been notified of your interest."
             });
@@ -73,8 +85,9 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
             // Ideally we should refresh the parent list here
             window.location.reload();
         } catch (error) {
+            console.error('[Frontend] Error applying:', error);
             toast.error("Error", {
-                description: "Something went wrong. Please try again."
+                description: error instanceof Error ? error.message : "Something went wrong. Please try again."
             });
         } finally {
             setIsApplying(false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Filter,
     Plus,
@@ -24,6 +25,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface CreatorCampaignsClientProps {
     candidates: any[];
@@ -33,6 +41,8 @@ interface CreatorCampaignsClientProps {
 }
 
 export default function CreatorCampaignsClient({ candidates, activeCampaigns, isVerified, followerCount }: CreatorCampaignsClientProps) {
+    const router = useRouter();
+
     // Default to DISCOVER if no personal campaigns, otherwise ONGOING
     const [selectedTab, setSelectedTab] = useState<'ONGOING' | 'INVITATIONS' | 'COMPLETED' | 'DISCOVER'>(
         candidates.length > 0 ? 'ONGOING' : 'DISCOVER'
@@ -49,6 +59,25 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
         niche: 'ALL',
         paymentType: 'ALL'
     });
+
+    // Handler for opening chat - navigate to messages page with the thread
+    const handleOpenChat = (campaign: any) => {
+        // Navigate to messages page - the backend will handle thread creation if needed
+        router.push(`/creator/messages?campaign=${campaign.id}`);
+        toast.success('Opening team chat...');
+    };
+
+    // Handler for marking campaign as complete
+    const handleMarkComplete = (campaign: any) => {
+        toast.info('Coming soon: Mark as complete feature');
+        // TODO: Implement mark as complete functionality
+    };
+
+    // Handler for reporting issues
+    const handleReportIssue = (campaign: any) => {
+        toast.info('Coming soon: Report issue feature');
+        // TODO: Implement report issue functionality
+    };
 
     const handleViewDetails = (campaign: any) => {
         setSelectedCampaign(campaign);
@@ -405,13 +434,35 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                     </div>
 
                                     <div className="flex gap-3 mt-auto">
-                                        <Button variant="outline" className="flex-1 border-gray-200 text-gray-700 h-10 font-bold rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-colors text-xs">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 border-gray-200 text-gray-700 h-10 font-bold rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-colors text-xs"
+                                            onClick={() => handleOpenChat(item)}
+                                        >
                                             <ChatIcon className="w-3.5 h-3.5 mr-2" />
                                             Team Chat
                                         </Button>
-                                        <Button variant="outline" className="w-10 border-gray-200 text-gray-400 h-10 rounded-xl hover:bg-gray-50 hover:text-gray-900 px-0 transition-colors">
-                                            <MoreHorizontal className="w-4 h-4" />
-                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" className="w-10 border-gray-200 text-gray-400 h-10 rounded-xl hover:bg-gray-50 hover:text-gray-900 px-0 transition-colors">
+                                                    <MoreHorizontal className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuItem onClick={() => handleViewDetails(item)}>
+                                                    <FileText className="w-4 h-4 mr-2" />
+                                                    View Details
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleMarkComplete(item)}>
+                                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                                    Mark as Complete
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleReportIssue(item)} className="text-red-600">
+                                                    <ShieldCheck className="w-4 h-4 mr-2" />
+                                                    Report Issue
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </Card>
                             )

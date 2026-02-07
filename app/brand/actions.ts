@@ -644,10 +644,12 @@ export async function handleCollabRequest(notificationId: string, action: 'ACCEP
             });
 
             if (!thread) {
+                // @ts-ignore
                 thread = await db.chatThread.create({
                     data: {
                         candidateId,
-                        participants: `${session.user.id},${candidate.influencer.userId}` // Simple CSV for now as per schema
+                        participants: `${session.user.id},${candidate.influencer.userId}`, // Simple CSV for now as per schema
+                        initiatedBy: session.user.id
                     }
                 });
             }
@@ -1226,6 +1228,119 @@ export async function getPaymentSuccessData(contractId: string) {
 
     } catch (error) {
         return { success: false };
+    }
+}
+
+
+// ====== CREATOR SEARCH & DIRECT MESSAGING ======
+
+/**
+ * Search for creators by name, niche, or handle
+ */
+export async function searchCreators(query: string) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: 'Unauthorized', creators: [] };
+        }
+
+        const creators = await db.creator.findMany({
+            where: {
+                AND: [
+                    {
+                        OR: [
+                            { fullName: { contains: query, mode: 'insensitive' } },
+                            { niche: { contains: query, mode: 'insensitive' } },
+                            { instagramUrl: { contains: query, mode: 'insensitive' } },
+                            { youtubeUrl: { contains: query, mode: 'insensitive' } },
+                        ]
+                    },
+                    { verificationStatus: 'APPROVED' }
+                ]
+            },
+            include: {
+                user: { select: { id: true, email: true } },
+                metrics: { orderBy: { fetchedAt: 'desc' }, take: 1 }
+            },
+            take: 20
+        });
+
+        const formattedCreators = creators.map((creator) => ({
+            id: creator.id,
+            userId: creator.userId,
+            fullName: creator.fullName,
+            displayName: creator.displayName || creator.autoDisplayName,
+            profileImage: creator.profileImageUrl || creator.autoProfileImageUrl,
+            niche: creator.niche,
+            instagramUrl: creator.instagramUrl,
+            youtubeUrl: creator.youtubeUrl,
+            bio: creator.bio || creator.autoBio,
+            followers: creator.metrics[0]?.followersCount || 0,
+            email: creator.user.email
+        }));
+
+        return { success: true, creators: formattedCreators };
+    } catch (error) {
+        console.error('Failed to search creators:', error);
+        return { success: false, error: 'Failed to search creators', creators: [] };
+    }
+}
+
+/**
+ * Create a new chat thread or get existing one with a creator
+ */
+export async function createOrGetThread(creatorUserId: string) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        const brandUserId = session.user.id;
+
+        const existingThread = await db.chatThread.findFirst({
+            where: {
+                AND: [
+                    { participants: { contains: brandUserId } },
+                    { participants: { contains: creatorUserId } }
+                ],
+                candidateId: null
+            }
+        });
+
+        if (existingThread) {
+            return { success: true, threadId: existingThread.id, isNew: false };
+        }
+
+        // @ts-ignore
+        const newThread = await db.chatThread.create({
+            data: {
+                participants: `${brandUserId},${creatorUserId}`,
+                initiatedBy: brandUserId
+            }
+        });
+
+        await db.message.create({
+            data: {
+                threadId: newThread.id,
+                senderId: brandUserId,
+                content: ' Started a conversation',
+                read: false
+            }
+        });
+
+        await createNotification(
+            creatorUserId,
+            'New Message',
+            'A brand has started a conversation with you',
+            'MESSAGE',
+            `/creator/messages?threadId=${newThread.id}`
+        );
+
+        return { success: true, threadId: newThread.id, isNew: true };
+    } catch (error) {
+        console.error('Failed to create/get thread:', error);
+        return { success: false, error: 'Failed to start conversation' };
     }
 }
 

@@ -3,9 +3,10 @@
 import { useState, useOptimistic, useTransition, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Send, Paperclip, MoreVertical, IndianRupee, Calendar, TrendingUp, AlertCircle, Shield, CheckCircle2, Search, FileText } from 'lucide-react';
+import { Send, Paperclip, MoreVertical, IndianRupee, Calendar, TrendingUp, AlertCircle, Shield, CheckCircle2, Search, FileText, Plus } from 'lucide-react';
 import { sendMessage, createOffer, finalizeOffer } from '../actions'; // Import Actions
 import { toast } from 'sonner';
+import CreatorSearchModal from './CreatorSearchModal';
 
 // UI Imports
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -79,6 +80,7 @@ export default function ChatClient({
     const [isPending, startTransition] = useTransition();
     const [messageInput, setMessageInput] = useState('');
     const [showNegotiation, setShowNegotiation] = useState(true);
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
     // Socket Connection Effect
     useEffect(() => {
@@ -212,9 +214,19 @@ export default function ChatClient({
             {/* Contacts Sidebar */}
             <aside className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10">
                 <div className="p-4 border-b border-gray-100">
-                    <h2 className="text-gray-900 font-bold text-lg mb-4 flex items-center gap-2">
-                        Inbox <span className="ml-auto w-6 h-6 bg-teal-100 text-teal-700 text-xs rounded-full flex items-center justify-center">{threads.length}</span>
-                    </h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-gray-900 font-bold text-lg flex items-center gap-2">
+                            Inbox <span className="w-6 h-6 bg-teal-100 text-teal-700 text-xs rounded-full flex items-center justify-center">{threads.length}</span>
+                        </h2>
+                        <Button
+                            onClick={() => setIsSearchModalOpen(true)}
+                            size="sm"
+                            className="bg-teal-600 hover:bg-teal-700 text-white h-8 px-3 rounded-lg"
+                        >
+                            <Plus className="w-4 h-4 mr-1" />
+                            New
+                        </Button>
+                    </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -524,6 +536,12 @@ export default function ChatClient({
                     <p className="max-w-xs mt-2 text-sm text-gray-500">Choose a thread from the sidebar to view message history and negotiation details.</p>
                 </div>
             )}
+
+            {/* Creator Search Modal */}
+            <CreatorSearchModal
+                isOpen={isSearchModalOpen}
+                onClose={() => setIsSearchModalOpen(false)}
+            />
         </div>
     );
 }
