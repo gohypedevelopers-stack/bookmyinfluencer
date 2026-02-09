@@ -758,12 +758,10 @@ export async function handleCollabRequest(notificationId: string, action: 'ACCEP
             });
 
             if (!thread) {
-                // @ts-ignore
                 thread = await db.chatThread.create({
                     data: {
                         candidateId,
-                        participants: `${session.user.id},${candidate.influencer.userId}`, // Simple CSV for now as per schema
-                        initiatedBy: session.user.id
+                        participants: `${session.user.id},${candidate.influencer.userId}` // Simple CSV for now as per schema
                     }
                 });
             }
@@ -1472,13 +1470,9 @@ export async function createOrGetThread(creatorUserId: string) {
             return { success: true, threadId: existingThread.id, isNew: false };
         }
 
-        // Create new thread
-        // @ts-ignore
         const newThread = await db.chatThread.create({
             data: {
-                participants: `${brandUserId},${creatorUserId}`,
-                initiatedBy: brandUserId,
-                candidateId: null // Explicitly null for direct DMs
+                participants: `${brandUserId},${creatorUserId}`
             }
         });
 

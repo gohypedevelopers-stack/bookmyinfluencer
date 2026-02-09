@@ -31,7 +31,7 @@ async function checkAllCreators() {
                 data: {
                     creatorId: creator.id,
                     status: 'PENDING',
-                    submittedAt: creator.submittedForVerificationAt || new Date()
+                    submittedAt: new Date()
                 }
             });
             console.log('✅ Fixed.');

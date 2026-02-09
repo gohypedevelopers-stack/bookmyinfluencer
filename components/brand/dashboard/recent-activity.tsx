@@ -6,7 +6,7 @@ type ActivityType = 'DRAFT_SUBMITTED' | 'APPLICATION_RECEIVED' | 'PAYMENT_RELEAS
 
 interface Activity {
     id: string
-    type: ActivityType
+    type: string
     title: string
     subtitle: string
     time: string
@@ -19,27 +19,35 @@ interface RecentActivityProps {
 }
 
 export function RecentActivity({ activities }: RecentActivityProps) {
-    const getIcon = (type: Activity['type']) => {
+    const getIcon = (type: string) => {
         switch (type) {
             case 'DRAFT_SUBMITTED':
+            case 'MESSAGE':
                 return <FileText className="w-5 h-5 text-blue-600" />
             case 'APPLICATION_RECEIVED':
+            case 'OFFER':
                 return <Mail className="w-5 h-5 text-green-600" />
             case 'PAYMENT_RELEASED':
+            case 'ESCROW':
                 return <DollarSign className="w-5 h-5 text-orange-600" />
             case 'CAMPAIGN_COMPLETED':
                 return <CheckCircle className="w-5 h-5 text-purple-600" />
+            case 'SYSTEM':
             default:
                 return <Clock className="w-5 h-5 text-gray-600" />
         }
     }
 
-    const getBgColor = (type: Activity['type']) => {
+    const getBgColor = (type: string) => {
         switch (type) {
-            case 'DRAFT_SUBMITTED': return 'bg-blue-100'
-            case 'APPLICATION_RECEIVED': return 'bg-green-100'
-            case 'PAYMENT_RELEASED': return 'bg-orange-100'
+            case 'DRAFT_SUBMITTED':
+            case 'MESSAGE': return 'bg-blue-100'
+            case 'APPLICATION_RECEIVED':
+            case 'OFFER': return 'bg-green-100'
+            case 'PAYMENT_RELEASED':
+            case 'ESCROW': return 'bg-orange-100'
             case 'CAMPAIGN_COMPLETED': return 'bg-purple-100'
+            case 'SYSTEM':
             default: return 'bg-gray-100'
         }
     }

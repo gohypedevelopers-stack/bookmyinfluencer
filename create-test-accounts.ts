@@ -35,7 +35,7 @@ async function createFreshAccounts() {
         console.log(`   Password: ${password}`)
         console.log('')
     } catch (e) {
-        console.log('❌ Brand account creation failed:', e.message)
+        console.log('❌ Brand account creation failed:', e instanceof Error ? e.message : String(e))
     }
 
     // 2. Creator Account  
@@ -72,7 +72,7 @@ async function createFreshAccounts() {
         console.log(`   Password: ${password}`)
         console.log('')
     } catch (e) {
-        console.log('❌ Creator account creation failed:', e.message)
+        console.log('❌ Creator account creation failed:', e instanceof Error ? e.message : String(e))
     }
 
     console.log('\n' + '='.repeat(60))
