@@ -17,7 +17,8 @@ export async function GET() {
         // Also get creators from InfluencerProfile (different auth system)
         const influencerProfiles = await db.influencerProfile.findMany({
             include: {
-                user: true
+                user: true,
+                kyc: true
             }
         });
 
@@ -57,7 +58,7 @@ export async function GET() {
             followers: inf.followers || 0,
             engagementRate: inf.engagementRate || 0,
             profileImage: inf.user.image || '',
-            verified: inf.kycStatus === 'APPROVED'
+            verified: inf.kyc?.status === 'APPROVED'
         }));
 
         // Combine and deduplicate
