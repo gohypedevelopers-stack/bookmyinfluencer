@@ -45,6 +45,16 @@ export default function InfluencerDiscovery() {
     const [selectedNiche, setSelectedNiche] = useState('All');
     const [priceRange, setPriceRange] = useState([50, 5000]);
     const [followersRange, setFollowersRange] = useState([0, 1000]); // in K
+    const [showAllNiches, setShowAllNiches] = useState(false);
+
+    // All available niches
+    const allNiches = [
+        'Fashion & Health', 'Tech & Gadgets', 'Fashion', 'Music',
+        'Fitness', 'Travel', 'Food', 'Lifestyle', 'Gaming',
+        'Beauty', 'Education', 'Finance', 'Entertainment', 'Sports',
+        'Photography', 'Art & Design'
+    ];
+    const visibleNiches = showAllNiches ? allNiches : allNiches.slice(0, 4);
 
     // Fetch Function
     const fetchInfluencers = async (page: number = currentPage) => {
@@ -170,9 +180,15 @@ export default function InfluencerDiscovery() {
                                         placeholder="Search by name..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && fetchInfluencers()}
-                                        className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        onKeyDown={(e) => e.key === 'Enter' && fetchInfluencers(1)}
+                                        className="w-full pl-9 pr-20 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
+                                    <button
+                                        onClick={() => { setCurrentPage(1); fetchInfluencers(1); }}
+                                        className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 bg-teal-600 text-white text-xs font-semibold rounded-md hover:bg-teal-700 transition-colors"
+                                    >
+                                        Search
+                                    </button>
                                 </div>
 
                                 <div className="space-y-6">
@@ -208,7 +224,7 @@ export default function InfluencerDiscovery() {
                                             Niche & Category
                                         </label>
                                         <div className="space-y-2">
-                                            {['Fashion & Health', 'Tech & Gadgets', 'Fashion', 'Music'].map((item) => (
+                                            {visibleNiches.map((item) => (
                                                 <label key={item} className="flex items-center gap-2 cursor-pointer">
                                                     <input
                                                         type="checkbox"
@@ -219,8 +235,11 @@ export default function InfluencerDiscovery() {
                                                     <span className="text-sm text-gray-700">{item}</span>
                                                 </label>
                                             ))}
-                                            <button className="text-sm text-teal-600 hover:text-teal-700 font-medium">
-                                                + Show 12 more
+                                            <button
+                                                onClick={() => setShowAllNiches(!showAllNiches)}
+                                                className="text-sm text-teal-600 hover:text-teal-700 font-medium"
+                                            >
+                                                {showAllNiches ? '− Show less' : `+ Show ${allNiches.length - 4} more`}
                                             </button>
                                         </div>
                                     </div>
