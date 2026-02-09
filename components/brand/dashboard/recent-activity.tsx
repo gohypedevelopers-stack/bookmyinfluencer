@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { FileText, Mail, DollarSign, CheckCircle, Clock } from "lucide-react"
+import Link from "next/link"
+
+type ActivityType = 'DRAFT_SUBMITTED' | 'APPLICATION_RECEIVED' | 'PAYMENT_RELEASED' | 'CAMPAIGN_COMPLETED' | string
 
 interface Activity {
     id: string
-    type: 'DRAFT_SUBMITTED' | 'APPLICATION_RECEIVED' | 'PAYMENT_RELEASED' | 'CAMPAIGN_COMPLETED'
+    type: ActivityType
     title: string
-    subtitle: string // e.g., "Lifestyle Lara submitted a draft for Summer Glow 2024"
+    subtitle: string
     time: string
     actionLabel?: string
     actionLink?: string

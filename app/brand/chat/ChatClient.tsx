@@ -3,42 +3,99 @@
 import { useState, useOptimistic, useTransition, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Send, Paperclip, MoreVertical, IndianRupee, Calendar, TrendingUp, AlertCircle, Shield, CheckCircle2, Search, FileText, Plus } from 'lucide-react';
-import { sendMessage, createOffer, finalizeOffer } from '../actions'; // Import Actions
-import { toast } from 'sonner';
-import CreatorSearchModal from './CreatorSearchModal';
-
-// UI Imports
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Ban,
+    Trash2,
+    Image as ImageIcon,
+    Send,
+    MoreVertical,
+    Phone,
+    Video,
+    Search,
+    Paperclip,
+    Smile,
+    ArrowLeft,
+    Check,
+    CheckCircle2,
+    Clock,
+    DollarSign,
+    FileText,
+    Shield,
+    User,
+    Flag
+} from 'lucide-react';
+import { sendMessage, createOffer, finalizeOffer, blockUser, reportUser, deleteThread, markBrandMessagesRead } from '../actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { io, Socket } from "socket.io-client";
+import { toast } from "sonner";
+import CreatorSearchModal from './CreatorSearchModal';
+import CallInterface from './CallInterface';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+// Helper for date formatting
+const formatDate = (date: Date | string, formatStr: string) => {
+    const d = new Date(date);
+    if (formatStr === 'MMM d') {
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    if (formatStr === 'h:mm a') {
+        return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+    return d.toDateString();
+}
+
+// Types
 interface Message {
     id: string;
     content: string;
     senderId: string;
     createdAt: Date;
-    sender: { name: string; image: string | null };
+    sender: {
+        id: string;
+        name: string | null;
+        image: string | null;
+    };
+    read?: boolean;
+    attachmentUrl?: string | null;
+    attachmentType?: string | null;
 }
 
 interface Thread {
     id: string;
-    candidateId?: string;
+    candidateId?: string | null;
     lastMessage: Message | null;
+    updatedAt: Date;
     influencer: {
         id: string;
         userId: string;
-        instagramHandle: string | null;
-        user: { name: string | null; image: string | null };
+        instagramHandle?: string | null;
+        user: {
+            name: string | null;
+            image: string | null;
+        };
     };
-    candidate?: {
+    title: string;
+    brandId?: string;
+    offer?: {
         id: string;
+        amount: number;
+        deliverablesDescription: string;
         status: string;
-        campaign: { id: string; title: string; brandId: string };
-        offer?: { id: string; amount: number; deliverablesDescription: string; status: string };
-    }
+    } | null;
+    campaign?: {
+        id: string;
+        title: string;
+    } | null;
 }
 
 interface ChatClientProps {
@@ -49,10 +106,6 @@ interface ChatClientProps {
     brandProfileId: string;
 }
 
-import { io } from "socket.io-client";
-
-// ... previous imports
-
 export default function ChatClient({
     threads,
     selectedThreadId: initialThreadId,
@@ -61,487 +114,688 @@ export default function ChatClient({
     brandProfileId
 }: ChatClientProps) {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const activeThreadId = initialThreadId || searchParams.get('threadId');
+    const [activeThreadId, setActiveThreadId] = useState<string | undefined>(initialThreadId);
 
-    const activeThread = threads.find(t => t.id === activeThreadId);
-    const messages = initialMessages;
-    const candidate = activeThread?.candidate;
-    const currentOffer = candidate?.offer;
+    useEffect(() => {
+        if (activeThreadId) {
+            markBrandMessagesRead(activeThreadId);
+        }
+    }, [activeThreadId]);
 
-    // Socket Ref
-    const socketRef = useRef<any>(null);
-
-    const [optimisticMessages, addOptimisticMessage] = useOptimistic(
-        messages,
-        (state: Message[], newMessage: Message) => [...state, newMessage]
-    );
-
-    const [isPending, startTransition] = useTransition();
     const [messageInput, setMessageInput] = useState('');
-    const [showNegotiation, setShowNegotiation] = useState(true);
+    const [isPending, startTransition] = useTransition();
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+        initialMessages,
+        (state, newMessage: Message) => [...state, newMessage]
+    );
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-    // Socket Connection Effect
+    // Call State
+    const [isCallOpen, setIsCallOpen] = useState(false);
+    const [initialIsVideo, setInitialIsVideo] = useState(false);
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+    // Derived State
+    const activeThread = threads.find(t => t.id === activeThreadId);
+
+    // Socket.IO Integration
     useEffect(() => {
-        // Connect to the custom server (default URL is /)
-        socketRef.current = io();
+        const newSocket = io({
+            path: '/api/socket',
+        });
+        setSocket(newSocket);
 
-        if (activeThreadId) {
-            socketRef.current.emit("join_room", activeThreadId);
-        }
-
-        socketRef.current.on("receive_message", (data: any) => {
-            // Only add if it's not from us (we add our own optimistically)
-            if (data.senderId !== currentUserId) {
-                const incomingMessage = {
-                    id: data.id || Math.random().toString(),
-                    content: data.message, // Map 'message' to 'content'
-                    senderId: data.senderId,
-                    createdAt: new Date(),
-                    sender: { name: "Creator", image: null } // Placeholder, logic can be refined
-                };
-                startTransition(() => {
-                    addOptimisticMessage(incomingMessage);
-                });
+        newSocket.on('connect', () => {
+            console.log('Connected to socket', newSocket.id);
+            newSocket.emit('join-room', currentUserId);
+            if (activeThreadId) {
+                newSocket.emit('join-room', `thread:${activeThreadId}`);
             }
         });
 
-        return () => {
-            socketRef.current.disconnect();
-        };
-    }, [activeThreadId, currentUserId]);
-
-
-
-    // Offer State
-    const [isOfferOpen, setIsOfferOpen] = useState(false);
-    const [offerAmount, setOfferAmount] = useState(currentOffer?.amount?.toString() || '');
-    const [offerDeliverables, setOfferDeliverables] = useState(currentOffer?.deliverablesDescription || '');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Update form when thread changes
-    useEffect(() => {
-        if (currentOffer) {
-            setOfferAmount(currentOffer.amount.toString());
-            setOfferDeliverables(currentOffer.deliverablesDescription);
-        } else {
-            setOfferAmount('');
-            setOfferDeliverables('');
-        }
-    }, [currentOffer]);
-
-    async function handleSendMessage() {
-        if (!messageInput.trim() || !activeThread) return;
-
-        const newMessageStub = {
-            id: Math.random().toString(),
-            content: messageInput,
-            senderId: currentUserId,
-            createdAt: new Date(),
-            sender: { name: "Me", image: null }
-        };
-
-        // 1. Optimistic Update (Immediate Feedback)
-        startTransition(() => {
-            addOptimisticMessage(newMessageStub);
+        newSocket.on('new-message', (newMessage: Message) => {
+            if (activeThreadId && (newMessage as any).threadId === activeThreadId) {
+                startTransition(() => {
+                    router.refresh();
+                });
+            } else {
+                router.refresh();
+                toast.info(`New message from ${newMessage.sender.name}`);
+            }
         });
 
-        // 2. Clear Input
-        setMessageInput('');
+        // Incoming Call Listener
+        newSocket.on('call-received', (data) => {
+            toast.info(`Incoming call from ${data.name}`);
+        });
 
-        // 3. Emit to Socket (Real-time Broadcast)
-        if (socketRef.current) {
-            socketRef.current.emit("send_message", {
-                room: activeThread.id,
-                message: newMessageStub.content,
-                senderId: currentUserId
-            });
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [activeThreadId, currentUserId, router]);
+
+    // Report Dialog State
+    const [isReportOpen, setIsReportOpen] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+    const [isReporting, setIsReporting] = useState(false);
+
+
+
+    // Scroll to bottom on new messages
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [optimisticMessages]);
+
+    // Update active thread when URL changes
+    useEffect(() => {
+        if (initialThreadId && initialThreadId !== activeThreadId) {
+            setActiveThreadId(initialThreadId);
+            if (socket) {
+                socket.emit('join-room', `thread:${initialThreadId}`);
+            }
         }
+    }, [initialThreadId, activeThreadId, socket]);
 
-        // 4. Persist to DB (Server Action)
-        await sendMessage(activeThread.id, currentUserId, newMessageStub.content);
-    }
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if ((!messageInput.trim() && !fileAttachment) || !activeThreadId) return;
 
-    async function handleCreateOffer() {
-        if (!candidate) return;
-        if (!offerAmount || !offerDeliverables) {
-            toast.error("Please fill in all fields");
+        const currentInput = messageInput;
+        const currentAttachment = fileAttachment;
+
+        setMessageInput('');
+        setFileAttachment(null);
+
+        // Optimistic update
+        startTransition(() => {
+            addOptimisticMessage({
+                id: 'config-temp-' + Date.now(),
+                content: currentInput,
+                senderId: currentUserId,
+                createdAt: new Date(),
+                sender: {
+                    id: currentUserId,
+                    name: 'Me',
+                    image: null
+                },
+                read: false,
+                attachmentUrl: currentAttachment?.url,
+                attachmentType: currentAttachment?.type
+            });
+        });
+
+        try {
+            const result = await sendMessage(activeThreadId, currentUserId, currentInput, currentAttachment?.url, currentAttachment?.type);
+            if (!result.success) {
+                toast.error('Failed to send message');
+            } else {
+                // Emit to Socket
+                if (socket) {
+                    socket.emit("send-message", {
+                        threadId: `thread:${activeThreadId}`,
+                        content: currentInput,
+                        senderId: currentUserId,
+                        sender: {
+                            name: "Brand",
+                            image: null
+                        },
+                        createdAt: new Date(),
+                        attachmentUrl: currentAttachment?.url,
+                        attachmentType: currentAttachment?.type
+                    });
+                }
+                router.refresh();
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Error sending message');
+        }
+    };
+
+    const [fileAttachment, setFileAttachment] = useState<{ url: string; type: string; name: string } | null>(null);
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File size must be less than 5MB");
             return;
         }
 
-        setIsSubmitting(true);
-        const result = await createOffer(candidate.id, parseFloat(offerAmount), offerDeliverables);
-        setIsSubmitting(false);
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
 
-        if (result.success) {
-            toast.success("Offer sent successfully!");
-            setIsOfferOpen(false);
-        } else {
-            toast.error(result.error || "Failed to send offer");
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) throw new Error('Upload failed');
+
+            const data = await res.json();
+            setFileAttachment({
+                url: data.url,
+                type: file.type.startsWith('image/') ? 'IMAGE' : 'DOCUMENT',
+                name: file.name
+            });
+            toast.success("File attached");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to upload file");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
-    }
+    };
 
-    async function handleFinalizeContract() {
-        if (!candidate) return;
+    const handleCreateOffer = async (amount: number, description: string) => {
+        if (!activeThread?.candidateId) return;
 
-        setIsSubmitting(true);
-        const result = await finalizeOffer(candidate.id);
-        setIsSubmitting(false);
-
-        if (result.success) {
-            toast.success("Contract generated and offer accepted!");
-            router.refresh();
-        } else {
-            toast.error(result.error || "Failed to finalize");
+        try {
+            const result = await createOffer(activeThread.candidateId, amount, description);
+            if (result.success) {
+                toast.success('Offer created!');
+                router.refresh();
+            } else {
+                toast.error(result.error);
+            }
+        } catch (error) {
+            toast.error('Failed to create offer');
         }
-    }
-    if (!activeThread && threads.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-gray-50 text-gray-500">
-                <Search className="w-12 h-12 mb-4 text-gray-300" />
-                <p className="text-lg font-medium text-gray-900">No active conversations</p>
-                <p className="text-sm">Start a campaign to connect with influencers.</p>
-                <Link href="/brand/campaigns" className="mt-4 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition">
-                    Go to Campaigns
-                </Link>
-            </div>
-        );
-    }
+    };
+
+    const handleFinalizeContract = async () => {
+        if (!activeThread?.candidateId) return;
+
+        try {
+            const result = await finalizeOffer(activeThread.candidateId);
+            if (result.success) {
+                toast.success('Contract finalized!');
+                router.refresh();
+            } else {
+                toast.error(result.error || 'Failed to finalize');
+            }
+        } catch (error) {
+            toast.error('Failed to finalize contract');
+        }
+    };
+
+    const handleBlockUser = async () => {
+        if (!activeThread?.influencer?.userId) return;
+        if (!confirm("Are you sure you want to block this user? They won't be able to message you.")) return;
+
+        try {
+            const result = await blockUser(activeThread.influencer.userId);
+            if (result.success) {
+                toast.success('User blocked successfully');
+                router.refresh();
+            } else {
+                toast.error(result.error || 'Failed to block user');
+            }
+        } catch (error) {
+            toast.error('Failed to block user');
+        }
+    };
+
+    const handleClearChat = async () => {
+        if (!activeThreadId) return;
+        if (!confirm("Are you sure you want to delete this conversation? This action cannot be undone.")) return;
+
+        try {
+            const result = await deleteThread(activeThreadId);
+            if (result.success) {
+                toast.success('Conversation deleted');
+                setActiveThreadId(undefined);
+                router.refresh();
+            } else {
+                toast.error(result.error || 'Failed to delete conversation');
+            }
+        } catch (error) {
+            toast.error('Failed to delete conversation');
+        }
+    };
+
+    const handleReportUser = async () => {
+        if (!activeThread?.influencer?.userId || !reportReason.trim()) return;
+        setIsReporting(true);
+
+        try {
+            const result = await reportUser(activeThread.influencer.userId, reportReason);
+            if (result.success) {
+                toast.success('User reported. Our team will review this shortly.');
+                setIsReportOpen(false);
+                setReportReason('');
+            } else {
+                toast.error(result.error || 'Failed to report user');
+            }
+        } catch (error) {
+            toast.error('Failed to report user');
+        } finally {
+            setIsReporting(false);
+        }
+    };
 
     return (
-        <div className="h-[calc(100vh-64px)] flex bg-gray-50 overflow-hidden">
-            {/* Contacts Sidebar */}
-            <aside className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10">
+        <div className="flex h-[calc(100vh-64px)] bg-white overflow-hidden">
+            {/* Thread List Sidebar */}
+            <div className={`w-full md:w-80 lg:w-96 border-r border-gray-100 flex flex-col bg-white z-10 ${activeThreadId ? 'hidden md:flex' : 'flex'}`}>
+                {/* Search Header */}
                 <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-gray-900 font-bold text-lg flex items-center gap-2">
-                            Inbox <span className="w-6 h-6 bg-teal-100 text-teal-700 text-xs rounded-full flex items-center justify-center">{threads.length}</span>
-                        </h2>
+                        <h2 className="text-xl font-bold text-gray-900">Messages</h2>
                         <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
                             onClick={() => setIsSearchModalOpen(true)}
-                            size="sm"
-                            className="bg-teal-600 hover:bg-teal-700 text-white h-8 px-3 rounded-lg"
                         >
-                            <Plus className="w-4 h-4 mr-1" />
-                            New
+                            <span className="material-symbols-outlined">edit_square</span>
                         </Button>
                     </div>
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Filter messages..."
-                            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                            placeholder="Search messages..."
+                            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
                         />
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
-                    {threads.map((thread) => (
-                        <button
-                            key={thread.id}
-                            onClick={() => router.push(`?threadId=${thread.id}`)}
-                            className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition border-l-4 ${activeThread?.id === thread.id ? 'bg-teal-50/50 border-teal-500' : 'border-transparent'}`}
-                        >
-                            <div className="relative">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                    {thread.influencer.user.name?.[0]}
-                                </div>
+                {/* Thread List */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    {threads.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full p-8 text-center text-gray-500">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                <span className="material-symbols-outlined text-3xl text-gray-400">chat_bubble_outline</span>
                             </div>
-                            <div className="flex-1 min-w-0 text-left">
-                                <div className="flex items-start justify-between mb-1">
-                                    <span className="font-semibold text-gray-900 text-sm truncate">{thread.influencer.user.name}</span>
-                                    {thread.lastMessage && (
-                                        <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
-                                            {new Date(thread.lastMessage.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                        </span>
+                            <p className="font-medium text-gray-900 mb-1">No messages yet</p>
+                            <p className="text-sm mb-4">Start connecting with creators to see your conversations here.</p>
+                            <Button onClick={() => setIsSearchModalOpen(true)} variant="outline" className="border-teal-200 text-teal-700 hover:bg-teal-50">
+                                Find Creators
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-gray-50">
+                            {threads.map((thread) => {
+                                const lastMsgDate = thread.lastMessage ? new Date(thread.lastMessage.createdAt) : new Date(thread.updatedAt);
+                                return (
+                                    <Link
+                                        key={thread.id}
+                                        href={`/brand/chat?threadId=${thread.id}`}
+                                        className={`flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors cursor-pointer relative ${activeThreadId === thread.id ? 'bg-teal-50/50 hover:bg-teal-50' : ''}`}
+                                    >
+                                        {activeThreadId === thread.id && (
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-teal-500" />
+                                        )}
+                                        <div className="relative flex-shrink-0">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 p-[2px]">
+                                                <div className="w-full h-full rounded-full bg-white p-[2px] overflow-hidden">
+                                                    {thread.influencer.user.image ? (
+                                                        <img src={thread.influencer.user.image} alt="" className="w-full h-full object-cover rounded-full" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-bold">
+                                                            {thread.influencer.user.name?.[0] || 'U'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h3 className={`text-sm truncate ${activeThreadId === thread.id ? 'font-bold text-teal-900' : 'font-semibold text-gray-900'}`}>
+                                                    {thread.title}
+                                                </h3>
+                                                <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                                                    {formatDate(lastMsgDate, 'MMM d')}
+                                                </span>
+                                            </div>
+                                            <p className={`text-sm truncate ${activeThreadId === thread.id ? 'text-teal-700 font-medium' : 'text-gray-500'}`}>
+                                                {thread.lastMessage ? (
+                                                    thread.lastMessage.senderId === currentUserId ? `You: ${thread.lastMessage.content}` : thread.lastMessage.content
+                                                ) : (
+                                                    <span className="italic">No messages yet</span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Chat Area */}
+            {activeThread ? (
+                <div className={`flex-1 flex flex-col items-stretch h-full bg-gray-50/50 z-0 ${activeThreadId ? 'flex' : 'hidden md:flex'}`}>
+                    {/* Chat Header */}
+                    <div className="h-16 px-6 bg-white border-b border-gray-100 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-3">
+                            {/* Mobile Back Button */}
+                            <Link href="/brand/chat" className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full">
+                                <ArrowLeft className="w-5 h-5" />
+                            </Link>
+
+                            <div className="relative">
+                                <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-100">
+                                    {activeThread.influencer.user.image ? (
+                                        <img src={activeThread.influencer.user.image} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold">
+                                            {activeThread.influencer.user.name?.[0]}
+                                        </div>
                                     )}
                                 </div>
-                                <p className={`text-xs truncate mb-1 ${activeThread?.id === thread.id ? 'text-gray-700 font-medium' : 'text-gray-500'}`}>
-                                    {thread.id === activeThread?.id && optimisticMessages.length > 0 ? optimisticMessages[optimisticMessages.length - 1].content : (thread.lastMessage?.content || 'No messages yet')}
-                                </p>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </aside>
-
-            {/* Main Chat Area */}
-            {activeThread ? (
-                <main className="flex-1 flex flex-col bg-white">
-                    <div className="bg-white border-b border-gray-200 px-6 py-3 shadow-sm z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-white font-bold shadow-sm">
-                                {activeThread.influencer.user.name?.[0]}
+                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
-                                    {activeThread.influencer.user.name}
-                                    <CheckCircle2 className="w-3 h-3 text-blue-500" />
+                                    {activeThread.title}
+                                    {activeThread.candidateId && (
+                                        <span className="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 text-[10px] font-bold uppercase tracking-wider border border-teal-100">
+                                            Campaign
+                                        </span>
+                                    )}
                                 </h3>
-                                <p className="text-gray-500 text-xs">{activeThread.influencer.instagramHandle || '@creator'}</p>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <span>{activeThread.influencer.user.name}</span>
+                                    {activeThread.influencer.instagramHandle && (
+                                        <>
+                                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[10px]">photo_camera</span>
+                                                @{activeThread.influencer.instagramHandle}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowNegotiation(!showNegotiation)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${showNegotiation ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+                                onClick={() => {
+                                    setInitialIsVideo(false);
+                                    setIsCallOpen(true);
+                                }}
                             >
-                                <IndianRupee className="w-4 h-4" />
-                                <span>Offer Details</span>
-                            </button>
-                            <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition">
-                                <MoreVertical className="w-5 h-5" />
-                            </button>
+                                <Phone className="w-5 h-5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-gray-400 hover:text-teal-600 hover:bg-teal-50"
+                                onClick={() => {
+                                    setInitialIsVideo(true);
+                                    setIsCallOpen(true);
+                                }}
+                            >
+                                <Video className="w-5 h-5" />
+                            </Button>
+                            <div className="w-px h-8 bg-gray-200 mx-2"></div>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
+                                        <MoreVertical className="w-5 h-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                    <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/brand/influencers/${activeThread.influencer.id}`} className="cursor-pointer">
+                                            <User className="w-4 h-4 mr-2" />
+                                            View Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleClearChat} className="text-orange-600 cursor-pointer">
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Clear Chat
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setIsReportOpen(true)} className="text-amber-600 cursor-pointer">
+                                        <Flag className="w-4 h-4 mr-2" />
+                                        Report User
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleBlockUser} className="text-red-600 cursor-pointer">
+                                        <Ban className="w-4 h-4 mr-2" />
+                                        Block User
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
 
-                    <div className="flex-1 flex overflow-hidden bg-gray-50/50">
-                        <div className="flex-1 flex flex-col min-w-0">
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                {optimisticMessages.map((message) => {
-                                    const isMe = message.senderId === currentUserId;
-                                    return (
-                                        <div key={message.id} className={`flex items-end gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
-                                            {!isMe && (
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm mb-1">
-                                                    {message.sender?.name?.[0] || activeThread.influencer.user.name?.[0]}
-                                                </div>
-                                            )}
-
-                                            <div className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
-                                                <div className={`px-5 py-3 rounded-2xl shadow-sm text-sm leading-relaxed ${isMe
-                                                    ? 'bg-blue-600 text-white rounded-br-sm'
-                                                    : 'bg-white text-gray-700 rounded-bl-sm border border-gray-200'
-                                                    }`}>
-                                                    <p>{message.content}</p>
-                                                </div>
-                                                <span className={`text-[10px] text-gray-400 mt-1 block ${isMe ? 'text-right' : 'text-left'}`}>
-                                                    {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="bg-white border-t border-gray-200 p-4">
-                                <div className="max-w-4xl mx-auto flex items-end gap-3">
-                                    <div className="flex-1 bg-gray-50 rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-400 transition-all flex items-center px-4 py-2">
-                                        <input
-                                            type="text"
-                                            value={messageInput}
-                                            onChange={(e) => setMessageInput(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                            placeholder="Type your message..."
-                                            className="flex-1 bg-transparent border-none text-gray-900 placeholder-gray-400 focus:outline-none text-sm h-10"
-                                        />
-                                        <button className="text-gray-400 hover:text-gray-600 transition p-2">
-                                            <Paperclip className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <button
-                                        onClick={handleSendMessage}
-                                        disabled={!messageInput.trim()}
-                                        className="h-14 w-14 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
+                    {/* Report Dialog */}
+                    {isReportOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">Report User</h3>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Please tell us why you are reporting this user. We take all reports seriously.
+                                </p>
+                                <textarea
+                                    value={reportReason}
+                                    onChange={(e) => setReportReason(e.target.value)}
+                                    placeholder="Describe the issue (e.g., spam, harassment, inappropriate content)..."
+                                    className="w-full min-h-[100px] p-3 border border-gray-200 rounded-lg mb-4 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none resize-none text-sm"
+                                />
+                                <div className="flex justify-end gap-3">
+                                    <Button variant="outline" onClick={() => setIsReportOpen(false)} disabled={isReporting}>
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleReportUser}
+                                        disabled={!reportReason.trim() || isReporting}
+                                        className="bg-red-600 hover:bg-red-700 text-white"
                                     >
-                                        <Send className="w-5 h-5" />
-                                    </button>
+                                        {isReporting ? 'Submitting...' : 'Submit Report'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>
+                    )}
 
-                        {/* Negotiation Sidebar */}
-                        {showNegotiation && (
-                            <aside className="w-80 bg-white border-l border-gray-200 overflow-y-auto hidden lg:flex flex-col animate-in slide-in-from-right duration-300 shadow-xl shadow-gray-200/50 z-20">
-                                <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                                    <h4 className="text-gray-900 font-bold mb-4 flex items-center gap-2 text-sm">
-                                        <TrendingUp className="w-4 h-4 text-teal-600" /> Negotiation Status
-                                    </h4>
-                                    <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Current State</span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight ${candidate?.status === 'HIRED' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'
-                                                }`}>
-                                                {candidate?.status || 'Active'}
-                                            </span>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-                                                    <IndianRupee className="w-4 h-4 text-green-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-bold">Offer Amount</p>
-                                                    <p className="text-sm text-gray-900 font-bold">₹{currentOffer?.amount || '0.00'}</p>
-                                                </div>
+                    {/* Messages Area */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[url('/patterns/subtle-dots.png')]">
+                        {/* Offer/Contract Status Banner if applicable */}
+                        {activeThread.offer && (
+                            <div className="mx-auto max-w-lg mb-6">
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 bg-teal-100 text-teal-600 rounded-lg">
+                                                <DollarSign className="w-4 h-4" />
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                    <Calendar className="w-4 h-4 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-bold">Timeline</p>
-                                                    <p className="text-sm text-gray-900 font-bold">14 Days</p>
-                                                </div>
-                                            </div>
+                                            <span className="font-bold text-gray-900 text-sm">Offer Details</span>
                                         </div>
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+                                            ${activeThread.offer.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                                                activeThread.offer.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                            {activeThread.offer.status}
+                                        </span>
                                     </div>
-                                </div>
-
-                                <div className="p-6 space-y-6">
-                                    <div>
-                                        <h5 className="text-xs text-gray-400 uppercase font-bold tracking-widest mb-3">Campaign Context</h5>
-                                        <div className="space-y-4">
-                                            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                <FileText className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-                                                <div>
-                                                    <p className="text-sm text-gray-900 font-bold line-clamp-1">{candidate?.campaign?.title || 'Direct Collaboration'}</p>
-                                                    <Link href={`/brand/campaigns/${candidate?.campaign?.id}`} className="text-xs text-blue-600 hover:underline mt-1 block">
-                                                        View Campaign Brief
-                                                    </Link>
-                                                </div>
-                                            </div>
+                                    <div className="p-4">
+                                        <div className="flex justify-between items-baseline mb-2">
+                                            <span className="text-2xl font-bold text-gray-900">₹{activeThread.offer.amount.toLocaleString()}</span>
+                                            <span className="text-xs text-gray-500 uppercase font-semibold">Total Budget</span>
                                         </div>
-                                    </div>
+                                        <p className="text-sm text-gray-600 leading-relaxed mb-4">{activeThread.offer.deliverablesDescription}</p>
 
-                                    <div className="pt-6 border-t border-gray-100">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h5 className="text-xs text-gray-400 uppercase font-bold tracking-widest">Actions</h5>
-                                        </div>
-
-                                        {!currentOffer ? (
-                                            <div className="text-center py-6 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                                <AlertCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                                <p className="text-xs text-gray-500 mb-4">No active offer yet.</p>
-                                                <Dialog open={isOfferOpen} onOpenChange={setIsOfferOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <button className="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
-                                                            Create New Offer
-                                                        </button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Make an Offer</DialogTitle>
-                                                            <DialogDescription>
-                                                                Propose terms for this collaboration. The influencer will be notified.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <div className="space-y-4 py-4">
-                                                            <div className="space-y-2">
-                                                                <Label htmlFor="amount">Offer Amount (₹)</Label>
-                                                                <Input
-                                                                    id="amount"
-                                                                    type="number"
-                                                                    value={offerAmount}
-                                                                    onChange={(e) => setOfferAmount(e.target.value)}
-                                                                    placeholder="e.g. 5000"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <Label htmlFor="deliverables">Deliverables</Label>
-                                                                <Textarea
-                                                                    id="deliverables"
-                                                                    value={offerDeliverables}
-                                                                    onChange={(e) => setOfferDeliverables(e.target.value)}
-                                                                    placeholder="e.g. 1 Reel, 2 Stories, raw usage rights..."
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <DialogFooter>
-                                                            <Button variant="outline" onClick={() => setIsOfferOpen(false)}>Cancel</Button>
-                                                            <Button onClick={handleCreateOffer} className="bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting}>
-                                                                {isSubmitting ? 'Sending...' : 'Send Offer'}
-                                                            </Button>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-3">
-                                                <Dialog open={isOfferOpen} onOpenChange={setIsOfferOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <button className="w-full py-2.5 bg-white text-gray-700 text-xs font-bold rounded-lg border border-gray-200 hover:bg-gray-50 transition shadow-sm">
-                                                            Update / Counter Offer
-                                                        </button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Update Offer</DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className="space-y-4 py-4">
-                                                            <div className="space-y-2">
-                                                                <Label>Amount (₹)</Label>
-                                                                <Input
-                                                                    type="number"
-                                                                    value={offerAmount}
-                                                                    onChange={(e) => setOfferAmount(e.target.value)}
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <Label>Deliverables</Label>
-                                                                <Textarea
-                                                                    value={offerDeliverables}
-                                                                    onChange={(e) => setOfferDeliverables(e.target.value)}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <DialogFooter>
-                                                            <Button variant="outline" onClick={() => setIsOfferOpen(false)}>Cancel</Button>
-                                                            <Button onClick={handleCreateOffer} disabled={isSubmitting}>Update Offer</Button>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
-
-                                                {candidate?.status !== 'HIRED' && (
-                                                    <button
-                                                        onClick={handleFinalizeContract}
-                                                        disabled={isSubmitting}
-                                                        className="w-full py-2.5 bg-teal-600 text-white text-xs font-bold rounded-lg shadow-md shadow-teal-200 hover:bg-teal-700 transition-all disabled:opacity-50"
-                                                    >
-                                                        {isSubmitting ? 'Processing...' : 'Approve & Generate Contract'}
-                                                    </button>
-                                                )}
-                                            </div>
+                                        {activeThread.offer.status === 'ACCEPTED' && !activeThread.campaign?.id && ( // Placeholder check for contract status
+                                            <Button onClick={handleFinalizeContract} className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                                                Finalize Contract
+                                            </Button>
                                         )}
                                     </div>
+                                </div>
+                            </div>
+                        )}
 
-                                    <div className="pt-6 border-t border-gray-100">
-                                        <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-xl">
-                                            <div className="flex gap-2 mb-2">
-                                                <Shield className="w-4 h-4 text-yellow-600 shrink-0" />
-                                                <span className="text-[10px] font-bold text-yellow-700 uppercase">Secure Escrow</span>
+                        {optimisticMessages.map((msg, idx) => {
+                            const isMe = msg.senderId === currentUserId;
+                            const isConsecutive = idx > 0 && optimisticMessages[idx - 1].senderId === msg.senderId;
+
+                            return (
+                                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`flex items-end gap-2 max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        {!isMe && !isConsecutive ? (
+                                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
+                                                {msg.sender.image ? (
+                                                    <img src={msg.sender.image} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                                        {msg.sender.name?.[0]}
+                                                    </div>
+                                                )}
                                             </div>
-                                            <p className="text-[10px] text-gray-600 leading-relaxed">
-                                                Funds are held safely in escrow until you approve the work.
-                                            </p>
+                                        ) : (
+                                            <div className="w-8 flex-shrink-0" />
+                                        )}
+
+                                        <div className={`group relative p-3.5 text-sm leading-relaxed shadow-sm
+                                            ${isMe
+                                                ? 'bg-teal-600 text-white rounded-2xl rounded-tr-sm'
+                                                : 'bg-white text-gray-900 border border-gray-100 rounded-2xl rounded-tl-sm'
+                                            } ${isConsecutive ? (isMe ? 'rounded-tr-2xl -mt-4' : 'rounded-tl-2xl -mt-4') : ''}
+                                        `}>
+                                            {msg.attachmentUrl && (
+                                                <div className="mb-2">
+                                                    {msg.attachmentType === 'IMAGE' ? (
+                                                        <a href={msg.attachmentUrl} target="_blank" rel="noopener noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-gray-200">
+                                                            <img src={msg.attachmentUrl} alt="Attachment" className="w-full h-full object-cover" />
+                                                        </a>
+                                                    ) : (
+                                                        <a href={msg.attachmentUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                                                            <div className="p-2 bg-white rounded-md shadow-sm">
+                                                                <FileText className="w-5 h-5 text-teal-600" />
+                                                            </div>
+                                                            <span className="text-xs font-medium text-gray-700 underline truncate max-w-[150px]">
+                                                                View Attachment
+                                                            </span>
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {msg.content}
+                                            <span className={`text-[10px] absolute bottom-1 ${isMe ? 'right-2 text-teal-200' : 'left-2 text-gray-400'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                                                {formatDate(new Date(msg.createdAt), 'h:mm a')}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </aside>
-                        )}
+                            );
+                        })}
+                        <div ref={messagesEndRef} />
                     </div>
-                </main>
+
+                    {/* Input Area */}
+                    <div className="p-4 bg-white border-t border-gray-100">
+                        <form onSubmit={handleSendMessage} className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all">
+                            <div className="flex items-center gap-1 pb-2 pl-2">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={handleFileSelect}
+                                    accept="image/*,application/pdf"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className={`h-8 w-8 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-full ${isUploading ? 'animate-pulse' : ''}`}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isUploading}
+                                >
+                                    <Paperclip className="w-5 h-5" />
+                                </Button>
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-full">
+                                    <Smile className="w-5 h-5" />
+                                </Button>
+                            </div>
+                            {fileAttachment && (
+                                <div className="absolute bottom-full left-4 mb-2 p-2 bg-white rounded-lg shadow-lg border border-gray-100 flex items-center gap-2">
+                                    <div className="p-1 bg-teal-50 rounded">
+                                        {fileAttachment.type === 'IMAGE' ? <ImageIcon className="w-4 h-4 text-teal-600" /> : <FileText className="w-4 h-4 text-teal-600" />}
+                                    </div>
+                                    <span className="text-xs font-medium max-w-[150px] truncate">{fileAttachment.name}</span>
+                                    <button onClick={() => setFileAttachment(null)} className="text-gray-400 hover:text-red-500">
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            )}
+                            <Textarea
+                                value={messageInput}
+                                onChange={(e) => setMessageInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendMessage(e);
+                                    }
+                                }}
+                                placeholder="Type your message..."
+                                className="min-h-[44px] max-h-32 py-3 bg-transparent border-none focus-visible:ring-0 resize-none text-gray-900 placeholder:text-gray-400"
+                            />
+                            <div className="pb-1 pr-1">
+                                <Button
+                                    type="submit"
+                                    disabled={!messageInput.trim() || isPending}
+                                    className="h-10 w-10 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/20 p-0 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <Send className="w-5 h-5 ml-0.5" />
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gray-50">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-100">
-                        {/* eslint-disable-next-line lucide-react/no-lines-around-comment */}
-                        <div className="w-10 h-10 text-gray-300">
-                            {/* Use a simple svg or icon if needed, avoiding import conflicts */}
-                            <Search className="w-10 h-10" />
+                <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-gray-50 text-center p-8">
+                    <div className="w-24 h-24 bg-white rounded-full shadow-xl shadow-gray-200/50 flex items-center justify-center mb-6 animate-pulse-slow">
+                        <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-4xl text-teal-600">forum</span>
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900">Select a Conversation</h3>
-                    <p className="max-w-xs mt-2 text-sm text-gray-500">Choose a thread from the sidebar to view message history and negotiation details.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Conversations</h2>
+                    <p className="text-gray-500 max-w-md mx-auto mb-8">
+                        Select a conversation from the list or start a new one to connect with creators.
+                    </p>
+                    <Button onClick={() => setIsSearchModalOpen(true)} className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-6 rounded-full text-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-600/40 transition-all hover:-translate-y-1">
+                        Find Creators to Message
+                    </Button>
                 </div>
             )}
 
-            {/* Creator Search Modal */}
             <CreatorSearchModal
                 isOpen={isSearchModalOpen}
                 onClose={() => setIsSearchModalOpen(false)}
             />
+
+            {activeThread && (
+                <CallInterface
+                    isOpen={isCallOpen}
+                    onClose={() => setIsCallOpen(false)}
+                    currentUserId={currentUserId}
+                    currentUserName="Me" // Ideally fetch actual name
+                    currentUserImage={null}
+                    recipientId={activeThread.influencer.userId}
+                    recipientName={activeThread.influencer.user.name || "Influencer"}
+                    recipientImage={activeThread.influencer.user.image}
+                    initialIsVideo={initialIsVideo}
+                    socket={socket}
+                />
+            )}
         </div>
     );
 }

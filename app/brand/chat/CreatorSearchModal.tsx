@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Users, Instagram, Youtube, Loader2, MessageSquare } from 'lucide-react';
+import { Search, Users, Instagram, Youtube, Loader2, MessageSquare, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { searchCreators, createOrGetThread } from '../actions';
 import { toast } from 'sonner';
 
@@ -35,27 +42,39 @@ export default function CreatorSearchModal({ isOpen, onClose }: CreatorSearchMod
     const [isSearching, setIsSearching] = useState(false);
     const [isStartingChat, setIsStartingChat] = useState<string | null>(null);
 
+    // Pagination & Filters
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [platformFilter, setPlatformFilter] = useState<string>('all');
+    const [minFollowers, setMinFollowers] = useState<string>('0');
+
+    const handleSearch = async (currPage = 1) => {
+        setIsSearching(true);
+        const result = await searchCreators(searchQuery, currPage, {
+            platform: platformFilter !== 'all' ? platformFilter : undefined,
+            minFollowers: parseInt(minFollowers) > 0 ? parseInt(minFollowers) : undefined
+        });
+        setIsSearching(false);
+
+        if (result.success) {
+            setCreators(result.creators);
+            setTotalPages(result.totalPages || 1);
+            setPage(result.page || 1);
+        } else {
+            toast.error(result.error || 'Failed to search creators');
+        }
+    };
+
     // Debounced search
     useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (searchQuery.trim().length < 2) {
-                setCreators([]);
-                return;
-            }
-
-            setIsSearching(true);
-            const result = await searchCreators(searchQuery);
-            setIsSearching(false);
-
-            if (result.success) {
-                setCreators(result.creators);
-            } else {
-                toast.error(result.error || 'Failed to search creators');
+        const timer = setTimeout(() => {
+            if (searchQuery.trim().length >= 0) { // Allow searching with empty query to see all/filtered
+                handleSearch(1);
             }
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [searchQuery]);
+    }, [searchQuery, platformFilter, minFollowers]);
 
     const handleStartChat = async (creator: Creator) => {
         setIsStartingChat(creator.userId);
@@ -80,46 +99,74 @@ export default function CreatorSearchModal({ isOpen, onClose }: CreatorSearchMod
         return count.toString();
     };
 
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            handleSearch(newPage);
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl max-h-[80vh] p-0 overflow-hidden">
-                <DialogHeader className="p-6 pb-4 border-b border-gray-100">
+            <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden flex flex-col">
+                <DialogHeader className="p-6 pb-4 border-b border-gray-100 flex-shrink-0">
                     <DialogTitle className="text-xl font-bold text-gray-900">Find Creators</DialogTitle>
                     <DialogDescription>
                         Search for verified creators to start a conversation
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="p-6 pt-4">
-                    {/* Search Input */}
-                    <div className="relative mb-6">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input
-                            type="text"
-                            placeholder="Search by name, niche, or social handle..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 h-12 text-base border-gray-200 focus:ring-2 focus:ring-teal-500"
-                        />
-                        {isSearching && (
-                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600 animate-spin" />
-                        )}
+                <div className="p-6 pt-4 flex-1 overflow-hidden flex flex-col">
+                    {/* Search & Filters */}
+                    <div className="space-y-4 mb-6 flex-shrink-0">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Input
+                                type="text"
+                                placeholder="Search by name, niche, or social handle..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10 h-12 text-base border-gray-200 focus:ring-2 focus:ring-teal-500"
+                            />
+                            {isSearching && (
+                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600 animate-spin" />
+                            )}
+                        </div>
+
+                        <div className="flex gap-3">
+                            <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Platform" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Platforms</SelectItem>
+                                    <SelectItem value="instagram">Instagram</SelectItem>
+                                    <SelectItem value="youtube">YouTube</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select value={minFollowers} onValueChange={setMinFollowers}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Followers" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Any Followers</SelectItem>
+                                    <SelectItem value="10000">10k+</SelectItem>
+                                    <SelectItem value="50000">50k+</SelectItem>
+                                    <SelectItem value="100000">100k+</SelectItem>
+                                    <SelectItem value="500000">500k+</SelectItem>
+                                    <SelectItem value="1000000">1M+</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     {/* Results */}
-                    <div className="max-h-[400px] overflow-y-auto">
-                        {searchQuery.trim().length < 2 ? (
-                            <div className="text-center py-12">
-                                <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500 text-sm">
-                                    Type at least 2 characters to search
-                                </p>
-                            </div>
-                        ) : creators.length === 0 && !isSearching ? (
+                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        {creators.length === 0 && !isSearching ? (
                             <div className="text-center py-12">
                                 <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                                 <p className="text-gray-500 text-sm">
-                                    No creators found. Try a different search.
+                                    No creators found. Try a different search or filter.
                                 </p>
                             </div>
                         ) : (
@@ -189,6 +236,33 @@ export default function CreatorSearchModal({ isOpen, onClose }: CreatorSearchMod
                             </div>
                         )}
                     </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 mt-2 border-t border-gray-100 flex-shrink-0">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(page - 1)}
+                                disabled={page === 1 || isSearching}
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" />
+                                Previous
+                            </Button>
+                            <span className="text-sm text-gray-500">
+                                Page {page} of {totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(page + 1)}
+                                disabled={page === totalPages || isSearching}
+                            >
+                                Next
+                                <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

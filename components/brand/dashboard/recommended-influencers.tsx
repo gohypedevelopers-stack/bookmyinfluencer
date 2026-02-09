@@ -1,9 +1,11 @@
+"use client"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, ArrowLeft } from "lucide-react"
+import { useState } from "react"
 
 interface Influencer {
     id: string
@@ -23,6 +25,22 @@ interface RecommendedInfluencersProps {
 }
 
 export function RecommendedInfluencers({ influencers }: RecommendedInfluencersProps) {
+    const [startIndex, setStartIndex] = useState(0)
+    const itemsPerPage = 3
+
+    const canGoBack = startIndex > 0
+    const canGoForward = startIndex + itemsPerPage < influencers.length
+
+    const handlePrev = () => {
+        if (canGoBack) setStartIndex(prev => Math.max(0, prev - itemsPerPage))
+    }
+
+    const handleNext = () => {
+        if (canGoForward) setStartIndex(prev => Math.min(influencers.length - itemsPerPage, prev + itemsPerPage))
+    }
+
+    const visibleInfluencers = influencers.slice(startIndex, startIndex + itemsPerPage)
+
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -33,20 +51,32 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                     </span>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-8 w-8 rounded-full ${!canGoBack ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handlePrev}
+                        disabled={!canGoBack}
+                    >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-8 w-8 rounded-full ${!canGoForward ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={handleNext}
+                        disabled={!canGoForward}
+                    >
                         <ArrowRight className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {influencers.slice(0, 3).map((influencer) => (
+                {visibleInfluencers.map((influencer) => (
                     <Card key={influencer.id} className="overflow-hidden border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                         <div className={`h-24 ${influencer.niche.includes('Lifestyle') ? 'bg-blue-50' :
-                                influencer.niche.includes('Teach') ? 'bg-green-50' : 'bg-pink-50'
+                            influencer.niche.includes('Teach') ? 'bg-green-50' : 'bg-pink-50'
                             }`}></div>
                         <div className="px-6 pb-6 mt-[-30px]">
                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white mb-3">
@@ -94,6 +124,12 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                         </div>
                     </Card>
                 ))}
+
+                {visibleInfluencers.length === 0 && (
+                    <div className="col-span-3 text-center py-12 text-gray-500">
+                        No influencers found. <Link href="/brand/discover" className="text-blue-600 font-medium">Browse Marketplace</Link>
+                    </div>
+                )}
             </div>
         </div>
     )

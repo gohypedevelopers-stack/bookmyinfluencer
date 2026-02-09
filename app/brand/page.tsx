@@ -9,7 +9,7 @@ import { RecommendedInfluencers } from "@/components/brand/dashboard/recommended
 import { QuickActions } from "@/components/brand/dashboard/quick-actions";
 import { TopCollections } from "@/components/brand/dashboard/top-collections";
 import { RecentActivity } from "@/components/brand/dashboard/recent-activity";
-import { getPublicCreators, getBrandStats, getBrandDashboardActivity } from "@/app/brand/actions";
+import { getPublicCreators, getBrandStats, getBrandDashboardActivity, getBrandNotifications } from "@/app/brand/actions";
 
 export default async function BrandDashboardPage() {
     const session = await getServerSession(authOptions);
@@ -40,6 +40,9 @@ export default async function BrandDashboardPage() {
 
     // 3. Activity
     const activities = await getBrandDashboardActivity();
+
+    // 4. Unread Messages
+    const { unreadMessageCount } = await getBrandNotifications();
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -91,7 +94,7 @@ export default async function BrandDashboardPage() {
                         </div>
 
                         {/* Quick Actions */}
-                        <QuickActions />
+                        <QuickActions unreadMessageCount={unreadMessageCount} />
 
                         {/* Top Collections */}
                         <TopCollections />

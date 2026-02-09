@@ -29,14 +29,21 @@ export function CreatorNotificationPopover() {
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
 
-    const unreadCount = notifications.filter(n => !n.read).length
-
     async function fetchNotifications() {
         setIsLoading(true)
-        const data = await getCreatorNotifications()
-        setNotifications(data as Notification[])
+        const res = await getCreatorNotifications()
+        // Handle both old (array) and new (object) return types for safety during flight
+        if (Array.isArray(res)) {
+            setNotifications(res as Notification[])
+        } else {
+            setNotifications(res.notifications as Notification[])
+            setUnreadMessageCount(res.unreadMessageCount || 0)
+        }
         setIsLoading(false)
     }
+
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0)
+    const totalUnread = notifications.filter(n => !n.read).length + unreadMessageCount
 
     useEffect(() => {
         // Initial fetch
@@ -60,7 +67,7 @@ export function CreatorNotificationPopover() {
             <PopoverTrigger asChild>
                 <button className="w-10 h-10 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors relative">
                     <Bell className="w-5 h-5" />
-                    {unreadCount > 0 && (
+                    {totalUnread > 0 && (
                         <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                     )}
                 </button>
@@ -68,9 +75,9 @@ export function CreatorNotificationPopover() {
             <PopoverContent className="w-80 p-0 rounded-xl shadow-xl mr-4" align="end">
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
                     <h4 className="font-bold text-sm text-gray-900">Notifications</h4>
-                    {unreadCount > 0 && (
+                    {totalUnread > 0 && (
                         <span className="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full">
-                            {unreadCount} New
+                            {totalUnread} New
                         </span>
                     )}
                 </div>

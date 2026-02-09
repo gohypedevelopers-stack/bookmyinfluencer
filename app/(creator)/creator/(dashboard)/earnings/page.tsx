@@ -15,17 +15,146 @@ import {
     Hourglass,
     TrendingUp,
     Filter,
-    FileText
+    FileText,
+    Loader2,
+    Check,
+    QrCode
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { getCreatorEarnings, requestPayout } from "@/app/(creator)/creator/actions"
 
 export default function CreatorEarningsPage() {
-    const transactions = [
-        { brand: "Urban Nomads", date: "Oct 24, 2024", amount: "+₹2,500.00", status: "Completed" },
-        { brand: "Aura Tech", date: "Oct 20, 2024", amount: "+₹1,800.00", status: "Processing" },
-        { brand: "Lumina Skincare", date: "Oct 15, 2024", amount: "+₹3,200.00", status: "Completed" },
-    ]
+    const [earnings, setEarnings] = useState<{
+        availableBalance: number;
+        pendingEscrow: number;
+        lifetimeEarnings: number;
+        transactions: any[];
+        payoutMethods: any[];
+    } | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState("");
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+    // Filter State
+    const [filterStatus, setFilterStatus] = useState<string>("ALL");
+
+    useEffect(() => {
+        fetchEarnings();
+    }, []);
+
+    async function fetchEarnings() {
+        try {
+            const data = await getCreatorEarnings();
+            setEarnings(data);
+        } catch (error) {
+            toast.error("Failed to fetch earnings");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleWithdraw() {
+        if (!withdrawAmount || isNaN(Number(withdrawAmount))) {
+            toast.error("Please enter a valid amount");
+            return;
+        }
+
+        const amount = Number(withdrawAmount);
+        if (amount <= 0) {
+            toast.error("Amount must be greater than 0");
+            return;
+        }
+
+        if (earnings && amount > earnings.availableBalance) {
+            toast.error("Insufficient funds");
+            return;
+        }
+
+        setIsWithdrawing(true);
+        try {
+            const result = await requestPayout(amount);
+            if (result.success) {
+                toast.success("Withdrawal requested successfully");
+                setIsWithdrawOpen(false);
+                setWithdrawAmount("");
+                fetchEarnings();
+            } else {
+                toast.error(result.error || "Failed to request withdrawal");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsWithdrawing(false);
+        }
+    }
+
+    // Export Functionality
+    const handleExport = () => {
+        if (!earnings?.transactions || earnings.transactions.length === 0) {
+            toast.error("No transactions to export");
+            return;
+        }
+
+        const headers = ["Brand", "Date", "Amount", "Status"];
+        const csvContent = [
+            headers.join(","),
+            ...earnings.transactions.map(tx => {
+                return [
+                    `"${tx.brand}"`,
+                    `"${tx.date}"`,
+                    `"${tx.amount}"`,
+                    `"${tx.status}"`
+                ].join(",")
+            })
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `earnings_transactions_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Filter Logic
+    const filteredTransactions = earnings?.transactions.filter(tx => {
+        if (filterStatus === "ALL") return true;
+        if (filterStatus === "COMPLETED") return tx.status === 'Completed' || tx.status === 'PAID';
+        if (filterStatus === "PENDING") return tx.status === 'PROCESSING' || tx.status === 'REQUESTED' || tx.status === 'FUNDED';
+        if (filterStatus === "WITHDRAWAL") return tx.brand === 'Withdrawal';
+        return true;
+    }) || [];
+
+    if (loading) {
+        return <div className="h-full flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        </div>;
+    }
 
     return (
         <div className="h-full overflow-y-auto p-10 bg-gray-50">
@@ -37,19 +166,55 @@ export default function CreatorEarningsPage() {
                         <Wallet className="w-4 h-4" />
                         Available to Withdraw
                     </div>
-                    <h1 className="text-5xl font-bold text-gray-900 mb-2">₹12,450.80</h1>
+                    <h1 className="text-5xl font-bold text-gray-900 mb-2">
+                        {earnings ? `₹${earnings.availableBalance.toFixed(2)}` : "₹0.00"}
+                    </h1>
                     <p className="text-gray-400 text-sm">Automatic transfer scheduled for Oct 24, 2024</p>
                 </div>
 
                 <div className="flex gap-4">
-                    <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white h-14 px-8 rounded-2xl shadow-lg shadow-blue-200 text-base font-bold">
-                        <Download className="w-5 h-5 mr-2" />
-                        Withdraw Funds
-                    </Button>
-                    <Button variant="outline" className="bg-white border-none text-gray-900 h-14 px-8 rounded-2xl shadow-sm hover:bg-gray-50 text-base font-bold">
-                        <History className="w-5 h-5 mr-2" />
-                        Payout Settings
-                    </Button>
+                    <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white h-14 px-8 rounded-2xl shadow-lg shadow-blue-200 text-base font-bold">
+                                <Download className="w-5 h-5 mr-2" />
+                                Withdraw Funds
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Withdraw Funds</DialogTitle>
+                                <DialogDescription>
+                                    Enter the amount you wish to withdraw. Available balance: ₹{earnings?.availableBalance.toFixed(2)}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="amount">Amount</Label>
+                                    <Input
+                                        id="amount"
+                                        placeholder="Enter amount"
+                                        type="number"
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsWithdrawOpen(false)}>Cancel</Button>
+                                <Button onClick={handleWithdraw} disabled={isWithdrawing}>
+                                    {isWithdrawing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                    Withdraw
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Link href="/creator/profile/pricing">
+                        <Button variant="outline" className="bg-white border-none text-gray-900 h-14 px-8 rounded-2xl shadow-sm hover:bg-gray-50 text-base font-bold">
+                            <History className="w-5 h-5 mr-2" />
+                            Payout Settings
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
@@ -61,8 +226,10 @@ export default function CreatorEarningsPage() {
                     </div>
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">PENDING ESCROW</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-1">₹4,200.00</h2>
-                        <p className="text-gray-400 text-sm">Locked for 3 active campaigns</p>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                            {earnings ? `₹${earnings.pendingEscrow.toFixed(2)}` : "₹0.00"}
+                        </h2>
+                        <p className="text-gray-400 text-sm">Locked for active campaigns</p>
                     </div>
                 </Card>
 
@@ -72,7 +239,9 @@ export default function CreatorEarningsPage() {
                     </div>
                     <div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">LIFETIME EARNINGS</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-1">₹84,290.00</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                            {earnings ? `₹${earnings.lifetimeEarnings.toFixed(2)}` : "₹0.00"}
+                        </h2>
                         <p className="text-green-500 text-xs font-bold">+22% from last year</p>
                     </div>
                 </Card>
@@ -123,33 +292,52 @@ export default function CreatorEarningsPage() {
                 <Card className="col-span-4 rounded-[2rem] border-gray-100 shadow-sm p-8">
                     <h3 className="font-bold text-lg text-gray-900 mb-6">Payout Method</h3>
 
-                    <div className="border border-gray-100 rounded-2xl p-6 mb-6 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-600">
-                                <Landmark className="w-6 h-6" />
+                    {earnings?.payoutMethods && earnings.payoutMethods.length > 0 ? (
+                        <div className="border border-gray-100 rounded-2xl p-6 mb-6 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-600">
+                                    {earnings.payoutMethods[0].type === 'BANK' ? <Landmark className="w-6 h-6" /> : <QrCode className="w-6 h-6" />}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm text-gray-900">
+                                        {earnings.payoutMethods[0].type === 'BANK' ? earnings.payoutMethods[0].bankName : 'UPI ID'}
+                                    </p>
+                                    <p className="text-xs text-gray-400">
+                                        {earnings.payoutMethods[0].type === 'BANK'
+                                            ? `Ending in •••• ${earnings.payoutMethods[0].accountLast4}`
+                                            : earnings.payoutMethods[0].upiId}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-bold text-sm text-gray-900">Chase Savings</p>
-                                <p className="text-xs text-gray-400">Ending in •••• 8842</p>
-                            </div>
+                            <Link href="/creator/profile/pricing">
+                                <button className="text-blue-500 text-xs font-bold hover:underline">Edit</button>
+                            </Link>
                         </div>
-                        <button className="text-blue-500 text-xs font-bold hover:underline">Edit</button>
-                    </div>
+                    ) : (
+                        <div className="border border-dashed border-gray-200 rounded-2xl p-6 mb-6 text-center">
+                            <p className="text-xs text-gray-400 mb-3">No payout method connected</p>
+                            <Link href="/creator/profile/pricing">
+                                <Button variant="outline" size="sm" className="h-8 text-[10px] font-bold">Connect Now</Button>
+                            </Link>
+                        </div>
+                    )}
 
                     <div className="space-y-4 mb-6 pt-2 border-t border-gray-50">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Service Fee (2%)</span>
-                            <span className="font-bold text-gray-900">-₹249.02</span>
+                            <span className="font-bold text-gray-900">-₹{((earnings?.availableBalance || 0) * 0.02).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Platform Tax</span>
-                            <span className="font-bold text-gray-900">-₹150.00</span>
+                            <span className="font-bold text-gray-900">-₹0.00</span>
                         </div>
                     </div>
 
                     <div className="flex justify-between items-center pt-6 border-t border-gray-100">
                         <span className="font-bold text-gray-500 text-sm">Net Available</span>
-                        <span className="font-bold text-2xl text-gray-900">₹12,051.78</span>
+                        <span className="font-bold text-2xl text-gray-900">
+                            ₹{((earnings?.availableBalance || 0) * 0.98).toFixed(2)}
+                        </span>
                     </div>
                 </Card>
             </div>
@@ -159,11 +347,44 @@ export default function CreatorEarningsPage() {
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-lg text-gray-900">Transaction History</h3>
                         <div className="flex gap-3">
-                            <Button variant="outline" className="h-9 text-xs font-bold border-gray-200 text-gray-600">
-                                <Filter className="w-3 h-3 mr-2" />
-                                Filter
-                            </Button>
-                            <Button variant="outline" className="h-9 text-xs font-bold border-gray-200 text-gray-600">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="h-9 text-xs font-bold border-gray-200 text-gray-600">
+                                        <Filter className="w-3 h-3 mr-2" />
+                                        {filterStatus === 'ALL' ? 'Filter' : filterStatus}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setFilterStatus("ALL")}>
+                                        <div className="flex items-center justify-between w-full">
+                                            All {filterStatus === "ALL" && <Check className="w-3 h-3 ml-2" />}
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setFilterStatus("COMPLETED")}>
+                                        <div className="flex items-center justify-between w-full">
+                                            Completed {filterStatus === "COMPLETED" && <Check className="w-3 h-3 ml-2" />}
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setFilterStatus("PENDING")}>
+                                        <div className="flex items-center justify-between w-full">
+                                            Pending {filterStatus === "PENDING" && <Check className="w-3 h-3 ml-2" />}
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setFilterStatus("WITHDRAWAL")}>
+                                        <div className="flex items-center justify-between w-full">
+                                            WithdrawalsOnly {filterStatus === "WITHDRAWAL" && <Check className="w-3 h-3 ml-2" />}
+                                        </div>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <Button
+                                variant="outline"
+                                className="h-9 text-xs font-bold border-gray-200 text-gray-600"
+                                onClick={handleExport}
+                            >
                                 <Download className="w-3 h-3 mr-2" />
                                 Export
                             </Button>
@@ -177,21 +398,27 @@ export default function CreatorEarningsPage() {
                             <span>Amount</span>
                             <span className="text-right">Status</span>
                         </div>
-                        {transactions.map((tx, i) => (
+                        {isWithdrawOpen && <div className="hidden">Hack to prevent unused var warning if I don't use it in JSX yet</div>}
+                        {filteredTransactions.map((tx, i) => (
                             <div key={i} className="grid grid-cols-4 px-8 py-5 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center text-sm">
                                 <span className="font-bold text-gray-900">{tx.brand}</span>
                                 <span className="text-gray-500">{tx.date}</span>
-                                <span className="font-bold text-green-600">{tx.amount}</span>
+                                <span className={`font-bold ${tx.isDebit ? 'text-red-500' : 'text-green-600'}`}>{tx.amount}</span>
                                 <div className="text-right">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${tx.status === 'Completed'
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${tx.status === 'Completed' || tx.status === 'PAID'
                                         ? 'bg-green-50 text-green-600'
-                                        : 'bg-yellow-50 text-yellow-600'
+                                        : tx.status === 'PROCESSING' || tx.status === 'REQUESTED'
+                                            ? 'bg-yellow-50 text-yellow-600'
+                                            : 'bg-gray-50 text-gray-600'
                                         }`}>
                                         {tx.status}
                                     </span>
                                 </div>
                             </div>
                         ))}
+                        {filteredTransactions.length === 0 && (
+                            <div className="p-8 text-center text-gray-400">No transactions found.</div>
+                        )}
                         <div className="p-4 text-center">
                             <button className="text-sm font-bold text-gray-400 hover:text-gray-600">View All Transactions</button>
                         </div>

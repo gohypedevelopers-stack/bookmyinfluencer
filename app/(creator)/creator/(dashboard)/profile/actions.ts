@@ -274,39 +274,20 @@ export async function updateCreatorProfileAction(formData: FormData) {
             updateData.profileImageUrl = `/uploads/${filename}`
         }
 
-        // Separate backgroundImageUrl to allow raw update if Prisma Client is stale
-        let bannerUrlFn: string | undefined;
-
         if (bannerImageFile && bannerImageFile.size > 0 && bannerImageFile.name) {
             const buffer = Buffer.from(await bannerImageFile.arrayBuffer())
             const filename = `banner-${userId}-${Date.now()}-${bannerImageFile.name.replace(/[^a-zA-Z0-9.]/g, "")}`
             const filepath = join(uploadDir, filename)
             await writeFile(filepath, buffer)
-            // Do NOT add to updateData directly to avoid "Unknown argument"
-            bannerUrlFn = `/uploads/${filename}`
+            updateData.backgroundImageUrl = `/uploads/${filename}`
         }
+
+        console.log("Updating creator profile for user:", userId, "with data:", JSON.stringify(updateData, null, 2))
 
         await db.creator.update({
             where: { userId },
             data: updateData
         })
-
-        // Execute Raw SQL for background_image_url if we have one
-        // This bypasses Prisma Client validation if the schema hasn't been regenerated
-        if (bannerUrlFn) {
-            // Using $executeRawUnsafe because tagged template with dynamic string from file upload could be tricky
-            // But here we are passing strict string. 
-            // Better to use $executeRaw with parameter.
-            // Note: background_image_url is the column name in DB. userId is user_id.
-            const { Prisma } = await import("@prisma/client")
-            // We need to use Prisma.sql to tag the query if using $executeRaw
-            // Or simpler: use $executeRawUnsafe
-            await db.$executeRawUnsafe(
-                `UPDATE "creators" SET "background_image_url" = $1 WHERE "user_id" = $2`,
-                bannerUrlFn,
-                userId
-            )
-        }
 
         revalidatePath("/creator/profile")
         return { success: true }

@@ -99,9 +99,20 @@ model User {
   brandProfile      BrandProfile?
   influencerProfile InfluencerProfile?
   
-  sentMessages      Message[] @relation("SentMessages")
-  notifications     Notification[]
+  // Messages
+  sentMessages      Message[]       @relation("SentMessages")
+
+  // Notifications
+  notifications     Notification[]  @relation()
+
+  // Audit Logs
   auditLogs         AuditLog[]
+
+  // Social
+  blocksInitiated   Block[]         @relation("BlocksInitiated")
+  blocksReceived    Block[]         @relation("BlocksReceived")
+  reportsInitiated  Report[]        @relation("ReportsInitiated")
+  reportsReceived   Report[]        @relation("ReportsReceived")
 }
 
 model BrandProfile {
@@ -327,6 +338,7 @@ model ChatThread {
   
   // For generic chats not linked to campaign
   participants String // Comma-separated User IDs
+  initiatedBy  String? // User ID who started the thread
   
   messages    Message[]
   
@@ -342,7 +354,9 @@ model Message {
   senderId  String
   sender    User     @relation("SentMessages", fields: [senderId], references: [id])
   
-  content   String
+  content   String? // Content can be optional if only sending a file
+  attachmentUrl String?
+  attachmentType String? // IMAGE, VIDEO, DOCUMENT, etc.
   read      Boolean  @default(false)
   
   createdAt DateTime @default(now())
@@ -363,6 +377,33 @@ model Dispute {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id])
+  
+  blockedId String
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
+  
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  reporterId String
+  reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id])
+  
+  reportedId String
+  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
+  
+  reason    String
+  status    String   @default("PENDING") // PENDING, REVIEWED, RESOLVED
+  
+  createdAt DateTime @default(now())
 }
 
 model Notification {

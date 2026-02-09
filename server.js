@@ -19,22 +19,48 @@ app.prepare().then(() => {
         console.log("Client connected:", socket.id);
 
         // Join a specific thread room
-        socket.on("join_room", (room) => {
+        socket.on("join-room", (room) => {
             socket.join(room);
             console.log(`User ${socket.id} joined room: ${room}`);
         });
 
         // Handle sending messages
-        socket.on("send_message", (data) => {
+        socket.on("send-message", (data) => {
             console.log("Message received:", data);
-            // Broadcast to everyone in the room EXCEPT sender (usually sender adds optimistic UI)
-            // OR broadcast to everyone including sender if we want single source of truth
-            // For now, let's broadcast to the room so the receiver gets it.
-            socket.to(data.room).emit("receive_message", data);
+            socket.to(data.threadId).emit("new-message", data);
+        });
+
+        // --- Call Signaling ---
+
+        socket.on("call-user", (data) => {
+            // data: { userToCall, signalData, from, name }
+            console.log(`Call from ${data.from} to ${data.userToCall}`);
+            io.to(data.userToCall).emit("call-received", {
+                signal: data.signalData,
+                from: data.from,
+                name: data.name
+            });
+        });
+
+        socket.on("answer-call", (data) => {
+            // data: { to, signal }
+            io.to(data.to).emit("call-accepted", data.signal);
+        });
+
+        socket.on("reject-call", (data) => {
+            io.to(data.to).emit("call-rejected");
+        });
+
+        socket.on("end-call", (data) => {
+            // Notify the other user in the room/thread or specific user
+            if (data.to) {
+                io.to(data.to).emit("call-ended");
+            }
         });
 
         socket.on("disconnect", () => {
             console.log("Client disconnected");
+            socket.broadcast.emit("call-ended");
         });
     });
 

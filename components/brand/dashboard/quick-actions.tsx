@@ -2,7 +2,11 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { ShoppingBag, Bookmark, Users, MessageSquare } from "lucide-react"
 
-export function QuickActions() {
+interface QuickActionsProps {
+    unreadMessageCount?: number
+}
+
+export function QuickActions({ unreadMessageCount = 0 }: QuickActionsProps) {
     const actions = [
         {
             name: "Browse Marketplace",
@@ -16,21 +20,21 @@ export function QuickActions() {
             href: "/brand/collections",
             icon: Bookmark,
             color: "text-blue-600",
-            bg: "bg-blue-50" // In design it's blue icon
+            bg: "bg-blue-50"
         },
         {
             name: "Bulk Invite Influencers",
-            href: "/brand/campaigns/invite", // Placeholder
+            href: "/brand/campaigns",
             icon: Users,
             color: "text-blue-600",
             bg: "bg-blue-50"
         },
         {
-            name: "Unread Messages (3)",
+            name: unreadMessageCount > 0 ? `Unread Messages (${unreadMessageCount})` : "Messages",
             href: "/brand/chat",
             icon: MessageSquare,
-            color: "text-blue-600",
-            bg: "bg-blue-50"
+            color: unreadMessageCount > 0 ? "text-red-600" : "text-blue-600",
+            bg: unreadMessageCount > 0 ? "bg-red-50" : "bg-blue-50"
         }
     ]
 

@@ -34,6 +34,11 @@ export default function InfluencerDiscovery() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const itemsPerPage = 9;
+
     // Filters State
     const [selectedLocation, setSelectedLocation] = useState('India');
     const [selectedCity, setSelectedCity] = useState('Mumbai');
@@ -42,7 +47,7 @@ export default function InfluencerDiscovery() {
     const [followersRange, setFollowersRange] = useState([0, 1000]); // in K
 
     // Fetch Function
-    const fetchInfluencers = async () => {
+    const fetchInfluencers = async (page: number = currentPage) => {
         setIsLoading(true);
         try {
             const res = await getPublicCreators({
@@ -61,7 +66,11 @@ export default function InfluencerDiscovery() {
                         (inf.niche && inf.niche.toLowerCase().includes(lowerQ))
                     );
                 }
-                setInfluencers(data);
+                setTotalItems(data.length);
+                // Apply pagination
+                const startIndex = (page - 1) * itemsPerPage;
+                const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+                setInfluencers(paginatedData);
             }
         } catch (error) {
             console.error(error);
@@ -71,7 +80,8 @@ export default function InfluencerDiscovery() {
 
     // Initial Fetch & Tab Change
     useEffect(() => {
-        fetchInfluencers();
+        setCurrentPage(1);
+        fetchInfluencers(1);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedTab]);
     // Removed filter deps to make "Apply" manual.
@@ -262,7 +272,7 @@ export default function InfluencerDiscovery() {
                                     </div>
 
                                     <button
-                                        onClick={fetchInfluencers}
+                                        onClick={() => { setCurrentPage(1); fetchInfluencers(1); }}
                                         className="w-full py-3 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/30 transition-all"
                                     >
                                         Apply Filters
@@ -406,29 +416,71 @@ export default function InfluencerDiscovery() {
                         )}
 
                         {/* Pagination */}
-                        <div className="flex items-center justify-center gap-2 mt-8">
-                            <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            {[1, 2, 3, '...', 12].map((page, idx) => (
+                        {totalItems > itemsPerPage && (
+                            <div className="flex items-center justify-center gap-2 mt-8">
                                 <button
-                                    key={idx}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${page === 1
-                                        ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'
-                                        : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
-                                        }`}
+                                    onClick={() => { if (currentPage > 1) { setCurrentPage(currentPage - 1); fetchInfluencers(currentPage - 1); } }}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {page}
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
                                 </button>
-                            ))}
-                            <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
+                                {(() => {
+                                    const totalPages = Math.ceil(totalItems / itemsPerPage);
+                                    const pages: (number | string)[] = [];
+
+                                    if (totalPages <= 7) {
+                                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                                    } else {
+                                        pages.push(1);
+                                        if (currentPage > 3) pages.push('...');
+                                        for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                                            pages.push(i);
+                                        }
+                                        if (currentPage < totalPages - 2) pages.push('...');
+                                        pages.push(totalPages);
+                                    }
+
+                                    return pages.map((page, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                if (typeof page === 'number') {
+                                                    setCurrentPage(page);
+                                                    fetchInfluencers(page);
+                                                }
+                                            }}
+                                            disabled={page === '...'}
+                                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${page === currentPage
+                                                ? 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'
+                                                : page === '...'
+                                                    ? 'border border-gray-300 text-gray-400 cursor-default'
+                                                    : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                                                }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ));
+                                })()}
+                                <button
+                                    onClick={() => {
+                                        const totalPages = Math.ceil(totalItems / itemsPerPage);
+                                        if (currentPage < totalPages) {
+                                            setCurrentPage(currentPage + 1);
+                                            fetchInfluencers(currentPage + 1);
+                                        }
+                                    }}
+                                    disabled={currentPage >= Math.ceil(totalItems / itemsPerPage)}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

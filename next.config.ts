@@ -19,9 +19,12 @@ const nextConfig: NextConfig = {
   typescript: {
     tsconfigPath: './tsconfig.json',
   },
-  turbopack: {
-    root: process.cwd(),
-  }
+
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
 } as any;
 
 export default nextConfig;

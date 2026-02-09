@@ -12,15 +12,37 @@ import {
     Send,
     CheckCircle2,
     Loader2,
-    MessageSquare
+    MessageSquare,
+    Flag,
+    Ban,
+    Trash2,
+    User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState, useEffect, useRef } from "react"
-import { getCreatorThreads, getThreadMessages, sendMessage } from "@/app/(creator)/creator/actions"
+import { getCreatorThreads, getThreadMessages, sendMessage, markMessagesRead, deleteThread, blockBrand, reportBrand } from "@/app/(creator)/creator/actions"
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 interface Thread {
     id: string
@@ -29,6 +51,7 @@ interface Thread {
     lastMessage: string
     updatedAt: Date
     unread: boolean
+    participants: string
 }
 
 interface Message {
@@ -42,8 +65,6 @@ interface Message {
 }
 
 import { io } from "socket.io-client"
-
-// ... imports
 
 export default function CreatorMessagesPage() {
     const { data: session } = useSession()
@@ -59,6 +80,11 @@ export default function CreatorMessagesPage() {
     const scrollRef = useRef<HTMLDivElement>(null)
     const socketRef = useRef<any>(null)
 
+    // Report Dialog State
+    const [isReportOpen, setIsReportOpen] = useState(false)
+    const [reportReason, setReportReason] = useState("")
+    const [isReporting, setIsReporting] = useState(false)
+
     // Fetch threads on mount
     useEffect(() => {
         fetchThreads()
@@ -67,7 +93,7 @@ export default function CreatorMessagesPage() {
     async function fetchThreads() {
         try {
             const data = await getCreatorThreads()
-            setThreads(data as Thread[])
+            setThreads(data as any[])
             if (data.length > 0 && !activeThreadId) {
                 setActiveThreadId(data[0].id)
             }
@@ -88,23 +114,27 @@ export default function CreatorMessagesPage() {
             setMessages(data as Message[])
             setIsLoadingMessages(false)
             scrollToBottom()
+            // Mark messages as read
+            await markMessagesRead(activeThreadId)
         }
 
         fetchMessages()
 
         // Socket.io Connection
-        socketRef.current = io()
-        socketRef.current.emit("join_room", activeThreadId)
+        socketRef.current = io({
+            path: '/api/socket',
+        })
+        socketRef.current.emit("join-room", `thread:${activeThreadId}`)
 
-        socketRef.current.on("receive_message", (data: any) => {
-            // Avoid duplicating if we just sent it (though senderId check handles this usually)
+        socketRef.current.on("new-message", (data: any) => {
+            // Avoid duplicating if we just sent it
             if (data.senderId !== session?.user?.id) {
                 setMessages((prev) => [...prev, {
                     id: data.id || Math.random().toString(),
-                    content: data.message,
+                    content: data.content,
                     senderId: data.senderId,
-                    senderName: "Brand", // Simplified
-                    senderImage: null,
+                    senderName: data.sender?.name || "Brand",
+                    senderImage: data.sender?.image || null,
                     createdAt: new Date(),
                     isMe: false
                 }])
@@ -144,10 +174,15 @@ export default function CreatorMessagesPage() {
 
         // Emit to Socket
         if (socketRef.current) {
-            socketRef.current.emit("send_message", {
-                room: activeThreadId,
-                message: messagePayload.content,
-                senderId: messagePayload.senderId
+            socketRef.current.emit("send-message", {
+                threadId: `thread:${activeThreadId}`,
+                content: messagePayload.content,
+                senderId: messagePayload.senderId,
+                sender: {
+                    name: messagePayload.senderName,
+                    image: messagePayload.senderImage
+                },
+                createdAt: messagePayload.createdAt
             })
         }
 
@@ -156,12 +191,13 @@ export default function CreatorMessagesPage() {
             await sendMessage(activeThreadId, newMessage)
         } catch (error) {
             toast.error("Failed to send message")
-            // Here you might want to remove the optimistic message on failure
         }
     }
 
     // Delete conversation handler
     async function handleDeleteConversation(threadId: string) {
+        if (!confirm("Are you sure you want to delete this conversation? This action cannot be undone.")) return;
+
         try {
             // Optimistically remove from UI
             setThreads(prev => prev.filter(t => t.id !== threadId))
@@ -173,8 +209,7 @@ export default function CreatorMessagesPage() {
             }
 
             toast.success("Conversation deleted")
-            // TODO: Add actual API call to delete conversation from database
-            // await deleteThread(threadId)
+            await deleteThread(threadId)
         } catch (error) {
             toast.error("Failed to delete conversation")
             // Revert on error
@@ -182,12 +217,71 @@ export default function CreatorMessagesPage() {
         }
     }
 
+    // Block Brand handler
+    async function handleBlockBrand(brandUserId: string) {
+        if (!confirm("Are you sure you want to block this brand? You won't be able to message each other.")) return;
+
+        try {
+            const res = await blockBrand(brandUserId);
+            if (res.success) {
+                toast.success("Brand blocked successfully");
+                // Maybe redirect or refresh?
+            } else {
+                toast.error(res.error || "Failed to block brand");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        }
+    }
+
+    // Report Brand handler
+    async function handleReportBrand() {
+        if (!activeThreadId || !reportReason.trim()) return;
+        setIsReporting(true);
+
+        // We need brandUserId. It's not directly in activeThread object unless we parse participants or fetch it.
+        // Quick fix: Get it from participants string or passed in thread object if available.
+        // In getCreatorThreads, we don't pass participants array cleanly, just string usually.
+        // Let's rely on finding the OTHER participant from the thread participant string.
+
+        // Actually, fetching brandUserId is tricky if we don't have it handy.
+        // `activeThread` has `id`. We can pass threadId to report, OR we parse participants.
+        // Let's Assume the ActiveThread object has the Brand User ID implicitly or we can extract it.
+        // getCreatorThreads returns: participants string.
+
+        const thread = threads.find(t => t.id === activeThreadId);
+        if (!thread) return;
+
+        // Extract other user ID (Brand)
+        const participants = thread.participants.split(',');
+        const brandUserId = participants.find(p => p !== session?.user?.id);
+
+        if (!brandUserId) {
+            toast.error("Could not identify brand to report");
+            setIsReporting(false);
+            return;
+        }
+
+        try {
+            const res = await reportBrand(brandUserId, reportReason);
+            if (res.success) {
+                toast.success("Report submitted. We will review it shortly.");
+                setIsReportOpen(false);
+                setReportReason("");
+            } else {
+                toast.error(res.error || "Failed to submit report");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsReporting(false);
+        }
+    }
+
     // Filter threads based on search query
     const filteredThreads = threads.filter(thread =>
         thread.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
-
-
 
     const activeThread = threads.find(t => t.id === activeThreadId)
 
@@ -201,8 +295,8 @@ export default function CreatorMessagesPage() {
                         <button
                             onClick={() => setIsEditMode(!isEditMode)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
-                                    ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
                             {isEditMode ? (
@@ -264,7 +358,10 @@ export default function CreatorMessagesPage() {
                                             <h3 className="font-bold text-gray-900 truncate pr-2">{conv.name}</h3>
                                             {isEditMode ? (
                                                 <button
-                                                    onClick={() => handleDeleteConversation(conv.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteConversation(conv.id);
+                                                    }}
                                                     className="px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded transition-colors shrink-0"
                                                 >
                                                     Delete
@@ -316,14 +413,83 @@ export default function CreatorMessagesPage() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
+                                <button
+                                    onClick={() => toast.info("Audio calling feature is coming soon!")}
+                                    className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors"
+                                >
                                     <Phone className="w-5 h-5" />
                                 </button>
-                                <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
-                                    <MoreVertical className="w-5 h-5" />
-                                </button>
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
+                                            <MoreVertical className="w-5 h-5" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56">
+                                        <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {/* TODO: Link to actual Brand Profile if available */}
+                                        <DropdownMenuItem disabled className="cursor-not-allowed text-gray-400">
+                                            <User className="w-4 h-4 mr-2" />
+                                            View Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteConversation(activeThread.id)} className="text-orange-600 cursor-pointer">
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Clear Chat
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => setIsReportOpen(true)} className="text-amber-600 cursor-pointer">
+                                            <Flag className="w-4 h-4 mr-2" />
+                                            Report Brand
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                const participants = activeThread.participants.split(',');
+                                                const brandUserId = participants.find(p => p !== session?.user?.id);
+                                                if (brandUserId) handleBlockBrand(brandUserId);
+                                            }}
+                                            className="text-red-600 cursor-pointer"
+                                        >
+                                            <Ban className="w-4 h-4 mr-2" />
+                                            Block Brand
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </header>
+
+                        {/* Report Dialog */}
+                        <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Report Brand</DialogTitle>
+                                    <DialogDescription>
+                                        Please describe why you are reporting this brand. We take all reports seriously.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label>Reason</Label>
+                                        <Textarea
+                                            placeholder="Describe the issue..."
+                                            value={reportReason}
+                                            onChange={(e) => setReportReason(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsReportOpen(false)}>Cancel</Button>
+                                    <Button
+                                        onClick={handleReportBrand}
+                                        disabled={isReporting || !reportReason.trim()}
+                                        className="bg-red-600 hover:bg-red-700 text-white"
+                                    >
+                                        {isReporting ? "Submitting..." : "Submit Report"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
 
                         {/* Chat Messages */}
                         <div className="flex-1 overflow-y-auto px-8 pb-4" ref={scrollRef}>
