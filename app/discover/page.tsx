@@ -8,14 +8,21 @@ import { Navbar } from '@/components/Navbar';
 
 interface Creator {
     id: string;
+    dbId: string;
     name: string;
     handle: string;
     niche: string;
     location: string;
-    followers: number;
-    engagementRate: number;
+    followers: string;
+    followersCount: number;
+    engagementRate: string;
+    avgViews: string;
     profileImage: string;
+    thumbnail: string;
     verified: boolean;
+    tags: string[];
+    priceRange: string;
+    saved: boolean;
 }
 
 interface Brand {
@@ -127,8 +134,8 @@ export default function PublicMarketplacePage() {
                         <button
                             onClick={() => setActiveTab('creators')}
                             className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all ${activeTab === 'creators'
-                                    ? 'bg-white text-slate-900 shadow-lg'
-                                    : 'bg-slate-700 text-white hover:bg-slate-600'
+                                ? 'bg-white text-slate-900 shadow-lg'
+                                : 'bg-slate-700 text-white hover:bg-slate-600'
                                 }`}
                         >
                             <Users className="w-5 h-5" />
@@ -137,8 +144,8 @@ export default function PublicMarketplacePage() {
                         <button
                             onClick={() => setActiveTab('brands')}
                             className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all ${activeTab === 'brands'
-                                    ? 'bg-white text-slate-900 shadow-lg'
-                                    : 'bg-slate-700 text-white hover:bg-slate-600'
+                                ? 'bg-white text-slate-900 shadow-lg'
+                                : 'bg-slate-700 text-white hover:bg-slate-600'
                                 }`}
                         >
                             <Building2 className="w-5 h-5" />
@@ -171,8 +178,8 @@ export default function PublicMarketplacePage() {
                                 key={niche}
                                 onClick={() => setSelectedNiche(niche)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selectedNiche === niche
-                                        ? 'bg-slate-900 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-slate-900 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 {niche}
@@ -201,52 +208,95 @@ export default function PublicMarketplacePage() {
                     filteredCreators.length > 0 ? (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredCreators.map((creator) => (
-                                <div key={creator.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-                                    <div className="relative h-48 bg-gradient-to-br from-slate-200 to-slate-300">
-                                        {creator.profileImage && (
-                                            <Image
+                                <div key={creator.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+                                    {/* Thumbnail */}
+                                    <div className="relative h-48 bg-gray-200 overflow-hidden">
+                                        {(creator.thumbnail && (creator.thumbnail.startsWith('/') || creator.thumbnail.startsWith('http'))) ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={creator.thumbnail}
+                                                alt={creator.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : creator.profileImage ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
                                                 src={creator.profileImage}
                                                 alt={creator.name}
-                                                fill
-                                                className="object-cover"
+                                                className="w-full h-full object-cover"
                                             />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-teal-400 to-blue-500" />
                                         )}
-                                        {creator.verified && (
-                                            <span className="absolute top-3 right-3 px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
-                                                ✓ Verified
+
+                                        <div className="absolute top-3 left-3 flex gap-2">
+                                            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-700 flex items-center gap-1">
+                                                <Instagram className="w-3 h-3" />
+                                                {creator.niche?.split(',')[0] || 'Creator'}
                                             </span>
-                                        )}
-                                        <span className="absolute top-3 left-3 px-2 py-1 bg-white/90 text-gray-700 text-xs font-medium rounded-full flex items-center gap-1">
-                                            <Instagram className="w-3 h-3" />
-                                            {creator.niche.split(',')[0]}
-                                        </span>
+                                            {creator.verified && (
+                                                <span className="px-2.5 py-1 bg-teal-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white flex items-center gap-1">
+                                                    ✓ VERIFIED
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
+                                    {/* Content */}
                                     <div className="p-5">
-                                        <h3 className="font-bold text-gray-900 text-lg">{creator.name}</h3>
-                                        <p className="text-sm text-gray-500 mb-3">{creator.handle}</p>
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-bold text-gray-900 mb-1">{creator.name}</h3>
+                                            <p className="text-sm text-gray-500">{creator.handle}</p>
+                                        </div>
 
-                                        <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-t border-b border-gray-100">
-                                            <div className="text-center">
-                                                <p className="text-xs text-gray-500 uppercase">Followers</p>
-                                                <p className="font-bold text-gray-900">{formatFollowers(creator.followers)}</p>
+                                        {/* Stats */}
+                                        <div className="grid grid-cols-3 gap-3 mb-4">
+                                            <div>
+                                                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                                    <Users className="w-3 h-3" />
+                                                    FOLLOWERS
+                                                </div>
+                                                <div className="font-bold text-gray-900">{creator.followers}</div>
                                             </div>
-                                            <div className="text-center border-l border-gray-100">
-                                                <p className="text-xs text-gray-500 uppercase">Engage</p>
-                                                <p className="font-bold text-green-600">{creator.engagementRate}%</p>
+                                            <div>
+                                                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                                    <TrendingUp className="w-3 h-3" />
+                                                    ENG. RATE
+                                                </div>
+                                                <div className="font-bold text-green-600">{creator.engagementRate}</div>
                                             </div>
-                                            <div className="text-center border-l border-gray-100">
-                                                <p className="text-xs text-gray-500 uppercase">Location</p>
-                                                <p className="font-bold text-gray-700 text-xs">{creator.location || 'India'}</p>
+                                            <div>
+                                                <div className="text-xs text-gray-500 mb-1">
+                                                    REACH
+                                                </div>
+                                                <div className="font-bold text-gray-900">{creator.avgViews || 'N/A'}</div>
                                             </div>
                                         </div>
 
-                                        <Link
-                                            href={`/login?redirect=/brand/influencers/${creator.id}`}
-                                            className="block w-full text-center py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors"
-                                        >
-                                            View Profile
-                                        </Link>
+                                        {/* Tags */}
+                                        {creator.tags && creator.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {creator.tags.map((tag) => (
+                                                    <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Footer */}
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                            <div className="text-sm">
+                                                <span className="text-gray-500">Starting at</span>
+                                                <div className="font-bold text-gray-900">{creator.priceRange || '₹100-500'}</div>
+                                            </div>
+                                            <Link
+                                                href={`/login?redirect=/brand/discover/${creator.dbId || creator.id}`}
+                                                className="px-4 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+                                            >
+                                                View Profile
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

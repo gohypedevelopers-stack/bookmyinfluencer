@@ -320,44 +320,43 @@ export async function getPublicCreators(filter?: {
 }) {
     try {
         // Construct where clause based on filters
-        const where: any = {};
-
-        // For debugging, we aren't enforcing verified status STRICTLY yet to ensure you see your profile
-        // In production: where.verificationStatus = 'VERIFIED';
+        const creatorWhere: any = {};
+        const influencerWhere: any = {};
 
         if (filter?.niche && filter.niche !== 'All') {
-            where.niche = { contains: filter.niche, mode: 'insensitive' };
+            creatorWhere.niche = { contains: filter.niche, mode: 'insensitive' };
+            // InfluencerProfile has niche as string array, handle differently
         }
 
-        // Note: Location, Helpers for followers count etc would be complex queries or post-filtering
-        // For MVP, we fetch detailed candidates and filter or sort.
-
+        // Fetch from Creator table (OTP auth system)
         const creators = await db.creator.findMany({
-            where,
+            where: creatorWhere,
             include: {
                 user: true,
-                metrics: true, // For normalized stats
+                metrics: true,
                 selfReportedMetrics: true
             },
-            take: 50, // Limit for performance
-            orderBy: {
-                // @ts-ignore - 'createdAt' might not exist on Creator, using user.createdAt or just ignoring sort for now if unsafe
-                verifiedAt: 'desc'
-            }
+            take: 50
         });
 
-        // Map to UI format
-        const mapped = creators.map((c: any) => {
-            // Determine primary metric
+        // Fetch from InfluencerProfile table (NextAuth system)
+        const influencerProfiles = await db.influencerProfile.findMany({
+            where: influencerWhere,
+            include: {
+                user: true
+            },
+            take: 50
+        });
+
+        // Map Creator data to UI format
+        const mappedCreators = creators.map((c: any) => {
             const primaryMetric = c.metrics?.[0];
             const followers = primaryMetric?.followersCount
                 || c.selfReportedMetrics?.[0]?.followersCount
                 || 0;
 
-            // Engagement mock or calc
             const engagement = primaryMetric ? `${(primaryMetric.engagementRate || 0).toFixed(1)}%` : 'N/A';
 
-            // Format followers
             const fmtFollowers = followers > 1000000
                 ? `${(followers / 1000000).toFixed(1)}M`
                 : followers > 1000
@@ -365,31 +364,73 @@ export async function getPublicCreators(filter?: {
                     : followers.toString();
 
             return {
-                id: c.userId, // Use userId as the public identifier often
+                id: c.userId,
                 dbId: c.id,
                 name: c.displayName || c.fullName || c.user?.name || "Influencer",
                 handle: c.instagramUrl ? `@${c.instagramUrl.split('/').pop()}` : '@creator',
                 niche: c.niche || 'General',
-                location: 'Global', // Placeholder until location field added
+                location: 'India',
                 followers: fmtFollowers,
                 followersCount: followers,
                 engagementRate: engagement,
                 avgViews: primaryMetric?.viewsCount || 'N/A',
-                verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED', // Adjust based on Enum
-                tags: c.niche ? c.niche.split(',').slice(0, 3) : [],
-                priceRange: '₹100-500', // Placeholder
-                thumbnail: c.backgroundImageUrl || "", // Use uploaded banner
-                profileImage: c.profileImageUrl || c.user?.image, // Use uploaded profile
+                verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
+                tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
+                priceRange: '₹100-500',
+                thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
+                profileImage: c.profileImageUrl || c.autoProfileImageUrl || c.user?.image,
                 saved: false
             };
         });
 
-        // Client Side filtering for ranges if DB query is too complex for now
-        let filtered = mapped;
-        if (filter?.minFollowers) filtered = filtered.filter((c: any) => c.followersCount >= filter.minFollowers!);
-        if (filter?.maxFollowers) filtered = filtered.filter((c: any) => c.followersCount <= filter.maxFollowers!);
+        // Map InfluencerProfile data to UI format
+        const mappedInfluencers = influencerProfiles.map((inf: any) => {
+            const followers = inf.followers || 0;
+            const fmtFollowers = followers > 1000000
+                ? `${(followers / 1000000).toFixed(1)}M`
+                : followers > 1000
+                    ? `${(followers / 1000).toFixed(1)}K`
+                    : followers.toString();
 
-        return { success: true, data: filtered };
+            const nicheArray = Array.isArray(inf.niche)
+                ? inf.niche
+                : (inf.niche ? inf.niche.split(',').map((n: string) => n.trim()) : ['Creator']);
+
+            return {
+                id: inf.userId,
+                dbId: inf.id,
+                name: inf.user?.name || 'Creator',
+                handle: inf.instagramHandle ? `@${inf.instagramHandle}` : '@creator',
+                niche: nicheArray.join(', '),
+                location: inf.location || 'India',
+                followers: fmtFollowers,
+                followersCount: followers,
+                engagementRate: inf.engagementRate ? `${inf.engagementRate.toFixed(1)}%` : 'N/A',
+                avgViews: 'N/A',
+                verified: inf.kycStatus === 'APPROVED',
+                tags: nicheArray.slice(0, 3),
+                priceRange: '₹100-500',
+                thumbnail: inf.user?.image || "",
+                profileImage: inf.user?.image || "",
+                saved: false
+            };
+        });
+
+        // Combine all creators
+        let allCreators = [...mappedCreators, ...mappedInfluencers];
+
+        // Apply niche filter for influencers (since array field needs different handling)
+        if (filter?.niche && filter.niche !== 'All') {
+            allCreators = allCreators.filter((c: any) =>
+                c.niche.toLowerCase().includes(filter.niche!.toLowerCase())
+            );
+        }
+
+        // Apply followers range filter
+        if (filter?.minFollowers) allCreators = allCreators.filter((c: any) => c.followersCount >= filter.minFollowers!);
+        if (filter?.maxFollowers) allCreators = allCreators.filter((c: any) => c.followersCount <= filter.maxFollowers!);
+
+        return { success: true, data: allCreators };
     } catch (error) {
         console.error("Error fetching creators:", error);
         return { success: false, data: [] };
