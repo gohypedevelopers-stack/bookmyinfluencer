@@ -116,7 +116,7 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                                 </div>
                             </div>
 
-                            <Link href={`/brand/discover?id=${influencer.id}`} className="w-full">
+                            <Link href={`/brand/influencers/${influencer.id}`} className="w-full">
                                 <Button className="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none">
                                     View Profile
                                 </Button>
