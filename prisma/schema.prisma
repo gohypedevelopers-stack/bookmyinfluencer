@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "windows"]
   engineType    = "binary"
 }
@@ -9,7 +9,400 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
+model User {
+  id                String             @id @default(cuid())
+  name              String?
+  email             String             @unique
+  passwordHash      String?
+  image             String?
+  role              UserRole           @default(INFLUENCER)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  auditLogs         AuditLog[]
+  blocksReceived    Block[]            @relation("BlocksReceived")
+  blocksInitiated   Block[]            @relation("BlocksInitiated")
+  brandProfile      BrandProfile?
+  influencerProfile InfluencerProfile?
+  sentMessages      Message[]          @relation("SentMessages")
+  notifications     Notification[]
+  reportsReceived   Report[]           @relation("ReportsReceived")
+  reportsInitiated  Report[]           @relation("ReportsInitiated")
+}
+
+model BrandProfile {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  companyName String
+  website     String?
+  industry    String?
+  description String?
+  location    String?
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns   Campaign[]
+  contracts   Contract[]
+}
+
+model InfluencerProfile {
+  id              String              @id @default(cuid())
+  userId          String              @unique
+  niche           String
+  location        String?
+  bio             String?
+  instagramHandle String?
+  youtubeHandle   String?
+  tiktokHandle    String?
+  followers       Int                 @default(0)
+  engagementRate  Float               @default(0)
+  socialData      String?
+  pricing         String?
+  applications    CampaignCandidate[]
+  contracts       Contract[]
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kyc             KYCSubmission?
+  payouts         PayoutRequest[]
+}
+
+model KYCSubmission {
+  id              String            @id @default(cuid())
+  profileId       String            @unique
+  status          KYCStatus         @default(NOT_SUBMITTED)
+  documentType    String?
+  documentUrl     String?
+  documentBackUrl String?
+  panCard         String?
+  bankDetails     String?
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  adminNotes      String?
+  profile         InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  id           String              @id @default(cuid())
+  brandId      String
+  title        String
+  description  String?
+  requirements String?
+  budget       Float?
+  status       CampaignStatus      @default(DRAFT)
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  images       String[]            @default([])
+  location     String?
+  minFollowers Int?                @default(0)
+  niche        String?
+  paymentType  String?             @default("FIXED")
+  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  candidates   CampaignCandidate[]
+}
+
+model CampaignCandidate {
+  id           String            @id @default(cuid())
+  campaignId   String
+  influencerId String
+  status       CandidateStatus   @default(CONTACTED)
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  campaign     Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  chatThread   ChatThread?
+  contract     Contract?
+  offer        Offer?
+
+  @@unique([campaignId, influencerId])
+}
+
+model Offer {
+  id                      String            @id @default(cuid())
+  candidateId             String            @unique
+  amount                  Float
+  currency                String            @default("INR")
+  deliverablesDescription String
+  status                  OfferStatus       @default(PENDING)
+  history                 String?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  candidate               CampaignCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+}
+
+model Contract {
+  id           String              @id @default(cuid())
+  candidateId  String?             @unique
+  brandId      String
+  influencerId String
+  totalAmount  Float
+  platformFee  Float
+  taxAmount    Float               @default(0)
+  status       ContractStatus      @default(DRAFT)
+  startDate    DateTime?
+  endDate      DateTime?
+  terms        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  candidate    CampaignCandidate?  @relation(fields: [candidateId], references: [id])
+  influencer   InfluencerProfile   @relation(fields: [influencerId], references: [id])
+  deliverables Deliverable[]
+  disputes     Dispute[]
+  transactions EscrowTransaction[]
+}
+
+model Deliverable {
+  id              String            @id @default(cuid())
+  contractId      String
+  title           String
+  description     String?
+  dueDate         DateTime?
+  status          DeliverableStatus @default(PENDING)
+  submissionUrl   String?
+  submissionNotes String?
+  submittedAt     DateTime?
+  approvedAt      DateTime?
+  feedback        String?
+  contract        Contract          @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model EscrowTransaction {
+  id                String                  @id @default(cuid())
+  contractId        String
+  amount            Float
+  currency          String                  @default("INR")
+  type              String
+  status            EscrowTransactionStatus @default(PENDING)
+  paymentGatewayRef String?
+  invoiceUrl        String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  contract          Contract                @relation(fields: [contractId], references: [id])
+}
+
+model PayoutRequest {
+  id            String            @id @default(cuid())
+  influencerId  String
+  amount        Float
+  currency      String            @default("INR")
+  status        PayoutStatus      @default(REQUESTED)
+  bankReference String?
+  adminNotes    String?
+  requestedAt   DateTime          @default(now())
+  processedAt   DateTime?
+  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id])
+}
+
+model ChatThread {
+  id           String             @id @default(cuid())
+  candidateId  String?            @unique
+  participants String
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  initiatedBy  String?
+  candidate    CampaignCandidate? @relation(fields: [candidateId], references: [id])
+  messages     Message[]
+}
+
+model Message {
+  id             String     @id @default(cuid())
+  threadId       String
+  senderId       String
+  content        String?
+  read           Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  attachmentType String?
+  attachmentUrl  String?
+  sender         User       @relation("SentMessages", fields: [senderId], references: [id])
+  thread         ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  contractId  String
+  raiserId    String
+  reason      String
+  description String
+  status      DisputeStatus @default(OPEN)
+  resolution  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  contract    Contract      @relation(fields: [contractId], references: [id])
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
+  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id])
+
+  @@unique([blockerId, blockedId])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  reportedId String
+  reason     String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
+  reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  details   String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model OtpUser {
+  id         String    @id @default(uuid())
+  email      String    @unique
+  verifiedAt DateTime? @map("verified_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  creator    Creator?
+  otps       EmailOtp?
+
+  @@map("users")
+}
+
+model EmailOtp {
+  id         String   @id @default(uuid())
+  userId     String   @unique @map("user_id")
+  otpHash    String   @map("otp_hash")
+  expiresAt  DateTime @map("expires_at")
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now()) @map("last_sent_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_otps")
+}
+
+model Creator {
+  id                   String                      @id @default(uuid())
+  userId               String                      @unique @map("user_id")
+  email                String?                     @map("email")
+  fullName             String?                     @map("full_name")
+  phone                String?
+  niche                String?
+  instagramUrl         String?                     @map("instagram_url")
+  youtubeUrl           String?                     @map("youtube_url")
+  profileImageUrl      String?                     @map("profile_image_url")
+  autoProfileImageUrl  String?                     @map("auto_profile_image_url")
+  displayName          String?                     @map("display_name")
+  autoDisplayName      String?                     @map("auto_display_name")
+  bio                  String?
+  autoBio              String?                     @map("auto_bio")
+  pricing              String?
+  mediaKit             String?                     @map("media_kit")
+  rawSocialData        String?                     @map("raw_social_data")
+  lastYoutubeFetchAt   DateTime?                   @map("last_youtube_fetch_at")
+  lastInstagramFetchAt DateTime?                   @map("last_instagram_fetch_at")
+  verifiedAt           DateTime?                   @map("verified_at")
+  backgroundImageUrl   String?                     @map("background_image_url")
+  paymentHistory       String?                     @map("payment_history")
+  payoutMethods        String?                     @map("payout_methods")
+  isLiveSyncEnabled    Boolean                     @default(true) @map("is_live_sync_enabled")
+  verificationStatus   KYCStatus                   @default(NOT_SUBMITTED) @map("verification_status")
+  kycSubmission        CreatorKYCSubmission?
+  metrics              CreatorMetric[]
+  selfReportedMetrics  CreatorSelfReportedMetric[]
+  socialAccounts       CreatorSocialAccount[]
+  user                 OtpUser                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("creators")
+}
+
+model CreatorSocialAccount {
+  id           String    @id @default(uuid())
+  creatorId    String    @map("creator_id")
+  provider     String
+  providerId   String    @map("provider_id")
+  accessToken  String?   @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiresAt    DateTime? @map("expires_at")
+  username     String?
+  type         String    @default("OAUTH")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  creator      Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, provider])
+  @@map("creator_social_accounts")
+}
+
+model CreatorSelfReportedMetric {
+  id             String   @id @default(uuid())
+  creatorId      String   @map("creator_id")
+  provider       String
+  followersCount Int      @map("followers_count")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  creator        Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, provider])
+  @@map("creator_self_reported_metrics")
+}
+
+model CreatorMetric {
+  id             String   @id @default(uuid())
+  creatorId      String   @map("creator_id")
+  provider       String
+  date           DateTime @default(now())
+  followersCount Int      @default(0) @map("followers_count")
+  engagementRate Float    @default(0) @map("engagement_rate")
+  viewsCount     String?  @map("views_count")
+  mediaCount     Int?     @map("media_count")
+  avgLikes       Float?   @map("avg_likes")
+  avgComments    Float?   @map("avg_comments")
+  reach          Int?
+  source         String?  @default("oauth")
+  fetchedAt      DateTime @default(now()) @map("fetched_at")
+  rawResponse    String?  @map("raw_response")
+  creator        Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, provider, date])
+  @@map("creator_metrics")
+}
+
+model CreatorKYCSubmission {
+  id                 String    @id @default(uuid())
+  creatorId          String    @unique @map("creator_id")
+  status             KYCStatus @default(PENDING)
+  instagramFollowers Int?      @map("instagram_followers")
+  youtubeSubscribers Int?      @map("youtube_subscribers")
+  totalPosts         Int?      @map("total_posts")
+  engagementRate     Float?    @map("engagement_rate")
+  adminNotes         String?   @map("admin_notes")
+  reviewedBy         String?   @map("reviewed_by")
+  reviewedAt         DateTime? @map("reviewed_at")
+  submittedAt        DateTime  @default(now()) @map("submitted_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  creator            Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@map("creator_kyc_submissions")
+}
+
 enum UserRole {
   BRAND
   INFLUENCER
@@ -83,510 +476,4 @@ enum DisputeStatus {
   RESOLVED_REFUND
   RESOLVED_RELEASE
   CLOSED
-}
-
-// Core User Models
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  passwordHash  String?
-  image         String?
-  role          UserRole  @default(INFLUENCER) 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  brandProfile      BrandProfile?
-  influencerProfile InfluencerProfile?
-  
-  // Messages
-  sentMessages      Message[]       @relation("SentMessages")
-
-  // Notifications
-  notifications     Notification[]  @relation()
-
-  // Audit Logs
-  auditLogs         AuditLog[]
-
-  // Social
-  blocksInitiated   Block[]         @relation("BlocksInitiated")
-  blocksReceived    Block[]         @relation("BlocksReceived")
-  reportsInitiated  Report[]        @relation("ReportsInitiated")
-  reportsReceived   Report[]        @relation("ReportsReceived")
-}
-
-model BrandProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName String
-  website     String?
-  industry    String?
-  description String?
-  location    String?
-  
-  campaigns   Campaign[]
-  contracts   Contract[]
-}
-
-model InfluencerProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  niche       String   // Comma-separated values
-  location    String?
-  bio         String?
-  
-  // Stats
-  instagramHandle String?
-  youtubeHandle   String?
-  tiktokHandle    String?
-  
-  followers   Int      @default(0)
-  engagementRate Float @default(0)
-  
-  // JSON fields for flexibility (stored as String for SQLite compatibility)
-  socialData  String?    // detailed stats
-  pricing     String?    // e.g., { "reel": 1000, "story": 500 }
-  
-  kyc         KYCSubmission?
-  
-  applications CampaignCandidate[]
-  contracts    Contract[]
-  payouts      PayoutRequest[]
-}
-
-model KYCSubmission {
-  id        String    @id @default(cuid())
-  profileId String    @unique
-  profile   InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  
-  status    KYCStatus @default(NOT_SUBMITTED)
-  
-  documentType String?
-  documentUrl  String? // Front
-  documentBackUrl String? // Back
-  panCard      String?
-  bankDetails  String?
-  
-  submittedAt  DateTime?
-  reviewedAt   DateTime?
-  adminNotes   String?
-}
-
-// Campaign & Kanban
-model Campaign {
-  id          String   @id @default(cuid())
-  brandId     String
-  brand       BrandProfile @relation(fields: [brandId], references: [id])
-  
-  title       String
-  description String?
-  requirements String?
-  budget      Float?
-  
-  // Targeting & Details
-  niche       String?
-  minFollowers Int?      @default(0)
-  location    String?    // targetLocation
-  paymentType String?    @default("FIXED") // FIXED, NEGOTIABLE, GIFTING
-  
-  images      String[]   @default([])
-
-  status      CampaignStatus @default(DRAFT)
-  
-  startDate   DateTime?
-  endDate     DateTime?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  candidates  CampaignCandidate[]
-}
-
-model CampaignCandidate {
-  id           String   @id @default(cuid())
-  campaignId   String
-  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  
-  influencerId String
-  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
-  
-  status       CandidateStatus @default(CONTACTED)
-  notes        String?
-  
-  offer        Offer?
-  contract     Contract?
-  
-  chatThread   ChatThread?
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@unique([campaignId, influencerId])
-}
-
-// Negotiation & Contracts
-model Offer {
-  id          String   @id @default(cuid())
-  candidateId String   @unique
-  candidate   CampaignCandidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  
-  amount      Float
-  currency    String   @default("INR")
-  deliverablesDescription String
-  
-  status      OfferStatus @default(PENDING)
-  
-  history     String?    // Array of previous versions/counters
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Contract {
-  id          String   @id @default(cuid())
-  
-  // Link to either candidate flow OR direct hire
-  candidateId String?  @unique
-  candidate   CampaignCandidate? @relation(fields: [candidateId], references: [id])
-  
-  // Direct relations if not via campaign flow (optional, but good for flexibility)
-  brandId     String
-  brand       BrandProfile @relation(fields: [brandId], references: [id])
-  influencerId String
-  influencer  InfluencerProfile @relation(fields: [influencerId], references: [id])
-  
-  totalAmount Float
-  platformFee Float
-  taxAmount   Float    @default(0) // GST/VAT
-  
-  status      ContractStatus @default(DRAFT)
-  
-  startDate   DateTime?
-  endDate     DateTime?
-  terms       String?
-  
-  deliverables Deliverable[]
-  transactions EscrowTransaction[]
-  disputes     Dispute[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Deliverable {
-  id          String   @id @default(cuid())
-  contractId  String
-  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  
-  title       String
-  description String?
-  dueDate     DateTime?
-  
-  status      DeliverableStatus @default(PENDING)
-  submissionUrl String?
-  submissionNotes String?
-  
-  submittedAt DateTime?
-  approvedAt  DateTime?
-  feedback    String?
-}
-
-// Payments
-model EscrowTransaction {
-  id          String   @id @default(cuid())
-  contractId  String
-  contract    Contract @relation(fields: [contractId], references: [id])
-  
-  amount      Float
-  currency    String   @default("INR")
-  type        String   // "DEPOSIT", "RELEASE", "REFUND"
-  
-  status      EscrowTransactionStatus @default(PENDING)
-  
-  paymentGatewayRef String?
-  invoiceUrl  String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model PayoutRequest {
-  id            String   @id @default(cuid())
-  influencerId  String
-  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id])
-  
-  amount        Float
-  currency      String   @default("INR")
-  status        PayoutStatus @default(REQUESTED)
-  
-  bankReference String?
-  adminNotes    String?
-  
-  requestedAt   DateTime @default(now())
-  processedAt   DateTime?
-}
-
-// Communication
-model ChatThread {
-  id          String   @id @default(cuid())
-  
-  candidateId String?  @unique
-  candidate   CampaignCandidate? @relation(fields: [candidateId], references: [id])
-  
-  // For generic chats not linked to campaign
-  participants String // Comma-separated User IDs
-  initiatedBy  String? // User ID who started the thread
-  
-  messages    Message[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  threadId  String
-  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  
-  senderId  String
-  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
-  
-  content   String? // Content can be optional if only sending a file
-  attachmentUrl String?
-  attachmentType String? // IMAGE, VIDEO, DOCUMENT, etc.
-  read      Boolean  @default(false)
-  
-  createdAt DateTime @default(now())
-}
-
-// Support
-model Dispute {
-  id          String   @id @default(cuid())
-  contractId  String
-  contract    Contract @relation(fields: [contractId], references: [id])
-  
-  raiserId    String   // User ID who raised it
-  reason      String
-  description String
-  
-  status      DisputeStatus @default(OPEN)
-  resolution  String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Block {
-  id        String   @id @default(cuid())
-  blockerId String
-  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id])
-  
-  blockedId String
-  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
-  
-  createdAt DateTime @default(now())
-
-  @@unique([blockerId, blockedId])
-}
-
-model Report {
-  id        String   @id @default(cuid())
-  reporterId String
-  reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id])
-  
-  reportedId String
-  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
-  
-  reason    String
-  status    String   @default("PENDING") // PENDING, REVIEWED, RESOLVED
-  
-  createdAt DateTime @default(now())
-}
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // "OFFER", "MESSAGE", "ESCROW", "SYSTEM"
-  title     String
-  message   String
-  link      String?
-  read      Boolean  @default(false)
-  
-  createdAt DateTime @default(now())
-}
-
-model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  
-  action    String
-  entity    String   // "OFFER", "CONTRACT", "USER"
-  entityId  String
-  details   String?
-  
-  createdAt DateTime @default(now())
-}
-
-// OTP onboarding tables (separate from NextAuth users)
-model OtpUser {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  verifiedAt DateTime? @map("verified_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  otps    EmailOtp[]
-  creator Creator?
-
-  @@map("users")
-}
-
-model EmailOtp {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  user       OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  otpHash    String   @map("otp_hash")
-  expiresAt  DateTime @map("expires_at")
-  attempts   Int      @default(0)
-  lastSentAt DateTime @default(now()) @map("last_sent_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  @@index([userId])
-  @@unique([userId])
-  @@map("email_otps")
-}
-
-model Creator {
-  id        String   @id @default(uuid())
-  userId    String   @unique @map("user_id")
-  user      OtpUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  email     String?  @map("email")
-  fullName  String?  @map("full_name")
-  phone     String?
-  niche     String?
-  instagramUrl  String?  @map("instagram_url")
-  youtubeUrl    String?  @map("youtube_url")
-  backgroundImageUrl String? @map("background_image_url")
-
-  // Profile Auto-Fetch Fields
-  profileImageUrl     String? @map("profile_image_url") // Manual override
-  autoProfileImageUrl String? @map("auto_profile_image_url") // Fetched
-  
-  displayName         String? @map("display_name") // Manual override
-  autoDisplayName     String? @map("auto_display_name") // Fetched
-
-  bio                 String? // Manual override
-  autoBio             String? @map("auto_bio") // Fetched
-
-  // New Dashboard Fields
-  pricing             String? // JSON: [{ title: "Reel", price: 100 }]
-  payoutMethods       String? @map("payout_methods") // JSON: [{ type: "BANK", details: {...} }]
-  paymentHistory      String? @map("payment_history") // JSON: [{ title: "Campaign", amount: 1000, date: "...", status: "COMPLETED" }]
-  mediaKit            String? @map("media_kit") // JSON: Selected posts provided by user
-  rawSocialData       String? @map("raw_social_data") // JSON: Latest posts from Apify for selection
-
-  lastYoutubeFetchAt   DateTime? @map("last_youtube_fetch_at")
-  lastInstagramFetchAt DateTime? @map("last_instagram_fetch_at")
-
-  // Verification Status
-  verificationStatus KYCStatus @default(NOT_SUBMITTED) @map("verification_status") 
-  verifiedAt         DateTime? @map("verified_at")
-
-  socialAccounts CreatorSocialAccount[]
-  metrics        CreatorMetric[]
-  selfReportedMetrics CreatorSelfReportedMetric[]
-  kycSubmission  CreatorKYCSubmission?
-
-  @@map("creators")
-}
-
-model CreatorSocialAccount {
-  id            String   @id @default(uuid())
-  creatorId     String   @map("creator_id")
-  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  provider      String   // "youtube", "instagram"
-  providerId    String   @map("provider_id")
-  accessToken   String?  @map("access_token")
-  refreshToken  String?  @map("refresh_token")
-  expiresAt     DateTime? @map("expires_at")
-  username      String?
-  
-  type          String   @default("OAUTH") // "OAUTH", "PUBLIC_API"
-  
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@unique([creatorId, provider])
-  @@map("creator_social_accounts")
-}
-
-model CreatorSelfReportedMetric {
-  id            String   @id @default(uuid())
-  creatorId     String   @map("creator_id")
-  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  
-  provider      String   // "instagram", etc.
-  followersCount Int     @map("followers_count")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  @@unique([creatorId, provider])
-  @@map("creator_self_reported_metrics")
-}
-
-model CreatorMetric {
-  id            String   @id @default(uuid())
-  creatorId     String   @map("creator_id")
-  creator       Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  provider      String   // "youtube", "instagram"
-  date          DateTime @default(now())
-  
-  // Normalized Stats
-  followersCount Int     @default(0) @map("followers_count")
-  engagementRate Float   @default(0) @map("engagement_rate")
-  viewsCount     String? @map("views_count") 
-  mediaCount     Int?    @map("media_count") // Video or Post count
-
-  // Detailed Stats
-  avgLikes       Float?  @map("avg_likes")
-  avgComments    Float?  @map("avg_comments")
-  reach          Int?    // Nullable, do not fake
-  
-  // Metadata
-  source         String? @default("oauth") // "youtube_api", "apify", "oauth"
-  fetchedAt      DateTime @default(now()) @map("fetched_at")
-
-  rawResponse    String? @map("raw_response")
-
-  @@index([creatorId, provider, date])
-  @@map("creator_metrics")
-}
-
-// Creator KYC Submission Model
-model CreatorKYCSubmission {
-  id        String   @id @default(uuid())
-  creatorId String   @unique @map("creator_id")
-  creator   Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  
-  status    KYCStatus   @default(PENDING)
-  
-  // Submitted Data
-  instagramFollowers Int?     @map("instagram_followers")
-  youtubeSubscribers Int?     @map("youtube_subscribers")
-  totalPosts         Int?     @map("total_posts")
-  engagementRate     Float?   @map("engagement_rate")
-  
-  // Admin Review
-  adminNotes         String?  @map("admin_notes")
-  reviewedBy         String?  @map("reviewed_by") // Admin user ID
-  reviewedAt         DateTime? @map("reviewed_at")
-  
-  submittedAt  DateTime @default(now()) @map("submitted_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  @@map("creator_kyc_submissions")
 }

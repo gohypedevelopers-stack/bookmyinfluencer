@@ -1,7 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -32,23 +31,8 @@ export async function POST(req: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-
-        // Sanitize filename
-        const sanitizedParams = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-        const filename = `${Date.now()}_${sanitizedParams}`;
-
-        // Ensure directory exists
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "campaigns");
-        try {
-            await fs.access(uploadDir);
-        } catch {
-            await fs.mkdir(uploadDir, { recursive: true });
-        }
-
-        const filepath = path.join(uploadDir, filename);
-        await fs.writeFile(filepath, buffer);
-
-        const url = `/uploads/campaigns/${filename}`;
+        const base64 = buffer.toString('base64');
+        const url = `data:${file.type};base64,${base64}`;
 
         return NextResponse.json({ success: true, url });
 

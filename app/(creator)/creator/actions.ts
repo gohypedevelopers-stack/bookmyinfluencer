@@ -159,19 +159,25 @@ export async function getCreatorThreads() {
         return threads.map(thread => {
             let name = "Unknown Brand";
             let image = null;
+            let brandProfileId = null;
+            let brandUserId = null;
 
             if (thread.candidate) {
                 const brand = thread.candidate.campaign.brand;
                 name = brand?.companyName || "Unknown Brand";
                 image = brand?.user?.image || null;
+                brandProfileId = brand?.id || null;
+                brandUserId = brand?.userId || null;
             } else {
                 // Direct DM
-                const otherUserId = thread.participants.split(',').find(id => id !== userId);
-                if (otherUserId) {
-                    const otherUser = directUsersMap.get(otherUserId);
+                const otherParticipantId = thread.participants.split(',').map(p => p.trim()).find(id => id !== userId);
+                if (otherParticipantId) {
+                    const otherUser = directUsersMap.get(otherParticipantId);
                     if (otherUser) {
                         name = otherUser.brandProfile?.companyName || otherUser.name || "Brand";
                         image = otherUser.image || null;
+                        brandProfileId = otherUser.brandProfile?.id || null;
+                        brandUserId = otherUser.id;
                     }
                 }
             }
@@ -184,7 +190,9 @@ export async function getCreatorThreads() {
                 image,
                 lastMessage: lastMsg?.content || "No messages yet",
                 updatedAt: lastMsg?.createdAt || thread.updatedAt,
-                unread: false // TODO: Add read status
+                unread: false,
+                brandId: brandProfileId,
+                brandUserId: brandUserId
             };
         });
 
@@ -803,3 +811,41 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
 
 
 
+// --- BRAND PROFILE ---
+
+export async function getPublicBrandById(id: string) {
+    try {
+        const brand = await db.brandProfile.findFirst({
+            where: {
+                OR: [
+                    { id: id },
+                    { userId: id }
+                ]
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        image: true,
+                        createdAt: true,
+                    }
+                },
+                campaigns: {
+                    where: {
+                        status: 'ACTIVE'
+                    },
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
+            }
+        });
+
+        if (!brand) return { success: false, error: "Brand not found" };
+
+        return { success: true, data: brand };
+    } catch (error) {
+        console.error("Error fetching brand:", error);
+        return { success: false, error: "Failed to fetch brand" };
+    }
+}

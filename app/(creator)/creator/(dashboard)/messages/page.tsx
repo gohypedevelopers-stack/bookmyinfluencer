@@ -51,7 +51,8 @@ interface Thread {
     lastMessage: string
     updatedAt: Date
     unread: boolean
-    participants: string
+    brandId: string | null
+    brandUserId: string | null
 }
 
 interface Message {
@@ -252,9 +253,7 @@ export default function CreatorMessagesPage() {
         const thread = threads.find(t => t.id === activeThreadId);
         if (!thread) return;
 
-        // Extract other user ID (Brand)
-        const participants = thread.participants.split(',');
-        const brandUserId = participants.find(p => p !== session?.user?.id);
+        const brandUserId = thread.brandUserId || thread.brandId; // Use brandUserId preferably
 
         if (!brandUserId) {
             toast.error("Could not identify brand to report");
@@ -429,11 +428,19 @@ export default function CreatorMessagesPage() {
                                     <DropdownMenuContent align="end" className="w-56">
                                         <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        {/* TODO: Link to actual Brand Profile if available */}
-                                        <DropdownMenuItem disabled className="cursor-not-allowed text-gray-400">
-                                            <User className="w-4 h-4 mr-2" />
-                                            View Profile
-                                        </DropdownMenuItem>
+                                        {(activeThread.brandId || activeThread.brandUserId) ? (
+                                            <DropdownMenuItem asChild>
+                                                <Link href={`/creator/brands/${activeThread.brandId || activeThread.brandUserId}`} className="cursor-pointer">
+                                                    <User className="w-4 h-4 mr-2" />
+                                                    View Profile
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem disabled className="cursor-not-allowed text-gray-400">
+                                                <User className="w-4 h-4 mr-2" />
+                                                View Profile
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem onClick={() => handleDeleteConversation(activeThread.id)} className="text-orange-600 cursor-pointer">
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Clear Chat
@@ -445,9 +452,8 @@ export default function CreatorMessagesPage() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() => {
-                                                const participants = activeThread.participants.split(',');
-                                                const brandUserId = participants.find(p => p !== session?.user?.id);
-                                                if (brandUserId) handleBlockBrand(brandUserId);
+                                                if (activeThread.brandUserId) handleBlockBrand(activeThread.brandUserId);
+                                                else if (activeThread.brandId) handleBlockBrand(activeThread.brandId);
                                             }}
                                             className="text-red-600 cursor-pointer"
                                         >

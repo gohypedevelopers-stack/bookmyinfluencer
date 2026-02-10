@@ -437,10 +437,15 @@ export async function getPublicCreators(filter?: {
     }
 }
 
-export async function getPublicCreatorById(userId: string) {
+export async function getPublicCreatorById(id: string) {
     try {
-        const creator = await db.creator.findUnique({
-            where: { userId },
+        const creator = await db.creator.findFirst({
+            where: {
+                OR: [
+                    { id: id },
+                    { userId: id }
+                ]
+            },
             include: {
                 user: true,
                 metrics: true,

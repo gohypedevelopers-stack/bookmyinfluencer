@@ -32,8 +32,33 @@ export async function updateSocialProfile(provider: "instagram" | "youtube", url
 
         if (provider === "instagram") {
             if (!url.includes("instagram.com/")) return { error: "Invalid Instagram URL" }
-            username = url.split("instagram.com/")[1]?.split("/")[0] || "instagram_user"
-            providerId = username
+
+            // --- INSTAGRAM AUTO-FETCH START ---
+            try {
+                const apifyToken = process.env.APIFY_TOKEN;
+                const actorId = process.env.APIFY_INSTAGRAM_ACTOR_ID;
+
+                if (apifyToken && actorId) {
+                    const { fetchInstagramPublicStats } = await import("@/lib/instagram-public");
+                    const res = await fetchInstagramPublicStats(url, apifyToken, actorId);
+
+                    if (res.stats) {
+                        finalFollowersCount = res.stats.followersCount;
+                        username = res.stats.username;
+                        providerId = username;
+                        socialType = "OAUTH"; // Verified via scraper
+                        finalEncodedData = res.stats;
+                    }
+                }
+            } catch (err) {
+                console.error("[Instagram Sync] Error:", err);
+            }
+
+            if (!username) {
+                username = url.split("instagram.com/")[1]?.split("/")[0] || "instagram_user"
+                providerId = username
+            }
+            // --- INSTAGRAM AUTO-FETCH END ---
         } else if (provider === "youtube") {
             if (!url.includes("youtube.com/")) return { error: "Invalid YouTube URL" }
 
@@ -158,6 +183,10 @@ export async function updateSocialProfile(provider: "instagram" | "youtube", url
         // Specific field updates if they exist in valid schema
         if (provider === "instagram") {
             updateData.instagramUrl = url;
+            if (socialType === "OAUTH") {
+                updateData.lastInstagramFetchAt = new Date();
+                if (finalEncodedData) updateData.rawSocialData = JSON.stringify(finalEncodedData);
+            }
         } else if (provider === "youtube") {
             updateData.youtubeUrl = url;
             if (socialType === "OAUTH") {
@@ -236,14 +265,70 @@ export async function disconnectSocialProfile(provider: "instagram" | "youtube")
     }
 }
 
+export async function toggleLiveSync(enabled: boolean) {
+    try {
+        const userId = await getVerifiedUserIdFromCookies()
+        if (!userId) return { error: "Unauthorized" }
+
+        await db.creator.update({
+            where: { userId },
+            data: { isLiveSyncEnabled: enabled } as any
+        })
+
+        revalidatePath("/creator/profile/social-accounts")
+        return { success: true }
+    } catch (error) {
+        console.error("Error toggling live sync:", error)
+        return { error: "Failed to update sync settings" }
+    }
+}
+
+export async function syncAllSocialData() {
+    try {
+        const userId = await getVerifiedUserIdFromCookies()
+        if (!userId) return { error: "Unauthorized" }
+
+        const creator = await db.creator.findUnique({
+            where: { userId },
+            include: { socialAccounts: true }
+        })
+
+        if (!creator) return { error: "Creator not found" }
+
+        const results = [];
+        for (const account of creator.socialAccounts) {
+            // Re-use updateSocialProfile if we have the URL stored in Creator model
+            let url = "";
+            if (account.provider === "instagram") url = creator.instagramUrl || "";
+            if (account.provider === "youtube") url = creator.youtubeUrl || "";
+
+            if (url) {
+                console.log(`[SyncAll] Syncing ${account.provider} for ${url}`);
+                const res = await updateSocialProfile(account.provider as any, url);
+                results.push({ provider: account.provider, success: !res.error });
+            }
+        }
+
+        revalidatePath("/creator/profile/social-accounts")
+        return { success: true, results }
+    } catch (error) {
+        console.error("Error syncing all social data:", error)
+        return { error: "Failed to sync social data" }
+    }
+}
+
+export async function updateMediaKitStats() {
+    // This is a wrapper for a full sync for now
+    return syncAllSocialData();
+}
+
 // Keep this for backward compatibility if needed, or redirect to new one
 export async function updateInstagramUrl(url: string, followersCount: number = 0) {
     return updateSocialProfile("instagram", url, followersCount);
 }
 
 // --- PROFILE UPDATE ACTION ---
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
+
 
 export async function updateCreatorProfileAction(formData: FormData) {
     try {
@@ -262,24 +347,17 @@ export async function updateCreatorProfileAction(formData: FormData) {
             bio
         }
 
-        // Handle File Uploads
-        const uploadDir = join(process.cwd(), "public", "uploads")
-        await mkdir(uploadDir, { recursive: true })
-
+        // Handle File Uploads via Base64 (to avoid EROFS on Vercel)
         if (profileImageFile && profileImageFile.size > 0 && profileImageFile.name) {
             const buffer = Buffer.from(await profileImageFile.arrayBuffer())
-            const filename = `profile-${userId}-${Date.now()}-${profileImageFile.name.replace(/[^a-zA-Z0-9.]/g, "")}`
-            const filepath = join(uploadDir, filename)
-            await writeFile(filepath, buffer)
-            updateData.profileImageUrl = `/uploads/${filename}`
+            const base64 = buffer.toString('base64')
+            updateData.profileImageUrl = `data:${profileImageFile.type};base64,${base64}`
         }
 
         if (bannerImageFile && bannerImageFile.size > 0 && bannerImageFile.name) {
             const buffer = Buffer.from(await bannerImageFile.arrayBuffer())
-            const filename = `banner-${userId}-${Date.now()}-${bannerImageFile.name.replace(/[^a-zA-Z0-9.]/g, "")}`
-            const filepath = join(uploadDir, filename)
-            await writeFile(filepath, buffer)
-            updateData.backgroundImageUrl = `/uploads/${filename}`
+            const base64 = buffer.toString('base64')
+            updateData.backgroundImageUrl = `data:${bannerImageFile.type};base64,${base64}`
         }
 
         console.log("Updating creator profile for user:", userId, "with data:", JSON.stringify(updateData, null, 2))

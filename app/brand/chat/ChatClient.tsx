@@ -115,6 +115,12 @@ export default function ChatClient({
 }: ChatClientProps) {
     const router = useRouter();
     const [activeThreadId, setActiveThreadId] = useState<string | undefined>(initialThreadId);
+    const [localMessages, setLocalMessages] = useState<Message[]>(initialMessages);
+
+    // Synchronize local messages when initialMessages change (from server refresh or thread switch)
+    useEffect(() => {
+        setLocalMessages(initialMessages);
+    }, [initialMessages]);
 
     useEffect(() => {
         if (activeThreadId) {
@@ -127,8 +133,10 @@ export default function ChatClient({
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const lastMessageCount = useRef(initialMessages.length);
     const [optimisticMessages, addOptimisticMessage] = useOptimistic(
-        initialMessages,
+        localMessages,
         (state, newMessage: Message) => [...state, newMessage]
     );
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -157,10 +165,16 @@ export default function ChatClient({
         });
 
         newSocket.on('new-message', (newMessage: Message) => {
+            // Check if message belongs to current active thread
             if (activeThreadId && (newMessage as any).threadId === activeThreadId) {
-                startTransition(() => {
-                    router.refresh();
-                });
+                // If it's not from me, add it to local state immediately
+                if (newMessage.senderId !== currentUserId) {
+                    setLocalMessages(prev => {
+                        // Avoid duplicates from concurrent refreshes
+                        if (prev.some(m => m.id === newMessage.id)) return prev;
+                        return [...prev, newMessage];
+                    });
+                }
             } else {
                 router.refresh();
                 toast.info(`New message from ${newMessage.sender.name}`);
@@ -184,10 +198,30 @@ export default function ChatClient({
 
 
 
-    // Scroll to bottom on new messages
+    // Scroll to bottom logic
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [optimisticMessages]);
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        // Determine if we should scroll
+        const isInitialLoad = lastMessageCount.current === 0;
+        const hasNewMessage = optimisticMessages.length > lastMessageCount.current;
+
+        // Check if user is near bottom (within 100px)
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+        // Scroll if:
+        // 1. Initial load
+        // 2. User just sent a message (we can detect this more reliably by checking senderId of last message)
+        const lastMsg = optimisticMessages[optimisticMessages.length - 1];
+        const isFromMe = lastMsg?.senderId === currentUserId;
+
+        if (isInitialLoad || (hasNewMessage && (isNearBottom || isFromMe))) {
+            messagesEndRef.current?.scrollIntoView({ behavior: isInitialLoad ? 'auto' : 'smooth' });
+        }
+
+        lastMessageCount.current = optimisticMessages.length;
+    }, [optimisticMessages, currentUserId]);
 
     // Update active thread when URL changes
     useEffect(() => {
@@ -554,7 +588,7 @@ export default function ChatClient({
                                     <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href={`/brand/influencers/${activeThread.influencer.id}`} className="cursor-pointer">
+                                        <Link href={`/brand/influencers/${activeThread.influencer.userId}`} className="cursor-pointer">
                                             <User className="w-4 h-4 mr-2" />
                                             View Profile
                                         </Link>
@@ -608,7 +642,10 @@ export default function ChatClient({
                     )}
 
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[url('/patterns/subtle-dots.png')]">
+                    <div
+                        ref={messagesContainerRef}
+                        className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[url('/patterns/subtle-dots.png')]"
+                    >
                         {/* Offer/Contract Status Banner if applicable */}
                         {activeThread.offer && (
                             <div className="mx-auto max-w-lg mb-6">
