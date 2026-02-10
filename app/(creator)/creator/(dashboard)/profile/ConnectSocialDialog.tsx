@@ -4,11 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Instagram, Youtube, Loader2, Plus, Settings } from "lucide-react"
+import { Instagram, Youtube, Loader2, Plus, Settings, Video, Twitch } from "lucide-react"
 import { updateSocialProfile } from "./actions"
 import { useRouter } from "next/navigation"
 
-type SocialProvider = "instagram" | "youtube"
+type SocialProvider = "instagram" | "youtube" | "tiktok" | "twitch"
 
 interface ConnectSocialDialogProps {
     children?: React.ReactNode
@@ -35,6 +35,24 @@ const PROVIDER_CONFIG = {
         hoverBorder: "hover:border-red-300",
         hoverBg: "hover:bg-red-50/30",
         btnClass: "bg-red-600 hover:bg-red-700"
+    },
+    tiktok: {
+        label: "TikTok",
+        icon: Video,
+        placeholder: "https://tiktok.com/@username",
+        colorClass: "text-pink-600",
+        hoverBorder: "hover:border-pink-300",
+        hoverBg: "hover:bg-pink-50/30",
+        btnClass: "bg-pink-600 hover:bg-pink-700"
+    },
+    twitch: {
+        label: "Twitch",
+        icon: Twitch,
+        placeholder: "https://twitch.tv/username",
+        colorClass: "text-purple-500",
+        hoverBorder: "hover:border-purple-300",
+        hoverBg: "hover:bg-purple-50/30",
+        btnClass: "bg-purple-500 hover:bg-purple-600"
     }
 }
 
