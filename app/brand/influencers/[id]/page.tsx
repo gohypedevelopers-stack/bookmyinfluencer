@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Instagram, MapPin, TrendingUp, Users, Eye, Heart, MessageCircle, Bookmark, Share2, CheckCircle2, Star, Calendar, Youtube, Link as LinkIcon, Loader2, X, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Instagram, MapPin, TrendingUp, Users, Eye, Heart, MessageCircle, Bookmark, Share2, CheckCircle2, Star, Calendar, Youtube, Link as LinkIcon, Loader2, X } from 'lucide-react';
 import { getPublicCreatorById, getBrandCampaigns, inviteInfluencer } from '../../actions';
 
 export default function InfluencerProfile() {
@@ -87,12 +87,7 @@ export default function InfluencerProfile() {
                             <span className="font-semibold text-xs text-gray-500">Back to Discovery</span>
                         </div>
                         <div className="ml-auto flex items-center gap-3">
-                            <Link href={`/brand/checkout/${id}`}>
-                                <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-md hover:shadow-indigo-200">
-                                    <ShieldCheck className="w-4 h-4" />
-                                    Hire & Pay Escrow
-                                </button>
-                            </Link>
+
                             <button
                                 onClick={handleOpenInvite}
                                 className="px-5 py-2 bg-white border-2 border-teal-600 text-teal-700 rounded-lg font-bold hover:bg-teal-50 transition-all"

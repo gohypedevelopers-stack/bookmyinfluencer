@@ -16,7 +16,8 @@ import {
     Flag,
     Ban,
     Trash2,
-    User
+    User,
+    CheckCheck
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,6 +63,7 @@ interface Message {
     senderImage: string | null
     createdAt: Date
     isMe: boolean
+    read?: boolean
 }
 
 import { io } from "socket.io-client"
@@ -79,6 +81,14 @@ export default function CreatorMessagesPage() {
     const [isEditMode, setIsEditMode] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
     const socketRef = useRef<any>(null)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
+    const [isTyping, setIsTyping] = useState(false)
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    // Initialize Audio
+    useEffect(() => {
+        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    }, [])
 
     // Report Dialog State
     const [isReportOpen, setIsReportOpen] = useState(false)
@@ -125,10 +135,18 @@ export default function CreatorMessagesPage() {
             path: '/api/socket',
         })
         socketRef.current.emit("join-room", `thread:${activeThreadId}`)
+        // Mark as read on join
+        socketRef.current.emit("message-read", { threadId: activeThreadId, userId: session?.user?.id })
 
         socketRef.current.on("new-message", (data: any) => {
             // Avoid duplicating if we just sent it
             if (data.senderId !== session?.user?.id) {
+                // Play sound
+                audioRef.current?.play().catch(e => console.error("Audio play failed", e))
+
+                // Emit read
+                socketRef.current.emit("message-read", { threadId: activeThreadId, userId: session?.user?.id })
+
                 setMessages((prev) => [...prev, {
                     id: data.id || Math.random().toString(),
                     content: data.content,
@@ -136,13 +154,38 @@ export default function CreatorMessagesPage() {
                     senderName: data.sender?.name || "Brand",
                     senderImage: data.sender?.image || null,
                     createdAt: new Date(),
-                    isMe: false
+                    isMe: false,
+                    read: false
                 }])
                 setTimeout(scrollToBottom, 100)
             }
         })
 
+        // Typing Indicators
+        socketRef.current.on('typing', (data: { threadId: string, userId: string }) => {
+            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+                setIsTyping(true)
+                setTimeout(scrollToBottom, 100)
+            }
+        })
+
+        socketRef.current.on('stop-typing', (data: { threadId: string, userId: string }) => {
+            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+                setIsTyping(false)
+            }
+        })
+
+        // Read Receipts
+        socketRef.current.on('message-read', (data: { threadId: string, userId: string }) => {
+            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+                setMessages(prev => prev.map(m => ({ ...m, read: true })))
+            }
+        })
+
         return () => {
+            if (activeThreadId) {
+                socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
+            }
             socketRef.current.disconnect()
         }
     }, [activeThreadId, session?.user?.id])
@@ -184,6 +227,8 @@ export default function CreatorMessagesPage() {
                 },
                 createdAt: messagePayload.createdAt
             })
+            // Stop typing
+            socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
         }
 
         // Persist to DB
@@ -525,12 +570,42 @@ export default function CreatorMessagesPage() {
                                                     }`}>
                                                     {msg.content}
                                                 </div>
-                                                <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1' : 'pl-1'}`}>
+                                                <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1' : 'pl-1'} flex items-center justify-end gap-1`}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {msg.isMe && (
+                                                        <span>
+                                                            {msg.read ? (
+                                                                <CheckCheck className="w-3 h-3 text-blue-500" />
+                                                            ) : (
+                                                                <CheckCheck className="w-3 h-3 text-gray-300" />
+                                                            )}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
+
+                                    {/* Typing Indicator */}
+                                    {isTyping && (
+                                        <div className="flex gap-4 max-w-3xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                            <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden ring-4 ring-white shadow-sm relative bg-gray-200">
+                                                {activeThread.image ? (
+                                                    <Image src={activeThread.image} alt={activeThread.name} fill className="object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+                                                        {activeThread.name[0]}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex items-center gap-1">
+                                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div ref={scrollRef} />
                                 </div>
                             )}
@@ -553,7 +628,18 @@ export default function CreatorMessagesPage() {
                                         className="bg-transparent border-none shadow-none focus-visible:ring-0 p-0 text-gray-700 placeholder:text-gray-400 h-6"
                                         placeholder="Type your message..."
                                         value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onChange={(e) => {
+                                            setNewMessage(e.target.value)
+                                            if (socketRef.current && activeThreadId) {
+                                                socketRef.current.emit("typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
+
+                                                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+
+                                                typingTimeoutRef.current = setTimeout(() => {
+                                                    socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
+                                                }, 2000)
+                                            }
+                                        }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault();

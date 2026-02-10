@@ -16,6 +16,7 @@ import {
     Smile,
     ArrowLeft,
     Check,
+    CheckCheck,
     CheckCircle2,
     Clock,
     DollarSign,
@@ -137,9 +138,24 @@ export default function ChatClient({
     const [isCallOpen, setIsCallOpen] = useState(false);
     const [initialIsVideo, setInitialIsVideo] = useState(false);
     const [socket, setSocket] = useState<Socket | null>(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Initialize Audio
+    useEffect(() => {
+        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // Notification sound
+    }, []);
 
     // Derived State
     const activeThread = threads.find(t => t.id === activeThreadId);
+
+    // Mark messages as read in DB when opening thread
+    useEffect(() => {
+        if (activeThreadId) {
+            markBrandMessagesRead(activeThreadId);
+        }
+    }, [activeThreadId]);
 
     // Socket.IO Integration
     useEffect(() => {
@@ -153,17 +169,49 @@ export default function ChatClient({
             newSocket.emit('join-room', currentUserId);
             if (activeThreadId) {
                 newSocket.emit('join-room', `thread:${activeThreadId}`);
+                // Mark as read immediately when joining
+                newSocket.emit('message-read', { threadId: activeThreadId, userId: currentUserId });
             }
         });
 
         newSocket.on('new-message', (newMessage: Message) => {
             if (activeThreadId && (newMessage as any).threadId === activeThreadId) {
                 startTransition(() => {
+                    // Check if message is not from me before playing sound to avoid echo
+                    if (newMessage.senderId !== currentUserId) {
+                        // Play sound
+                        audioRef.current?.play().catch(e => console.error("Audio play failed", e));
+                        // Emit read since we are viewing this thread
+                        newSocket.emit('message-read', { threadId: activeThreadId, userId: currentUserId });
+                    }
                     router.refresh();
                 });
             } else {
+                // Play sound for background notifications too
+                audioRef.current?.play().catch(e => console.error("Audio play failed", e));
                 router.refresh();
                 toast.info(`New message from ${newMessage.sender.name}`);
+            }
+        });
+
+        // Typing Indicators
+        newSocket.on('typing', (data: { threadId: string, userId: string }) => {
+            if (activeThreadId && data.threadId === `thread:${activeThreadId}` && data.userId !== currentUserId) {
+                setIsTyping(true);
+            }
+        });
+
+        newSocket.on('stop-typing', (data: { threadId: string, userId: string }) => {
+            if (activeThreadId && data.threadId === `thread:${activeThreadId}` && data.userId !== currentUserId) {
+                setIsTyping(false);
+            }
+        });
+
+        // Read Receipts
+        newSocket.on('message-read', (data: { threadId: string, userId: string }) => {
+            if (activeThreadId && data.threadId === `thread:${activeThreadId}` && data.userId !== currentUserId) {
+                // Force refresh or update local optimistic state to show blue ticks
+                router.refresh();
             }
         });
 
@@ -173,6 +221,9 @@ export default function ChatClient({
         });
 
         return () => {
+            if (activeThreadId) {
+                newSocket.emit('stop-typing', { threadId: `thread:${activeThreadId}`, userId: currentUserId });
+            }
             newSocket.disconnect();
         };
     }, [activeThreadId, currentUserId, router]);
@@ -246,6 +297,8 @@ export default function ChatClient({
                         attachmentUrl: currentAttachment?.url,
                         attachmentType: currentAttachment?.type
                     });
+                    // Stop typing when sent
+                    socket.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: currentUserId });
                 }
                 router.refresh();
             }
@@ -691,6 +744,15 @@ export default function ChatClient({
                                             {msg.content}
                                             <span className={`text-[10px] absolute bottom-1 ${isMe ? 'right-2 text-teal-200' : 'left-2 text-gray-400'} opacity-0 group-hover:opacity-100 transition-opacity`}>
                                                 {formatDate(new Date(msg.createdAt), 'h:mm a')}
+                                                {isMe && (
+                                                    <span className="ml-1 inline-flex">
+                                                        {msg.read ? (
+                                                            <CheckCheck className="w-3 h-3 text-blue-300" />
+                                                        ) : (
+                                                            <CheckCheck className="w-3 h-3 text-teal-200/70" />
+                                                        )}
+                                                    </span>
+                                                )}
                                             </span>
                                         </div>
                                     </div>
@@ -698,6 +760,28 @@ export default function ChatClient({
                             );
                         })}
                         <div ref={messagesEndRef} />
+
+                        {/* Typing Indicator */}
+                        {isTyping && (
+                            <div className="flex justify-start animate-fade-in">
+                                <div className="flex items-end gap-2">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-gray-200">
+                                        {activeThread.influencer.user.image ? (
+                                            <img src={activeThread.influencer.user.image} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                                {activeThread.influencer.user.name?.[0]}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1">
+                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Input Area */}
@@ -738,7 +822,21 @@ export default function ChatClient({
                             )}
                             <Textarea
                                 value={messageInput}
-                                onChange={(e) => setMessageInput(e.target.value)}
+                                onChange={(e) => {
+                                    setMessageInput(e.target.value);
+                                    if (socket && activeThreadId) {
+                                        // Emit typing event
+                                        socket.emit("typing", { threadId: `thread:${activeThreadId}`, userId: currentUserId });
+
+                                        // Clear existing timeout
+                                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+                                        // Set new timeout to stop typing
+                                        typingTimeoutRef.current = setTimeout(() => {
+                                            socket.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: currentUserId });
+                                        }, 2000);
+                                    }
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
