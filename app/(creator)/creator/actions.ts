@@ -159,19 +159,25 @@ export async function getCreatorThreads() {
         return threads.map(thread => {
             let name = "Unknown Brand";
             let image = null;
+            let brandProfileId = null;
+            let brandUserId = null;
 
             if (thread.candidate) {
                 const brand = thread.candidate.campaign.brand;
                 name = brand?.companyName || "Unknown Brand";
                 image = brand?.user?.image || null;
+                brandProfileId = brand?.id || null;
+                brandUserId = brand?.userId || null;
             } else {
                 // Direct DM
-                const otherUserId = thread.participants.split(',').find(id => id !== userId);
-                if (otherUserId) {
-                    const otherUser = directUsersMap.get(otherUserId);
+                const otherParticipantId = thread.participants.split(',').map(p => p.trim()).find(id => id !== userId);
+                if (otherParticipantId) {
+                    const otherUser = directUsersMap.get(otherParticipantId);
                     if (otherUser) {
                         name = otherUser.brandProfile?.companyName || otherUser.name || "Brand";
                         image = otherUser.image || null;
+                        brandProfileId = otherUser.brandProfile?.id || null;
+                        brandUserId = otherUser.id;
                     }
                 }
             }
@@ -184,7 +190,9 @@ export async function getCreatorThreads() {
                 image,
                 lastMessage: lastMsg?.content || "No messages yet",
                 updatedAt: lastMsg?.createdAt || thread.updatedAt,
-                unread: false // TODO: Add read status
+                unread: false,
+                brandId: brandProfileId,
+                brandUserId: brandUserId
             };
         });
 
@@ -223,19 +231,44 @@ export async function getThreadMessages(threadId: string) {
     }
 }
 
+import { pusherServer } from "@/lib/pusher";
+
+// ... (getCreatorThreads and getThreadMessages remain unchanged)
+
 export async function markMessagesRead(threadId: string) {
     const userId = await getCreatorId();
     if (!userId) return { success: false };
 
     try {
-        await db.message.updateMany({
+        const result = await db.message.updateMany({
             where: {
                 threadId,
                 senderId: { not: userId },
                 read: false
             },
-            data: { read: true }
+            data: {
+                read: true,
+                status: "SEEN",
+                seenAt: new Date()
+            }
         });
+
+        if (result.count > 0) {
+            const thread = await db.chatThread.findUnique({
+                where: { id: threadId }
+            });
+            if (thread) {
+                const participants = thread.participants.split(',');
+                const otherUserId = participants.find(p => p !== userId);
+                if (otherUserId) {
+                    await pusherServer.trigger(otherUserId, 'message:seen', {
+                        threadId,
+                        userId: userId
+                    });
+                }
+            }
+        }
+
         revalidatePath('/creator/messages');
         return { success: true };
     } catch (error) {
@@ -253,9 +286,28 @@ export async function sendMessage(threadId: string, content: string) {
             data: {
                 threadId,
                 senderId: userId,
-                content
+                content,
+                status: "SENT"
+            },
+            include: {
+                sender: {
+                    select: { name: true, image: true, id: true }
+                }
             }
         });
+
+        const thread = await db.chatThread.findUnique({
+            where: { id: threadId }
+        });
+
+        if (thread) {
+            const participants = thread.participants.split(',');
+            const recipientId = participants.find(p => p !== userId);
+
+            if (recipientId) {
+                await pusherServer.trigger(recipientId, 'message:new', message);
+            }
+        }
 
         // Update thread updated at
         await db.chatThread.update({
@@ -268,6 +320,20 @@ export async function sendMessage(threadId: string, content: string) {
     } catch (error) {
         console.error("Failed to send message", error);
         return { success: false, error: "Failed to send" };
+    }
+}
+
+export async function notifyTyping(threadId: string, isTyping: boolean) {
+    const userId = await getCreatorId();
+    if (!userId) return { success: false };
+
+    try {
+        await pusherServer.trigger(`presence-thread-${threadId}`, isTyping ? 'typing:start' : 'typing:stop', {
+            userId: userId
+        });
+        return { success: true };
+    } catch (error) {
+        return { success: false };
     }
 }
 
@@ -803,3 +869,41 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
 
 
 
+// --- BRAND PROFILE ---
+
+export async function getPublicBrandById(id: string) {
+    try {
+        const brand = await db.brandProfile.findFirst({
+            where: {
+                OR: [
+                    { id: id },
+                    { userId: id }
+                ]
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        image: true,
+                        createdAt: true,
+                    }
+                },
+                campaigns: {
+                    where: {
+                        status: 'ACTIVE'
+                    },
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
+            }
+        });
+
+        if (!brand) return { success: false, error: "Brand not found" };
+
+        return { success: true, data: brand };
+    } catch (error) {
+        console.error("Error fetching brand:", error);
+        return { success: false, error: "Failed to fetch brand" };
+    }
+}

@@ -26,6 +26,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                 return <FileText className="w-5 h-5 text-blue-600" />
             case 'APPLICATION_RECEIVED':
             case 'OFFER':
+            case 'COLLAB_REQUEST':
                 return <Mail className="w-5 h-5 text-green-600" />
             case 'PAYMENT_RELEASED':
             case 'ESCROW':
@@ -43,7 +44,8 @@ export function RecentActivity({ activities }: RecentActivityProps) {
             case 'DRAFT_SUBMITTED':
             case 'MESSAGE': return 'bg-blue-100'
             case 'APPLICATION_RECEIVED':
-            case 'OFFER': return 'bg-green-100'
+            case 'OFFER':
+            case 'COLLAB_REQUEST': return 'bg-green-100'
             case 'PAYMENT_RELEASED':
             case 'ESCROW': return 'bg-orange-100'
             case 'CAMPAIGN_COMPLETED': return 'bg-purple-100'
@@ -71,11 +73,17 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                                 <p className="text-xs text-gray-500">{activity.time} • {activity.subtitle}</p>
                             </div>
                         </div>
-                        {activity.actionLabel && (
-                            <Button variant="secondary" size="sm" className="bg-white border border-gray-200 shadow-sm text-gray-700 hover:bg-gray-50 shrink-0">
+                        {activity.actionLabel && activity.actionLink && activity.actionLink !== '#' ? (
+                            <Link href={activity.actionLink}>
+                                <Button variant="secondary" size="sm" className="bg-white border border-gray-200 shadow-sm text-gray-700 hover:bg-gray-50 shrink-0">
+                                    {activity.actionLabel}
+                                </Button>
+                            </Link>
+                        ) : activity.actionLabel ? (
+                            <Button variant="secondary" size="sm" disabled className="bg-white border border-gray-200 shadow-sm text-gray-700 hover:bg-gray-50 shrink-0 opacity-50 cursor-not-allowed">
                                 {activity.actionLabel}
                             </Button>
-                        )}
+                        ) : null}
                     </div>
                 ))}
 

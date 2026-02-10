@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 3000;
 app.prepare().then(() => {
     const server = express();
     const httpServer = createServer(server);
-    const io = socketIo(httpServer);
+    const io = socketIo(httpServer, {
+        path: "/api/socket"
+    });
 
     io.on("connection", (socket) => {
         console.log("Client connected:", socket.id);

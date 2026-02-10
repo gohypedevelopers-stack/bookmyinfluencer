@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -23,7 +24,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState, useEffect, useRef } from "react"
-import { getCreatorThreads, getThreadMessages, sendMessage, markMessagesRead, deleteThread, blockBrand, reportBrand } from "@/app/(creator)/creator/actions"
+import { getCreatorThreads, getThreadMessages, sendMessage, markMessagesRead, deleteThread, blockBrand, reportBrand, notifyTyping } from "@/app/(creator)/creator/actions"
+import { pusherClient } from "@/lib/pusher"
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
 import {
@@ -52,7 +54,8 @@ interface Thread {
     lastMessage: string
     updatedAt: Date
     unread: boolean
-    participants: string
+    brandId: string | null
+    brandUserId: string | null
 }
 
 interface Message {
@@ -66,7 +69,7 @@ interface Message {
     read?: boolean
 }
 
-import { io } from "socket.io-client"
+
 
 export default function CreatorMessagesPage() {
     const { data: session } = useSession()
@@ -80,10 +83,10 @@ export default function CreatorMessagesPage() {
     const [searchQuery, setSearchQuery] = useState("")
     const [isEditMode, setIsEditMode] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
-    const socketRef = useRef<any>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [isTyping, setIsTyping] = useState(false)
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const [onlineMembers, setOnlineMembers] = useState<Set<string>>(new Set())
+    const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null)
 
     // Initialize Audio
     useEffect(() => {
@@ -114,79 +117,121 @@ export default function CreatorMessagesPage() {
         }
     }
 
-    // Fetch messages when active thread changes & Real-time via Socket
+
+    // Fetch messages when active thread changes & Real-time via Pusher
     useEffect(() => {
-        if (!activeThreadId) return
+        if (!activeThreadId || !session?.user?.id) return
 
         const fetchMessages = async () => {
             setIsLoadingMessages(true)
             const data = await getThreadMessages(activeThreadId)
-            setMessages(data as Message[])
+
+            // Find first unread message from active thread that is NOT from me
+            const messages = data as Message[]
+            const unread = messages.find(m => !m.isMe && !m.read)
+            if (unread) setFirstUnreadId(unread.id)
+            else setFirstUnreadId(null)
+
+            setMessages(messages)
             setIsLoadingMessages(false)
-            scrollToBottom()
+            setTimeout(scrollToBottom, 500) // Increase timeout slightly for layout shift
+
             // Mark messages as read
             await markMessagesRead(activeThreadId)
+
+            // Update local state to read
+            setMessages(prev => prev.map(m => (!m.isMe && !m.read) ? { ...m, read: true } : m))
         }
 
         fetchMessages()
 
-        // Socket.io Connection
-        socketRef.current = io({
-            path: '/api/socket',
-        })
-        socketRef.current.emit("join-room", `thread:${activeThreadId}`)
-        // Mark as read on join
-        socketRef.current.emit("message-read", { threadId: activeThreadId, userId: session?.user?.id })
+        // Pusher Subscription
+        pusherClient.subscribe(session.user.id)
+        const channel = pusherClient.subscribe(`presence-thread-${activeThreadId}`)
 
-        socketRef.current.on("new-message", (data: any) => {
-            // Avoid duplicating if we just sent it
-            if (data.senderId !== session?.user?.id) {
+        // Presence handlers
+        const handleMemberAdded = (member: any) => {
+            setOnlineMembers((prev) => new Set(prev).add(member.id));
+        }
+
+        const handleMemberRemoved = (member: any) => {
+            setOnlineMembers((prev) => {
+                const next = new Set(prev);
+                next.delete(member.id);
+                return next;
+            });
+        }
+
+        const handleSubscriptionSucceeded = (members: any) => {
+            const membersSet = new Set<string>();
+            members.each((member: any) => membersSet.add(member.id));
+            setOnlineMembers(membersSet);
+        }
+
+        channel.bind("pusher:member_added", handleMemberAdded)
+        channel.bind("pusher:member_removed", handleMemberRemoved)
+        channel.bind("pusher:subscription_succeeded", handleSubscriptionSucceeded)
+
+        const handleNewMessage = (data: any) => {
+            // Avoid duplicating if we just sent it (Pusher echoes to everyone subscribed usually, or we filter by senderId)
+            if (data.senderId !== session.user.id) {
                 // Play sound
                 audioRef.current?.play().catch(e => console.error("Audio play failed", e))
 
-                // Emit read
-                socketRef.current.emit("message-read", { threadId: activeThreadId, userId: session?.user?.id })
+                // Emit read (server action)
+                markMessagesRead(activeThreadId)
 
-                setMessages((prev) => [...prev, {
-                    id: data.id || Math.random().toString(),
-                    content: data.content,
-                    senderId: data.senderId,
-                    senderName: data.sender?.name || "Brand",
-                    senderImage: data.sender?.image || null,
-                    createdAt: new Date(),
-                    isMe: false,
-                    read: false
-                }])
+                setMessages((prev) => {
+                    if (prev.some(m => m.id === data.id)) return prev
+                    return [...prev, {
+                        id: data.id || Math.random().toString(),
+                        content: data.content,
+                        senderId: data.senderId,
+                        senderName: data.sender?.name || "Brand",
+                        senderImage: data.sender?.image || null,
+                        createdAt: new Date(data.createdAt),
+                        isMe: false,
+                        read: false
+                    }]
+                })
                 setTimeout(scrollToBottom, 100)
             }
-        })
+        }
 
-        // Typing Indicators
-        socketRef.current.on('typing', (data: { threadId: string, userId: string }) => {
-            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+        const handleTyping = (data: { userId: string }) => {
+            if (data.userId !== session.user.id) {
                 setIsTyping(true)
                 setTimeout(scrollToBottom, 100)
             }
-        })
+        }
 
-        socketRef.current.on('stop-typing', (data: { threadId: string, userId: string }) => {
-            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+        const handleStopTyping = (data: { userId: string }) => {
+            if (data.userId !== session.user.id) {
                 setIsTyping(false)
             }
-        })
+        }
 
-        // Read Receipts
-        socketRef.current.on('message-read', (data: { threadId: string, userId: string }) => {
-            if (data.threadId === `thread:${activeThreadId}` && data.userId !== session?.user?.id) {
+        const handleRead = (data: { userId: string }) => {
+            if (data.userId !== session.user.id) {
                 setMessages(prev => prev.map(m => ({ ...m, read: true })))
             }
-        })
+        }
+
+        pusherClient.bind('message:new', handleNewMessage)
+        channel.bind('typing:start', handleTyping)
+        channel.bind('typing:stop', handleStopTyping)
+        channel.bind('message:seen', handleRead)
 
         return () => {
-            if (activeThreadId) {
-                socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
-            }
-            socketRef.current.disconnect()
+            pusherClient.unsubscribe(session.user.id)
+            pusherClient.unsubscribe(`presence-thread-${activeThreadId}`)
+            pusherClient.unbind('message:new', handleNewMessage)
+            channel.unbind('typing:start', handleTyping)
+            channel.unbind('typing:stop', handleStopTyping)
+            channel.unbind('message:seen', handleRead)
+            channel.unbind('pusher:member_added', handleMemberAdded)
+            channel.unbind('pusher:member_removed', handleMemberRemoved)
+            channel.unbind('pusher:subscription_succeeded', handleSubscriptionSucceeded)
         }
     }, [activeThreadId, session?.user?.id])
 
@@ -215,21 +260,8 @@ export default function CreatorMessagesPage() {
         setNewMessage("")
         setTimeout(scrollToBottom, 100)
 
-        // Emit to Socket
-        if (socketRef.current) {
-            socketRef.current.emit("send-message", {
-                threadId: `thread:${activeThreadId}`,
-                content: messagePayload.content,
-                senderId: messagePayload.senderId,
-                sender: {
-                    name: messagePayload.senderName,
-                    image: messagePayload.senderImage
-                },
-                createdAt: messagePayload.createdAt
-            })
-            // Stop typing
-            socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
-        }
+        // Stop typing notification
+        notifyTyping(activeThreadId, false)
 
         // Persist to DB
         try {
@@ -297,9 +329,7 @@ export default function CreatorMessagesPage() {
         const thread = threads.find(t => t.id === activeThreadId);
         if (!thread) return;
 
-        // Extract other user ID (Brand)
-        const participants = thread.participants.split(',');
-        const brandUserId = participants.find(p => p !== session?.user?.id);
+        const brandUserId = thread.brandUserId || thread.brandId; // Use brandUserId preferably
 
         if (!brandUserId) {
             toast.error("Could not identify brand to report");
@@ -451,8 +481,17 @@ export default function CreatorMessagesPage() {
                                 <div>
                                     <h2 className="font-bold text-gray-900">{activeThread.name}</h2>
                                     <div className="flex items-center text-xs text-gray-500">
-                                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                                        Active Now
+                                        {(activeThread.brandUserId && onlineMembers.has(activeThread.brandUserId)) ? (
+                                            <>
+                                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
+                                                Active Now
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-2"></span>
+                                                Offline
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -467,18 +506,26 @@ export default function CreatorMessagesPage() {
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
+                                        <button suppressHydrationWarning className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
                                             <MoreVertical className="w-5 h-5" />
                                         </button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-56">
                                         <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
                                         <DropdownMenuSeparator />
-                                        {/* TODO: Link to actual Brand Profile if available */}
-                                        <DropdownMenuItem disabled className="cursor-not-allowed text-gray-400">
-                                            <User className="w-4 h-4 mr-2" />
-                                            View Profile
-                                        </DropdownMenuItem>
+                                        {(activeThread.brandId || activeThread.brandUserId) ? (
+                                            <DropdownMenuItem asChild>
+                                                <Link href={`/creator/brands/${activeThread.brandId || activeThread.brandUserId}`} className="cursor-pointer">
+                                                    <User className="w-4 h-4 mr-2" />
+                                                    View Profile
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem disabled className="cursor-not-allowed text-gray-400">
+                                                <User className="w-4 h-4 mr-2" />
+                                                View Profile
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem onClick={() => handleDeleteConversation(activeThread.id)} className="text-orange-600 cursor-pointer">
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Clear Chat
@@ -490,9 +537,8 @@ export default function CreatorMessagesPage() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() => {
-                                                const participants = activeThread.participants.split(',');
-                                                const brandUserId = participants.find(p => p !== session?.user?.id);
-                                                if (brandUserId) handleBlockBrand(brandUserId);
+                                                if (activeThread.brandUserId) handleBlockBrand(activeThread.brandUserId);
+                                                else if (activeThread.brandId) handleBlockBrand(activeThread.brandId);
                                             }}
                                             className="text-red-600 cursor-pointer"
                                         >
@@ -545,45 +591,56 @@ export default function CreatorMessagesPage() {
                             ) : (
                                 <div className="space-y-8">
                                     {messages.map((msg) => (
-                                        <div key={msg.id} className={`flex gap-4 max-w-3xl ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
-                                            <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden ring-4 ring-white shadow-sm relative bg-gray-200">
-                                                {msg.senderImage ? (
-                                                    <Image
-                                                        src={msg.senderImage}
-                                                        alt={msg.senderName}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
-                                                        {msg.senderName[0]}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="space-y-1">
-                                                <div className={`flex items-baseline gap-2 ${msg.isMe ? 'justify-end' : ''}`}>
-                                                    <span className={`text-sm font-bold ${msg.isMe ? 'text-gray-500' : 'text-gray-900'}`}>{msg.senderName}</span>
-                                                </div>
-                                                <div className={`p-5 rounded-2xl shadow-sm leading-relaxed ${msg.isMe
-                                                    ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
-                                                    : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
-                                                    }`}>
-                                                    {msg.content}
-                                                </div>
-                                                <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1' : 'pl-1'} flex items-center justify-end gap-1`}>
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    {msg.isMe && (
-                                                        <span>
-                                                            {msg.read ? (
-                                                                <CheckCheck className="w-3 h-3 text-blue-500" />
-                                                            ) : (
-                                                                <CheckCheck className="w-3 h-3 text-gray-300" />
-                                                            )}
-                                                        </span>
+                                        <React.Fragment key={msg.id}>
+                                            <div className={`flex gap-4 max-w-3xl ${msg.isMe ? 'ml-auto flex-row-reverse' : ''}`}>
+                                                <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden ring-4 ring-white shadow-sm relative bg-gray-200">
+                                                    {msg.senderImage ? (
+                                                        <Image
+                                                            src={msg.senderImage}
+                                                            alt={msg.senderName}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold text-xs">
+                                                            {msg.senderName[0]}
+                                                        </div>
                                                     )}
                                                 </div>
+                                                <div className="space-y-1">
+                                                    <div className={`flex items-baseline gap-2 ${msg.isMe ? 'justify-end' : ''}`}>
+                                                        <span className={`text-sm font-bold ${msg.isMe ? 'text-gray-500' : 'text-gray-900'}`}>{msg.senderName}</span>
+                                                    </div>
+                                                    <div className={`p-5 rounded-2xl shadow-sm leading-relaxed ${msg.isMe
+                                                        ? 'bg-purple-600 text-white rounded-tr-none shadow-md'
+                                                        : 'bg-white text-gray-700 rounded-tl-none border border-gray-100'
+                                                        }`}>
+                                                        {msg.content}
+                                                    </div>
+                                                    <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1' : 'pl-1'} flex items-center justify-end gap-1`}>
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        {msg.isMe && (
+                                                            <span>
+                                                                {msg.read ? (
+                                                                    <CheckCheck className="w-3 h-3 text-blue-500" />
+                                                                ) : (
+                                                                    <CheckCheck className="w-3 h-3 text-gray-300" />
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                            {msg.id === firstUnreadId && (
+                                                <div className="flex items-center my-6">
+                                                    <div className="flex-1 h-px bg-purple-100"></div>
+                                                    <div className="px-4 py-1 bg-purple-50 text-purple-600 text-xs font-bold rounded-full border border-purple-100 uppercase tracking-wider shadow-sm">
+                                                        Unread Messages
+                                                    </div>
+                                                    <div className="flex-1 h-px bg-purple-100"></div>
+                                                </div>
+                                            )}
+                                        </React.Fragment>
                                     ))}
 
                                     {/* Typing Indicator */}
@@ -630,14 +687,11 @@ export default function CreatorMessagesPage() {
                                         value={newMessage}
                                         onChange={(e) => {
                                             setNewMessage(e.target.value)
-                                            if (socketRef.current && activeThreadId) {
-                                                socketRef.current.emit("typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
-
-                                                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
-
-                                                typingTimeoutRef.current = setTimeout(() => {
-                                                    socketRef.current.emit("stop-typing", { threadId: `thread:${activeThreadId}`, userId: session?.user?.id })
-                                                }, 2000)
+                                            // Notify typing via Pusher
+                                            if (activeThreadId && e.target.value.trim()) {
+                                                notifyTyping(activeThreadId, true)
+                                            } else if (activeThreadId) {
+                                                notifyTyping(activeThreadId, false)
                                             }
                                         }}
                                         onKeyDown={(e) => {
@@ -670,6 +724,6 @@ export default function CreatorMessagesPage() {
                     </div>
                 )}
             </main>
-        </div>
+        </div >
     )
 }

@@ -15,6 +15,7 @@ import { db } from "@/lib/db"
 import { getVerifiedUserIdFromCookies } from "@/lib/session"
 import { redirect } from "next/navigation"
 import { ConnectSocialDialog } from "../ConnectSocialDialog" // Use new generic dialog
+import { SyncAllButton, LiveSyncToggle, UpdateMediaKitButton } from "./SocialAccountsClient"
 
 // Helper component for platform icons
 const PlatformIcon = ({ provider, className }: { provider: string, className?: string }) => {
@@ -72,10 +73,7 @@ export default async function SocialAccountsPage() {
                     <p className="text-gray-500 mt-1">Manage your linked platforms and sync metrics</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 h-10 px-4 font-semibold">
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Sync All Data
-                    </Button>
+                    <SyncAllButton />
                 </div>
             </div>
 
@@ -98,8 +96,15 @@ export default async function SocialAccountsPage() {
                             // Determine URL for edit (simplified for now as we might not store full URL in socialAccount but partial in providerId)
                             // Ideally, we should fetch from `creator.instagramUrl` or `creator.youtubeUrl` or fall back to constructing it
                             let defaultUrl = "";
-                            if (isInstagram && creator.instagramUrl) defaultUrl = creator.instagramUrl;
-                            if (isYoutube && creator.youtubeUrl) defaultUrl = creator.youtubeUrl;
+                            let lastFetch = null;
+                            if (isInstagram) {
+                                if (creator.instagramUrl) defaultUrl = creator.instagramUrl;
+                                lastFetch = creator.lastInstagramFetchAt;
+                            }
+                            if (isYoutube) {
+                                if (creator.youtubeUrl) defaultUrl = creator.youtubeUrl;
+                                lastFetch = creator.lastYoutubeFetchAt;
+                            }
 
                             return (
                                 <Card key={account.id} className="rounded-[2rem] border-gray-100 shadow-sm p-6 relative overflow-hidden group hover:shadow-md transition-all">
@@ -154,7 +159,7 @@ export default async function SocialAccountsPage() {
                                     </div>
                                     <div className="flex items-center justify-between pt-2">
                                         <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wide">
-                                            <RefreshCw className="w-3 h-3" /> Latest
+                                            <RefreshCw className="w-3 h-3" /> Latest: {lastFetch ? new Date(lastFetch).toLocaleDateString() : 'Syncing...'}
                                         </span>
                                     </div>
                                 </Card>
@@ -171,7 +176,7 @@ export default async function SocialAccountsPage() {
                                 </div>
                                 <h3 className="font-bold text-xl text-gray-900">Live Performance Sync</h3>
                             </div>
-                            <Switch className="data-[state=checked]:bg-purple-500" defaultChecked />
+                            <LiveSyncToggle isLiveSyncEnabled={(creator as any).isLiveSyncEnabled} />
                         </div>
 
                         <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
@@ -227,12 +232,16 @@ export default async function SocialAccountsPage() {
 
                         <div className="space-y-6">
                             <div className="flex gap-4">
-                                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-                                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                <div className={`w-10 h-10 rounded-full ${creator.verificationStatus === 'APPROVED' ? 'bg-green-50' : 'bg-gray-50'} flex items-center justify-center shrink-0`}>
+                                    <CheckCircle2 className={`w-5 h-5 ${creator.verificationStatus === 'APPROVED' ? 'text-green-600' : 'text-gray-400'}`} />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-sm text-gray-900">Data Fidelity</p>
-                                    <p className="text-[10px] text-gray-500">Verified by Official APIs</p>
+                                    <p className="font-bold text-sm text-gray-900">
+                                        {creator.verificationStatus === 'APPROVED' ? 'Verified Account' : 'Verification Pending'}
+                                    </p>
+                                    <p className="text-[10px] text-gray-500">
+                                        {creator.verificationStatus === 'APPROVED' ? 'Your profile is visible to brands' : 'Complete onboarding for verification'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -242,9 +251,7 @@ export default async function SocialAccountsPage() {
                         </div>
 
                         <div className="mt-6">
-                            <Button className="w-full bg-gray-900 hover:bg-black text-white rounded-xl h-12 font-bold shadow-lg shadow-gray-200">
-                                Update Media Kit
-                            </Button>
+                            <UpdateMediaKitButton />
                         </div>
                     </Card>
                 </div>

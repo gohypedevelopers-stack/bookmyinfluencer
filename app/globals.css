@@ -140,3 +140,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Card flip border shimmer animation */
+@keyframes borderShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
