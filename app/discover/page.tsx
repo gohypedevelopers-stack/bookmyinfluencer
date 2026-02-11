@@ -518,7 +518,7 @@ export default function PublicMarketplacePage() {
                                                     {/* CTA */}
                                                     <div className="mt-auto">
                                                         <Link
-                                                            href={`/login?redirect=/brand/discover/${creator.dbId || creator.id}`}
+                                                            href={`/discover/${creator.dbId || creator.id}`}
                                                             className="block w-full text-center py-3 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-teal-500/25 hover:scale-[1.02]"
                                                             style={{
                                                                 background: 'linear-gradient(135deg, #14b8a6, #3b82f6)',
