@@ -5,7 +5,7 @@ const socketIo = require("socket.io");
 const express = require("express");
 
 const dev = process.env.NODE_ENV !== "production";
-const app = next({ dev });
+const app = next({ dev, dir: __dirname });
 const handle = app.getRequestHandler();
 
 const PORT = process.env.PORT || 3000;
@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 3000;
 app.prepare().then(() => {
     const server = express();
     const httpServer = createServer(server);
-    const io = socketIo(httpServer);
+    const io = socketIo(httpServer, {
+        path: "/api/socket"
+    });
 
     io.on("connection", (socket) => {
         console.log("Client connected:", socket.id);
@@ -28,6 +30,19 @@ app.prepare().then(() => {
         socket.on("send-message", (data) => {
             console.log("Message received:", data);
             socket.to(data.threadId).emit("new-message", data);
+        });
+
+        socket.on("typing", (data) => {
+            socket.to(data.threadId).emit("typing", data);
+        });
+
+        socket.on("stop-typing", (data) => {
+            socket.to(data.threadId).emit("stop-typing", data);
+        });
+
+        socket.on("message-read", (data) => {
+            // data: { threadId, userId }
+            socket.to(data.threadId).emit("message-read", data);
         });
 
         // --- Call Signaling ---

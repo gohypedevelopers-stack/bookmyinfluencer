@@ -1,11 +1,28 @@
 'use server';
 
+import { pusherServer } from "@/lib/pusher";
+
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog, createNotification } from "@/lib/audit";
 import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+
+
+export async function notifyTyping(threadId: string, isTyping: boolean) {
+    const session = await getServerSession(authOptions);
+    if (!session) return { success: false };
+
+    try {
+        await pusherServer.trigger(`presence-thread-${threadId}`, isTyping ? 'typing:start' : 'typing:stop', {
+            userId: session.user.id
+        });
+        return { success: true };
+    } catch (error) {
+        return { success: false };
+    }
+}
 
 export async function updateCandidateStatus(candidateId: string, newStatus: CandidateStatus) {
     try {
@@ -86,21 +103,43 @@ export async function fundEscrowTransaction(contractId: string) {
     }
 }
 
+
 export async function sendMessage(threadId: string, senderId: string, content: string, attachmentUrl?: string, attachmentType?: string) {
     try {
-        await db.message.create({
+        const message = await db.message.create({
             data: {
                 threadId,
                 senderId,
                 content,
                 attachmentUrl,
-                attachmentType
+                attachmentType,
+                status: "SENT"
+            },
+            include: {
+                sender: {
+                    select: { name: true, image: true, id: true }
+                }
             }
         });
+
+        // Get thread to find the other participant to notify
+        const thread = await db.chatThread.findUnique({
+            where: { id: threadId }
+        });
+
+        if (thread) {
+            const participants = thread.participants.split(',');
+            const recipientId = participants.find(p => p !== senderId);
+
+            if (recipientId) {
+                await pusherServer.trigger(recipientId, 'message:new', message);
+            }
+        }
 
         revalidatePath('/brand/chat');
         return { success: true };
     } catch (error) {
+        console.error("Failed to send message", error);
         return { success: false };
     }
 }
@@ -733,14 +772,37 @@ export async function markBrandMessagesRead(threadId: string) {
     if (!session || session.user.role !== 'BRAND') return { success: false };
 
     try {
-        await db.message.updateMany({
+        const result = await db.message.updateMany({
             where: {
                 threadId,
                 senderId: { not: session.user.id },
                 read: false
             },
-            data: { read: true }
+            data: {
+                read: true,
+                status: "SEEN",
+                seenAt: new Date()
+            }
         });
+
+        if (result.count > 0) {
+            // Find the sender of the messages (Influencer) to notify them that Brand has read
+            // Since updateMany doesn't return records, we check thread participants again
+            const thread = await db.chatThread.findUnique({
+                where: { id: threadId }
+            });
+            if (thread) {
+                const participants = thread.participants.split(',');
+                const otherUserId = participants.find(p => p !== session.user.id);
+                if (otherUserId) {
+                    await pusherServer.trigger(otherUserId, 'message:seen', {
+                        threadId,
+                        userId: session.user.id // Who read the message
+                    });
+                }
+            }
+        }
+
         revalidatePath('/brand');
         return { success: true };
     } catch (error) {
@@ -1546,4 +1608,6 @@ export async function createOrGetThread(creatorUserId: string) {
         return { success: false, error: 'Failed to start conversation' };
     }
 }
+
+
 

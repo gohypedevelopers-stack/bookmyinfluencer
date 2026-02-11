@@ -18,6 +18,7 @@ model User {
   role              UserRole           @default(INFLUENCER)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  lastSeenAt        DateTime?
   auditLogs         AuditLog[]
   blocksReceived    Block[]            @relation("BlocksReceived")
   blocksInitiated   Block[]            @relation("BlocksInitiated")
@@ -204,16 +205,19 @@ model ChatThread {
 }
 
 model Message {
-  id             String     @id @default(cuid())
+  id             String        @id @default(cuid())
   threadId       String
   senderId       String
   content        String?
-  read           Boolean    @default(false)
-  createdAt      DateTime   @default(now())
+  read           Boolean       @default(false)
+  status         MessageStatus @default(SENT)
+  deliveredAt    DateTime?
+  seenAt         DateTime?
+  createdAt      DateTime      @default(now())
   attachmentType String?
   attachmentUrl  String?
-  sender         User       @relation("SentMessages", fields: [senderId], references: [id])
-  thread         ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender         User          @relation("SentMessages", fields: [senderId], references: [id])
+  thread         ChatThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }
 
 model Dispute {
@@ -432,6 +436,7 @@ enum CampaignStatus {
 enum CandidateStatus {
   CONTACTED
   IN_NEGOTIATION
+  OFFERED
   HIRED
   CONTENT_REVIEW
   COMPLETED
@@ -481,4 +486,10 @@ enum DisputeStatus {
   RESOLVED_REFUND
   RESOLVED_RELEASE
   CLOSED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  SEEN
 }
