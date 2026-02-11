@@ -5,6 +5,9 @@ export async function GET() {
     try {
         // Get all creators from the Creator table (OTP auth system)
         const creators = await db.creator.findMany({
+            where: {
+                verificationStatus: 'APPROVED'
+            },
             include: {
                 user: true,
                 metrics: {
@@ -17,6 +20,11 @@ export async function GET() {
 
         // Also get creators from InfluencerProfile (NextAuth system)
         const influencerProfiles = await db.influencerProfile.findMany({
+            where: {
+                kyc: {
+                    status: 'APPROVED'
+                }
+            },
             include: {
                 user: true,
                 kyc: true

@@ -17,7 +17,9 @@ import {
     Video,
     Landmark,
     QrCode,
-    Loader2
+    Loader2,
+    Image,
+    MessageSquare
 } from "lucide-react"
 import { updatePricing, addPayoutMethod, removePayoutMethod } from "./actions"
 import { useRouter } from "next/navigation"
@@ -30,7 +32,7 @@ interface PricingFormProps {
 export default function PricingForm({ initialPricing, initialPayoutMethods }: PricingFormProps) {
     const [pricing, setPricing] = useState(Array.isArray(initialPricing) ? initialPricing : [])
     const [loading, setLoading] = useState(false)
-    const [payoutLoading, setPayoutLoading] = useState(false)
+    const [royaltyDuration, setRoyaltyDuration] = useState("1m") // 1m, 6m, 1y
     const router = useRouter()
 
     // Helper to get price for a specific service type
@@ -85,63 +87,212 @@ export default function PricingForm({ initialPricing, initialPayoutMethods }: Pr
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6 mb-6">
-                        {/* Reels / Shorts */}
-                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Film className="w-4 h-4 text-purple-500" />
-                                <span className="font-bold text-sm text-gray-900">Reels / Shorts</span>
+                    <div className="space-y-6">
+                        {/* INSTAGRAM SECTION */}
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider ml-1">Instagram</h4>
+
+                            {/* Instagram Story */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-pink-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center">
+                                            <Timer className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">Instagram Story</h4>
+                                            <p className="text-xs text-gray-500">24h visibility story post</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("instagram_story")}
+                                            onChange={(e) => handlePriceChange("instagram_story", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-pink-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="relative mb-2">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
-                                <Input
-                                    value={getPrice("reel")}
-                                    onChange={(e) => handlePriceChange("reel", e.target.value)}
-                                    placeholder="0"
-                                    className="h-14 pl-8 bg-white border-gray-200 text-lg font-bold rounded-xl focus-visible:ring-purple-500"
-                                />
+
+                            {/* Insta Reel */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-pink-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center">
+                                            <Film className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">Insta Reel</h4>
+                                            <p className="text-xs text-gray-500">60s vertical video</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("instagram_reel")}
+                                            onChange={(e) => handlePriceChange("instagram_reel", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-pink-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-xs text-gray-400">Average market rate: ₹800 - ₹1,500</p>
+
+                            {/* Insta Post */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-pink-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center">
+                                            <Image className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">Insta Post</h4>
+                                            <p className="text-xs text-gray-500">Static image or carousel</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("instagram_post")}
+                                            onChange={(e) => handlePriceChange("instagram_post", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-pink-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Insta Royalty / Collaboration */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-blue-100 transition-all shadow-sm">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                                                <Wallet className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900">Insta Royalty / Collaboration</h4>
+                                                <p className="text-xs text-gray-500">Long-term partnership rights</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pl-14">
+                                        <div className="flex gap-2 bg-gray-50 p-1 rounded-lg">
+                                            {['1m', '6m', '1y'].map((duration) => (
+                                                <button
+                                                    key={duration}
+                                                    onClick={() => setRoyaltyDuration(duration)}
+                                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${royaltyDuration === duration
+                                                        ? 'bg-white text-blue-600 shadow-sm'
+                                                        : 'text-gray-400 hover:text-gray-600'
+                                                        }`}
+                                                >
+                                                    {duration === '1m' ? '01 Month' : duration === '6m' ? '6 Month' : '1 Year'}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="relative w-40">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                            <Input
+                                                value={getPrice(`instagram_royalty_${royaltyDuration}`)}
+                                                onChange={(e) => handlePriceChange(`instagram_royalty_${royaltyDuration}`, e.target.value)}
+                                                placeholder="0"
+                                                className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-blue-500"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Stories */}
-                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Timer className="w-4 h-4 text-purple-500" />
-                                <span className="font-bold text-sm text-gray-900">Stories (Set of 3)</span>
-                            </div>
-                            <div className="relative mb-2">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
-                                <Input
-                                    value={getPrice("story")}
-                                    onChange={(e) => handlePriceChange("story", e.target.value)}
-                                    placeholder="0"
-                                    className="h-14 pl-8 bg-white border-gray-200 text-lg font-bold rounded-xl focus-visible:ring-purple-500"
-                                />
-                            </div>
-                            <p className="text-xs text-gray-400">Average market rate: ₹300 - ₹600</p>
-                        </div>
-                    </div>
+                        {/* YOUTUBE SECTION */}
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                            <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider ml-1">YouTube</h4>
 
-                    {/* Long-form Video */}
-                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative overflow-hidden">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2">
-                                <Video className="w-4 h-4 text-purple-500" />
-                                <span className="font-bold text-sm text-gray-900">Long-form Video (YT Integrated)</span>
+                            {/* YouTube Shorts */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-red-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+                                            <Film className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">YouTube Shorts</h4>
+                                            <p className="text-xs text-gray-500">60s vertical video</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("youtube_shorts")}
+                                            onChange={(e) => handlePriceChange("youtube_shorts", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-red-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
                             </div>
-                            <span className="bg-purple-100 text-purple-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Popular</span>
+
+                            {/* YouTube Video */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-red-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+                                            <Video className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">YouTube Video</h4>
+                                            <p className="text-xs text-gray-500">Long-form video placement</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("youtube_video")}
+                                            onChange={(e) => handlePriceChange("youtube_video", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-red-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* YouTube Community Post */}
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-red-100 transition-all shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center">
+                                            <MessageSquare className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900">YouTube Community Post</h4>
+                                            <p className="text-xs text-gray-500">Text/Image post on community tab</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative w-40">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                                        <Input
+                                            value={getPrice("youtube_community")}
+                                            onChange={(e) => handlePriceChange("youtube_community", e.target.value)}
+                                            placeholder="0"
+                                            className="h-10 pl-7 text-right bg-gray-50 border-gray-200 font-bold focus-visible:ring-red-500"
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">INR</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="relative mb-2">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
-                            <Input
-                                value={getPrice("video")}
-                                onChange={(e) => handlePriceChange("video", e.target.value)}
-                                placeholder="0"
-                                className="h-14 pl-8 bg-white border-gray-200 text-lg font-bold rounded-xl focus-visible:ring-purple-500"
-                            />
-                        </div>
-                        <p className="text-xs text-gray-400">Average market rate: ₹2,000 - ₹4,500</p>
+
                     </div>
                 </Card>
 
