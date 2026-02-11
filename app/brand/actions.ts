@@ -1,6 +1,6 @@
 'use server';
 
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer } from "@/lib/pusher-server";
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";

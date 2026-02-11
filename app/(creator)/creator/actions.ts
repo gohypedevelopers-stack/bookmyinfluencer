@@ -231,7 +231,7 @@ export async function getThreadMessages(threadId: string) {
     }
 }
 
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer } from "@/lib/pusher-server";
 
 // ... (getCreatorThreads and getThreadMessages remain unchanged)
 
