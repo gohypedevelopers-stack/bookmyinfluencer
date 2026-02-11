@@ -16,9 +16,9 @@ import { toast } from "sonner"
 import {
     getNotificationSettings,
     saveNotificationSettings,
-    resetNotificationSettings,
-    DEFAULT_NOTIFICATION_SETTINGS
+    resetNotificationSettings
 } from "./actions"
+import { DEFAULT_NOTIFICATION_SETTINGS } from "./constants"
 
 export default function NotificationsPage() {
     const [settings, setSettings] = useState<any>(DEFAULT_NOTIFICATION_SETTINGS)

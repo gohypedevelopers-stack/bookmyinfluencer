@@ -4,20 +4,7 @@ import { db } from "@/lib/db"
 import { getVerifiedUserIdFromCookies } from "@/lib/session"
 import { revalidatePath } from "next/cache"
 
-export const DEFAULT_NOTIFICATION_SETTINGS = {
-    campaigns: {
-        opportunities: { push: false, email: true, sms: false },
-        approvals: { push: true, email: false, sms: false }
-    },
-    payments: {
-        processed: { push: true, email: true, sms: true },
-        taxes: { push: false, email: true, sms: false }
-    },
-    social: {
-        visits: { push: true, email: false, sms: false },
-        messages: { push: true, email: true, sms: false }
-    }
-}
+import { DEFAULT_NOTIFICATION_SETTINGS } from "./constants"
 
 export async function getNotificationSettings() {
     try {
@@ -26,8 +13,8 @@ export async function getNotificationSettings() {
 
         const creator = await db.creator.findUnique({
             where: { userId },
-            select: { notificationSettings: true } as any
-        }) as any
+            select: { id: true, notificationSettings: true }
+        })
 
         if (!creator) return { error: "Creator profile not found" }
 
@@ -59,7 +46,7 @@ export async function saveNotificationSettings(settings: any) {
 
         if (!creator) return { error: "Creator profile not found" }
 
-        await (db.creator.update as any)({
+        await db.creator.update({
             where: { id: creator.id },
             data: {
                 notificationSettings: JSON.stringify(settings)
@@ -70,7 +57,7 @@ export async function saveNotificationSettings(settings: any) {
         return { success: true }
     } catch (error) {
         console.error("Error saving notification settings:", error)
-        return { error: "Failed to save notification settings" }
+        return { error: "Failed to save settings: " + (error instanceof Error ? error.message : "Unknown error") }
     }
 }
 
