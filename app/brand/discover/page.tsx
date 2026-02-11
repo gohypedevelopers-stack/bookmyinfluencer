@@ -418,7 +418,7 @@ export default function InfluencerDiscovery() {
                                                     <div className="font-bold text-gray-900">{influencer.priceRange}</div>
                                                 </div>
                                                 <Link
-                                                    href={`/brand/influencers/${influencer.id}`}
+                                                    href={`/discover/${influencer.id}`}
                                                     className="px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-teal-500/30 transition-all font-medium text-sm"
                                                 >
                                                     View Profile
