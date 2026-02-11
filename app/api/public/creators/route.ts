@@ -58,14 +58,14 @@ export async function GET() {
                 name: creator.displayName || creator.fullName || 'Creator',
                 handle: handle,
                 niche: creator.niche || 'Creator',
-                location: 'India',
+                location: 'India', // Creator model doesn't have location yet, keeping India as default but could be enhanced
                 followers: fmtFollowers,
                 followersCount: followers,
                 engagementRate: engagement,
                 avgViews: latestMetric?.viewsCount || 'N/A',
                 verified: creator.verificationStatus === 'APPROVED',
                 tags: creator.niche ? creator.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
-                priceRange: '₹100-500',
+                priceRange: creator.pricing || '₹100-500',
                 thumbnail: creator.backgroundImageUrl || creator.profileImageUrl || creator.autoProfileImageUrl || '',
                 profileImage: creator.profileImageUrl || creator.autoProfileImageUrl || '',
                 saved: false
@@ -85,11 +85,19 @@ export async function GET() {
                 ? inf.niche
                 : (inf.niche ? inf.niche.split(',').map((n: string) => n.trim()) : ['Creator']);
 
+            // Clean handle up - if it's a URL, extract the username
+            let handle = inf.instagramHandle || 'creator';
+            if (handle.startsWith('http')) {
+                const match = handle.match(/instagram\.com\/([^/?\s]+)/);
+                handle = match ? match[1] : 'creator';
+            }
+            if (!handle.startsWith('@')) handle = `@${handle}`;
+
             return {
                 id: inf.userId,
                 dbId: inf.id,
                 name: inf.user.name || 'Creator',
-                handle: inf.instagramHandle ? `@${inf.instagramHandle}` : '@creator',
+                handle: handle,
                 niche: nicheArray.join(', '),
                 location: inf.location || 'India',
                 followers: fmtFollowers,
@@ -98,7 +106,7 @@ export async function GET() {
                 avgViews: 'N/A',
                 verified: inf.kyc?.status === 'APPROVED',
                 tags: nicheArray.slice(0, 3),
-                priceRange: '₹100-500',
+                priceRange: inf.pricing || '₹100-500',
                 thumbnail: inf.user.image || '',
                 profileImage: inf.user.image || '',
                 saved: false

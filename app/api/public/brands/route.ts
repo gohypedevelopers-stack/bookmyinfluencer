@@ -27,7 +27,7 @@ export async function GET() {
                 name: brand.user.name || brand.companyName || 'Brand',
                 company: brand.companyName || 'Company',
                 industry: brand.industry || 'Business',
-                location: 'India',
+                location: brand.location || 'India',
                 logo: brand.user.image || '',
                 activeCampaigns: brand.campaigns.length,
                 totalSpent: totalSpent

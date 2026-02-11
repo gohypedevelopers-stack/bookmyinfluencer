@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db } from "../lib/db";
 import bcrypt from "bcryptjs";
 
 async function checkUser() {
@@ -54,7 +54,7 @@ async function checkUser() {
         });
 
         console.log("\n📋 All users in database:");
-        allUsers.forEach(u => {
+        allUsers.forEach((u: any) => {
             console.log(`  - ${u.email} (${u.role}) - Has Password: ${!!u.passwordHash}`);
         });
 
