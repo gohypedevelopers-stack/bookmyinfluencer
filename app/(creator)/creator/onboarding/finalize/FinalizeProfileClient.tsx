@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Instagram, Youtube, Music, Check, Wallet, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Instagram, Youtube, Music, Check, Wallet, CheckCircle2, X, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -36,6 +36,14 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
 
     // Determine initial niche
     const [selectedNiche, setSelectedNiche] = useState(initialData?.niche || "")
+    const [isCustomInputVisible, setIsCustomInputVisible] = useState(false)
+
+    useEffect(() => {
+        if (initialData?.niche && !NICHES.includes(initialData.niche)) {
+            setIsCustomInputVisible(true)
+            setSelectedNiche(initialData.niche)
+        }
+    }, [initialData])
 
     // Determine initial platforms based on connected accounts
     const initialPlatforms = []
@@ -161,18 +169,56 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
                             {NICHES.map(niche => (
                                 <button
                                     key={niche}
-                                    onClick={() => setSelectedNiche(niche)}
-                                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${selectedNiche === niche
+                                    onClick={() => {
+                                        setSelectedNiche(niche)
+                                        setIsCustomInputVisible(false)
+                                    }}
+                                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${selectedNiche === niche && !isCustomInputVisible
                                         ? "bg-[#2dd4bf] text-white shadow-lg shadow-teal-500/20"
                                         : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                                         }`}
                                 >
                                     <span className="flex items-center gap-2">
-                                        {selectedNiche === niche && <Check className="w-3.5 h-3.5" />}
+                                        {selectedNiche === niche && !isCustomInputVisible && <Check className="w-3.5 h-3.5" />}
                                         {niche}
                                     </span>
                                 </button>
                             ))}
+
+                            {/* Custom Niche Input */}
+                            {isCustomInputVisible ? (
+                                <div className="relative animate-in fade-in zoom-in-95 duration-200">
+                                    <Input
+                                        value={selectedNiche}
+                                        onChange={(e) => setSelectedNiche(e.target.value)}
+                                        placeholder="Enter custom niche..."
+                                        className="h-[42px] pl-5 pr-10 rounded-full text-sm font-medium border-gray-200 focus:border-[#2dd4bf] focus:ring-[#2dd4bf] min-w-[220px] shadow-sm"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            setIsCustomInputVisible(false)
+                                            setSelectedNiche("")
+                                        }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setSelectedNiche("")
+                                        setIsCustomInputVisible(true)
+                                    }}
+                                    className="px-5 py-2.5 rounded-full text-sm font-medium transition-all bg-white border border-dashed border-gray-300 text-gray-500 hover:border-[#2dd4bf] hover:text-[#2dd4bf] hover:bg-teal-50/50"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Plus className="w-3.5 h-3.5" />
+                                        Other
+                                    </span>
+                                </button>
+                            )}
                         </div>
                     </section>
 
