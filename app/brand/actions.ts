@@ -9,6 +9,27 @@ import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatu
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+// Helper to extract readable price range from raw pricing JSON
+function formatPriceRange(pricing: string | null | undefined): string {
+    if (!pricing) return '₹100-₹500';
+    try {
+        const data = JSON.parse(pricing);
+        const prices: number[] = [];
+        for (const [key, val] of Object.entries(data)) {
+            if (key === 'instaRoyaltyPrices' || key === 'instaRoyaltyDuration') continue;
+            const num = parseInt(val as string, 10);
+            if (!isNaN(num) && num > 0) prices.push(num);
+        }
+        if (prices.length === 0) return '₹100-₹500';
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        if (min === max) return `₹${min}`;
+        return `₹${min}-₹${max}`;
+    } catch {
+        if (pricing.includes('₹')) return pricing;
+        return '₹100-₹500';
+    }
+}
 
 export async function notifyTyping(threadId: string, isTyping: boolean) {
     const session = await getServerSession(authOptions);
@@ -415,7 +436,7 @@ export async function getPublicCreators(filter?: {
                 avgViews: primaryMetric?.viewsCount || 'N/A',
                 verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
-                priceRange: '₹100-500',
+                priceRange: formatPriceRange(c.pricing),
                 thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || c.user?.image,
                 saved: false
@@ -448,7 +469,7 @@ export async function getPublicCreators(filter?: {
                 avgViews: 'N/A',
                 verified: inf.kycStatus === 'APPROVED',
                 tags: nicheArray.slice(0, 3),
-                priceRange: '₹100-500',
+                priceRange: formatPriceRange(inf.pricing),
                 thumbnail: inf.user?.image || "",
                 profileImage: inf.user?.image || "",
                 saved: false

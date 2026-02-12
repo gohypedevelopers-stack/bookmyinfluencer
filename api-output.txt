@@ -1,0 +1,20 @@
+﻿[
+    {
+        "name":  "Bicicletas Monty",
+        "followers":  "253",
+        "followersCount":  253,
+        "priceRange":  "{\"instaStory\":\"350\",\"instaReel\":\"850\",\"instaPost\":\"500\",\"instaRoyaltyPrices\":{\"01 Month\":\"\",\"6 Month\":\"\",\"1 Year\":\"\"},\"instaRoyaltyDuration\":\"1 Year\",\"youtubeShorts\":\"500\",\"youtubeVideo\":\"1500\",\"youtubeCommunityPost\":\"300\"}"
+    },
+    {
+        "name":  "Rishav Rawat",
+        "followers":  "247",
+        "followersCount":  247,
+        "priceRange":  "{\"instaStory\":\"350\",\"instaReel\":\"850\",\"instaPost\":\"500\",\"instaRoyaltyPrices\":{\"01 Month\":\"15000\",\"6 Month\":\"50000\",\"1 Year\":\"90000\"},\"instaRoyaltyDuration\":\"01 Month\",\"youtubeShorts\":\"500\",\"youtubeVideo\":\"1500\",\"youtubeCommunityPost\":\"300\"}"
+    },
+    {
+        "name":  "Dheeraj_Sorout",
+        "followers":  "2",
+        "followersCount":  2,
+        "priceRange":  "{\"instaStory\":\"350\",\"instaReel\":\"850\",\"instaPost\":\"500\",\"instaRoyaltyPrices\":{\"01 Month\":\"\",\"6 Month\":\"\",\"1 Year\":\"\"},\"instaRoyaltyDuration\":\"1 Year\",\"youtubeShorts\":\"500\",\"youtubeVideo\":\"1500\",\"youtubeCommunityPost\":\"300\"}"
+    }
+]

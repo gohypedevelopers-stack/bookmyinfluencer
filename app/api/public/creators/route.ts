@@ -1,6 +1,30 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+// Helper to extract readable price range from raw pricing JSON
+function formatPriceRange(pricing: string | null): string {
+    if (!pricing) return '₹100-₹500';
+    try {
+        const data = JSON.parse(pricing);
+        // Collect all numeric price values
+        const prices: number[] = [];
+        for (const [key, val] of Object.entries(data)) {
+            if (key === 'instaRoyaltyPrices' || key === 'instaRoyaltyDuration') continue;
+            const num = parseInt(val as string, 10);
+            if (!isNaN(num) && num > 0) prices.push(num);
+        }
+        if (prices.length === 0) return '₹100-₹500';
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        if (min === max) return `₹${min}`;
+        return `₹${min}-₹${max}`;
+    } catch {
+        // If it's already a simple string like "₹100-500", return as-is
+        if (pricing.includes('₹')) return pricing;
+        return '₹100-₹500';
+    }
+}
+
 export async function GET() {
     try {
         // Get all creators from the Creator table (OTP auth system)
@@ -73,7 +97,7 @@ export async function GET() {
                 avgViews: latestMetric?.viewsCount || 'N/A',
                 verified: creator.verificationStatus === 'APPROVED',
                 tags: creator.niche ? creator.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
-                priceRange: creator.pricing || '₹100-500',
+                priceRange: formatPriceRange(creator.pricing),
                 thumbnail: creator.backgroundImageUrl || creator.profileImageUrl || creator.autoProfileImageUrl || '',
                 profileImage: creator.profileImageUrl || creator.autoProfileImageUrl || '',
                 saved: false
@@ -114,7 +138,7 @@ export async function GET() {
                 avgViews: 'N/A',
                 verified: inf.kyc?.status === 'APPROVED',
                 tags: nicheArray.slice(0, 3),
-                priceRange: inf.pricing || '₹100-500',
+                priceRange: formatPriceRange(inf.pricing || null),
                 thumbnail: inf.user.image || '',
                 profileImage: inf.user.image || '',
                 saved: false
