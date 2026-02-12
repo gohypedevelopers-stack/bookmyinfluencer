@@ -6,13 +6,13 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { redirect } from "next/navigation"
 import PricingForm from "./PricingForm"
 import PaymentHistory from "./PaymentHistory"
 
 export default async function PricingPayoutsPage() {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) redirect("/verify")
 
     const creator = await db.creator.findUnique({

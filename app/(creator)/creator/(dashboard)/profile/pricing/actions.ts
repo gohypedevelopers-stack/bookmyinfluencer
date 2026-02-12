@@ -1,12 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { revalidatePath } from "next/cache"
 
 export async function updatePricing(pricingData: any[]) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })
@@ -29,7 +29,7 @@ export async function updatePricing(pricingData: any[]) {
 
 export async function addPayoutMethod(method: any) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })
@@ -55,7 +55,7 @@ export async function addPayoutMethod(method: any) {
 
 export async function addPaymentRecord(payment: any) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })
@@ -81,7 +81,7 @@ export async function addPaymentRecord(payment: any) {
 
 export async function removePayoutMethod(methodId: string) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })

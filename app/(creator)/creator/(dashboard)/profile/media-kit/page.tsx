@@ -1,10 +1,10 @@
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { redirect } from "next/navigation"
 import MediaKitEditor from "./MediaKitEditor"
 
 export default async function MediaKitPage() {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) redirect("/verify")
 
     const creator = await db.creator.findUnique({

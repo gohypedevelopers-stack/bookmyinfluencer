@@ -14,7 +14,7 @@ import {
     Twitch
 } from "lucide-react"
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { redirect } from "next/navigation"
 import { ConnectSocialDialog } from "../ConnectSocialDialog" // Use new generic dialog
 import { SyncAllButton, LiveSyncToggle, UpdateMediaKitButton } from "./SocialAccountsClient"
@@ -29,7 +29,7 @@ const PlatformIcon = ({ provider, className }: { provider: string, className?: s
 }
 
 export default async function SocialAccountsPage() {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) redirect("/verify")
 
     const creator = await db.creator.findUnique({

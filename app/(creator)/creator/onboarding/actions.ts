@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 
 export async function completeOnboarding(payload?: {
     niche: string
@@ -10,7 +10,7 @@ export async function completeOnboarding(payload?: {
     pricing: any
 }) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         console.log("completeOnboarding called", { userId, payload })
 
         if (!userId) {

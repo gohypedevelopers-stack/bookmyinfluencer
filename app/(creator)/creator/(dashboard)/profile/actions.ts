@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { revalidatePath } from "next/cache"
 
 import { runApifyActor } from "@/lib/apify";
@@ -10,7 +10,7 @@ import { normalizeYoutubeMetrics, parseYoutubeChannel } from "@/lib/metrics-util
 // Generic function to update any social profile (Instagram, YouTube, etc.)
 export async function updateSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch", url: string, followersCount: number = 0) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) {
             return { error: "Unauthorized" }
         }
@@ -244,7 +244,7 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
 
 export async function disconnectSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch") {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })
@@ -289,7 +289,7 @@ export async function disconnectSocialProfile(provider: "instagram" | "youtube" 
 
 export async function toggleLiveSync(enabled: boolean) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         await db.creator.update({
@@ -307,7 +307,7 @@ export async function toggleLiveSync(enabled: boolean) {
 
 export async function syncAllSocialData() {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({
@@ -356,7 +356,7 @@ export async function updateInstagramUrl(url: string, followersCount: number = 0
 
 export async function updateCreatorProfileAction(formData: FormData) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { success: false, error: "Unauthorized" }
 
         const displayName = formData.get("displayName") as string

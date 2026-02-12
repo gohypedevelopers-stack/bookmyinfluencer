@@ -1,11 +1,11 @@
 'use server'
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { revalidatePath } from "next/cache"
 
 export async function updateCreatorPricing(pricing: string) {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) {
         return { success: false, error: "Unauthorized" }
     }
@@ -25,7 +25,7 @@ export async function updateCreatorPricing(pricing: string) {
 }
 
 export async function updateCreatorMediaKit(mediaKit: string) {
-    const userId = await getVerifiedUserIdFromCookies()
+    const userId = await getAuthenticatedCreatorId()
     if (!userId) {
         return { success: false, error: "Unauthorized" }
     }

@@ -1,14 +1,14 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { revalidatePath } from "next/cache"
 
 import { DEFAULT_NOTIFICATION_SETTINGS } from "./constants"
 
 export async function getNotificationSettings() {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({
@@ -36,7 +36,7 @@ export async function getNotificationSettings() {
 
 export async function saveNotificationSettings(settings: any) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({

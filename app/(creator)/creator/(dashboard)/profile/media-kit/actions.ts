@@ -1,12 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getVerifiedUserIdFromCookies } from "@/lib/session"
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { revalidatePath } from "next/cache"
 
 export async function updateMediaKit(selectedPosts: any[]) {
     try {
-        const userId = await getVerifiedUserIdFromCookies()
+        const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
 
         const creator = await db.creator.findUnique({ where: { userId } })
