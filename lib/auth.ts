@@ -50,13 +50,41 @@ export const authOptions: NextAuthOptions = {
 
                     console.log('✅ Login successful!')
 
+                    // Determine KYC status: check BOTH legacy KYCSubmission AND new Creator table
+                    let kycStatus: KYCStatus = (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus;
+                    let onboardingComplete = false;
+
+                    if (user.role === 'INFLUENCER') {
+                        // Check Creator table via OtpUser email linkage
+                        const otpUser = await db.otpUser.findUnique({
+                            where: { email: user.email },
+                            select: { id: true }
+                        });
+                        if (otpUser) {
+                            const creator = await db.creator.findUnique({
+                                where: { userId: otpUser.id },
+                                select: { niche: true, verificationStatus: true }
+                            });
+                            if (creator) {
+                                // If Creator has verificationStatus, use it
+                                if (creator.verificationStatus && creator.verificationStatus !== 'NOT_SUBMITTED') {
+                                    kycStatus = creator.verificationStatus as KYCStatus;
+                                }
+                                // Onboarding is complete if niche is set
+                                onboardingComplete = !!creator.niche;
+                            }
+                        }
+                        console.log('📋 Creator KYC:', kycStatus, 'Onboarding complete:', onboardingComplete);
+                    }
+
                     return {
                         id: user.id,
                         name: user.name,
                         email: user.email,
                         role: user.role as UserRole,
                         image: user.image,
-                        kycStatus: (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus
+                        kycStatus,
+                        onboardingComplete
                     }
                 } catch (error) {
                     console.error("Auth error:", error);
@@ -85,6 +113,7 @@ export const authOptions: NextAuthOptions = {
                 token.role = user.role
                 token.id = user.id
                 token.kycStatus = user.kycStatus
+                token.onboardingComplete = (user as any).onboardingComplete || false
             }
             return token
         },
@@ -93,6 +122,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.role = token.role as UserRole
                 session.user.id = token.id as string
                 session.user.kycStatus = token.kycStatus as KYCStatus
+                    ; (session.user as any).onboardingComplete = token.onboardingComplete || false
             }
             return session
         }
