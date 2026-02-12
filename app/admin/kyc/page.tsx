@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react'
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, XCircle, Instagram, Youtube, TrendingUp } from "lucide-react"
+import { CheckCircle, XCircle, Instagram, Youtube, Eye } from "lucide-react"
+import { getFullProfileByEmail } from "../actions"
+import { UserDetailsModal } from "../components/UserDetailsModal"
+import { toast } from "sonner";
 
 interface Verification {
     id: string
@@ -33,6 +36,9 @@ export default function AdminKYCPage() {
     const [verifications, setVerifications] = useState<Verification[]>([])
     const [loading, setLoading] = useState(true)
     const [processingId, setProcessingId] = useState<string | null>(null)
+    const [selectedUser, setSelectedUser] = useState<any | null>(null)
+    const [selectedCreator, setSelectedCreator] = useState<any | null>(null)
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
     useEffect(() => {
         fetchPendingVerifications()
@@ -47,6 +53,7 @@ export default function AdminKYCPage() {
             }
         } catch (error) {
             console.error('Failed to fetch verifications:', error)
+            toast.error("Failed to fetch verifications")
         } finally {
             setLoading(false)
         }
@@ -67,14 +74,14 @@ export default function AdminKYCPage() {
 
             const data = await response.json()
             if (data.success) {
-                alert('Creator approved successfully! Email sent.')
+                toast.success('Creator approved successfully! Email sent.')
                 fetchPendingVerifications() // Refresh list
             } else {
-                alert('Error: ' + data.error)
+                toast.error('Error: ' + data.error)
             }
         } catch (error) {
             console.error('Approval error:', error)
-            alert('Failed to approve creator')
+            toast.error('Failed to approve creator')
         } finally {
             setProcessingId(null)
         }
@@ -95,14 +102,39 @@ export default function AdminKYCPage() {
 
             const data = await response.json()
             if (data.success) {
-                alert('Creator rejected. Email sent.')
+                toast.success('Creator rejected. Email sent.')
                 fetchPendingVerifications() // Refresh list
             } else {
-                alert('Error: ' + data.error)
+                toast.error('Error: ' + data.error)
             }
         } catch (error) {
             console.error('Rejection error:', error)
-            alert('Failed to reject creator')
+            toast.error('Failed to reject creator')
+        } finally {
+            setProcessingId(null)
+        }
+    }
+
+    const handleViewDetails = async (verification: Verification) => {
+        const email = verification.creator.user.email;
+        if (!email || email === 'No email') {
+            toast.error("No valid email found for this creator");
+            return;
+        }
+
+        setProcessingId(verification.id)
+        try {
+            const result = await getFullProfileByEmail(email);
+            if (result.success) {
+                setSelectedUser(result.user);
+                setSelectedCreator(result.creator);
+                setIsDetailsOpen(true);
+            } else {
+                toast.error("Failed to load details");
+            }
+        } catch (error) {
+            console.error('View details error:', error)
+            toast.error("Failed to view details");
         } finally {
             setProcessingId(null)
         }
@@ -118,6 +150,15 @@ export default function AdminKYCPage() {
 
     return (
         <div className="space-y-6">
+            <UserDetailsModal
+                isOpen={isDetailsOpen}
+                onClose={() => setIsDetailsOpen(false)}
+                user={selectedUser}
+                creator={selectedCreator}
+                onUpdate={() => {
+                    fetchPendingVerifications();
+                }}
+            />
             <div>
                 <h2 className="text-2xl font-bold text-gray-900">KYC Verifications</h2>
                 <p className="text-gray-500">Review and approve creator verification requests</p>
@@ -217,6 +258,15 @@ export default function AdminKYCPage() {
                                     >
                                         <XCircle className="w-4 h-4 mr-2" />
                                         Reject
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleViewDetails(verification)}
+                                        disabled={processingId === verification.id}
+                                        variant="outline"
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    >
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        Details
                                     </Button>
                                 </div>
                             </div>

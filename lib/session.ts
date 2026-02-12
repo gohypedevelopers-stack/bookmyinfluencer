@@ -1,5 +1,7 @@
 import crypto from "crypto"
 import { cookies } from "next/headers"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 type SessionPayload = {
   userId: string
@@ -93,10 +95,16 @@ export function verifySession(token: string): SessionPayload | null {
 }
 
 export async function getVerifiedUserIdFromCookies() {
+  // 1. Try NextAuth Session (Primary source of truth now)
+  const session = await getServerSession(authOptions)
+  if (session?.user?.id) {
+    return session.user.id
+  }
+
+  // 2. Fallback to custom 'session' cookie (for backward compatibility)
   const cookieStore = await cookies()
   const token = cookieStore.get("session")?.value
   if (!token) return null
   const payload = verifySession(token)
   return payload?.userId ?? null
 }
-

@@ -37,3 +37,92 @@ export async function updatePayoutStatus(payoutId: string, status: PayoutStatus)
         return { success: false, error: "Failed" };
     }
 }
+
+export async function deleteUser(userId: string) {
+    try {
+        await db.user.delete({
+            where: { id: userId }
+        });
+        revalidatePath('/admin/users');
+        return { success: true };
+    } catch (error) {
+        console.error("Delete user error", error);
+        return { success: false, error: "Failed to delete user" };
+    }
+}
+
+export async function updateUserRole(userId: string, role: any) {
+    try {
+        await db.user.update({
+            where: { id: userId },
+            data: { role }
+        });
+        revalidatePath('/admin/users');
+        return { success: true };
+    } catch (error) {
+        console.error("Update role error", error);
+        return { success: false, error: "Failed to update role" };
+    }
+}
+
+export async function getFullProfileByEmail(email: string) {
+    try {
+        const user = await db.user.findUnique({
+            where: { email },
+            include: {
+                influencerProfile: {
+                    include: {
+                        kyc: true
+                    }
+                }
+            }
+        });
+
+        // Use a more relaxed search for Creator: email on User or email on Creator or similar
+        const creator = await db.creator.findFirst({
+            where: {
+                user: { email: email }
+            },
+            include: {
+                metrics: true,
+                kycSubmission: true,
+                user: true
+            }
+        });
+
+        return { success: true, user: user ? JSON.parse(JSON.stringify(user)) : null, creator: creator ? JSON.parse(JSON.stringify(creator)) : null };
+    } catch (error) {
+        console.error("Get profile error", error);
+        return { success: false, error: "Failed to fetch profile" };
+    }
+}
+
+export async function verifyCreator(creatorId: string, status: KYCStatus) {
+    try {
+        await db.creator.update({
+            where: { id: creatorId },
+            data: {
+                verificationStatus: status,
+                verifiedAt: status === 'APPROVED' ? new Date() : null
+            }
+        });
+
+        const kyc = await db.creatorKYCSubmission.findUnique({
+            where: { creatorId }
+        });
+
+        if (kyc) {
+            await db.creatorKYCSubmission.update({
+                where: { id: kyc.id },
+                data: { status }
+            });
+        }
+
+        revalidatePath('/admin/kyc');
+        revalidatePath('/admin/users');
+        return { success: true };
+    } catch (error) {
+        console.error("Verify creator error", error);
+        return { success: false, error: "Failed to verify creator" };
+    }
+}
