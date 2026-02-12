@@ -40,14 +40,26 @@ export async function updatePayoutStatus(payoutId: string, status: PayoutStatus)
 
 export async function deleteUser(userId: string) {
     try {
+        console.log(`[ADMIN_ACTION] deleteUser called for userId: ${userId}`);
+
+        // Audit log BEFORE delete so we have a record even if it fails
+        await db.auditLog.create({
+            data: {
+                action: 'DELETE_USER',
+                entity: 'User',
+                entityId: userId,
+                details: JSON.stringify({ timestamp: new Date().toISOString(), env: process.env.NODE_ENV })
+            }
+        });
+
         await db.user.delete({
             where: { id: userId }
         });
         revalidatePath('/admin/users');
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Delete user error", error);
-        return { success: false, error: "Failed to delete user" };
+        return { success: false, error: error.message || "Failed to delete user" };
     }
 }
 

@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { headers } from "next/headers";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
+        const headersList = await headers();
+        const apiKey = headersList.get('x-admin-key');
+
+        // Basic protection - though user asked for this to be visible proof
+        // We'll allow it public for now as requested for "PROOF", or check env
+
         const dbUrl = process.env.DATABASE_URL || "";
         const directUrl = process.env.DIRECT_URL || "";
 
@@ -19,17 +26,21 @@ export async function GET() {
             }
         };
 
-        const userCount = await db.user.count();
-        const otpUserCount = await db.otpUser.count();
-        const creatorCount = await db.creator.count();
-        const kycCount = await db.creatorKYCSubmission.count();
-
-        // Check for any recent audit logs (last 5)
-        const recentLogs = await db.auditLog.findMany({
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-            select: { action: true, entity: true, createdAt: true }
-        });
+        const [
+            userCount,
+            otpUserCount,
+            creatorCount,
+            kycCount,
+            chatThreadCount,
+            messageCount
+        ] = await Promise.all([
+            db.user.count(),
+            db.otpUser.count(),
+            db.creator.count(),
+            db.creatorKYCSubmission.count(),
+            db.chatThread.count(),
+            db.message.count()
+        ]);
 
         const info = {
             timestamp: new Date().toISOString(),
@@ -40,9 +51,10 @@ export async function GET() {
                 users: userCount,
                 otpUsers: otpUserCount,
                 creators: creatorCount,
-                kycSubmissions: kycCount
-            },
-            recent_logs: recentLogs
+                kycSubmissions: kycCount,
+                chatThreads: chatThreadCount,
+                messages: messageCount
+            }
         };
 
         console.log("[Health Check] DB Info:", JSON.stringify(info, null, 2));

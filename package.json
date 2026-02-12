@@ -8,9 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:setup": "prisma generate && prisma migrate dev && tsx prisma/seed.ts"
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed:local": "tsx prisma/seed.ts",
+    "count-rows": "tsx scripts/count-rows.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

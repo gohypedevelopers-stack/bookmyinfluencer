@@ -867,7 +867,7 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
 
         // Get user to find influencer profile
         const user = await db.user.findUnique({
-            where: { email: session.user.email }
+            where: { email: email }
         });
 
         // Calculate total revenue from escrow
