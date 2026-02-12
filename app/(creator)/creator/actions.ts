@@ -235,7 +235,8 @@ export async function getCreatorThreads() {
                 updatedAt: lastMsg?.createdAt || thread.updatedAt,
                 unread: false,
                 brandId: brandProfileId,
-                brandUserId: brandUserId
+                brandUserId: brandUserId,
+                isLastMessageMe: lastMsg?.senderId === userId
             };
         });
 

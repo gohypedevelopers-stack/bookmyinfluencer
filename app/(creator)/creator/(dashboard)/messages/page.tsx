@@ -56,6 +56,7 @@ interface Thread {
     unread: boolean
     brandId: string | null
     brandUserId: string | null
+    isLastMessageMe?: boolean
 }
 
 interface Message {
@@ -83,6 +84,7 @@ export default function CreatorMessagesPage() {
     const [searchQuery, setSearchQuery] = useState("")
     const [isEditMode, setIsEditMode] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [isTyping, setIsTyping] = useState(false)
     const [onlineMembers, setOnlineMembers] = useState<Set<string>>(new Set())
@@ -236,7 +238,9 @@ export default function CreatorMessagesPage() {
     }, [activeThreadId, session?.user?.id])
 
     const scrollToBottom = () => {
-        if (scrollRef.current) {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+        } else if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         }
     }
@@ -448,7 +452,7 @@ export default function CreatorMessagesPage() {
                                             )}
                                         </div>
                                         <p className={`text-sm truncate ${activeThreadId === conv.id ? 'text-gray-600 font-medium' : 'text-gray-400'}`}>
-                                            {conv.lastMessage}
+                                            {conv.isLastMessageMe ? `You: ${conv.lastMessage}` : conv.lastMessage}
                                         </p>
                                     </div>
                                 </div>
@@ -563,7 +567,7 @@ export default function CreatorMessagesPage() {
                                     <div className="space-y-2">
                                         <Label>Reason</Label>
                                         <Textarea
-                                            placeholder="Describe the issue..."
+                                            placeholder=" Describe the issue..."
                                             value={reportReason}
                                             onChange={(e) => setReportReason(e.target.value)}
                                         />
@@ -617,7 +621,7 @@ export default function CreatorMessagesPage() {
                                                         }`}>
                                                         {msg.content}
                                                     </div>
-                                                    <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1' : 'pl-1'} flex items-center justify-end gap-1`}>
+                                                    <div className={`text-[10px] text-gray-400 font-medium ${msg.isMe ? 'text-right pr-1 justify-end' : 'pl-1 justify-start'} flex items-center gap-1`}>
                                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         {msg.isMe && (
                                                             <span>
@@ -663,7 +667,7 @@ export default function CreatorMessagesPage() {
                                         </div>
                                     )}
 
-                                    <div ref={scrollRef} />
+                                    <div ref={messagesEndRef} />
                                 </div>
                             )}
                         </div>

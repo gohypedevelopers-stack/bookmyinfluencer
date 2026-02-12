@@ -160,14 +160,6 @@ export default function ChatClient({
     // Derived State
     const activeThread = threads.find(t => t.id === activeThreadId);
 
-    // Mark messages as read in DB when opening thread
-    useEffect(() => {
-        if (activeThreadId) {
-            markBrandMessagesRead(activeThreadId);
-        }
-    }, [activeThreadId]);
-
-
 
     // Online Status State
     const [onlineMembers, setOnlineMembers] = useState<Set<string>>(new Set());
@@ -547,7 +539,9 @@ export default function ChatClient({
                                             </div>
                                             <p className={`text-sm truncate ${activeThreadId === thread.id ? 'text-teal-700 font-medium' : 'text-gray-500'}`}>
                                                 {thread.lastMessage ? (
-                                                    thread.lastMessage.senderId === currentUserId ? `You: ${thread.lastMessage.content}` : thread.lastMessage.content
+                                                    thread.lastMessage.senderId === currentUserId
+                                                        ? `You: ${thread.lastMessage.content}`
+                                                        : `${thread.lastMessage.sender?.name || 'Partner'}: ${thread.lastMessage.content}`
                                                 ) : (
                                                     <span className="italic">No messages yet</span>
                                                 )}
