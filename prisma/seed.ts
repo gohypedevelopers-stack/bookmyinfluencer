@@ -5,6 +5,12 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+    if (process.env.NODE_ENV === 'production') {
+        console.error('❌ FATAL: Attempted to run seed in production!');
+        console.error('This operation is strictly forbidden to prevent data loss.');
+        process.exit(1);
+    }
+
     console.log('Seeding database...')
 
     // 1. Clean up

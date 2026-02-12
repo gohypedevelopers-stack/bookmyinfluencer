@@ -6,16 +6,59 @@ import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 // Helper to get the actual Creator ID (Resolved to a User table ID)
+// Helper to get the actual Creator ID (Resolved to a User table ID)
 async function getCreatorId() {
+    // 1. Try OTP Session Cookie first (Preferred for Creator App)
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const otpSession = cookieStore.get("session")?.value;
+
+    if (otpSession) {
+        try {
+            const { verifySession } = await import("@/lib/session");
+            const payload = await verifySession(otpSession);
+            if (payload?.userId) {
+                // Ensure shadow User exists for compatibility
+                const otpUser = await db.otpUser.findUnique({
+                    where: { id: payload.userId },
+                    include: { creator: true }
+                });
+
+                if (otpUser) {
+                    // Try to find existing shadow user
+                    const existingUser = await db.user.findUnique({
+                        where: { email: otpUser.email }
+                    });
+
+                    if (existingUser) return existingUser.id;
+
+                    // Create shadow User if missing
+                    const newUser = await db.user.create({
+                        data: {
+                            email: otpUser.email,
+                            name: otpUser.creator?.displayName || otpUser.creator?.fullName || "Creator",
+                            image: otpUser.creator?.profileImageUrl,
+                            role: 'INFLUENCER'
+                        }
+                    });
+                    return newUser.id;
+                }
+            }
+        } catch (e) {
+            // Invalid OTP session, fall through to NextAuth
+        }
+    }
+
+    // 2. Try NextAuth Session
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) return null;
 
-    // 1. Try finding existing User (NextAuth/Schema-compliant)
+    // 3. Try finding existing User (NextAuth/Schema-compliant)
     let user = await db.user.findUnique({
         where: { email: session.user.email }
     });
 
-    // 2. If no User, check OtpUser and create shadow User
+    // 4. If no User, check OtpUser and create shadow User
     if (!user) {
         const otpUser = await db.otpUser.findUnique({
             where: { email: session.user.email },
@@ -763,8 +806,28 @@ export async function getCreatorAnalytics(provider?: string, days: number = 30) 
 // --- DASHBOARD DATA ---
 
 export async function getCreatorDashboardData(platform: string = "instagram", days: number = 30) {
+    let email = null;
+
+    // 1. Check NextAuth Session
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) return null;
+    if (session?.user?.email) {
+        email = session.user.email;
+    } else {
+        // 2. Check OTP Session
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const otpSession = cookieStore.get("session")?.value;
+        if (otpSession) {
+            const { verifySession } = await import("@/lib/session");
+            const payload = await verifySession(otpSession);
+            if (payload?.userId) {
+                const otpUser = await db.otpUser.findUnique({ where: { id: payload.userId } });
+                email = otpUser?.email;
+            }
+        }
+    }
+
+    if (!email) return null;
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -772,7 +835,7 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
     try {
         // Find OtpUser first, then Creator
         const otpUser = await db.otpUser.findUnique({
-            where: { email: session.user.email },
+            where: { email: email },
             include: {
                 creator: {
                     include: {

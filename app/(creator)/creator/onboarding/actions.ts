@@ -34,26 +34,40 @@ export async function completeOnboarding(payload?: {
             })
         }
 
+        // Check if creator profile exists to determine if we should reset status
+        const existingCreator = await db.creator.findUnique({
+            where: { userId },
+            select: { verificationStatus: true }
+        });
+
+        const shouldResetStatus = !existingCreator || existingCreator.verificationStatus === 'REJECTED' || existingCreator.verificationStatus === 'NOT_SUBMITTED';
+
+        // Prepare update data - ONLY update status if needed
+        const updateData: any = {
+            niche: payload?.niche,
+            pricing: JSON.stringify(payload?.pricing),
+        };
+
+        if (shouldResetStatus) {
+            updateData.verificationStatus = 'PENDING';
+            updateData.kycSubmission = {
+                upsert: {
+                    create: {
+                        status: 'PENDING',
+                        submittedAt: new Date(),
+                    },
+                    update: {
+                        status: 'PENDING',
+                        submittedAt: new Date(),
+                    }
+                }
+            };
+        }
+
         // Create or Update the creator profile
         await db.creator.upsert({
             where: { userId },
-            update: {
-                niche: payload?.niche,
-                pricing: JSON.stringify(payload?.pricing),
-                verificationStatus: 'PENDING', // Set status to PENDING
-                kycSubmission: {
-                    upsert: {
-                        create: {
-                            status: 'PENDING',
-                            submittedAt: new Date(),
-                        },
-                        update: {
-                            status: 'PENDING',
-                            submittedAt: new Date(),
-                        }
-                    }
-                }
-            },
+            update: updateData,
             create: {
                 userId,
                 niche: payload?.niche,
@@ -67,6 +81,9 @@ export async function completeOnboarding(payload?: {
                 }
             },
         })
+
+        // Log the action
+        console.log(`[Onboarding] Completed for user ${userId}. Status reset: ${shouldResetStatus}`);
 
         redirect("/creator/onboarding/verification")
     } catch (error) {
