@@ -26,11 +26,13 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
 
     const selfieKey = creator?.kycSubmission?.selfieImageKey || user?.influencerProfile?.kyc?.selfieImageKey;
 
-    useState(() => {
+    useClientEffect(() => {
         if (isOpen && selfieKey) {
             handleFetchSelfie(selfieKey);
+        } else if (!isOpen) {
+            setSelfieUrl(null);
         }
-    });
+    }, [isOpen, selfieKey]);
 
     const handleFetchSelfie = async (key: string) => {
         setFetchingSelfie(true);

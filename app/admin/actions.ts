@@ -94,7 +94,7 @@ export async function getFullProfileByEmail(email: string) {
         });
 
         // Use a more relaxed search for Creator: email on User or email on Creator or similar
-        const creator = await db.creator.findFirst({
+        const creator = await (db.creator as any).findFirst({
             where: {
                 user: { email: email }
             },
@@ -104,6 +104,29 @@ export async function getFullProfileByEmail(email: string) {
                 user: true
             }
         });
+
+        // Fallback: If kycSubmission exists but missing our new fields (due to stale types), fetch via raw query
+        if (creator && creator.id) {
+            try {
+                const rawKyc = await db.$queryRawUnsafe(`SELECT * FROM creator_kyc_submissions WHERE creator_id = $1`, creator.id) as any[];
+                if (rawKyc && rawKyc.length > 0) {
+                    const k = rawKyc[0];
+                    // Overwrite/Attach fields manually since Prisma might filter them
+                    creator.kycSubmission = {
+                        ...creator.kycSubmission,
+                        selfieImageKey: k.selfie_image_key,
+                        livenessPrompt: k.liveness_prompt,
+                        livenessResult: k.liveness_result,
+                        selfieCapturedAt: k.selfie_captured_at,
+                        submittedAt: k.submitted_at,
+                        reviewedAt: k.reviewed_at,
+                        status: k.status
+                    };
+                }
+            } catch (rawErr) {
+                console.error("Raw KYC Fetch Error", rawErr);
+            }
+        }
 
         return { success: true, user: user ? JSON.parse(JSON.stringify(user)) : null, creator: creator ? JSON.parse(JSON.stringify(creator)) : null };
     } catch (error) {

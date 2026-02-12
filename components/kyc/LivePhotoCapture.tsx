@@ -27,16 +27,33 @@ export default function LivePhotoCapture({ onUploadSuccess, userId }: LivePhotoC
         setPrompt(PROMPTS[Math.floor(Math.random() * PROMPTS.length)]);
     }, []);
 
+    // Fix: Attach stream when video element becomes available in DOM
+    useEffect(() => {
+        if (videoRef.current && stream) {
+            videoRef.current.srcObject = stream;
+        }
+    }, [stream, isCameraActive]);
+
+    // Cleanup: Stop camera on unmount
+    useEffect(() => {
+        return () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [stream]);
+
     const startCamera = async () => {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user', width: { ideal: 1024 }, height: { ideal: 1024 } },
+                video: {
+                    facingMode: 'user',
+                    width: { ideal: 1280, max: 1920 },
+                    height: { ideal: 720, max: 1080 }
+                },
                 audio: false,
             });
             setStream(mediaStream);
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
-            }
             setIsCameraActive(true);
         } catch (err) {
             console.error('Error accessing camera:', err);

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth";
-import db from "@/lib/prisma";
+import { db } from "@/lib/db";
 import KYCOnboardingClient from "./KYCOnboardingClient";
 
 export default async function KYCOnboardingPage() {
@@ -10,7 +10,7 @@ export default async function KYCOnboardingPage() {
     const creator = await db.creator.findUnique({
         where: { userId },
         include: { kycSubmission: true },
-    });
+    }) as any;
 
     // If already approved, skip
     if (creator?.verificationStatus === "APPROVED") {
