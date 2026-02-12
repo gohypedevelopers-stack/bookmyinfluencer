@@ -75,6 +75,11 @@ model KYCSubmission {
   submittedAt     DateTime?
   reviewedAt      DateTime?
   adminNotes      String?
+  selfieImageKey  String?
+  selfieCapturedAt DateTime?
+  livenessPrompt  LivenessPrompt?
+  livenessResult  LivenessResult?
+  verifiedByAdminAt DateTime?
   profile         InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
@@ -407,6 +412,11 @@ model CreatorKYCSubmission {
   reviewedAt         DateTime? @map("reviewed_at")
   submittedAt        DateTime  @default(now()) @map("submitted_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
+  selfieImageKey     String?   @map("selfie_image_key")
+  selfieCapturedAt   DateTime? @map("selfie_captured_at")
+  livenessPrompt     LivenessPrompt? @map("liveness_prompt")
+  livenessResult     LivenessResult? @map("liveness_result")
+  verifiedByAdminAt  DateTime? @map("verified_by_admin_at")
   creator            Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@map("creator_kyc_submissions")
@@ -448,6 +458,17 @@ enum OfferStatus {
   ACCEPTED
   REJECTED
   COUNTERED
+}
+
+enum LivenessPrompt {
+  SMILE
+  BLINK
+}
+
+enum LivenessResult {
+  PASSED
+  FAILED
+  NOT_CHECKED
 }
 
 enum ContractStatus {

@@ -499,6 +499,9 @@ export async function getPublicCreators(filter?: {
 
 export async function getPublicCreatorById(id: string) {
     try {
+        let creatorData: any = null;
+
+        // 1. Try Creator table
         const creator = await db.creator.findFirst({
             where: {
                 OR: [
@@ -513,34 +516,67 @@ export async function getPublicCreatorById(id: string) {
             }
         });
 
-        if (!creator) return { success: false, error: "Creator not found" };
+        if (creator) {
+            const primaryMetric = creator.metrics[0];
+            const selfMetric = creator.selfReportedMetrics[0];
 
-        // Normalize metrics and other fields for UI consumption
-        const primaryMetric = creator.metrics[0];
-        const selfMetric = creator.selfReportedMetrics[0];
+            creatorData = {
+                id: creator.userId,
+                name: creator.displayName || creator.fullName || (creator.user as any).name || "Influencer",
+                handle: creator.instagramUrl ? `@${creator.instagramUrl.split('/').pop()}` : undefined,
+                niche: creator.niche || 'General',
+                bio: creator.bio,
+                location: 'Global',
+                profileImage: creator.profileImageUrl || (creator.user as any).image,
+                bannerImage: creator.backgroundImageUrl,
+                instagramUrl: creator.instagramUrl,
+                youtubeUrl: creator.youtubeUrl,
+                pricing: creator.pricing ? JSON.parse(creator.pricing as string) : [],
+                verificationStatus: creator.verificationStatus,
+                stats: {
+                    followers: primaryMetric?.followersCount || selfMetric?.followersCount || 0,
+                    engagementRate: (primaryMetric?.engagementRate || 0),
+                    avgViews: primaryMetric?.viewsCount || 0
+                }
+            };
+        } else {
+            // 2. Try legacy InfluencerProfile table
+            const profile = await db.influencerProfile.findFirst({
+                where: {
+                    OR: [
+                        { id: id },
+                        { userId: id }
+                    ]
+                },
+                include: { user: true }
+            });
 
-        const data = {
-            id: creator.userId,
-            name: creator.displayName || creator.fullName || (creator.user as any).name || "Influencer",
-            handle: creator.instagramUrl ? `@${creator.instagramUrl.split('/').pop()}` : undefined,
-            niche: creator.niche || 'General',
-            bio: creator.bio,
-            location: 'Global', // Placeholder
-            profileImage: creator.profileImageUrl || (creator.user as any).image,
-            // @ts-ignore
-            bannerImage: creator.backgroundImageUrl,
-            instagramUrl: creator.instagramUrl,
-            youtubeUrl: creator.youtubeUrl,
-            pricing: creator.pricing ? JSON.parse(creator.pricing as string) : [],
-            verificationStatus: creator.verificationStatus,
-            stats: {
-                followers: primaryMetric?.followersCount || selfMetric?.followersCount || 0,
-                engagementRate: primaryMetric?.engagementRate || 0,
-                avgViews: primaryMetric?.viewsCount || 0
+            if (profile) {
+                creatorData = {
+                    id: profile.userId,
+                    name: (profile.user as any).name || "Influencer",
+                    handle: profile.instagramHandle ? `@${profile.instagramHandle}` : undefined,
+                    niche: Array.isArray(profile.niche) ? (profile.niche[0] || 'General') : (profile.niche || 'General'),
+                    bio: profile.bio,
+                    location: profile.location || 'Global',
+                    profileImage: (profile.user as any).image,
+                    bannerImage: null,
+                    instagramUrl: profile.instagramHandle ? `https://instagram.com/${profile.instagramHandle}` : null,
+                    youtubeUrl: null,
+                    pricing: profile.pricing ? JSON.parse(profile.pricing as string) : [],
+                    verificationStatus: 'APPROVED',
+                    stats: {
+                        followers: profile.followers || 0,
+                        engagementRate: (profile.engagementRate || 0),
+                        avgViews: 'N/A'
+                    }
+                };
             }
-        };
+        }
 
-        return { success: true, data };
+        if (!creatorData) return { success: false, error: "Creator not found" };
+
+        return { success: true, data: creatorData };
     } catch (error) {
         console.error("Error fetching creator:", error);
         return { success: false, error: "Failed to fetch creator" };
@@ -1296,8 +1332,8 @@ export async function getCheckoutData(influencerId: string) {
         let targetUserId = influencerId;
         let creatorData: any = null;
 
-        const creator = await db.creator.findUnique({
-            where: { userId: influencerId }, // influencerId is often OtpUser.id
+        const creator = await db.creator.findFirst({
+            where: { OR: [{ id: influencerId }, { userId: influencerId }] },
             include: { user: true, socialAccounts: true }
         });
 
@@ -1323,8 +1359,8 @@ export async function getCheckoutData(influencerId: string) {
         }
 
         // 2. Find or Create InfluencerProfile linked to this (NextAuth) User
-        let profile = await db.influencerProfile.findUnique({
-            where: { userId: targetUserId },
+        let profile = await db.influencerProfile.findFirst({
+            where: { OR: [{ id: targetUserId }, { userId: targetUserId }] },
             include: { user: true }
         });
 
@@ -1334,10 +1370,10 @@ export async function getCheckoutData(influencerId: string) {
                 data: {
                     userId: targetUserId,
                     niche: creatorData.niche || 'General',
-                    instagramHandle: creatorData.instagramUrl,
+                    instagramHandle: creatorData.instagramUrl ? creatorData.instagramUrl.split('/').pop() : 'creator',
                     bio: creatorData.bio,
                     followers: creatorData.followers || 0,
-                    pricing: creatorData.pricing || JSON.stringify([])
+                    pricing: creatorData.pricing || JSON.stringify({})
                 },
                 include: { user: true }
             });
@@ -1345,16 +1381,47 @@ export async function getCheckoutData(influencerId: string) {
 
         if (!profile) return { success: false, error: "Influencer not found" };
 
+        // Normalize Pricing Data
+        const PRICE_LABELS: Record<string, string> = {
+            instaStory: 'Instagram Story',
+            instaReel: 'Instagram Reel',
+            instaPost: 'Instagram Post',
+            youtubeShorts: 'YouTube Shorts',
+            youtubeVideo: 'YouTube Video',
+            youtubeCommunityPost: 'YouTube Community Post',
+        };
+
+        let rawPricing: Record<string, any> = {};
+        try {
+            rawPricing = profile.pricing ? JSON.parse(profile.pricing as string) : {};
+        } catch {
+            rawPricing = {};
+        }
+
+        let normalizedPricing: any[] = [];
+        if (Array.isArray(rawPricing)) {
+            normalizedPricing = rawPricing;
+        } else {
+            normalizedPricing = Object.entries(rawPricing)
+                .filter(([key, val]) => PRICE_LABELS[key] && val && val !== "0")
+                .map(([key, val]) => ({
+                    id: key,
+                    title: PRICE_LABELS[key],
+                    price: parseFloat(val as string) || 0
+                }));
+        }
+
         return {
             success: true,
             data: {
-                id: profile.userId,
+                id: profile.id,
+                userId: profile.userId,
                 name: profile.user.name || creatorData?.displayName || creatorData?.fullName || "Influencer",
-                handle: profile.instagramHandle || creatorData?.instagramUrl || "@influencer",
+                handle: profile.instagramHandle ? `@${profile.instagramHandle}` : (creatorData?.instagramUrl || "@influencer"),
                 image: profile.user.image || creatorData?.profileImageUrl,
                 verified: true,
-                followers: profile.followers || creatorData?.followers || 0,
-                pricing: profile.pricing ? JSON.parse(profile.pricing as string) : (creatorData?.pricing ? JSON.parse(creatorData.pricing) : [])
+                followers: profile.followers || 0,
+                pricing: normalizedPricing
             }
         };
 

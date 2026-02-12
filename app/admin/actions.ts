@@ -3,6 +3,9 @@
 import { db } from "@/lib/db";
 import { KYCStatus, PayoutStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { getR2SignedUrl } from "@/lib/storage";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function updateKYCStatus(submissionId: string, status: KYCStatus) {
     try {
@@ -136,5 +139,20 @@ export async function verifyCreator(creatorId: string, status: KYCStatus) {
     } catch (error) {
         console.error("Verify creator error", error);
         return { success: false, error: "Failed to verify creator" };
+    }
+}
+
+export async function getSignedSelfieUrl(key: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const url = await getR2SignedUrl(key, 300); // 5 minutes expiry
+        return { success: true, url };
+    } catch (error) {
+        console.error("Signed URL Error", error);
+        return { success: false, error: "Failed to generate URL" };
     }
 }

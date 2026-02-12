@@ -6,13 +6,16 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getCheckoutData, processDirectHire } from '@/app/brand/actions';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
     const unwrappedParams = use(params);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const serviceId = searchParams.get('service');
+
     const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'NETBANKING'>('UPI');
     const [upiId, setUpiId] = useState('');
     const [data, setData] = useState<any>(null);
@@ -27,14 +30,17 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         getCheckoutData(unwrappedParams.id).then(res => {
             if (res.success && res.data) {
                 setData(res.data);
-                // Default to first service or a standard package
+
                 const pricing = res.data.pricing || [];
-                if (pricing.length > 0) setSelectedService(pricing[0]);
-                else setSelectedService({ title: "Collaboration", price: 5000 }); // Default fallback
+                if (pricing.length > 0) {
+                    const preselected = serviceId ? pricing.find((p: any) => p.id === serviceId) : null;
+                    setSelectedService(preselected || pricing[0]);
+                }
+                else setSelectedService({ title: "Collaboration", price: 5000 });
             }
             setLoading(false);
         });
-    }, [unwrappedParams.id]);
+    }, [unwrappedParams.id, serviceId]);
 
     const handleVerifyUpi = async () => {
         setUpiError('');

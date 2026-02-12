@@ -8,7 +8,8 @@ import { CheckCircle, XCircle, Instagram, Youtube, ExternalLink, Activity, Calen
 import { format } from "date-fns"
 import { useState } from "react"
 import { toast } from "sonner"
-import { verifyCreator } from "../actions"
+import { verifyCreator, getSignedSelfieUrl } from "../actions"
+import { useEffect as useClientEffect } from "react" // For clarity if needed, or just useEffect
 
 interface UserDetailsModalProps {
     isOpen: boolean
@@ -20,6 +21,30 @@ interface UserDetailsModalProps {
 
 export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: UserDetailsModalProps) {
     const [loading, setLoading] = useState(false)
+    const [selfieUrl, setSelfieUrl] = useState<string | null>(null)
+    const [fetchingSelfie, setFetchingSelfie] = useState(false)
+
+    const selfieKey = creator?.kycSubmission?.selfieImageKey || user?.influencerProfile?.kyc?.selfieImageKey;
+
+    useState(() => {
+        if (isOpen && selfieKey) {
+            handleFetchSelfie(selfieKey);
+        }
+    });
+
+    const handleFetchSelfie = async (key: string) => {
+        setFetchingSelfie(true);
+        try {
+            const res = await getSignedSelfieUrl(key);
+            if (res.success && res.url) {
+                setSelfieUrl(res.url);
+            }
+        } catch (e) {
+            console.error("Failed to fetch selfie URL", e);
+        } finally {
+            setFetchingSelfie(false);
+        }
+    };
 
     const handleVerification = async (status: 'APPROVED' | 'REJECTED') => {
         if (!creator) return toast.error("No creator profile found to verify");
@@ -309,11 +334,41 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
                                         </div>
 
                                         <div className="space-y-4">
-                                            <h4 className="text-sm font-bold text-gray-900 border-b pb-2">Documents & Info</h4>
-                                            {/* Add placeholders or actual fields if available in schema */}
-                                            <div className="bg-gray-50 p-4 rounded-lg text-center text-gray-500 text-sm">
-                                                No documents uploaded directly. Verification relies on social media OAuth data.
-                                            </div>
+                                            <h4 className="text-sm font-bold text-gray-900 border-b pb-2">Verification Selfie</h4>
+                                            {selfieKey ? (
+                                                <div className="space-y-4">
+                                                    <div className="aspect-square w-full relative bg-gray-100 rounded-xl overflow-hidden border">
+                                                        {selfieUrl ? (
+                                                            <img src={selfieUrl} alt="KYC Selfie" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                                                {fetchingSelfie ? "Loading..." : "Secure Image"}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="bg-gray-50 p-3 rounded-lg text-xs space-y-2">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Liveness Prompt:</span>
+                                                            <span className="font-bold text-gray-900">{creator?.kycSubmission?.livenessPrompt || "N/A"}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Liveness Result:</span>
+                                                            <Badge variant="outline" className="text-[10px] h-5 bg-green-50 text-green-700 border-green-200">
+                                                                {creator?.kycSubmission?.livenessResult || "PASSED"}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Captured At:</span>
+                                                            <span className="text-gray-700">{formatDate(creator?.kycSubmission?.selfieCapturedAt)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-gray-50 p-6 rounded-lg text-center text-gray-500 text-sm">
+                                                    <ShieldCheck className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                                    No verification selfie uploaded.
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </TabsContent>

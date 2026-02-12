@@ -144,7 +144,7 @@ export function FinalizeProfileClient({ initialData }: FinalizeProfileClientProp
                 <div className="flex-1 max-w-2xl">
                     <div className="mb-12">
                         <div className="flex justify-between items-end mb-2">
-                            <span className="text-sm font-semibold text-gray-500">Step 3 of 3</span>
+                            <span className="text-sm font-semibold text-gray-500">Step 4 of 4</span>
                             <span className="text-sm font-semibold text-gray-400">Registration Progress</span>
                         </div>
                         <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">

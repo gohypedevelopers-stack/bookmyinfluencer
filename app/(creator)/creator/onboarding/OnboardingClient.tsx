@@ -124,12 +124,12 @@ export function OnboardingClient({ initialInstagramUrl = "", initialYoutubeUrl =
       <div className="w-full bg-white relative">
         <div className="max-w-4xl mx-auto px-6 pt-6 pb-2">
           <div className="flex justify-between text-[10px] font-bold tracking-widest text-[#24b2a0] uppercase mb-2">
-            <span>Step 2 of 3</span>
+            <span>Step 2 of 4</span>
             <span className="text-gray-900">50% Complete</span>
           </div>
         </div>
         <div className="w-full h-1 bg-gray-100 absolute bottom-0 left-0">
-          <div className="h-full w-1/2 bg-[#2dd4bf]" />
+          <div className="h-full w-2/4 bg-[#2dd4bf]" />
         </div>
       </div>
 
@@ -389,11 +389,11 @@ export function OnboardingClient({ initialInstagramUrl = "", initialYoutubeUrl =
             Back to Personal Details
           </button>
           <div className="flex items-center gap-6">
-            <button className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors" onClick={() => router.push('/creator/onboarding/finalize')}>
+            <button className="text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors" onClick={() => router.push('/creator/onboarding/kyc')}>
               Skip for now
             </button>
             <Button
-              onClick={() => router.push('/creator/onboarding/finalize')}
+              onClick={() => router.push('/creator/onboarding/kyc')}
               className="bg-gray-900 hover:bg-black text-white px-6 h-10 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-gray-900/10 transition-all hover:scale-[1.02]"
             >
               Continue

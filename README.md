@@ -68,3 +68,13 @@ Once DB is running:
 
 The application uses Server Actions for mutations (`app/(brand)/actions.ts`, `app/(influencer)/actions.ts`).
 **PRODUCTION READY**: Mock fallbacks have been removed. Ensure DB connection is active.
+
+## Live Photo + Liveness Verification
+
+This system ensures secure and fraud-proof identity verification during influencer onboarding.
+
+- **Technology**: Uses `MediaDevices API` for real-time camera access. File uploads are intentionally disabled to prevent spoofing with pre-recorded images.
+- **Liveness Checks**: Users are prompted with random actions (**Smile** or **Blink**) during capture.
+- **Storage**: Images are processed (resized & watermarked) in the browser, then securely uploaded to **Cloudflare R2** (S3-compatible private storage).
+- **Admin Review**: Administrators can view verification selfies using time-limited **Signed URLs**, ensuring no permanent public access to sensitive data.
+- **Auditability**: Capture timestamps, liveness prompts, and results are stored in the database for manual verification.

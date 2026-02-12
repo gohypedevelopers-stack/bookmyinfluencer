@@ -35,23 +35,23 @@ export async function GET(req: NextRequest) {
         });
 
         // Transform data to include calculated metrics
-        const verifications = pendingVerifications.map((submission) => {
+        const verifications = pendingVerifications.map((submission: any) => {
             const creator = submission.creator;
 
             // Get latest Instagram metrics
-            const igMetric = creator.metrics.find(m => m.provider === 'instagram');
+            const igMetric = creator.metrics.find((m: any) => m.provider === 'instagram');
             // Get latest YouTube metrics
-            const ytMetric = creator.metrics.find(m => m.provider === 'youtube');
+            const ytMetric = creator.metrics.find((m: any) => m.provider === 'youtube');
 
             // Calculate total posts and engagement
             const totalPosts = (igMetric?.mediaCount || 0) + (ytMetric?.mediaCount || 0);
 
             // Calculate average engagement rate across platforms
             const allEngagementRates = creator.metrics
-                .map(m => m.engagementRate)
-                .filter(rate => rate > 0);
+                .map((m: any) => m.engagementRate)
+                .filter((rate: any) => rate > 0);
             const avgEngagement = allEngagementRates.length > 0
-                ? allEngagementRates.reduce((a, b) => a + b, 0) / allEngagementRates.length
+                ? allEngagementRates.reduce((a: any, b: any) => a + b, 0) / allEngagementRates.length
                 : null;
 
             return {
@@ -62,6 +62,10 @@ export async function GET(req: NextRequest) {
                 youtubeSubscribers: ytMetric?.followersCount || null,
                 totalPosts: (totalPosts === 0 && !igMetric && !ytMetric) ? null : totalPosts,
                 engagementRate: avgEngagement ? Number(avgEngagement.toFixed(2)) : null,
+                selfieImageKey: submission.selfieImageKey,
+                livenessPrompt: submission.livenessPrompt,
+                livenessResult: submission.livenessResult,
+                selfieCapturedAt: submission.selfieCapturedAt,
                 creator: {
                     id: creator.id,
                     fullName: creator.fullName,
