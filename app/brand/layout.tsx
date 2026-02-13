@@ -1,4 +1,5 @@
 import { BrandTopNav } from "@/components/brand/brand-top-nav"
+import { BrandSidebar } from "@/components/brand/brand-sidebar"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -37,21 +38,24 @@ export default async function BrandLayout({
 
     return (
         <BrandSessionProvider session={session}>
-            <div className="min-h-screen bg-gray-50">
-                <BrandTopNav />
-                <main>
-                    {children}
-                </main>
-                <footer className="border-t border-gray-200 bg-white py-6 mt-12">
-                    <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-                        <span>© 2024 BrandCRM. All rights reserved.</span>
-                        <div className="flex items-center gap-6">
-                            <a href="#" className="hover:text-gray-700">Help Center</a>
-                            <a href="#" className="hover:text-gray-700">Privacy Policy</a>
-                            <a href="#" className="hover:text-gray-700">Terms of Service</a>
-                        </div>
-                    </div>
-                </footer>
+            <div className="flex h-screen bg-gray-50 overflow-hidden">
+                <BrandSidebar />
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                    <BrandTopNav />
+                    <main className="flex-1 overflow-y-auto">
+                        {children}
+                        <footer className="border-t border-gray-200 bg-white py-6 mt-12 px-6">
+                            <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+                                <span>© 2024 BrandCRM. All rights reserved.</span>
+                                <div className="flex items-center gap-6">
+                                    <a href="#" className="hover:text-gray-700">Help Center</a>
+                                    <a href="#" className="hover:text-gray-700">Privacy Policy</a>
+                                    <a href="#" className="hover:text-gray-700">Terms of Service</a>
+                                </div>
+                            </div>
+                        </footer>
+                    </main>
+                </div>
             </div>
         </BrandSessionProvider>
     )

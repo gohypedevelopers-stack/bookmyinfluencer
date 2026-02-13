@@ -31,16 +31,18 @@ model User {
 }
 
 model BrandProfile {
-  id          String     @id @default(cuid())
-  userId      String     @unique
-  companyName String
-  website     String?
-  industry    String?
-  description String?
-  location    String?
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaigns   Campaign[]
-  contracts   Contract[]
+  id             String     @id @default(cuid())
+  userId         String     @unique
+  companyName    String
+  website        String?
+  industry       String?
+  description    String?
+  location       String?
+  walletBalance  Float      @default(0)
+  paymentMethods String?    @default("[]")
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns      Campaign[]
+  contracts      Contract[]
 }
 
 model InfluencerProfile {

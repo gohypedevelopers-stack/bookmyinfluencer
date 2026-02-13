@@ -1695,7 +1695,163 @@ export async function createOrGetThread(creatorUserId: string) {
         console.error('Failed to create/get thread:', error);
         return { success: false, error: 'Failed to start conversation' };
     }
+
 }
 
+// ====== WALLET & PAYMENT ACTIONS ======
 
+export async function getBrandWallet() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
 
+    try {
+        const brand: any = await db.brandProfile.findUnique({
+            where: { userId: session.user.id },
+            include: {
+                contracts: {
+                    include: { transactions: true }
+                }
+            }
+        });
+
+        if (!brand) return { success: false, error: "Brand profile not found" };
+
+        let totalSpent = 0;
+        let inEscrow = 0;
+        const transactions: any[] = [];
+
+        brand.contracts.forEach(contract => {
+            contract.transactions.forEach(tx => {
+                if (tx.status === EscrowTransactionStatus.RELEASED) {
+                    totalSpent += tx.amount;
+                } else if (tx.status === EscrowTransactionStatus.FUNDED) {
+                    inEscrow += tx.amount;
+                }
+
+                // Collect detailed transaction history
+                transactions.push({
+                    id: tx.id,
+                    influencer: "Campaign Payment",
+                    campaign: contract.id.substring(0, 8),
+                    date: tx.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    amount: `₹${tx.amount.toLocaleString()}`,
+                    status: tx.status,
+                    type: "Debit"
+                });
+            });
+        });
+
+        // Add dummy wallet deposit for visualization if transactions are empty
+        if (transactions.length === 0) {
+            transactions.push({
+                influencer: "Initial Deposit",
+                campaign: "Wallet Setup",
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                amount: `₹${brand.walletBalance.toLocaleString()}`,
+                status: "Completed",
+                type: "Credit"
+            });
+        }
+
+        return {
+            success: true,
+            data: {
+                walletBalance: brand.walletBalance,
+                totalSpent,
+                inEscrow,
+                transactions: transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+                paymentMethods: brand.paymentMethods ? JSON.parse(brand.paymentMethods as string) : []
+            }
+        };
+    } catch (error) {
+        console.error("Wallet Fetch Error", error);
+        return { success: false, error: "Failed to fetch wallet data" };
+    }
+}
+
+export async function addFundsToWallet(amount: number) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
+
+    try {
+        // Use raw SQL because Prisma client might be stale
+        await db.$executeRaw`
+            UPDATE "BrandProfile" 
+            SET "walletBalance" = "walletBalance" + ${amount} 
+            WHERE "userId" = ${session.user.id}
+        `;
+
+        await createAuditLog("WALLET_DEPOSIT", "BRAND_PROFILE", session.user.id, undefined, { amount });
+
+        revalidatePath('/brand/wallet');
+        return { success: true };
+    } catch (error) {
+        console.error("Add Funds Error", error);
+        return { success: false, error: "Failed to add funds" };
+    }
+}
+
+export async function savePaymentMethod(method: any) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
+
+    try {
+        const brand: any = await db.brandProfile.findUnique({
+            where: { userId: session.user.id }
+        });
+
+        if (!brand) return { success: false, error: "Brand not found" };
+
+        let methods = brand.paymentMethods ? JSON.parse(brand.paymentMethods as string) : [];
+
+        // Add unique ID if not present
+        const newMethod = { ...method, id: method.id || Math.random().toString(36).substr(2, 9) };
+
+        // If this is set as default, unset others
+        if (newMethod.isDefault) {
+            methods = methods.map((m: any) => ({ ...m, isDefault: false }));
+        }
+
+        methods.push(newMethod);
+
+        await db.$executeRaw`
+            UPDATE "BrandProfile" 
+            SET "paymentMethods" = ${JSON.stringify(methods)} 
+            WHERE "userId" = ${session.user.id}
+        `;
+
+        revalidatePath('/brand/wallet');
+        return { success: true };
+    } catch (error) {
+        console.error("Save Payment Method Error", error);
+        return { success: false, error: "Failed to save payment method" };
+    }
+}
+
+export async function deletePaymentMethod(methodId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
+
+    try {
+        const brand: any = await db.brandProfile.findUnique({
+            where: { userId: session.user.id }
+        });
+
+        if (!brand) return { success: false, error: "Brand not found" };
+
+        let methods = brand.paymentMethods ? JSON.parse(brand.paymentMethods as string) : [];
+        methods = methods.filter((m: any) => m.id !== methodId);
+
+        await db.$executeRaw`
+            UPDATE "BrandProfile" 
+            SET "paymentMethods" = ${JSON.stringify(methods)} 
+            WHERE "userId" = ${session.user.id}
+        `;
+
+        revalidatePath('/brand/wallet');
+        return { success: true };
+    } catch (error) {
+        console.error("Delete Payment Method Error", error);
+        return { success: false, error: "Failed to delete payment method" };
+    }
+}

@@ -65,7 +65,7 @@ export function HeroSection() {
                             </div>
                             <div>
                                 <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Payouts</p>
-                                <p className="text-xl font-bold text-slate-900">$12.4M+</p>
+                                <p className="text-xl font-bold text-slate-900">₹12.4M+</p>
                             </div>
                         </div>
 

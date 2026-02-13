@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card"
-import { DollarSign, Wallet, CheckCircle } from "lucide-react"
+// No icons used in stats headers for now
 
 interface BrandStatsProps {
     stats: {
@@ -17,7 +17,7 @@ export function BrandStats({ stats }: BrandStatsProps) {
                     <div>
                         <p className="text-sm text-gray-500 font-medium mb-1 uppercase tracking-wider">Total Budget Spent</p>
                         <h3 className="text-3xl font-bold text-gray-900">
-                            ${stats.totalSpent.toLocaleString()}
+                            ₹{stats.totalSpent.toLocaleString()}
                         </h3>
                     </div>
                     <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md">
@@ -34,7 +34,7 @@ export function BrandStats({ stats }: BrandStatsProps) {
                     <div>
                         <p className="text-sm text-gray-500 font-medium mb-1 uppercase tracking-wider">Active Escrows</p>
                         <h3 className="text-3xl font-bold text-gray-900">
-                            ${stats.activeEscrow.toLocaleString()}
+                            ₹{stats.activeEscrow.toLocaleString()}
                         </h3>
                     </div>
                     <div className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-md">

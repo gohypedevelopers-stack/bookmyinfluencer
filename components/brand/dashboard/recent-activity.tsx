@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { FileText, Mail, DollarSign, CheckCircle, Clock } from "lucide-react"
+import { FileText, Mail, IndianRupee, CheckCircle, Clock } from "lucide-react"
 import Link from "next/link"
 
 type ActivityType = 'DRAFT_SUBMITTED' | 'APPLICATION_RECEIVED' | 'PAYMENT_RELEASED' | 'CAMPAIGN_COMPLETED' | string
@@ -30,7 +30,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                 return <Mail className="w-5 h-5 text-green-600" />
             case 'PAYMENT_RELEASED':
             case 'ESCROW':
-                return <DollarSign className="w-5 h-5 text-orange-600" />
+                return <IndianRupee className="w-5 h-5 text-orange-600" />
             case 'CAMPAIGN_COMPLETED':
                 return <CheckCircle className="w-5 h-5 text-purple-600" />
             case 'SYSTEM':
