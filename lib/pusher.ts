@@ -1,7 +1,17 @@
 import PusherClient from "pusher-js";
 
-export const pusherClient = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "mt1",
-    authEndpoint: "/api/pusher/auth",
-});
+const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY;
+const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "mt1";
+
+export const pusherClient = pusherKey
+    ? new PusherClient(pusherKey, {
+        cluster: pusherCluster,
+        authEndpoint: "/api/pusher/auth",
+    })
+    : {
+        subscribe: () => ({ bind: () => { }, unbind: () => { } }),
+        unsubscribe: () => { },
+        bind: () => { },
+        unbind: () => { },
+    } as any;
 
