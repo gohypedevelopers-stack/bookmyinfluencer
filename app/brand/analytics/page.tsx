@@ -21,22 +21,33 @@ export default async function BrandAnalyticsPage() {
         redirect('/brand/onboarding');
     }
 
-    // Fetch Global Analytics Data
-    const analytics = await getBrandOverallAnalytics();
+    // Fetch Global Analytics Data with Safety Check
+    let analyticsData;
 
-    // Default empty data structure if fetch fails
-    const analyticsData = analytics.success ? analytics.data : {
-        summary: {
-            totalReach: 0,
-            totalEngagement: 0,
-            avgCPE: "0.00",
-            conversions: 0,
-            totalSpent: 0,
-            budget: 0
-        },
-        performance: [],
-        creators: []
-    };
+    try {
+        const analytics = await getBrandOverallAnalytics();
+        if (analytics?.success && analytics?.data) {
+            analyticsData = analytics.data;
+        }
+    } catch (e) {
+        console.error("BrandAnalyticsPage Fetch Error:", e);
+    }
+
+    // Default empty data structure if fetch fails or returns null
+    if (!analyticsData) {
+        analyticsData = {
+            summary: {
+                totalReach: 0,
+                totalEngagement: 0,
+                avgCPE: "0.00",
+                conversions: 0,
+                totalSpent: 0,
+                budget: 0
+            },
+            performance: [],
+            creators: []
+        };
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
