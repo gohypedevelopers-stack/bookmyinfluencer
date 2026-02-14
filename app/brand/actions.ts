@@ -10,10 +10,25 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 // Helper to extract readable price range from raw pricing JSON
+function safeJsonParse(jsonString: string | null | undefined, fallback: any = []): any {
+    if (!jsonString) return fallback;
+    try {
+        return JSON.parse(jsonString);
+    } catch (e) {
+        console.warn("JSON Parse Error:", e, "Input:", jsonString);
+        return fallback;
+    }
+}
+
 function formatPriceRange(pricing: string | null | undefined): string {
     if (!pricing) return '₹100-₹500';
     try {
-        const data = JSON.parse(pricing);
+        const data = safeJsonParse(pricing, null);
+        if (!data) {
+            if (pricing.includes('₹')) return pricing;
+            return '₹100-₹500';
+        }
+
         const prices: number[] = [];
         for (const [key, val] of Object.entries(data)) {
             if (key === 'instaRoyaltyPrices' || key === 'instaRoyaltyDuration') continue;
@@ -26,7 +41,7 @@ function formatPriceRange(pricing: string | null | undefined): string {
         if (min === max) return `₹${min}`;
         return `₹${min}-₹${max}`;
     } catch {
-        if (pricing.includes('₹')) return pricing;
+        if (pricing && pricing.includes('₹')) return pricing;
         return '₹100-₹500';
     }
 }
@@ -531,7 +546,7 @@ export async function getPublicCreatorById(id: string) {
                 bannerImage: creator.backgroundImageUrl,
                 instagramUrl: creator.instagramUrl,
                 youtubeUrl: creator.youtubeUrl,
-                pricing: creator.pricing ? JSON.parse(creator.pricing as string) : [],
+                pricing: safeJsonParse(creator.pricing as string),
                 verificationStatus: creator.verificationStatus,
                 stats: {
                     followers: primaryMetric?.followersCount || selfMetric?.followersCount || 0,
@@ -563,7 +578,7 @@ export async function getPublicCreatorById(id: string) {
                     bannerImage: null,
                     instagramUrl: profile.instagramHandle ? `https://instagram.com/${profile.instagramHandle}` : null,
                     youtubeUrl: null,
-                    pricing: profile.pricing ? JSON.parse(profile.pricing as string) : [],
+                    pricing: safeJsonParse(profile.pricing as string),
                     verificationStatus: 'APPROVED',
                     stats: {
                         followers: profile.followers || 0,
