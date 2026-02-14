@@ -30,7 +30,9 @@ interface Influencer {
 export default function InfluencerDiscovery() {
     const [selectedTab, setSelectedTab] = useState<'instagram' | 'youtube' | 'tv' | 'music'>('instagram');
     const [showFilters, setShowFilters] = useState(true);
-    const [influencers, setInfluencers] = useState<Influencer[]>([]);
+    // Data State
+    const [allInfluencers, setAllInfluencers] = useState<Influencer[]>([]);
+    const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -45,7 +47,16 @@ export default function InfluencerDiscovery() {
     const [selectedNiche, setSelectedNiche] = useState('All');
     const [priceRange, setPriceRange] = useState([50, 5000]);
     const [followersRange, setFollowersRange] = useState([0, 1000]); // in K
+    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([0, 1000]);
     const [showAllNiches, setShowAllNiches] = useState(false);
+
+    // Debounce Followers Range
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedFollowersRange(followersRange);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [followersRange]);
 
     // All available niches
     const allNiches = [
@@ -56,31 +67,17 @@ export default function InfluencerDiscovery() {
     ];
     const visibleNiches = showAllNiches ? allNiches : allNiches.slice(0, 4);
 
-    // Fetch Function
-    const fetchInfluencers = async (page: number = currentPage) => {
+    // 1. Fetch from Server (Filtered by Niche & Followers)
+    const fetchInfluencers = async () => {
         setIsLoading(true);
         try {
             const res = await getPublicCreators({
                 niche: selectedNiche === 'All' ? undefined : selectedNiche,
-                minFollowers: followersRange[0] * 1000,
-                maxFollowers: followersRange[1] * 1000
+                minFollowers: debouncedFollowersRange[0] * 1000,
+                maxFollowers: debouncedFollowersRange[1] * 1000
             });
             if (res.success) {
-                let data = res.data as Influencer[];
-                // Client-side filtering for things not in DB query yet
-                if (searchQuery) {
-                    const lowerQ = searchQuery.toLowerCase();
-                    data = data.filter(inf =>
-                        inf.name.toLowerCase().includes(lowerQ) ||
-                        inf.handle.toLowerCase().includes(lowerQ) ||
-                        (inf.niche && inf.niche.toLowerCase().includes(lowerQ))
-                    );
-                }
-                setTotalItems(data.length);
-                // Apply pagination
-                const startIndex = (page - 1) * itemsPerPage;
-                const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
-                setInfluencers(paginatedData);
+                setAllInfluencers(res.data as Influencer[]);
             }
         } catch (error) {
             console.error(error);
@@ -88,15 +85,61 @@ export default function InfluencerDiscovery() {
         setIsLoading(false);
     };
 
-    // Initial Fetch & Tab Change
+    // Trigger Fetch when specific server-side params change
+    useEffect(() => {
+        fetchInfluencers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTab, selectedNiche, debouncedFollowersRange]);
+
+    // 2. Client-side Filtering (Search, Location, Price) & Pagination
+    useEffect(() => {
+        let results = allInfluencers;
+
+        // Search
+        if (searchQuery) {
+            const lowerQ = searchQuery.toLowerCase();
+            results = results.filter(inf =>
+                inf.name.toLowerCase().includes(lowerQ) ||
+                inf.handle.toLowerCase().includes(lowerQ) ||
+                (inf.niche && inf.niche.toLowerCase().includes(lowerQ))
+            );
+        }
+
+        // Location
+        if (selectedLocation !== 'India') {
+            results = results.filter(inf =>
+                inf.location?.includes(selectedLocation)
+            );
+        }
+
+        // Price
+        // Assuming priceRangeStr format "₹100-500" or similar in `inf.priceRange`
+        // We'll try to parse it. If logic is complex, might need robust parsing.
+        // For now, let's assume we filter if we can parse.
+        // If Price filter is critical, we need standardized price field.
+        // Checking `Influencer` interface: priceRange: string.
+        results = results.filter(inf => {
+            if (!inf.priceRange) return true;
+            const prices = inf.priceRange.replace(/[^0-9-]/g, '').split('-').map(Number);
+            const minPrice = prices[0] || 0;
+            const maxPrice = prices[1] || minPrice;
+
+            // Check overlap
+            const [filterMin, filterMax] = priceRange;
+            return Math.max(minPrice, filterMin) <= Math.min(maxPrice, filterMax);
+        });
+
+        // Pagination
+        setTotalItems(results.length);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        setFilteredInfluencers(results.slice(startIndex, startIndex + itemsPerPage));
+
+    }, [allInfluencers, searchQuery, selectedLocation, selectedCity, priceRange, currentPage]);
+
+    // Reset Page on Filter Change
     useEffect(() => {
         setCurrentPage(1);
-        fetchInfluencers(1);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedTab]);
-    // Removed filter deps to make "Apply" manual.
-    // searchQuery is also manual now (requires Apply or Enter) - or I can keep it auto.
-    // User asked "Fix working of ... Apply Filters", so manual is safer.
+    }, [searchQuery, selectedLocation, priceRange, selectedNiche, debouncedFollowersRange]);
 
     const handleReset = () => {
         setSelectedLocation('India');
@@ -105,20 +148,11 @@ export default function InfluencerDiscovery() {
         setPriceRange([50, 5000]);
         setFollowersRange([0, 1000]);
         setSearchQuery('');
-        // Trigger fetch with defaults immediately?
-        // Usually Reset just resets UI, user clicks Apply. Or Reset applies defaults.
-        // Let's apply defaults.
-        // We need to wait for state update or pass defaults directly.
-        // Passing defaults directly to a new fetch call is cleanest.
-        setIsLoading(true);
-        getPublicCreators({}).then(res => {
-            if (res.success) setInfluencers(res.data as Influencer[]);
-            setIsLoading(false);
-        });
+        // Fetch will trigger automatically due to effect on state change
     };
 
     const toggleSave = (id: string) => {
-        setInfluencers(influencers.map(inf =>
+        setAllInfluencers(prev => prev.map(inf =>
             inf.id === id ? { ...inf, saved: !inf.saved } : inf
         ));
     };
@@ -180,15 +214,8 @@ export default function InfluencerDiscovery() {
                                         placeholder="Search by name..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && fetchInfluencers(1)}
-                                        className="w-full pl-9 pr-20 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                        className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
-                                    <button
-                                        onClick={() => { setCurrentPage(1); fetchInfluencers(1); }}
-                                        className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 bg-teal-600 text-white text-xs font-semibold rounded-md hover:bg-teal-700 transition-colors"
-                                    >
-                                        Search
-                                    </button>
                                 </div>
 
                                 <div className="space-y-6">
@@ -290,12 +317,7 @@ export default function InfluencerDiscovery() {
                                         </div>
                                     </div>
 
-                                    <button
-                                        onClick={() => { setCurrentPage(1); fetchInfluencers(1); }}
-                                        className="w-full py-3 bg-gradient-to-r from-teal-600 to-teal-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/30 transition-all"
-                                    >
-                                        Apply Filters
-                                    </button>
+
                                 </div>
                             </div>
                         </aside>
@@ -308,7 +330,7 @@ export default function InfluencerDiscovery() {
                             <h1 className="text-2xl font-bold text-gray-900">
                                 Explore Creators
                                 <span className="text-sm font-normal text-gray-500 ml-3">
-                                    Showing {influencers.length} creators matching your criteria
+                                    Showing {totalItems} creators matching your criteria
                                 </span>
                             </h1>
 
@@ -328,7 +350,7 @@ export default function InfluencerDiscovery() {
                             </div>
                         ) : (
                             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {influencers.length > 0 ? influencers.map((influencer) => (
+                                {filteredInfluencers.length > 0 ? filteredInfluencers.map((influencer) => (
                                     <div key={influencer.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                         {/* Thumbnail */}
                                         <div className={`relative h-48 bg-gray-200 overflow-hidden`}>
@@ -438,7 +460,7 @@ export default function InfluencerDiscovery() {
                         {totalItems > itemsPerPage && (
                             <div className="flex items-center justify-center gap-2 mt-8">
                                 <button
-                                    onClick={() => { if (currentPage > 1) { setCurrentPage(currentPage - 1); fetchInfluencers(currentPage - 1); } }}
+                                    onClick={() => { if (currentPage > 1) { setCurrentPage(currentPage - 1); } }}
                                     disabled={currentPage === 1}
                                     className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
@@ -468,7 +490,6 @@ export default function InfluencerDiscovery() {
                                             onClick={() => {
                                                 if (typeof page === 'number') {
                                                     setCurrentPage(page);
-                                                    fetchInfluencers(page);
                                                 }
                                             }}
                                             disabled={page === '...'}
@@ -488,7 +509,6 @@ export default function InfluencerDiscovery() {
                                         const totalPages = Math.ceil(totalItems / itemsPerPage);
                                         if (currentPage < totalPages) {
                                             setCurrentPage(currentPage + 1);
-                                            fetchInfluencers(currentPage + 1);
                                         }
                                     }}
                                     disabled={currentPage >= Math.ceil(totalItems / itemsPerPage)}

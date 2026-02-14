@@ -1720,8 +1720,8 @@ export async function getBrandWallet() {
         let inEscrow = 0;
         const transactions: any[] = [];
 
-        brand.contracts.forEach(contract => {
-            contract.transactions.forEach(tx => {
+        brand.contracts.forEach((contract: any) => {
+            contract.transactions.forEach((tx: any) => {
                 if (tx.status === EscrowTransactionStatus.RELEASED) {
                     totalSpent += tx.amount;
                 } else if (tx.status === EscrowTransactionStatus.FUNDED) {

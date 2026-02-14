@@ -77,7 +77,7 @@ export default function InfluencerProfileClient({
                                             </div>
                                         </div>
                                         <div className="flex gap-3 mt-2 md:mt-0 w-full md:w-auto">
-                                            {session?.user?.role === 'BRAND' || session?.user?.role === 'ADMIN' ? (
+                                            {(session?.user as any)?.role === 'BRAND' || (session?.user as any)?.role === 'ADMIN' ? (
                                                 <>
                                                     <button className="flex-1 md:flex-none h-11 px-6 bg-teal-50 text-teal-600 hover:bg-teal-100 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
                                                         <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
@@ -88,10 +88,17 @@ export default function InfluencerProfileClient({
                                                         Hire Now
                                                     </Link>
                                                 </>
+                                            ) : session ? (
+                                                // Logged in but not a brand/admin (could be another influencer)
+                                                <button disabled className="flex-1 md:flex-none h-11 px-6 bg-gray-100 text-gray-400 rounded-xl font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                                                    <span className="material-symbols-outlined text-[20px]">info</span>
+                                                    Brand access only
+                                                </button>
                                             ) : (
-                                                <Link href={`/login?returnUrl=/brand/discover/${profile.id}&action=hire`} className="flex-1 md:flex-none h-11 px-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2">
-                                                    <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-                                                    Request Promotion
+                                                // Guest
+                                                <Link href={`/login?returnUrl=/discover/${profile.id}`} className="flex-1 md:flex-none h-11 px-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2">
+                                                    <span className="material-symbols-outlined text-[20px]">login</span>
+                                                    Login to Hire
                                                 </Link>
                                             )}
                                         </div>
@@ -187,7 +194,10 @@ export default function InfluencerProfileClient({
                                                         <span className="text-gray-500 text-sm">/ deliverable</span>
                                                     </div>
                                                     <Link
-                                                        href={`/brand/checkout/${profile.id}?service=${service.id}`}
+                                                        href={(session?.user as any)?.role === 'BRAND' || (session?.user as any)?.role === 'ADMIN'
+                                                            ? `/brand/checkout/${profile.id}?service=${service.id}`
+                                                            : `/login?returnUrl=/discover/${profile.id}`
+                                                        }
                                                         className="block w-full text-center py-2.5 rounded-lg border-2 border-gray-100 text-gray-900 font-bold text-sm hover:border-teal-600 hover:text-teal-600 transition-colors"
                                                     >
                                                         Hire for {service.label}
