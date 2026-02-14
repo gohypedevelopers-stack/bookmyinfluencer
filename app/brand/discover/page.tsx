@@ -195,8 +195,8 @@ export default function InfluencerDiscovery() {
                 <div className="flex gap-6">
                     {/* Filters Sidebar */}
                     {showFilters && (
-                        <aside className="w-72 flex-shrink-0">
-                            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+                        <aside className="w-72 flex-shrink-0 sticky top-4 h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
+                            <div className="bg-white rounded-xl border border-gray-200 p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="font-bold text-gray-900">Refine Search</h3>
                                     <button

@@ -437,7 +437,7 @@ export async function getPublicCreators(filter?: {
                 verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
                 priceRange: formatPriceRange(c.pricing),
-                thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
+                thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || c.user?.image || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || c.user?.image,
                 saved: false
             };

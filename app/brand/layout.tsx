@@ -1,5 +1,5 @@
 import { BrandTopNav } from "@/components/brand/brand-top-nav"
-import { BrandSidebar } from "@/components/brand/brand-sidebar"
+import { BrandNavbar } from "@/components/brand/brand-navbar"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -38,8 +38,8 @@ export default async function BrandLayout({
 
     return (
         <BrandSessionProvider session={session}>
-            <div className="flex h-screen bg-gray-50 overflow-hidden">
-                <BrandSidebar />
+            <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+                <BrandNavbar />
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                     <BrandTopNav />
                     <main className="flex-1 overflow-y-auto">
