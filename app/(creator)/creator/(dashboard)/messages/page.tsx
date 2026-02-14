@@ -485,7 +485,7 @@ export default function CreatorMessagesPage() {
                                 <div>
                                     <h2 className="font-bold text-gray-900">{activeThread.name}</h2>
                                     <div className="flex items-center text-xs text-gray-500">
-                                        {(activeThread.brandUserId && onlineMembers.has(activeThread.brandUserId)) ? (
+                                        {(activeThread.brandUserId && onlineMembers.has(activeThread.brandUserId)) || (onlineMembers.size > 1) ? (
                                             <>
                                                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
                                                 Active Now
