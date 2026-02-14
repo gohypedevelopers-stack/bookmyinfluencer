@@ -81,7 +81,7 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                         <div className="px-6 pb-6 mt-[-30px]">
                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white mb-3">
                                 <Image
-                                    src={influencer.profileImage || "/placeholder.jpg"}
+                                    src={influencer.profileImage && influencer.profileImage.length > 0 ? influencer.profileImage : "/images/elena.png"}
                                     alt={influencer.name}
                                     fill
                                     className="object-cover"
