@@ -106,6 +106,7 @@ export async function getManagerCampaignDetails(id: string) {
         const campaign = await db.campaign.findUnique({
             where: { id },
             include: {
+                payouts: true,
                 brand: { include: { user: true } },
                 candidates: {
                     include: {
@@ -119,6 +120,7 @@ export async function getManagerCampaignDetails(id: string) {
                         }
                     }
                 }
+                // Removed as any cast
             }
         });
 

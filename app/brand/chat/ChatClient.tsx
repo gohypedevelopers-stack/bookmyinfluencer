@@ -28,6 +28,7 @@ import {
     Flag
 } from 'lucide-react';
 import { notifyTyping, markBrandMessagesRead, sendMessage, createOffer, finalizeOffer, blockUser, reportUser, deleteThread } from '@/app/brand/actions';
+import { fundContractFromWallet } from '@/app/brand/wallet-actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,7 +101,10 @@ interface Thread {
         title: string;
     } | null;
     contract?: {
+        id: string;
         status: string;
+        totalAmount: number;
+        transactions: any[]; // Or define strict type
     } | null;
 }
 
@@ -110,6 +114,7 @@ interface ChatClientProps {
     messages: Message[];
     currentUserId: string;
     brandProfileId: string;
+    walletBalance: number;
 }
 
 export default function ChatClient({
@@ -117,11 +122,13 @@ export default function ChatClient({
     selectedThreadId: initialThreadId,
     messages: initialMessages,
     currentUserId,
-    brandProfileId
+    brandProfileId,
+    walletBalance
 }: ChatClientProps) {
     const router = useRouter();
     const [activeThreadId, setActiveThreadId] = useState<string | undefined>(initialThreadId);
     const [localMessages, setLocalMessages] = useState<Message[]>(initialMessages);
+    const [isFunding, setIsFunding] = useState(false);
 
     // Synchronize local messages when initialMessages change (from server refresh or thread switch)
     useEffect(() => {
@@ -462,6 +469,40 @@ export default function ChatClient({
             toast.error('Failed to report user');
         } finally {
             setIsReporting(false);
+        }
+    };
+
+    const handleFundAdvance = async () => {
+        if (!activeThread?.contract?.id) return;
+
+        // Calculate amount (logic from server: pending tx or total)
+        // We can just rely on user knowing the amount or display generic
+        // In UI below we calculate it for display
+
+        setIsFunding(true);
+        try {
+            const result = await fundContractFromWallet(activeThread.contract.id);
+            if (result.success) {
+                toast.success("Advance payment locked successfully. Chat is now enabled.");
+                router.refresh();
+            } else {
+                const errorMsg = (result as any).error || "Failed to fund advance";
+                if (errorMsg.includes("Insufficient wallet balance")) {
+                    // Could show modal here, for now just toast with specific action
+                    toast.error("Insufficient wallet balance", {
+                        action: {
+                            label: "Recharge",
+                            onClick: () => router.push('/brand/wallet')
+                        }
+                    });
+                } else {
+                    toast.error(errorMsg);
+                }
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setIsFunding(false);
         }
     };
 
@@ -822,12 +863,38 @@ export default function ChatClient({
 
                     {/* Input Area */}
                     <div className="p-4 bg-white border-t border-gray-100 relative">
-                        {isLocked && (
-                            <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm font-medium text-center shadow-sm z-10">
-                                Messaging is enabled once the campaign is funded (Advance Payment locked).
-                            </div>
-                        )}
-                        <form onSubmit={handleSendMessage} className={`flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {isLocked && (() => {
+                            const contract = activeThread?.contract;
+                            if (!contract) return null;
+
+                            const total = contract.totalAmount || 0;
+                            // Look for pending ESCROW_FUNDING tx
+                            const pendingTx = contract.transactions?.find((t: any) => t.type === 'ESCROW_FUNDING' && t.status === 'PENDING'); // or FUNDED? no only PENDING
+
+                            const advanceAmount = pendingTx ? pendingTx.amount : (total / 2); // Default 50%
+
+                            return (
+                                <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 shadow-md z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="text-sm">
+                                        <p className="font-bold mb-1">Campaign chat is currently locked.</p>
+                                        <p className="text-amber-800 mb-1">To start collaborating, please fund the advance payment.</p>
+                                        <p className="text-xs text-amber-600/80 mb-2">This advance will be securely locked for the campaign and released after deliverable approval.</p>
+                                        <div className="flex gap-4 text-xs font-medium text-amber-700/80">
+                                            <span>Advance: ₹{advanceAmount.toLocaleString()}</span>
+                                            <span>Wallet: ₹{walletBalance.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={handleFundAdvance}
+                                        disabled={isFunding}
+                                        className="bg-amber-600 hover:bg-amber-700 text-white shadow-none shrink-0"
+                                    >
+                                        {isFunding ? 'Processing...' : 'Pay Advance & Start Chat'}
+                                    </Button>
+                                </div>
+                            );
+                        })()}
+                        <form onSubmit={handleSendMessage} className={`flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all ${isLocked ? 'opacity-50 pointer-events-none filter blur-[1px]' : ''}`}>
                             <div className="flex items-center gap-1 pb-2 pl-2">
                                 <input
                                     type="file"

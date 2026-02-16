@@ -46,14 +46,29 @@ export default function ManagerCampaignDetailsClient({ campaign }: { campaign: a
     const [isProcessing, setIsProcessing] = useState(false);
     const [isLocking, setIsLocking] = useState(false);
 
-    async function handleApproveDeliverable(id: string) {
-        if (!confirm("Approve this deliverable?")) return;
+    async function handleApproveDeliverable(id: string, contractId: string) {
+        if (!confirm("Approve this deliverable? This will also lock the remaining contract amount.")) return;
         const result = await updateDeliverableStatus(id, "APPROVED");
         if (result.success) {
             toast.success("Deliverable Approved");
-            router.refresh();
+
+            // Trigger Final Lock automatically
+            setIsLocking(true);
+            try {
+                const lockResult = await approveDeliverableAndLock(contractId);
+                if (lockResult.success) {
+                    toast.success("Final amount locked & Contract marked as Completed");
+                } else {
+                    toast.error("Deliverable approved but failed to lock funds: " + lockResult.error);
+                }
+            } catch (e: any) {
+                toast.error("Lock error: " + e.message);
+            } finally {
+                setIsLocking(false);
+                router.refresh();
+            }
         } else {
-            toast.error(result.error || "Failed to approve");
+            toast.error((result as any).error || "Failed to approve");
         }
     }
 
@@ -65,7 +80,7 @@ export default function ManagerCampaignDetailsClient({ campaign }: { campaign: a
             toast.success("Deliverable Rejected");
             router.refresh();
         } else {
-            toast.error(result.error || "Failed to reject");
+            toast.error((result as any).error || "Failed to reject");
         }
     }
 
@@ -105,7 +120,7 @@ export default function ManagerCampaignDetailsClient({ campaign }: { campaign: a
                 setUtr("");
                 router.refresh();
             } else {
-                toast.error(result.error || "Failed to record payout");
+                toast.error((result as any).error || "Failed to record payout");
             }
         } catch (e: any) {
             toast.error(e.message);
@@ -168,13 +183,13 @@ export default function ManagerCampaignDetailsClient({ campaign }: { campaign: a
                                     <p className="text-xs text-gray-500 uppercase font-bold">Actions</p>
                                     <div className="flex gap-2 mt-1">
                                         {contract.status === "ACTIVE" && (
-                                            <Button size="xs" onClick={() => handleFinalLock(contract.id)} disabled={isLocking}>
+                                            <Button size="sm" className="h-6 text-xs" onClick={() => handleFinalLock(contract.id)} disabled={isLocking}>
                                                 <Lock className="w-3 h-3 mr-1" />
                                                 Final Lock
                                             </Button>
                                         )}
                                         {contract.status === "COMPLETED" && (
-                                            <Button size="xs" variant="outline" onClick={() => {
+                                            <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => {
                                                 setSelectedContract(contract);
                                                 setIsPayoutOpen(true);
                                             }}>
@@ -190,34 +205,46 @@ export default function ManagerCampaignDetailsClient({ campaign }: { campaign: a
                                 <h4 className="font-bold text-sm text-gray-700 uppercase">Deliverables</h4>
                                 {contract.deliverables.length > 0 ? (
                                     contract.deliverables.map((d: any) => (
-                                        <div key={d.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-white">
-                                            <div className="flex items-center gap-3">
-                                                <FileText className="w-4 h-4 text-gray-400" />
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900">{d.type}</p>
-                                                    <a href={d.url} target="_blank" className="text-xs text-blue-500 hover:underline flex items-center">
-                                                        View Link <ExternalLink className="w-3 h-3 ml-1" />
-                                                    </a>
+                                        <div key={d.id} className="flex flex-col gap-2 p-3 border border-gray-100 rounded-lg bg-white">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <FileText className="w-4 h-4 text-gray-400" />
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">{d.title}</p>
+                                                        {d.submissionUrl ? (
+                                                            <a href={d.submissionUrl} target="_blank" className="text-xs text-blue-500 hover:underline flex items-center mt-1">
+                                                                View Submission <ExternalLink className="w-3 h-3 ml-1" />
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 italic">Pending Submission</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className={`text-xs font-bold px-2 py-1 rounded-md ${d.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-xs font-bold px-2 py-1 rounded-md ${d.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
                                                         d.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
                                                             'bg-yellow-100 text-yellow-700'
-                                                    }`}>
-                                                    {d.status}
-                                                </span>
-                                                {d.status === 'SUBMITTED' && (
-                                                    <>
-                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50" onClick={() => handleApproveDeliverable(d.id)}>
-                                                            <CheckCircle className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleRejectDeliverable(d.id)}>
-                                                            <XCircle className="w-4 h-4" />
-                                                        </Button>
-                                                    </>
-                                                )}
+                                                        }`}>
+                                                        {d.status}
+                                                    </span>
+                                                    {d.status === 'SUBMITTED' && (
+                                                        <>
+                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50" onClick={() => handleApproveDeliverable(d.id, contract.id)}>
+                                                                <CheckCircle className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleRejectDeliverable(d.id)}>
+                                                                <XCircle className="w-4 h-4" />
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
+                                            {d.submissionNotes && (
+                                                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 mt-1">
+                                                    <span className="font-bold text-gray-400 uppercase text-[10px] mr-2">Note:</span>
+                                                    {d.submissionNotes}
+                                                </div>
+                                            )}
                                         </div>
                                     ))
                                 ) : (

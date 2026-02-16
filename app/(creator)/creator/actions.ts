@@ -591,13 +591,7 @@ export async function getCreatorEarnings() {
             where: { userId: userId },
             include: {
                 user: true,
-                payouts: true, // PayoutRequest (old flow / withdrawals)
-                payoutRecords: { // NEW: Manual Payouts from Manager
-                    include: {
-                        campaign: { select: { title: true, brand: { select: { companyName: true } } } }
-                    },
-                    orderBy: { paidAt: 'desc' }
-                }
+                payouts: true // PayoutRequest (old flow / withdrawals)
             }
         });
 
@@ -608,6 +602,14 @@ export async function getCreatorEarnings() {
             transactions: [],
             payoutMethods: []
         };
+
+        const payoutRecords = await db.payoutRecord.findMany({
+            where: { creatorId: influencer.id },
+            include: {
+                campaign: { select: { title: true, brand: { select: { companyName: true } } } }
+            },
+            orderBy: { paidAt: 'desc' }
+        });
 
         const contracts = await db.contract.findMany({
             where: { influencerId: influencer.id },
@@ -639,8 +641,8 @@ export async function getCreatorEarnings() {
         });
 
         // 2. Process PAYOUT RECORDS (Actual Earnings / Paid Out)
-        if (influencer.payoutRecords) {
-            influencer.payoutRecords.forEach(record => {
+        if (payoutRecords.length > 0) {
+            payoutRecords.forEach(record => {
                 lifetimeEarnings += record.amount;
 
                 transactionsList.push({
@@ -970,5 +972,89 @@ export async function getPublicBrandById(id: string) {
     } catch (error) {
         console.error("Error fetching brand:", error);
         return { success: false, error: "Failed to fetch brand" };
+    }
+}
+
+// --- DELIVERABLES ---
+
+export async function submitDeliverable(candidateId: string, url: string, notes?: string) {
+    const userId = await getCreatorId();
+    if (!userId) return { success: false, error: "Unauthorized" };
+
+    try {
+        const candidateResult = await db.campaignCandidate.findUnique({
+            where: { id: candidateId },
+            include: {
+                campaign: { include: { assignment: { select: { managerId: true } } } },
+                contract: {
+                    include: { deliverables: true }
+                },
+                influencer: { include: { user: { select: { name: true } } } }
+            }
+        });
+
+        if (!candidateResult || !candidateResult.contract) {
+            return { success: false, error: "Contract not found" };
+        }
+
+        const candidate = candidateResult;
+
+        // Find the pending deliverable
+        const deliverable = candidate.contract.deliverables.find(d => d.status === 'PENDING')
+            || candidate.contract.deliverables[0];
+
+        if (!deliverable) {
+            return { success: false, error: "No pending deliverables found" };
+        }
+
+        // Update Deliverable
+        await db.deliverable.update({
+            where: { id: deliverable.id },
+            data: {
+                status: 'SUBMITTED',
+                submissionUrl: url,
+                submissionNotes: notes,
+                submittedAt: new Date()
+            }
+        });
+
+        // Update Candidate Status if needed (e.g. to CONTENT_REVIEW)
+        if (candidate.status !== 'CONTENT_REVIEW') {
+            await db.campaignCandidate.update({
+                where: { id: candidateId },
+                data: { status: 'CONTENT_REVIEW' }
+            });
+        }
+
+        // Create Audit Log
+        if (candidate.campaign.assignment?.managerId) {
+            await db.auditLog.create({
+                data: {
+                    userId: userId,
+                    action: "DELIVERABLE_SUBMITTED",
+                    entity: "Deliverable",
+                    entityId: deliverable.id,
+                    details: `Submitted content for ${candidate.campaign.title}`
+                }
+            });
+
+            // Notify Manager
+            await db.notification.create({
+                data: {
+                    userId: candidate.campaign.assignment.managerId,
+                    type: "DELIVERABLE",
+                    title: "Deliverable Submitted",
+                    message: `${candidate.influencer.user?.name || "Creator"} submitted content for ${candidate.campaign.title}`,
+                    link: `/manager/campaigns/${candidate.campaignId}`
+                }
+            });
+        }
+
+        revalidatePath('/creator/campaigns');
+        return { success: true };
+
+    } catch (error) {
+        console.error("Failed to submit deliverable", error);
+        return { success: false, error: "Submission failed" };
     }
 }

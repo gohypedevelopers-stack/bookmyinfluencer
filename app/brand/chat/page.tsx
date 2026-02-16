@@ -40,7 +40,15 @@ export default async function ChatPage({
         );
     }
 
+    // ... existing imports ...
+
     const brandProfileId = user.brandProfile.id;
+
+    // Fetch Wallet Balance
+    const wallet = await db.brandWallet.findUnique({
+        where: { brandId: brandProfileId }
+    });
+    const walletBalance = wallet?.balance || 0;
 
     // Fetch threads where:
     // 1. Thread follows Candidate -> Campaign -> Brand
@@ -71,7 +79,11 @@ export default async function ChatPage({
                     },
                     offer: true,
                     campaign: { select: { id: true, title: true } },
-                    contract: { select: { status: true } }
+                    contract: {
+                        include: {
+                            transactions: true // Needed to calculate advance amount
+                        }
+                    }
                 }
             },
             messages: {
@@ -96,18 +108,10 @@ export default async function ChatPage({
             }
         });
         activeThreadMessages = threadMessages;
-
-        // Mark as read if not sent by current user
-        // We can do this asynchronously or in a separate action to not block rendering
-        // keeping it simple for now, maybe client side effect
     }
 
     // Map to shape expected by ChatClient
     // We need to fetch creator details for direct DMs where candidate is null
-    // This is tricky because participants string is "userId1,userId2".
-    // For direct DMs, we need to find the OTHER user.
-
-    // Extract other user IDs from direct threads
     const directThreadUserIds = rawThreads
         .filter(t => !t.candidateId)
         .map(t => {
@@ -175,6 +179,7 @@ export default async function ChatPage({
             messages={activeThreadMessages}
             currentUserId={session.user.id}
             brandProfileId={brandProfileId}
+            walletBalance={walletBalance}
         />
     );
 }

@@ -995,6 +995,7 @@ export async function getCampaignAnalytics(campaignId: string) {
         const campaign = await db.campaign.findUnique({
             where: { id: campaignId },
             include: {
+                payouts: true,
                 candidates: {
                     where: { status: CandidateStatus.HIRED },
                     include: {
@@ -1020,6 +1021,7 @@ export async function getCampaignAnalytics(campaignId: string) {
         let activeCreators = 0;
 
         const candidates = campaign.candidates || [];
+        const payoutRecords = campaign.payouts || [];
 
         const creatorsData = candidates.map((candidate) => {
             const influencer = candidate.influencer;
@@ -1044,6 +1046,21 @@ export async function getCampaignAnalytics(campaignId: string) {
             totalSpent += spent;
             activeCreators++;
 
+            // Determine Payment Status
+            let paymentStatus = "Pending";
+            const contractStatus = candidate.contract?.status;
+            const hasPayout = payoutRecords.some(p => p.creatorId === influencer.id);
+
+            if (contractStatus === ContractStatus.COMPLETED) {
+                if (hasPayout) {
+                    paymentStatus = "Paid";
+                } else {
+                    paymentStatus = "Final Locked";
+                }
+            } else if (contractStatus === ContractStatus.ACTIVE) {
+                paymentStatus = "Advance Locked";
+            }
+
             return {
                 id: influencer.id,
                 userId: influencer.userId,
@@ -1055,7 +1072,8 @@ export async function getCampaignAnalytics(campaignId: string) {
                 engagementRate,
                 spend: spent,
                 roi: (Math.random() * 5 + 1).toFixed(1) + "x", // Mock ROI
-                status: candidate.contract?.status === ContractStatus.COMPLETED ? "Completed" : "Active"
+                status: candidate.contract?.status === ContractStatus.COMPLETED ? "Completed" : "Active",
+                paymentStatus // New field
             };
         });
 

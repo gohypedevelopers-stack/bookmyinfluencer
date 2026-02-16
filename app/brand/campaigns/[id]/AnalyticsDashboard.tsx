@@ -222,6 +222,7 @@ export function AnalyticsDashboard({ data, campaignTitle }: AnalyticsDashboardPr
                                 <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Reach</th>
                                 <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Eng. Rate</th>
                                 <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Spend</th>
+                                <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Payment</th>
                                 <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">ROI</th>
                                 <th className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
                             </tr>
@@ -259,6 +260,14 @@ export function AnalyticsDashboard({ data, campaignTitle }: AnalyticsDashboardPr
                                     </td>
                                     <td className="py-4 px-6 text-right text-gray-700 text-sm">
                                         ₹{creator.spend.toLocaleString()}
+                                    </td>
+                                    <td className="py-4 px-6 text-right">
+                                        <span className={`inline-flex px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${creator.paymentStatus === 'Paid' ? 'bg-green-100 text-green-700' :
+                                                creator.paymentStatus === 'Final Locked' ? 'bg-blue-100 text-blue-700' :
+                                                    creator.paymentStatus === 'Advance Locked' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                                            }`}>
+                                            {creator.paymentStatus || 'Pending'}
+                                        </span>
                                     </td>
                                     <td className="py-4 px-6 text-right font-bold text-teal-600 text-sm">
                                         {creator.roi}

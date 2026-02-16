@@ -21,6 +21,8 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import CampaignDetailsModal from './CampaignDetailsModal';
 import InvitationDetailsModal from './InvitationDetailsModal';
+import SubmitDeliverableModal from './SubmitDeliverableModal';
+import { submitDeliverable } from '../../actions';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -52,6 +54,10 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedInvitation, setSelectedInvitation] = useState<any>(null);
     const [isInvitationModalOpen, setIsInvitationModalOpen] = useState(false);
+
+    // Submission Modal State
+    const [submissionCandidate, setSubmissionCandidate] = useState<any>(null);
+    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
     // Filter State
     const [filters, setFilters] = useState({
@@ -87,6 +93,15 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setTimeout(() => setSelectedCampaign(null), 300); // clear after animation
+    };
+
+    const handleOpenSubmitModal = (candidate: any) => {
+        setSubmissionCandidate(candidate);
+        setIsSubmitModalOpen(true);
+    };
+
+    const handleSubmitDeliverable = async (candidateId: string, url: string, notes: string) => {
+        return await submitDeliverable(candidateId, url, notes);
     };
 
     // Filter Logic for My Campaigns
@@ -431,6 +446,17 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                                 <p className="text-xs font-bold text-green-700">All deliverables completed!</p>
                                             </div>
                                         )}
+
+                                        {/* Submit Action */}
+                                        {nextItem && item.status !== 'COMPLETED' && (
+                                            <Button
+                                                className="w-full mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-md"
+                                                onClick={() => handleOpenSubmitModal(item)}
+                                            >
+                                                Submit Deliverable
+                                                <ImagesIcon className="w-4 h-4 ml-2" />
+                                            </Button>
+                                        )}
                                     </div>
 
                                     <div className="flex gap-3 mt-auto">
@@ -566,6 +592,13 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                 isOpen={isInvitationModalOpen}
                 onClose={() => setIsInvitationModalOpen(false)}
                 invitation={selectedInvitation}
+            />
+
+            <SubmitDeliverableModal
+                isOpen={isSubmitModalOpen}
+                onClose={() => setIsSubmitModalOpen(false)}
+                candidate={submissionCandidate}
+                onSubmit={handleSubmitDeliverable}
             />
         </div>
     )
