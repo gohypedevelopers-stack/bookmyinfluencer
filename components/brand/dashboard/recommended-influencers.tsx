@@ -13,6 +13,7 @@ interface Influencer {
     handle: string
     niche: string
     profileImage: string
+    bannerImage?: string | null
     stats: {
         followers: string | number
         engagement: string | number
@@ -75,9 +76,16 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {visibleInfluencers.map((influencer) => (
                     <Card key={influencer.id} className="overflow-hidden border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div className={`h-24 ${influencer.niche.includes('Lifestyle') ? 'bg-blue-50' :
-                            influencer.niche.includes('Teach') ? 'bg-green-50' : 'bg-pink-50'
-                            }`}></div>
+                        <div className={`h-24 relative overflow-hidden ${!influencer.bannerImage ? (influencer.niche.includes('Lifestyle') ? 'bg-blue-50' : influencer.niche.includes('Teach') ? 'bg-green-50' : 'bg-pink-50') : ''}`}>
+                            {influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:')) && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={influencer.bannerImage}
+                                    alt="Cover"
+                                    className="w-full h-full object-cover"
+                                />
+                            )}
+                        </div>
                         <div className="px-6 pb-6 mt-[-30px]">
                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white mb-3">
                                 <Image

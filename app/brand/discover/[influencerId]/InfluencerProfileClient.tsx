@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Session } from "next-auth";
 
-type FullProfile = InfluencerProfile & { user: User };
+type FullProfile = InfluencerProfile & { user: User; bannerImage?: string | null };
 
 export default function InfluencerProfileClient({
     profile,
@@ -34,7 +34,12 @@ export default function InfluencerProfileClient({
                             {/* Profile Hero Section */}
                             <div className="bg-white rounded-none xl:rounded-3xl border-b xl:border border-gray-100 overflow-hidden shadow-sm relative group">
                                 {/* Cover Image */}
-                                <div className="h-48 md:h-64 w-full bg-cover bg-center relative" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=2000")' }}>
+                                {/* Cover Image */}
+                                <div className="h-48 md:h-64 w-full bg-cover bg-center relative" style={{
+                                    backgroundImage: (profile.bannerImage && (profile.bannerImage.startsWith('/') || profile.bannerImage.startsWith('http') || profile.bannerImage.startsWith('data:')))
+                                        ? `url("${profile.bannerImage}")`
+                                        : 'url("https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=2000")'
+                                }}>
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                                 </div>
                                 <div className="px-6 pb-6 md:px-10 md:pb-8 relative">
@@ -55,15 +60,21 @@ export default function InfluencerProfileClient({
                                                         <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
                                                         Save
                                                     </button>
-                                                    <Link href={`/brand/campaigns/new?influencerId=${profile.id}`} className="flex-1 md:flex-none h-11 px-6 bg-teal-600 text-white hover:bg-teal-700 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">campaign</span>
-                                                        Request Promotion
+                                                    <Link
+                                                        href={`/brand/campaigns/new?influencerId=${profile.id}`}
+                                                        className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-500 via-teal-600 to-teal-500 bg-size-200 animate-gradient-x text-white hover:shadow-teal-500/40 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center gap-2 group"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform duration-300">campaign</span>
+                                                        <span className="tracking-wide">Request Collaboration</span>
                                                     </Link>
                                                 </>
                                             ) : (
-                                                <Link href={`/login?returnUrl=/brand/discover/${profile.id}&action=hire`} className="flex-1 md:flex-none h-11 px-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2 animate-pulse">
+                                                <Link
+                                                    href={`/login?returnUrl=/brand/discover/${profile.id}&action=hire`}
+                                                    className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 animate-pulse hover:animate-none"
+                                                >
                                                     <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-                                                    Request Promotion
+                                                    Request Collaboration
                                                 </Link>
                                             )}
                                         </div>

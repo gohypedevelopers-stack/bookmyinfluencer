@@ -11,13 +11,14 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full bg-white flex flex-col">
       <Navbar />
-      <div id="main-content" className="flex-1 w-full">
+      {/* Main Content Wrapper */}
+      <main id="main-content" className="flex-1 w-full">
         <HeroSection />
         <FeaturesSection />
         <TalentSection />
         <WorkflowSection />
         <CallToAction />
-      </div>
+      </main>
       <Footer />
     </div>
   )
