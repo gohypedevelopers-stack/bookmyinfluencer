@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { CampaignCandidate, InfluencerProfile, User, Offer, CandidateStatus } from '@prisma/client';
 import { updateCandidateStatus } from '../actions';
+import { fundCandidateFromWallet } from '../wallet-actions';
+import { toast } from 'sonner';
 
 type CandidateWithDetails = CampaignCandidate & {
     influencer: InfluencerProfile & { user: User };
@@ -54,8 +56,33 @@ export default function CampaignKanbanClient({ candidates }: CampaignKanbanClien
     const handleStatusMove = async (id: string, currentStatus: string) => {
         const statuses = STATUS_COLUMNS.map(c => c.id);
         const currentIndex = statuses.indexOf(currentStatus);
+
         if (currentIndex < statuses.length - 1) {
             const nextStatus = statuses[currentIndex + 1];
+
+            // Intercept HIRED move to process payment
+            if (nextStatus === 'HIRED') {
+                const confirmed = confirm("Moving to HIRED will lock the advance payment from your wallet. Proceed?");
+                if (!confirmed) return;
+
+                try {
+                    const result = await fundCandidateFromWallet(id);
+                    if (result.success) {
+                        toast.success("Advance locked & candidate hired!");
+                        // Status is updated server-side, forcing revalidation might be needed or just optimistic update?
+                        // revalidatePath is in the action.
+                        // We can return here as the action updates the status.
+                        return;
+                    } else {
+                        toast.error(result.error || "Failed to process payment");
+                        return; // Don't proceed to update status manually if payment failed
+                    }
+                } catch (e: any) {
+                    toast.error(e.message || "Failed to process payment");
+                    return;
+                }
+            }
+
             await updateCandidateStatus(id, nextStatus as CandidateStatus);
         }
     };

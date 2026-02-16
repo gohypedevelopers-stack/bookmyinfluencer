@@ -179,3 +179,59 @@ export async function getSignedSelfieUrl(key: string) {
         return { success: false, error: "Failed to generate URL" };
     }
 }
+
+export async function getAllCampaignsForAdmin() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        const campaigns = await db.campaign.findMany({
+            include: {
+                brand: { include: { user: true } },
+                assignment: { include: { manager: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        return { success: true, data: campaigns };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getManagerUsers() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        const managers = await db.user.findMany({
+            where: { role: "MANAGER" },
+            select: { id: true, name: true, email: true, image: true }
+        });
+        return { success: true, data: managers };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function assignManagerToCampaign(campaignId: string, managerId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        await db.campaignAssignment.upsert({
+            where: { campaignId },
+            update: { managerId, assignedAt: new Date() },
+            create: {
+                campaignId,
+                managerId
+            }
+        });
+
+        revalidatePath('/admin/campaigns');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Assign Manager Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+

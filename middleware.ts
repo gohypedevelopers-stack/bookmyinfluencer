@@ -96,6 +96,13 @@ export default withAuth(
         if (path.startsWith("/admin") && userRole !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url))
         }
+
+        // Manager Routes
+        if (path.startsWith("/manager") && userRole !== "MANAGER" && userRole !== "ADMIN") {
+            return NextResponse.redirect(new URL("/", req.url))
+        }
+
+        return NextResponse.next()
     },
     {
         callbacks: {
@@ -111,6 +118,7 @@ export const config = {
     matcher: [
         "/brand/:path*",
         "/influencer/:path*",
-        "/admin/:path*"
+        "/admin/:path*",
+        "/manager/:path*"
     ]
 }

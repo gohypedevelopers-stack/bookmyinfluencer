@@ -28,6 +28,7 @@ model User {
   notifications     Notification[]
   reportsReceived   Report[]           @relation("ReportsReceived")
   reportsInitiated  Report[]           @relation("ReportsInitiated")
+  managedCampaigns  CampaignAssignment[]
 }
 
 model BrandProfile {
@@ -43,6 +44,7 @@ model BrandProfile {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   campaigns      Campaign[]
   contracts      Contract[]
+  brandWallet    BrandWallet?
 }
 
 model InfluencerProfile {
@@ -63,6 +65,7 @@ model InfluencerProfile {
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   kyc             KYCSubmission?
   payouts         PayoutRequest[]
+  payoutRecords   PayoutRecord[]
 }
 
 model KYCSubmission {
@@ -104,6 +107,9 @@ model Campaign {
   paymentType  String?             @default("FIXED")
   brand        BrandProfile        @relation(fields: [brandId], references: [id])
   candidates   CampaignCandidate[]
+  transactions WalletTransaction[]
+  assignment   CampaignAssignment?
+  payouts      PayoutRecord[]
 }
 
 model CampaignCandidate {
@@ -428,6 +434,7 @@ enum UserRole {
   BRAND
   INFLUENCER
   ADMIN
+  MANAGER
 }
 
 enum KYCStatus {
@@ -515,4 +522,61 @@ enum MessageStatus {
   SENT
   DELIVERED
   SEEN
+}
+
+model BrandWallet {
+  id           String              @id @default(cuid())
+  brandId      String              @unique
+  balance      Float               @default(0)
+  currency     String              @default("INR")
+  updatedAt    DateTime            @updatedAt
+  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id         String      @id @default(cuid())
+  walletId   String
+  type       String
+  amount     Float
+  campaignId String?
+  reference  String?
+  status     String      @default("SUCCESS")
+  createdAt  DateTime    @default(now())
+  wallet     BrandWallet @relation(fields: [walletId], references: [id])
+  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
+}
+
+model RazorpayPayment {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  paymentId String?
+  signature String?
+  amount    Float
+  currency  String   @default("INR")
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CampaignAssignment {
+  id         String   @id @default(cuid())
+  campaignId String   @unique
+  managerId  String
+  assignedAt DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  manager    User     @relation(fields: [managerId], references: [id])
+}
+
+model PayoutRecord {
+  id          String            @id @default(cuid())
+  campaignId  String
+  creatorId   String
+  amount      Float
+  method      String
+  utr         String
+  processedBy String?
+  paidAt      DateTime          @default(now())
+  campaign    Campaign          @relation(fields: [campaignId], references: [id])
+  creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
 }
