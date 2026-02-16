@@ -678,7 +678,7 @@ export default function CreatorMessagesPage() {
                         <div className="p-6 bg-white border-t border-gray-200 mt-auto shrink-0 relative">
                             {isLocked && (
                                 <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm font-medium text-center shadow-sm">
-                                    Messaging is enabled once the campaign is funded (Advance Payment locked).
+                                    Chat will be enabled once the brand activates the campaign.
                                 </div>
                             )}
                             <div className={`max-w-4xl mx-auto flex items-end gap-3 ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>

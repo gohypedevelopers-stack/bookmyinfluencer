@@ -10,41 +10,41 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(cuid())
+  id                String               @id @default(cuid())
   name              String?
-  email             String             @unique
+  email             String               @unique
   passwordHash      String?
   image             String?
-  role              UserRole           @default(INFLUENCER)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  role              UserRole             @default(INFLUENCER)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
   lastSeenAt        DateTime?
   auditLogs         AuditLog[]
-  blocksReceived    Block[]            @relation("BlocksReceived")
-  blocksInitiated   Block[]            @relation("BlocksInitiated")
+  blocksReceived    Block[]              @relation("BlocksReceived")
+  blocksInitiated   Block[]              @relation("BlocksInitiated")
   brandProfile      BrandProfile?
-  influencerProfile InfluencerProfile?
-  sentMessages      Message[]          @relation("SentMessages")
-  notifications     Notification[]
-  reportsReceived   Report[]           @relation("ReportsReceived")
-  reportsInitiated  Report[]           @relation("ReportsInitiated")
   managedCampaigns  CampaignAssignment[]
+  influencerProfile InfluencerProfile?
+  sentMessages      Message[]            @relation("SentMessages")
+  notifications     Notification[]
+  reportsReceived   Report[]             @relation("ReportsReceived")
+  reportsInitiated  Report[]             @relation("ReportsInitiated")
 }
 
 model BrandProfile {
-  id             String     @id @default(cuid())
-  userId         String     @unique
+  id             String       @id @default(cuid())
+  userId         String       @unique
   companyName    String
   website        String?
   industry       String?
   description    String?
   location       String?
-  walletBalance  Float      @default(0)
-  paymentMethods String?    @default("[]")
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethods String?      @default("[]")
+  walletBalance  Float        @default(0)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandWallet    BrandWallet?
   campaigns      Campaign[]
   contracts      Contract[]
-  brandWallet    BrandWallet?
 }
 
 model InfluencerProfile {
@@ -64,28 +64,28 @@ model InfluencerProfile {
   contracts       Contract[]
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   kyc             KYCSubmission?
-  payouts         PayoutRequest[]
   payoutRecords   PayoutRecord[]
+  payouts         PayoutRequest[]
 }
 
 model KYCSubmission {
-  id              String            @id @default(cuid())
-  profileId       String            @unique
-  status          KYCStatus         @default(NOT_SUBMITTED)
-  documentType    String?
-  documentUrl     String?
-  documentBackUrl String?
-  panCard         String?
-  bankDetails     String?
-  submittedAt     DateTime?
-  reviewedAt      DateTime?
-  adminNotes      String?
-  selfieImageKey  String?
-  selfieCapturedAt DateTime?
-  livenessPrompt  LivenessPrompt?
-  livenessResult  LivenessResult?
+  id                String            @id @default(cuid())
+  profileId         String            @unique
+  status            KYCStatus         @default(NOT_SUBMITTED)
+  documentType      String?
+  documentUrl       String?
+  documentBackUrl   String?
+  panCard           String?
+  bankDetails       String?
+  submittedAt       DateTime?
+  reviewedAt        DateTime?
+  adminNotes        String?
+  livenessPrompt    LivenessPrompt?
+  livenessResult    LivenessResult?
+  selfieCapturedAt  DateTime?
+  selfieImageKey    String?
   verifiedByAdminAt DateTime?
-  profile         InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile           InfluencerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model Campaign {
@@ -106,10 +106,10 @@ model Campaign {
   niche        String?
   paymentType  String?             @default("FIXED")
   brand        BrandProfile        @relation(fields: [brandId], references: [id])
-  candidates   CampaignCandidate[]
-  transactions WalletTransaction[]
   assignment   CampaignAssignment?
+  candidates   CampaignCandidate[]
   payouts      PayoutRecord[]
+  transactions WalletTransaction[]
 }
 
 model CampaignCandidate {
@@ -223,12 +223,12 @@ model Message {
   senderId       String
   content        String?
   read           Boolean       @default(false)
-  status         MessageStatus @default(SENT)
-  deliveredAt    DateTime?
-  seenAt         DateTime?
   createdAt      DateTime      @default(now())
   attachmentType String?
   attachmentUrl  String?
+  deliveredAt    DateTime?
+  seenAt         DateTime?
+  status         MessageStatus @default(SENT)
   sender         User          @relation("SentMessages", fields: [senderId], references: [id])
   thread         ChatThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }
@@ -325,8 +325,6 @@ model Creator {
   niche                String?
   instagramUrl         String?                     @map("instagram_url")
   youtubeUrl           String?                     @map("youtube_url")
-  tiktokUrl            String?                     @map("tiktok_url")
-  twitchUrl            String?                     @map("twitch_url")
   profileImageUrl      String?                     @map("profile_image_url")
   autoProfileImageUrl  String?                     @map("auto_profile_image_url")
   displayName          String?                     @map("display_name")
@@ -338,15 +336,17 @@ model Creator {
   rawSocialData        String?                     @map("raw_social_data")
   lastYoutubeFetchAt   DateTime?                   @map("last_youtube_fetch_at")
   lastInstagramFetchAt DateTime?                   @map("last_instagram_fetch_at")
-  lastTiktokFetchAt    DateTime?                   @map("last_tiktok_fetch_at")
-  lastTwitchFetchAt    DateTime?                   @map("last_twitch_fetch_at")
   verifiedAt           DateTime?                   @map("verified_at")
-  notificationSettings String?                     @map("notification_settings")
   backgroundImageUrl   String?                     @map("background_image_url")
   paymentHistory       String?                     @map("payment_history")
   payoutMethods        String?                     @map("payout_methods")
-  isLiveSyncEnabled    Boolean                     @default(true) @map("is_live_sync_enabled")
   verificationStatus   KYCStatus                   @default(NOT_SUBMITTED) @map("verification_status")
+  isLiveSyncEnabled    Boolean                     @default(true) @map("is_live_sync_enabled")
+  lastTiktokFetchAt    DateTime?                   @map("last_tiktok_fetch_at")
+  lastTwitchFetchAt    DateTime?                   @map("last_twitch_fetch_at")
+  notificationSettings String?                     @map("notification_settings")
+  tiktokUrl            String?                     @map("tiktok_url")
+  twitchUrl            String?                     @map("twitch_url")
   kycSubmission        CreatorKYCSubmission?
   metrics              CreatorMetric[]
   selfReportedMetrics  CreatorSelfReportedMetric[]
@@ -408,26 +408,83 @@ model CreatorMetric {
 }
 
 model CreatorKYCSubmission {
-  id                 String    @id @default(uuid())
-  creatorId          String    @unique @map("creator_id")
-  status             KYCStatus @default(PENDING)
-  instagramFollowers Int?      @map("instagram_followers")
-  youtubeSubscribers Int?      @map("youtube_subscribers")
-  totalPosts         Int?      @map("total_posts")
-  engagementRate     Float?    @map("engagement_rate")
-  adminNotes         String?   @map("admin_notes")
-  reviewedBy         String?   @map("reviewed_by")
-  reviewedAt         DateTime? @map("reviewed_at")
-  submittedAt        DateTime  @default(now()) @map("submitted_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  selfieImageKey     String?   @map("selfie_image_key")
-  selfieCapturedAt   DateTime? @map("selfie_captured_at")
+  id                 String          @id @default(uuid())
+  creatorId          String          @unique @map("creator_id")
+  status             KYCStatus       @default(PENDING)
+  instagramFollowers Int?            @map("instagram_followers")
+  youtubeSubscribers Int?            @map("youtube_subscribers")
+  totalPosts         Int?            @map("total_posts")
+  engagementRate     Float?          @map("engagement_rate")
+  adminNotes         String?         @map("admin_notes")
+  reviewedBy         String?         @map("reviewed_by")
+  reviewedAt         DateTime?       @map("reviewed_at")
+  submittedAt        DateTime        @default(now()) @map("submitted_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
   livenessPrompt     LivenessPrompt? @map("liveness_prompt")
   livenessResult     LivenessResult? @map("liveness_result")
-  verifiedByAdminAt  DateTime? @map("verified_by_admin_at")
-  creator            Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  selfieCapturedAt   DateTime?       @map("selfie_captured_at")
+  selfieImageKey     String?         @map("selfie_image_key")
+  verifiedByAdminAt  DateTime?       @map("verified_by_admin_at")
+  creator            Creator         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@map("creator_kyc_submissions")
+}
+
+model BrandWallet {
+  id           String              @id @default(cuid())
+  brandId      String              @unique
+  balance      Float               @default(0)
+  currency     String              @default("INR")
+  updatedAt    DateTime            @updatedAt
+  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id         String      @id @default(cuid())
+  walletId   String
+  type       String
+  amount     Float
+  campaignId String?
+  reference  String?
+  status     String      @default("SUCCESS")
+  createdAt  DateTime    @default(now())
+  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
+  wallet     BrandWallet @relation(fields: [walletId], references: [id])
+}
+
+model RazorpayPayment {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  paymentId String?
+  signature String?
+  amount    Float
+  currency  String   @default("INR")
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CampaignAssignment {
+  id         String   @id @default(cuid())
+  campaignId String   @unique
+  managerId  String
+  assignedAt DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  manager    User     @relation(fields: [managerId], references: [id])
+}
+
+model PayoutRecord {
+  id          String            @id @default(cuid())
+  campaignId  String
+  creatorId   String
+  amount      Float
+  method      String
+  utr         String
+  processedBy String?
+  paidAt      DateTime          @default(now())
+  campaign    Campaign          @relation(fields: [campaignId], references: [id])
+  creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
 }
 
 enum UserRole {
@@ -455,11 +512,11 @@ enum CampaignStatus {
 enum CandidateStatus {
   CONTACTED
   IN_NEGOTIATION
-  OFFERED
   HIRED
   CONTENT_REVIEW
   COMPLETED
   REJECTED
+  OFFERED
 }
 
 enum OfferStatus {
@@ -522,61 +579,4 @@ enum MessageStatus {
   SENT
   DELIVERED
   SEEN
-}
-
-model BrandWallet {
-  id           String              @id @default(cuid())
-  brandId      String              @unique
-  balance      Float               @default(0)
-  currency     String              @default("INR")
-  updatedAt    DateTime            @updatedAt
-  brand        BrandProfile        @relation(fields: [brandId], references: [id])
-  transactions WalletTransaction[]
-}
-
-model WalletTransaction {
-  id         String      @id @default(cuid())
-  walletId   String
-  type       String
-  amount     Float
-  campaignId String?
-  reference  String?
-  status     String      @default("SUCCESS")
-  createdAt  DateTime    @default(now())
-  wallet     BrandWallet @relation(fields: [walletId], references: [id])
-  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
-}
-
-model RazorpayPayment {
-  id        String   @id @default(cuid())
-  orderId   String   @unique
-  paymentId String?
-  signature String?
-  amount    Float
-  currency  String   @default("INR")
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model CampaignAssignment {
-  id         String   @id @default(cuid())
-  campaignId String   @unique
-  managerId  String
-  assignedAt DateTime @default(now())
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  manager    User     @relation(fields: [managerId], references: [id])
-}
-
-model PayoutRecord {
-  id          String            @id @default(cuid())
-  campaignId  String
-  creatorId   String
-  amount      Float
-  method      String
-  utr         String
-  processedBy String?
-  paidAt      DateTime          @default(now())
-  campaign    Campaign          @relation(fields: [campaignId], references: [id])
-  creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
 }

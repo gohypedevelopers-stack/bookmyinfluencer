@@ -11,6 +11,7 @@ import { Bell, Check, X, Loader2 } from "lucide-react"
 import { getBrandNotifications, handleCollabRequest, markNotificationRead } from "@/app/brand/actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface Notification {
     id: string
@@ -112,19 +113,42 @@ export function NotificationPopover() {
                                     <div className="flex justify-between items-start gap-2 mb-1">
                                         <h5 className="font-bold text-sm text-gray-800">{notification.title}</h5>
                                         <button
-                                            onClick={() => handleMarkRead(notification.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMarkRead(notification.id);
+                                            }}
                                             className="text-gray-300 hover:text-gray-500"
                                             title="Dismiss"
                                         >
                                             <X className="w-3 h-3" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500 leading-relaxed mb-3">
-                                        {notification.message}
-                                    </p>
+
+                                    {notification.link ? (
+                                        <Link
+                                            href={notification.link}
+                                            onClick={() => {
+                                                console.log(`[NAV_DEBUG] Notification clicked: ${notification.link}`);
+                                                setIsOpen(false);
+                                                handleMarkRead(notification.id);
+                                            }}
+                                            className="block group"
+                                        >
+                                            <p className="text-xs text-gray-500 leading-relaxed mb-1 group-hover:text-blue-600 transition-colors">
+                                                {notification.message}
+                                            </p>
+                                            <span className="text-[10px] text-blue-500 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                                View now <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
+                                            </span>
+                                        </Link>
+                                    ) : (
+                                        <p className="text-xs text-gray-500 leading-relaxed mb-3">
+                                            {notification.message}
+                                        </p>
+                                    )}
 
                                     {notification.type === 'COLLAB_REQUEST' && (
-                                        <div className="flex gap-2 mt-2">
+                                        <div className="flex gap-2 mt-3">
                                             <Button
                                                 size="sm"
                                                 onClick={() => handleAction(notification.id, 'ACCEPT')}

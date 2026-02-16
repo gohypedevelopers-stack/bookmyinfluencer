@@ -25,10 +25,11 @@ import {
     FileText,
     Shield,
     User,
-    Flag
+    Flag,
+    Loader2
 } from 'lucide-react';
 import { notifyTyping, markBrandMessagesRead, sendMessage, createOffer, finalizeOffer, blockUser, reportUser, deleteThread } from '@/app/brand/actions';
-import { fundContractFromWallet } from '@/app/brand/wallet-actions';
+import { fundContractFromWallet, fundCandidateFromWallet } from '@/app/brand/wallet-actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,6 +130,16 @@ export default function ChatClient({
     const [activeThreadId, setActiveThreadId] = useState<string | undefined>(initialThreadId);
     const [localMessages, setLocalMessages] = useState<Message[]>(initialMessages);
     const [isFunding, setIsFunding] = useState(false);
+    const [justUnlockedContractIds, setJustUnlockedContractIds] = useState<Set<string>>(new Set());
+    const [debugActionLog, setDebugActionLog] = useState<string[]>([]);
+    const searchParams = useSearchParams();
+    const isDebugMode = searchParams.get('debug') === '1' || process.env.NODE_ENV !== 'production';
+
+    const logDebug = (msg: string) => {
+        const time = new Date().toLocaleTimeString();
+        setDebugActionLog(prev => [`[${time}] ${msg}`, ...prev].slice(0, 10));
+        console.log(`[CHAT_DEBUG] ${msg}`);
+    };
 
     // Synchronize local messages when initialMessages change (from server refresh or thread switch)
     useEffect(() => {
@@ -169,7 +180,9 @@ export default function ChatClient({
 
     // Derived State
     const activeThread = threads.find(t => t.id === activeThreadId);
-    const isLocked = activeThread?.candidateId && !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contract?.status || '');
+    const isLocked = activeThread?.candidateId &&
+        !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contract?.status || '') &&
+        !(activeThread.contract?.id && justUnlockedContractIds.has(activeThread.contract.id));
 
 
     // Online Status State
@@ -295,6 +308,20 @@ export default function ChatClient({
         lastMessageCount.current = optimisticMessages.length;
     }, [optimisticMessages, currentUserId]);
 
+    // URL Deep Link Sync
+    useEffect(() => {
+        if (initialThreadId) {
+            console.log(`[NAV_DEBUG] Page loaded with threadId: ${initialThreadId}`);
+            const threadExists = threads.some(t => t.id === initialThreadId);
+            if (!threadExists) {
+                console.error(`[NAV_DEBUG] Thread ${initialThreadId} not found in user's thread list.`);
+                toast.error("Invalid thread link or access denied.");
+            } else {
+                console.log(`[NAV_DEBUG] Thread ${initialThreadId} found and selected.`);
+            }
+        }
+    }, [initialThreadId, threads]);
+
     // Update active thread when URL changes
     useEffect(() => {
         if (initialThreadId && initialThreadId !== activeThreadId) {
@@ -403,17 +430,21 @@ export default function ChatClient({
 
     const handleFinalizeContract = async () => {
         if (!activeThread?.candidateId) return;
+        logDebug(`Finalizing contract for candidate: ${activeThread.candidateId}`);
 
         try {
             const result = await finalizeOffer(activeThread.candidateId);
             if (result.success) {
                 toast.success('Contract finalized!');
+                logDebug(`Contract finalized success`);
                 router.refresh();
             } else {
                 toast.error(result.error || 'Failed to finalize');
+                logDebug(`Contract finalized failed: ${result.error}`);
             }
         } catch (error) {
             toast.error('Failed to finalize contract');
+            logDebug(`Contract finalized error`);
         }
     };
 
@@ -473,25 +504,56 @@ export default function ChatClient({
     };
 
     const handleFundAdvance = async () => {
-        if (!activeThread?.contract?.id) return;
+        const contract = activeThread?.contract;
+        const offer = activeThread?.offer;
 
-        // Calculate amount (logic from server: pending tx or total)
-        // We can just rely on user knowing the amount or display generic
-        // In UI below we calculate it for display
+        const total = contract?.totalAmount || offer?.amount || 0;
+        const pendingTx = contract?.transactions?.find((t: any) => (t.type === 'ESCROW_FUNDING' || t.type === 'DEPOSIT') && t.status === 'PENDING');
+        const advanceAmount = pendingTx ? pendingTx.amount : (total / 2);
 
+        const contractId = contract?.id;
+        const candidateId = activeThread?.candidateId;
+
+        if (!contractId && !candidateId) {
+            logDebug("Cannot fund: No contract or candidate ID found");
+            return;
+        }
+
+        // 1. Pre-check wallet balance (UX optimization)
+        if (walletBalance < advanceAmount) {
+            logDebug(`Insufficient balance pre-check: Have ₹${walletBalance}, Need ₹${advanceAmount}`);
+            toast.error("Insufficient wallet balance. Please recharge.", {
+                action: {
+                    label: "Recharge Wallet",
+                    onClick: () => router.push('/brand/wallet')
+                }
+            });
+            return;
+        }
+
+        logDebug(`Initiating funding for ${contractId ? `contract: ${contractId}` : `candidate: ${candidateId}`}. Amount: ₹${advanceAmount}`);
         setIsFunding(true);
         try {
-            const result = await fundContractFromWallet(activeThread.contract.id);
+            const result = contractId
+                ? await fundContractFromWallet(contractId)
+                : await fundCandidateFromWallet(candidateId!);
+
             if (result.success) {
+                const targetId = contractId || (result as any).contractId;
+                if (targetId) {
+                    setJustUnlockedContractIds(prev => new Set(prev).add(targetId));
+                }
+                logDebug(`Funding successful. Status: ${result.newStatus}, Balance: ₹${result.newWalletBalance}`);
                 toast.success("Advance payment locked successfully. Chat is now enabled.");
                 router.refresh();
             } else {
-                const errorMsg = (result as any).error || "Failed to fund advance";
+                const errorMsg = (result as any).error || (result as any).message || "Failed to fund advance";
+                logDebug(`Funding failed: ${errorMsg}`);
+
                 if (errorMsg.includes("Insufficient wallet balance")) {
-                    // Could show modal here, for now just toast with specific action
-                    toast.error("Insufficient wallet balance", {
+                    toast.error("Insufficient wallet balance. Please recharge.", {
                         action: {
-                            label: "Recharge",
+                            label: "Recharge Wallet",
                             onClick: () => router.push('/brand/wallet')
                         }
                     });
@@ -499,8 +561,10 @@ export default function ChatClient({
                     toast.error(errorMsg);
                 }
             }
-        } catch (error) {
-            toast.error("An error occurred");
+        } catch (error: any) {
+            const msg = error.message || "An error occurred";
+            logDebug(`Funding exception: ${msg}`);
+            toast.error(msg);
         } finally {
             setIsFunding(false);
         }
@@ -861,39 +925,56 @@ export default function ChatClient({
                         )}
                     </div>
 
-                    {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-gray-100 relative">
-                        {isLocked && (() => {
-                            const contract = activeThread?.contract;
-                            if (!contract) return null;
+                    {/* Payment CTA Section - ALWAYS ABOVE INPUT */}
+                    {isLocked && (() => {
+                        const contract = activeThread?.contract;
+                        const offer = activeThread?.offer;
 
-                            const total = contract.totalAmount || 0;
-                            // Look for pending ESCROW_FUNDING tx
-                            const pendingTx = contract.transactions?.find((t: any) => t.type === 'ESCROW_FUNDING' && t.status === 'PENDING'); // or FUNDED? no only PENDING
+                        // If no contract AND no offer, we can't show price but maybe still show lock? 
+                        // But usually if it's a campaign thread, there is an offer.
 
-                            const advanceAmount = pendingTx ? pendingTx.amount : (total / 2); // Default 50%
+                        const total = contract?.totalAmount || offer?.amount || 0;
+                        const pendingTx = contract?.transactions?.find((t: any) => t.type === 'ESCROW_FUNDING' && t.status === 'PENDING');
+                        const advanceAmount = pendingTx ? pendingTx.amount : (total / 2);
 
-                            return (
-                                <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 shadow-md z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="text-sm">
-                                        <p className="font-bold mb-1">Campaign chat is currently locked.</p>
-                                        <p className="text-amber-800 mb-1">To start collaborating, please fund the advance payment.</p>
-                                        <p className="text-xs text-amber-600/80 mb-2">This advance will be securely locked for the campaign and released after deliverable approval.</p>
-                                        <div className="flex gap-4 text-xs font-medium text-amber-700/80">
-                                            <span>Advance: ₹{advanceAmount.toLocaleString()}</span>
-                                            <span>Wallet: ₹{walletBalance.toLocaleString()}</span>
+                        return (
+                            <div className="p-4 bg-yellow-50 border-y border-yellow-200 text-yellow-900 shadow-sm z-10 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-2">
+                                <div className="text-sm">
+                                    <p className="font-extrabold text-yellow-900 mb-1 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-yellow-600">lock</span>
+                                        Campaign chat is currently locked.
+                                    </p>
+                                    <p className="text-yellow-800 mb-2">To begin collaboration, please pay the advance for this campaign.</p>
+                                    <div className="flex gap-4 p-2 bg-white/50 rounded-lg border border-yellow-100">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase font-bold text-yellow-600/70">Advance</span>
+                                            <span className="font-bold">₹{(advanceAmount || 0).toLocaleString()}</span>
+                                        </div>
+                                        <div className="w-px h-8 bg-yellow-200"></div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] uppercase font-bold text-yellow-600/70">Wallet</span>
+                                            <span className="font-bold">₹{walletBalance.toLocaleString()}</span>
                                         </div>
                                     </div>
-                                    <Button
-                                        onClick={handleFundAdvance}
-                                        disabled={isFunding}
-                                        className="bg-amber-600 hover:bg-amber-700 text-white shadow-none shrink-0"
-                                    >
-                                        {isFunding ? 'Processing...' : 'Pay Advance & Start Chat'}
-                                    </Button>
                                 </div>
-                            );
-                        })()}
+                                <Button
+                                    onClick={handleFundAdvance}
+                                    disabled={isFunding}
+                                    className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-md shadow-yellow-200 shrink-0 font-bold px-6 py-2 h-auto rounded-lg transition-all active:scale-95"
+                                >
+                                    {isFunding ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Processing...
+                                        </span>
+                                    ) : 'Pay Advance & Start Chat'}
+                                </Button>
+                            </div>
+                        );
+                    })()}
+
+                    {/* Input Area */}
+                    <div className="p-4 bg-white border-t border-gray-100 relative">
                         <form onSubmit={handleSendMessage} className={`flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all ${isLocked ? 'opacity-50 pointer-events-none filter blur-[1px]' : ''}`}>
                             <div className="flex items-center gap-1 pb-2 pl-2">
                                 <input
@@ -1000,6 +1081,43 @@ export default function ChatClient({
                     initialIsVideo={initialIsVideo}
                     socket={socket}
                 />
+            )}
+            {isDebugMode && (
+                <div className="fixed bottom-4 right-4 z-[9999] bg-black/90 text-green-400 p-4 rounded-xl border border-green-500/30 font-mono text-[10px] w-80 shadow-2xl backdrop-blur-md">
+                    <div className="flex justify-between items-center mb-2 pb-2 border-b border-green-500/20">
+                        <span className="font-bold uppercase tracking-widest text-[#00ff00]">Chat Debug Panel</span>
+                        <div className="flex gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        </div>
+                    </div>
+                    <div className="space-y-1.5 opacity-90">
+                        <p><span className="text-gray-400">URL threadId:</span> {initialThreadId || 'null'}</p>
+                        <p><span className="text-gray-400">activeThreadId:</span> {activeThreadId || 'null'}</p>
+                        <p><span className="text-gray-400">isCampaign:</span> {activeThread?.candidateId ? 'TRUE' : 'FALSE'}</p>
+                        <p><span className="text-gray-400">contractId:</span> {activeThread?.contract?.id || 'null'}</p>
+                        <p><span className="text-gray-400">contractStatus:</span> {activeThread?.contract?.status || 'null'}</p>
+                        <p><span className="text-gray-400">isLocked:</span> {isLocked ? 'TRUE' : 'FALSE'}</p>
+                        <p><span className="text-gray-400">Advance:</span> ₹{(() => {
+                            const contract = activeThread?.contract;
+                            const offer = activeThread?.offer;
+                            const total = contract?.totalAmount || offer?.amount || 0;
+                            const pendingTx = contract?.transactions?.find((t: any) => (t.type === 'ESCROW_FUNDING' || t.type === 'DEPOSIT') && t.status === 'PENDING');
+                            return (pendingTx ? pendingTx.amount : (total / 2)).toLocaleString();
+                        })()}</p>
+                        <p><span className="text-gray-400">Wallet:</span> ₹{walletBalance.toLocaleString()}</p>
+                        <p><span className="text-gray-400">CTA should render:</span> {isLocked ? <span className="text-[#00ff00] font-bold">YES</span> : <span className="text-red-500 font-bold">NO</span>}</p>
+                    </div>
+                    {debugActionLog.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-green-500/20 overflow-hidden">
+                            <p className="text-[9px] uppercase font-bold text-gray-500 mb-1">Last Actions:</p>
+                            <div className="space-y-1">
+                                {debugActionLog.map((log, i) => (
+                                    <p key={i} className="truncate">{log}</p>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );

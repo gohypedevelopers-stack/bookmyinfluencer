@@ -462,9 +462,9 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
                     data: {
                         userId: candidate.campaign.brand.userId,
                         type: 'MESSAGE',
-                        title: 'Invitation Accepted',
-                        message: `${candidate.influencer.user?.name || 'A creator'} has accepted your collaboration invitation for ${candidate.campaign.title}!`,
-                        link: `/brand/messages?threadId=${thread.id}`
+                        title: 'Collaboration accepted ✅',
+                        message: `Your request was accepted. Pay the advance to start chat.`,
+                        link: `/brand/chat?threadId=${thread.id}`
                     }
                 });
             }
@@ -986,7 +986,7 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
         const candidateResult = await db.campaignCandidate.findUnique({
             where: { id: candidateId },
             include: {
-                campaign: { include: { assignment: { select: { managerId: true } } } },
+                campaign: { include: { brand: true, assignment: { select: { managerId: true } } } },
                 contract: {
                     include: { deliverables: true }
                 },
@@ -1000,7 +1000,7 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
 
         type CandidateWithRelations = Prisma.CampaignCandidateGetPayload<{
             include: {
-                campaign: { include: { assignment: { select: { managerId: true } } } };
+                campaign: { include: { brand: { select: { userId: true } }, assignment: { select: { managerId: true } } } };
                 contract: { include: { deliverables: true } };
                 influencer: { include: { user: { select: { name: true } } } };
             }
@@ -1040,27 +1040,45 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
         }
 
         // Create Audit Log
-        if (candidate.campaign.assignment?.managerId) {
-            await db.auditLog.create({
-                data: {
-                    userId: userId,
-                    action: "DELIVERABLE_SUBMITTED",
-                    entity: "Deliverable",
-                    entityId: deliverable.id,
-                    details: `Submitted content for ${candidate.campaign.title}`
-                }
-            });
+        await db.auditLog.create({
+            data: {
+                userId: userId,
+                action: "DELIVERABLE_SUBMITTED",
+                entity: "Deliverable",
+                entityId: deliverable.id,
+                details: `Submitted content for ${candidate.campaign.title}`
+            }
+        });
 
-            // Notify Manager
-            await db.notification.create({
+        // 5. Notify Manager & Brand
+        const notificationsPool = [];
+
+        if (candidate.campaign.assignment?.managerId) {
+            notificationsPool.push(db.notification.create({
                 data: {
                     userId: candidate.campaign.assignment.managerId,
                     type: "DELIVERABLE",
                     title: "Deliverable Submitted",
-                    message: `${candidate.influencer.user?.name || "Creator"} submitted content for ${candidate.campaign.title}`,
+                    message: `${candidate.influencer.user?.name || "Creator"} submitted content for ${candidate.campaign.title}. Review required.`,
                     link: `/manager/campaigns/${candidate.campaignId}`
                 }
-            });
+            }));
+        }
+
+        if (candidate.campaign.brand?.userId) {
+            notificationsPool.push(db.notification.create({
+                data: {
+                    userId: candidate.campaign.brand.userId,
+                    type: "DELIVERABLE",
+                    title: "Deliverable Submitted",
+                    message: `Deliverable submitted. Review required.`,
+                    link: `/brand/chat?threadId=${candidate.contract.id}`
+                }
+            }));
+        }
+
+        if (notificationsPool.length > 0) {
+            await Promise.all(notificationsPool);
         }
 
         revalidatePath('/creator/campaigns');

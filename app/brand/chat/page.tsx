@@ -154,6 +154,9 @@ export default async function ChatPage({
             ...t,
             influencer, // Can be null if data consistency issue, filtered below
             title,
+            offer: t.candidate?.offer,
+            campaign: t.candidate?.campaign,
+            contract: t.candidate?.contract,
             lastMessage: t.messages[0] // Since we ordered by desc and took 1
         };
     }).filter((t) => t.influencer) as any[];

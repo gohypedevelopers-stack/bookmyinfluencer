@@ -193,6 +193,8 @@ export async function fundCandidateFromWallet(candidateId: string) {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) return { success: false, error: "Unauthorized" };
 
+    console.log(`[FUNDING_DEBUG] fundCandidateFromWallet for Candidate: ${candidateId}`);
+
     try {
         // 1. Get Candidate & Offer
         const candidate = await db.campaignCandidate.findUnique({
@@ -207,24 +209,36 @@ export async function fundCandidateFromWallet(candidateId: string) {
 
         // 2. Create Contract if missing
         if (!contractId) {
+            console.log(`[FUNDING_DEBUG] Creating contract for Candidate: ${candidateId}`);
+            const advanceAmount = candidate.offer.amount / 2;
+
             const newContract = await db.contract.create({
                 data: {
                     candidateId: candidate.id,
                     brandId: candidate.campaign.brandId,
                     influencerId: candidate.influencerId,
                     totalAmount: candidate.offer.amount,
-                    platformFee: 0, // Configurable?
-                    status: "DRAFT"
+                    platformFee: 0,
+                    status: "PENDING_ESCROW",
+                    transactions: {
+                        create: {
+                            amount: advanceAmount,
+                            type: "ESCROW_FUNDING",
+                            status: "PENDING",
+                            currency: "INR"
+                        }
+                    }
                 }
             });
             contractId = newContract.id;
+            console.log(`[FUNDING_DEBUG] Contract created: ${contractId}, Advance Transaction: ₹${advanceAmount}`);
         }
 
         // 3. Fund it
         return await fundContractFromWallet(contractId);
 
     } catch (error: any) {
-        console.error("Fund Candidate Error:", error);
+        console.error("[FUNDING_DEBUG] Fund Candidate Error:", error);
         return { success: false, error: error.message };
     }
 }
@@ -247,7 +261,9 @@ export async function fundContractFromWallet(contractId: string) {
                     transactions: true,
                     brand: true,
                     influencer: true,
-                    candidate: true
+                    candidate: {
+                        include: { campaign: true }
+                    }
                 }
             });
 
@@ -255,15 +271,14 @@ export async function fundContractFromWallet(contractId: string) {
             if (contract.brand.userId !== session.user.id) throw new Error("Unauthorized");
 
             const pendingTx = contract.transactions.find(
-                t => t.status === "PENDING" && t.type === "ESCROW_FUNDING"
+                t => t.status === "PENDING" && (t.type === "ESCROW_FUNDING" || t.type === "DEPOSIT")
             );
 
-            // If no explicit funding tx, maybe the TOTAL contract amount is the key?
-            // Assuming a transaction row exists for the advance/escrow.
-            // If not, we might need to create it or rely on contract.totalAmount.
-            // Let's assume there is one or default to totalAmount.
+            const amountToLock = pendingTx ? pendingTx.amount : (contract.totalAmount / 2);
 
-            const amountToLock = pendingTx ? pendingTx.amount : contract.totalAmount;
+            console.log(`[FUNDING_DEBUG] Starting funding for Contract: ${contractId}`);
+            console.log(`[FUNDING_DEBUG] Brand User ID: ${session.user.id}`);
+            console.log(`[FUNDING_DEBUG] Amount to Lock: ₹${amountToLock}`);
 
             if (amountToLock <= 0) throw new Error("Invalid amount");
 
@@ -272,18 +287,23 @@ export async function fundContractFromWallet(contractId: string) {
                 where: { brandId: contract.brandId }
             });
 
+            console.log(`[FUNDING_DEBUG] Wallet Balance Before: ₹${wallet?.balance || 0}`);
+
             if (!wallet || wallet.balance < amountToLock) {
+                console.error(`[FUNDING_DEBUG] Insufficient funds. Need: ₹${amountToLock}, Has: ₹${wallet?.balance || 0}`);
                 throw new Error(`Insufficient wallet balance. Required: ₹${amountToLock}, Available: ₹${wallet?.balance || 0}`);
             }
 
             // 3. Deduct from Wallet
-            await tx.brandWallet.update({
+            const updatedWallet = await tx.brandWallet.update({
                 where: { id: wallet.id },
                 data: { balance: { decrement: amountToLock } }
             });
 
+            console.log(`[FUNDING_DEBUG] Wallet Balance After: ₹${updatedWallet.balance}`);
+
             // 4. Record Wallet Transaction
-            await tx.walletTransaction.create({
+            const walletTx = await tx.walletTransaction.create({
                 data: {
                     walletId: wallet.id,
                     type: "ADVANCE_LOCK",
@@ -294,12 +314,15 @@ export async function fundContractFromWallet(contractId: string) {
                 }
             });
 
+            console.log(`[FUNDING_DEBUG] Wallet Transaction created: ${walletTx.id}`);
+
             // 5. Update Contract/Transaction Status
             if (pendingTx) {
                 await tx.escrowTransaction.update({
                     where: { id: pendingTx.id },
                     data: { status: "FUNDED" }
                 });
+                console.log(`[FUNDING_DEBUG] Escrow Transaction ${pendingTx.id} marked as FUNDED`);
             } else {
                 // Create one if missing for record
                 await tx.escrowTransaction.create({
@@ -311,26 +334,49 @@ export async function fundContractFromWallet(contractId: string) {
                         status: "FUNDED"
                     }
                 });
+                console.log(`[FUNDING_DEBUG] New Escrow Transaction created and marked as FUNDED`);
             }
 
-            await tx.contract.update({
+            const updatedContract = await tx.contract.update({
                 where: { id: contractId },
                 data: { status: "ACTIVE" }
             });
+
+            console.log(`[FUNDING_DEBUG] Contract status updated from ${contract.status} to ${updatedContract.status}`);
 
             if (contract.candidateId) {
                 await tx.campaignCandidate.update({
                     where: { id: contract.candidateId },
                     data: { status: "HIRED" }
                 });
+                console.log(`[FUNDING_DEBUG] Candidate ${contract.candidateId} status updated to HIRED`);
+            }
+
+            // 6. Notify Influencer
+            if (contract.influencer.userId) {
+                await tx.notification.create({
+                    data: {
+                        userId: contract.influencer.userId,
+                        type: "SYSTEM",
+                        title: "Advance locked. Chat is now enabled.",
+                        message: `The brand has paid the advance. Chat for ${contract.candidate?.campaign?.title || 'the campaign'} is now active.`,
+                        link: "/creator/messages"
+                    }
+                });
+                console.log(`[FUNDING_DEBUG] Notification sent to Influencer: ${contract.influencer.userId}`);
             }
 
             revalidatePath(`/brand/wallet`);
             revalidatePath(`/brand/campaigns`);
-            return { success: true };
+            return {
+                success: true,
+                contractId,
+                newStatus: updatedContract.status,
+                newWalletBalance: updatedWallet.balance
+            };
         });
     } catch (error: any) {
-        console.error("Fund Contract Error:", error);
+        console.error("[FUNDING_DEBUG] TRANSACTION FAILED:", error.message);
         return { success: false, error: error.message || "Failed to fund contract" };
     }
 }
