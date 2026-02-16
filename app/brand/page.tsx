@@ -35,7 +35,8 @@ export default async function BrandDashboardPage() {
             followers: c.followersCount || 0,
             engagement: c.engagementRate || 0,
             match: Math.floor(Math.random() * 20) + 80 // Mock Match Score for now
-        }
+        },
+        bannerImage: c.bannerImage || null
     })) : [];
 
     // 3. Activity

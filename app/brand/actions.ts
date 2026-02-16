@@ -454,6 +454,7 @@ export async function getPublicCreators(filter?: {
                 priceRange: formatPriceRange(c.pricing),
                 thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || c.user?.image || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || c.user?.image || "",
+                bannerImage: c.backgroundImageUrl || null,
                 saved: false
             };
         });
@@ -487,6 +488,7 @@ export async function getPublicCreators(filter?: {
                 priceRange: formatPriceRange(inf.pricing),
                 thumbnail: inf.user?.image || "",
                 profileImage: inf.user?.image || "",
+                bannerImage: null, // InfluencerProfile doesn't have a banner image field yet
                 saved: false
             };
         });
