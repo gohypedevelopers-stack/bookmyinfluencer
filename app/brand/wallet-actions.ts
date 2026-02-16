@@ -352,6 +352,24 @@ export async function manualPayout(
     try {
         await db.$transaction(async (tx) => {
             // 1. Verify Campaign/Creator exist
+            // Check for duplicate payout (same UTR or total amount check)
+            const existingPayout = await tx.payoutRecord.findFirst({
+                where: {
+                    campaignId,
+                    creatorId,
+                    utr // strict check on UTR to avoid double entry of same transaction
+                }
+            });
+
+            if (existingPayout) {
+                throw new Error("Payout with this UTR already recorded.");
+            }
+
+            // Optional: Check if total payouts exceed contract amount? 
+            // Good for safety, but maybe partials are allowed?
+            // Let's stick to UTR uniqueness for now unless user asked for balance check.
+            // User said "Prevent duplicate payout records for same contract/campaign".
+
             // 2. Create Payout Record
             await tx.payoutRecord.create({
                 data: {
@@ -363,21 +381,6 @@ export async function manualPayout(
                     processedBy: session.user.id
                 }
             });
-
-            // 3. Update any relate status?
-            // Maybe mark contract as COMPLETED if fully paid?
-            // "After paying: Manager/Admin marks payout as PAID in system."
-            // This function IS marking it.
-
-            // Maybe update Wallet Transaction? (Already deducted at FINAL_LOCK).
-            // Wait, logic says:
-            // "On manager APPROVAL: If remaining amount not yet locked: Deduct... Record FINAL_LOCK"
-            // "Manager pays MANUALLY... marks payout as PAID"
-
-            // So PayoutRecord is just a record of the manual transfer.
-            // But we should ensure the money was LOCKED (deducted from BrandWallet).
-
-            // Let's assume FINAL_LOCK happened at approval.
         });
 
         revalidatePath(`/manager/campaigns`);

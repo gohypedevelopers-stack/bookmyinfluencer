@@ -162,6 +162,7 @@ export async function getCreatorThreads() {
                 },
                 candidate: {
                     include: {
+                        contract: { select: { status: true } },
                         campaign: {
                             include: {
                                 brand: {
@@ -236,7 +237,9 @@ export async function getCreatorThreads() {
                 unread: false,
                 brandId: brandProfileId,
                 brandUserId: brandUserId,
-                isLastMessageMe: lastMsg?.senderId === userId
+                isLastMessageMe: lastMsg?.senderId === userId,
+                contractStatus: thread.candidate?.contract?.status || null,
+                isCampaign: !!thread.candidate
             };
         });
 
@@ -588,7 +591,13 @@ export async function getCreatorEarnings() {
             where: { userId: userId },
             include: {
                 user: true,
-                payouts: true
+                payouts: true, // PayoutRequest (old flow / withdrawals)
+                payoutRecords: { // NEW: Manual Payouts from Manager
+                    include: {
+                        campaign: { select: { title: true, brand: { select: { companyName: true } } } }
+                    },
+                    orderBy: { paidAt: 'desc' }
+                }
             }
         });
 
@@ -603,71 +612,63 @@ export async function getCreatorEarnings() {
         const contracts = await db.contract.findMany({
             where: { influencerId: influencer.id },
             include: {
-                transactions: true,
+                transactions: true, // EscrowTransaction
                 brand: { include: { user: true } }
             }
         });
 
         let lifetimeEarnings = 0;
         let pendingEscrow = 0;
-        let releasedEscrow = 0;
+        // let releasedEscrow = 0; // Not used for "Available" anymore since manual payout
 
         const transactionsList: any[] = [];
 
+        // 1. Process PENDING ESCROW (Funded Contracts)
         contracts.forEach(contract => {
             contract.transactions.forEach(tx => {
                 const amount = tx.amount;
-
                 // PENDING ESCROW = FUNDED
                 if (tx.status === 'FUNDED') {
                     pendingEscrow += amount;
                 }
-
-                // LIFETIME EARNINGS = RELEASED
-                if (tx.status === 'RELEASED') { // Corrected from COMPLETED based on schema
-                    lifetimeEarnings += amount;
-                    releasedEscrow += amount;
-
-                    // Add to transaction list
-                    transactionsList.push({
-                        id: tx.id,
-                        brand: contract.brand.companyName || "Brand", // Fallback
-                        date: tx.updatedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-                        amount: `+₹${amount.toFixed(2)}`,
-                        status: 'Completed', // UI friendly status
-                        originalDate: tx.updatedAt // For sorting
-                    });
-                }
+                // We IGNORE 'RELEASED' escrow here because we rely on PayoutRecord for actual earnings history now.
+                // Unless we want to support both flows? 
+                // User said "Creator earnings/wallet must show money ONLY after Manager/Admin marks payout as PAID".
+                // So we strictly use PayoutRecord for earnings.
             });
         });
 
-        // Deduct Payouts
-        let totalPayouts = 0;
-        if (influencer.payouts) {
-            influencer.payouts.forEach(payout => {
-                if (payout.status !== 'FAILED') {
-                    totalPayouts += payout.amount;
-                }
+        // 2. Process PAYOUT RECORDS (Actual Earnings / Paid Out)
+        if (influencer.payoutRecords) {
+            influencer.payoutRecords.forEach(record => {
+                lifetimeEarnings += record.amount;
 
-                // Add payouts to transaction list
                 transactionsList.push({
-                    id: payout.id,
-                    brand: "Withdrawal",
-                    date: payout.requestedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-                    amount: `-₹${payout.amount.toFixed(2)}`,
-                    status: payout.status,
-                    originalDate: payout.requestedAt,
-                    isDebit: true
+                    id: record.id,
+                    brand: record.campaign.brand.companyName || "Brand",
+                    date: record.paidAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                    amount: `+₹${record.amount.toFixed(2)}`,
+                    status: 'Paid', // Explicitly PAID
+                    originalDate: record.paidAt,
+                    method: record.method,
+                    utr: record.utr
                 });
             });
         }
 
-        const availableBalance = releasedEscrow - totalPayouts;
+        // 3. Process Old Witherswals (PayoutRequests) if any?
+        // If we switched to manual payouts, maybe we hide old withdrawals or show them as history?
+        // Let's keep them for history but they don't affect "Available Balance" calculation since Available Balance is now 0.
+        // Actually, if we show "Paid" income, that money is with the creator.
+        // "Available to Withdraw" implies checking wallet balance held by platform.
+        // Since platform holds 0 (manager pays manually), availableBalance = 0.
 
-        // Sort transactions by date desc
+        const availableBalance = 0;
+
+        // Sort by date
         transactionsList.sort((a, b) => b.originalDate - a.originalDate);
 
-        // Fetch Creator profile for payout methods (linked via email)
+        // Fetch Payout Methods (for display settings)
         let payoutMethods: any[] = [];
         if (influencer.user.email) {
             const otpUser = await db.otpUser.findUnique({
@@ -686,7 +687,7 @@ export async function getCreatorEarnings() {
         return {
             availableBalance,
             pendingEscrow,
-            lifetimeEarnings,
+            lifetimeEarnings, // This now reflects total PayoutRecords
             transactions: transactionsList,
             payoutMethods
         };

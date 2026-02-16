@@ -99,6 +99,9 @@ interface Thread {
         id: string;
         title: string;
     } | null;
+    contract?: {
+        status: string;
+    } | null;
 }
 
 interface ChatClientProps {
@@ -159,6 +162,7 @@ export default function ChatClient({
 
     // Derived State
     const activeThread = threads.find(t => t.id === activeThreadId);
+    const isLocked = activeThread?.candidateId && !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contract?.status || '');
 
 
     // Online Status State
@@ -817,8 +821,13 @@ export default function ChatClient({
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-gray-100">
-                        <form onSubmit={handleSendMessage} className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all">
+                    <div className="p-4 bg-white border-t border-gray-100 relative">
+                        {isLocked && (
+                            <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm font-medium text-center shadow-sm z-10">
+                                Messaging is enabled once the campaign is funded (Advance Payment locked).
+                            </div>
+                        )}
+                        <form onSubmit={handleSendMessage} className={`flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-teal-300 focus-within:ring-4 focus-within:ring-teal-50 transition-all ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
                             <div className="flex items-center gap-1 pb-2 pl-2">
                                 <input
                                     type="file"

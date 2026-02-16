@@ -54,9 +54,10 @@ interface Thread {
     lastMessage: string
     updatedAt: Date
     unread: boolean
-    brandId: string | null
     brandUserId: string | null
     isLastMessageMe?: boolean
+    contractStatus?: string | null
+    isCampaign?: boolean
 }
 
 interface Message {
@@ -363,6 +364,7 @@ export default function CreatorMessagesPage() {
     )
 
     const activeThread = threads.find(t => t.id === activeThreadId)
+    const isLocked = activeThread?.isCampaign && !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contractStatus || '');
 
     return (
         <div className="flex h-[calc(100vh-64px)] font-sans overflow-hidden bg-gray-50">
@@ -673,8 +675,13 @@ export default function CreatorMessagesPage() {
                         </div>
 
                         {/* Chat Input */}
-                        <div className="p-6 bg-white border-t border-gray-200 mt-auto shrink-0">
-                            <div className="max-w-4xl mx-auto flex items-end gap-3">
+                        <div className="p-6 bg-white border-t border-gray-200 mt-auto shrink-0 relative">
+                            {isLocked && (
+                                <div className="absolute inset-x-0 bottom-full mb-2 mx-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm font-medium text-center shadow-sm">
+                                    Messaging is enabled once the campaign is funded (Advance Payment locked).
+                                </div>
+                            )}
+                            <div className={`max-w-4xl mx-auto flex items-end gap-3 ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <div className="flex gap-2 pb-2 text-gray-400">
                                     <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                         <Paperclip className="w-5 h-5" />
@@ -687,7 +694,7 @@ export default function CreatorMessagesPage() {
                                 <div className="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 focus-within:ring-2 focus-within:ring-purple-100 focus-within:border-purple-300 transition-all">
                                     <Input
                                         className="bg-transparent border-none shadow-none focus-visible:ring-0 p-0 text-gray-700 placeholder:text-gray-400 h-6"
-                                        placeholder="Type your message..."
+                                        placeholder={isLocked ? "Chat is locked..." : "Type your message..."}
                                         value={newMessage}
                                         onChange={(e) => {
                                             setNewMessage(e.target.value)
@@ -704,13 +711,13 @@ export default function CreatorMessagesPage() {
                                                 handleSendMessage();
                                             }
                                         }}
-                                        disabled={isSending}
+                                        disabled={isSending || isLocked}
                                     />
                                 </div>
 
                                 <button
                                     onClick={handleSendMessage}
-                                    disabled={!newMessage.trim() || isSending}
+                                    disabled={!newMessage.trim() || isSending || isLocked}
                                     className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all text-white disabled:opacity-50"
                                 >
                                     {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}

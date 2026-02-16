@@ -71,6 +71,7 @@ export default async function ChatPage({
                     },
                     offer: true,
                     campaign: { select: { id: true, title: true } },
+                    contract: { select: { status: true } }
                 }
             },
             messages: {
