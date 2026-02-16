@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 // Helper to get the actual Creator ID (Resolved to a User table ID)
 // Helper to get the actual Creator ID (Resolved to a User table ID)
@@ -993,11 +994,23 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
             }
         });
 
-        if (!candidateResult || !candidateResult.contract) {
+        if (!candidateResult) {
             return { success: false, error: "Contract not found" };
         }
 
-        const candidate = candidateResult;
+        type CandidateWithRelations = Prisma.CampaignCandidateGetPayload<{
+            include: {
+                campaign: { include: { assignment: { select: { managerId: true } } } };
+                contract: { include: { deliverables: true } };
+                influencer: { include: { user: { select: { name: true } } } };
+            }
+        }>;
+
+        const candidate = candidateResult as unknown as CandidateWithRelations;
+
+        if (!candidate.contract) {
+            return { success: false, error: "Contract not found" };
+        }
 
         // Find the pending deliverable
         const deliverable = candidate.contract.deliverables.find(d => d.status === 'PENDING')

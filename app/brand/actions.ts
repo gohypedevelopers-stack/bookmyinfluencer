@@ -5,7 +5,7 @@ import { pusherServer } from "@/lib/pusher-server";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog, createNotification } from "@/lib/audit";
-import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@prisma/client";
+import { Prisma, CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -992,7 +992,7 @@ export async function getCampaignAnalytics(campaignId: string) {
     if (!session || session.user.role !== 'BRAND') return { success: false, error: 'Unauthorized' };
 
     try {
-        const campaign = await db.campaign.findUnique({
+        const campaignResult = await db.campaign.findUnique({
             where: { id: campaignId },
             include: {
                 payouts: true,
@@ -1012,7 +1012,21 @@ export async function getCampaignAnalytics(campaignId: string) {
             }
         });
 
-        if (!campaign) return { success: false, error: "Campaign not found" };
+        if (!campaignResult) return { success: false, error: "Campaign not found" };
+
+        type CampaignWithAnalytics = Prisma.CampaignGetPayload<{
+            include: {
+                payouts: true,
+                candidates: {
+                    include: {
+                        influencer: { include: { user: true } },
+                        contract: { include: { transactions: true } }
+                    }
+                }
+            }
+        }>;
+
+        const campaign = campaignResult as unknown as CampaignWithAnalytics;
 
         // 1. Calculate Top Level Stats
         let totalReach = 0;

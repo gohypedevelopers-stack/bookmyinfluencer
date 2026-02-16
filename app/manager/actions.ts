@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function getManagerStats() {
     const session = await getServerSession(authOptions);
