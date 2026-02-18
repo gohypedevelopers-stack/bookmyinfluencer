@@ -72,13 +72,32 @@ export default withAuth(
 
         // 2. Role-based protection
 
+        // Check Onboarding Status
+        // If logged in but onboarding not complete, force redirect to onboarding
+        // But allow access to the onboarding pages themselves and APIs
+        const isOnboardingPage = path.startsWith("/brand-onboarding") || path.startsWith("/creator-onboarding");
+        const isApiRoute = path.startsWith("/api");
+        const isStatic = path.startsWith("/_next") || path.includes("."); // static files
+
+        if (token && !isApiRoute && !isStatic) {
+            const onboardingComplete = (token as any).onboardingComplete;
+
+            if (!onboardingComplete && !isOnboardingPage) {
+                if (userRole === "BRAND") {
+                    return NextResponse.redirect(new URL("/brand-onboarding", req.url));
+                } else if (userRole === "INFLUENCER") {
+                    return NextResponse.redirect(new URL("/creator-onboarding", req.url));
+                }
+            }
+        }
+
         // Brand Routes
-        // Brand Routes
-        // Brand Routes
-        // Relaxing middleware role check to rely on Layout protection for now
-        // if (path.startsWith("/brand") && !path.startsWith("/brand/login") && !path.startsWith("/brand/register") && userRole !== "BRAND" && userRole !== "ADMIN") {
-        //     return NextResponse.redirect(new URL("/", req.url))
-        // }
+        if (path.startsWith("/brand") && !path.startsWith("/brand/login") && !path.startsWith("/brand/register")) {
+            // If trying to access brand dashboard but not a brand, redirect home
+            if (userRole !== "BRAND" && userRole !== "ADMIN") {
+                return NextResponse.redirect(new URL("/", req.url))
+            }
+        }
 
         // Influencer Routes
         if (path.startsWith("/influencer")) {

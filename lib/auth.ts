@@ -63,18 +63,28 @@ export const authOptions: NextAuthOptions = {
                         if (otpUser) {
                             const creator = await db.creator.findUnique({
                                 where: { userId: otpUser.id },
-                                select: { niche: true, verificationStatus: true }
+                                select: { verificationStatus: true, onboardingCompleted: true }
                             });
                             if (creator) {
                                 // If Creator has verificationStatus, use it
                                 if (creator.verificationStatus && creator.verificationStatus !== 'NOT_SUBMITTED') {
                                     kycStatus = creator.verificationStatus as KYCStatus;
                                 }
-                                // Onboarding is complete if niche is set
-                                onboardingComplete = !!creator.niche;
+                                // Onboarding is complete if flag is set
+                                onboardingComplete = creator.onboardingCompleted;
                             }
                         }
                         console.log('📋 Creator KYC:', kycStatus, 'Onboarding complete:', onboardingComplete);
+                    } else if (user.role === 'BRAND') {
+                        // Check BrandProfile table
+                        const brand = await db.brandProfile.findUnique({
+                            where: { userId: user.id },
+                            select: { onboardingCompleted: true }
+                        });
+                        if (brand) {
+                            onboardingComplete = brand.onboardingCompleted;
+                        }
+                        console.log('📋 Brand Onboarding complete:', onboardingComplete);
                     }
 
                     return {
@@ -108,13 +118,19 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.role = user.role
                 token.id = user.id
                 token.kycStatus = user.kycStatus
                 token.onboardingComplete = (user as any).onboardingComplete || false
             }
+
+            // Support session updates from client
+            if (trigger === "update" && session) {
+                return { ...token, ...session }
+            }
+
             return token
         },
         async session({ session, token }) {

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, CheckCircle, Camera, Layers, Instagram, Youtube } from 'lucide-react';
+import { Eye, EyeOff, Layers, User, Phone, Instagram, Youtube, Mail, Lock, CheckCircle, ArrowRight, Loader2, Chrome, Github } from 'lucide-react';
 import { registerUserAction } from './actions';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -23,10 +24,15 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+
     const [emailVerified, setEmailVerified] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
     const [otpLoading, setOtpLoading] = useState(false);
+
+    const router = useRouter();
+
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -43,8 +49,6 @@ export default function RegisterPage() {
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
         }));
     };
-
-    const router = useRouter();
 
     const requestOtp = async () => {
         if (!formData.email) {
@@ -131,7 +135,6 @@ export default function RegisterPage() {
 
         try {
             await registerUserAction(formDataObj);
-            alert('Registration successful! Please login.');
             router.push('/login');
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
@@ -150,165 +153,158 @@ export default function RegisterPage() {
     ];
 
     return (
-        <div className="h-screen w-full flex overflow-hidden">
-            {/* Left Side - Visual branding with purple gradient */}
-            <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#a78bfa] p-12 flex-col justify-between relative overflow-hidden shrink-0">
-                {/* Background decorative elements */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] opacity-20">
-                        <svg viewBox="0 0 400 400" className="w-full h-full">
-                            <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />
-                            <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-                            <g transform="translate(200, 200)">
-                                <ellipse cx="0" cy="-30" rx="25" ry="60" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-                                <path d="M0,-90 Q-30,-60 0,-30 Q30,-60 0,-90" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
-                                <line x1="0" y1="0" x2="0" y2="60" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-                                <ellipse cx="-20" cy="10" rx="15" ry="25" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" transform="rotate(-30)" />
-                                <ellipse cx="20" cy="10" rx="15" ry="25" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" transform="rotate(30)" />
-                            </g>
-                            <text fill="rgba(255,255,255,0.3)" fontSize="14" fontFamily="serif">
-                                <textPath href="#circlePath" startOffset="0%">
-                                    MINIMAL NATURAL • BRAND •
-                                </textPath>
-                            </text>
-                            <defs>
-                                <path id="circlePath" d="M 200,200 m -130,0 a 130,130 0 1,1 260,0 a 130,130 0 1,1 -260,0" />
-                            </defs>
-                            <text x="100" y="120" fill="rgba(255,255,255,0.2)" fontSize="24" fontFamily="serif">B</text>
-                            <text x="280" y="140" fill="rgba(255,255,255,0.2)" fontSize="24" fontFamily="serif">A</text>
-                            <text x="320" y="220" fill="rgba(255,255,255,0.2)" fontSize="24" fontFamily="serif">N</text>
-                            <text x="290" y="300" fill="rgba(255,255,255,0.2)" fontSize="24" fontFamily="serif">D</text>
-                        </svg>
-                    </div>
+        <div className="min-h-screen w-full flex bg-slate-50">
+            {/* Left Side - Visual branding (Gradient) - Same as Login */}
+            <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 p-12 flex-col justify-between relative overflow-hidden shrink-0"
+            >
+                {/* Decorative Elements */}
+                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white rounded-full blur-[100px]" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-300 rounded-full blur-[100px]" />
                 </div>
 
                 <div className="relative z-10">
-                    {/* Logo */}
-                    <div className="flex items-center gap-3 mb-16">
-                        <div className="w-10 h-10 bg-[#1a1a2e] rounded-lg flex items-center justify-center">
-                            <Layers className="w-5 h-5 text-white" />
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="flex items-center gap-3 mb-16"
+                    >
+                        <div className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                            <Layers className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-lg font-semibold text-white tracking-wide">CREATOR HUB</span>
-                    </div>
+                        <span className="text-xl font-bold text-white tracking-wide">CREATOR HUB</span>
+                    </motion.div>
 
-                    {/* Headline */}
-                    <div className="space-y-4">
-                        <h1 className="text-5xl font-bold text-white leading-tight">
-                            Turn your content<br />
-                            into a <span className="text-[#2dd4bf]">career.</span>
-                        </h1>
-                        <p className="text-lg text-white/80 max-w-md leading-relaxed">
+                    <div className="space-y-6 max-w-sm">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.5 }}
+                            className="text-4xl font-bold text-white leading-[1.1]"
+                        >
+                            Turn your content <br />
+                            into a <span className="text-blue-200">Career.</span>
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4, duration: 0.5 }}
+                            className="text-white/80 leading-relaxed font-light"
+                        >
                             Join 50,000+ creators landing deals with global brands daily. Everything you need to manage your business in one place.
-                        </p>
+                        </motion.p>
                     </div>
                 </div>
 
-                {/* Bottom Feature Cards */}
-                <div className="relative z-10">
-                    <div className="border-t border-white/20 pt-8">
-                        <div className="grid grid-cols-3 gap-6">
-                            <div className="space-y-2">
-                                <div className="w-8 h-8 bg-[#2dd4bf] rounded-lg flex items-center justify-center">
-                                    <CheckCircle className="w-4 h-4 text-[#1a1a2e]" />
-                                </div>
-                                <h3 className="text-sm font-semibold text-white">Get Verified</h3>
-                                <p className="text-xs text-white/60 leading-relaxed">
-                                    Boost your credibility with our official badge.
-                                </p>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="w-8 h-8 bg-[#2dd4bf] rounded-lg flex items-center justify-center">
-                                    <Camera className="w-4 h-4 text-[#1a1a2e]" />
-                                </div>
-                                <h3 className="text-sm font-semibold text-white">Secure Payments</h3>
-                                <p className="text-xs text-white/60 leading-relaxed">
-                                    Escrow protection for every single collab.
-                                </p>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="w-8 h-8 bg-[#2dd4bf] rounded-lg flex items-center justify-center">
-                                    <Layers className="w-4 h-4 text-[#1a1a2e]" />
-                                </div>
-                                <h3 className="text-sm font-semibold text-white">Direct Brand Deals</h3>
-                                <p className="text-xs text-white/60 leading-relaxed">
-                                    No middlemen, just you and the brands.
-                                </p>
-                            </div>
-                        </div>
+                <div className="relative z-10 grid grid-cols-2 gap-6 border-t border-white/10 pt-8">
+                    <div>
+                        <h4 className="text-white font-semibold mb-1">Get Verified</h4>
+                        <p className="text-xs text-blue-100/70">Boost credibility with our badge.</p>
+                    </div>
+                    <div>
+                        <h4 className="text-white font-semibold mb-1">Direct Deals</h4>
+                        <p className="text-xs text-blue-100/70">No middlemen, just you & brands.</p>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Right Side - Registration Form */}
-            <div className="flex-1 h-full overflow-y-auto bg-gray-50">
-                <div className="min-h-full flex items-center justify-center p-6">
-                    <div className="w-full max-w-md py-6">
-                        {/* Mobile Logo */}
-                        <div className="lg:hidden flex items-center gap-2 mb-6">
-                            <div className="w-8 h-8 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-lg flex items-center justify-center">
-                                <Layers className="w-4 h-4 text-white" />
+            <div className="flex-1 w-full bg-slate-50 relative">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none fixed" />
+
+                <div className="min-h-full flex items-center justify-center p-6 py-12">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="w-full max-w-2xl bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 relative z-10"
+                    >
+                        {/* Mobile Header */}
+                        <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
+                            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <Layers className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-sm font-semibold text-gray-900">CREATOR HUB</span>
+                            <span className="text-lg font-bold text-slate-900">CREATOR HUB</span>
                         </div>
 
-                        <div className="space-y-5">
-                            {/* Header */}
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h2>
-                                <p className="text-sm text-gray-600">Start your journey as a marketplace creator today.</p>
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-2">Create your account</h2>
+                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                <span>Already have an account?</span>
+                                <Link href="/login" className="text-blue-600 font-bold hover:underline flex items-center gap-1 group">
+                                    Log in <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                </Link>
                             </div>
+                        </div>
 
-                            {/* Form */}
-                            <form onSubmit={handleSubmit} className="space-y-3">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <AnimatePresence>
                                 {error && (
-                                    <div className="p-3 text-sm font-medium text-red-600 bg-red-50 rounded-lg">
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-start gap-3"
+                                    >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0" />
                                         {error}
-                                    </div>
+                                    </motion.div>
                                 )}
-                                {/* Full Name */}
-                                <div>
-                                    <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">
-                                        Full Name
-                                    </label>
-                                    <input
-                                        id="fullName"
-                                        name="fullName"
-                                        type="text"
-                                        placeholder="John Doe"
-                                        value={formData.fullName}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
-                                        required
-                                    />
+                            </AnimatePresence>
+
+                            {/* Personal Info Section */}
+                            <div className="space-y-6">
+                                <div className="grid md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                                <User className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="fullName"
+                                                type="text"
+                                                value={formData.fullName}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="John Doe"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Mobile Number</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                                <Phone className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="mobileNumber"
+                                                type="tel"
+                                                value={formData.mobileNumber}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="+1 (555) 000-0000"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Mobile Number & Primary Platform Row */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label htmlFor="mobileNumber" className="block text-xs font-medium text-gray-700 mb-1">
-                                            Mobile Number
-                                        </label>
-                                        <input
-                                            id="mobileNumber"
-                                            name="mobileNumber"
-                                            type="tel"
-                                            placeholder="+1(555) 000-0000"
-                                            value={formData.mobileNumber}
-                                            onChange={handleInputChange}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="primaryPlatform" className="block text-xs font-medium text-gray-700 mb-1">
-                                            Primary Social Platform
-                                        </label>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Primary Platform</label>
+                                    <div className="relative">
                                         <select
-                                            id="primaryPlatform"
                                             name="primaryPlatform"
                                             value={formData.primaryPlatform}
                                             onChange={handleInputChange}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white appearance-none cursor-pointer"
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm appearance-none cursor-pointer"
                                             required
                                         >
                                             {platforms.map(platform => (
@@ -317,244 +313,265 @@ export default function RegisterPage() {
                                                 </option>
                                             ))}
                                         </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Instagram Profile URL */}
-                                <div>
-                                    <label htmlFor="instagramUrl" className="block text-xs font-medium text-gray-700 mb-1">
-                                        Instagram Profile URL
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                            <Instagram className="w-4 h-4" />
+                                <div className="grid md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Instagram URL</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-pink-500 transition-colors pointer-events-none">
+                                                <Instagram className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="instagramUrl"
+                                                type="url"
+                                                value={formData.instagramUrl}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-500/10 focus:border-pink-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="instagram.com/handle"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">YouTube URL</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
+                                                <Youtube className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="youtubeUrl"
+                                                type="url"
+                                                value={formData.youtubeUrl}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="youtube.com/@channel"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
+                            {/* Account Security Section */}
+                            <div className="space-y-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
+                                    <div className="relative group">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                            <Mail className="w-4.5 h-4.5" />
                                         </div>
                                         <input
-                                            id="instagramUrl"
-                                            name="instagramUrl"
-                                            type="url"
-                                            placeholder="instagram.com/yourhandle"
-                                            value={formData.instagramUrl}
-                                            onChange={handleInputChange}
-                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* YouTube Channel URL */}
-                                <div>
-                                    <label htmlFor="youtubeUrl" className="block text-xs font-medium text-gray-700 mb-1">
-                                        YouTube Channel URL
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                            <Youtube className="w-4 h-4" />
-                                        </div>
-                                        <input
-                                            id="youtubeUrl"
-                                            name="youtubeUrl"
-                                            type="url"
-                                            placeholder="youtube.com/@channel"
-                                            value={formData.youtubeUrl}
-                                            onChange={handleInputChange}
-                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Email Address */}
-                                <div>
-                                    <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
-                                        Email Address
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            id="email"
                                             name="email"
                                             type="email"
-                                            placeholder="name@creator.com"
                                             value={formData.email}
                                             onChange={handleInputChange}
-                                            className={`w-full px-3 py-2 text-sm border ${emailVerified ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'} rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-10`}
+                                            className={`w-full pl-11 pr-10 py-3 border ${emailVerified ? 'bg-green-50/50 border-green-200 text-green-800' : 'bg-slate-50 border-slate-200 text-slate-900'} rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm`}
+                                            placeholder="name@example.com"
                                             required
                                             disabled={emailVerified}
                                         />
                                         {emailVerified && (
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600">
-                                                <CheckCircle className="w-4 h-4" />
+                                            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-green-500 bg-white rounded-full p-0.5 shadow-sm">
+                                                <CheckCircle className="w-4 h-4 fill-current" />
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Password */}
-                                <div>
-                                    <label htmlFor="password" className="block text-xs font-medium text-gray-700 mb-1">
-                                        Password
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            id="password"
-                                            name="password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            placeholder="••••••••"
-                                            value={formData.password}
-                                            onChange={handleInputChange}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white pr-10"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                {/* Dynamic OTP Section */}
+                                <AnimatePresence mode="wait">
+                                    {!emailVerified && formData.email && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-hidden"
                                         >
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                    </div>
-                                </div>
+                                            <div className="p-5 bg-gradient-to-br from-slate-50 to-blue-50/50 border border-blue-100 rounded-2xl">
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs font-bold text-blue-800 uppercase tracking-wide">Email Verification Required</span>
+                                                        {otpSent && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setOtpSent(false)}
+                                                                className="text-xs text-blue-500 hover:text-blue-700 font-medium"
+                                                            >
+                                                                Change Email
+                                                            </button>
+                                                        )}
+                                                    </div>
 
-                                {/* Confirm Password */}
-                                <div>
-                                    <label htmlFor="confirmPassword" className="block text-xs font-medium text-gray-700 mb-1">
-                                        Confirm Password
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            placeholder="••••••••"
-                                            value={formData.confirmPassword}
-                                            onChange={handleInputChange}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white pr-10"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                        >
-                                            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Email Verification Section */}
-                                {!emailVerified && (
-                                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
-                                        <div className="flex flex-col gap-2">
-                                            <div className="text-xs font-semibold text-purple-900">
-                                                Verify Email Address
-                                            </div>
-                                            {!otpSent ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={requestOtp}
-                                                    disabled={otpLoading || !formData.email}
-                                                    className="w-full py-2 bg-white border border-purple-200 text-purple-600 rounded-md text-xs font-medium hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
-                                                >
-                                                    {otpLoading ? (
-                                                        <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                                                    ) : (
-                                                        'Send Verification Code'
-                                                    )}
-                                                </button>
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    <p className="text-[10px] text-purple-600">
-                                                        Enter the 6-digit code sent to {formData.email}
-                                                    </p>
-                                                    <div className="flex gap-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="000000"
-                                                            value={otp}
-                                                            onChange={(e) => {
-                                                                const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                                                setOtp(val);
-                                                            }}
-                                                            className="flex-1 px-3 py-2 text-sm border border-purple-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-center tracking-widest font-mono"
-                                                            maxLength={6}
-                                                        />
+                                                    {!otpSent ? (
                                                         <button
                                                             type="button"
-                                                            onClick={verifyOtp}
-                                                            disabled={otpLoading || otp.length !== 6}
-                                                            className="px-4 py-2 bg-purple-600 text-white rounded-md text-xs font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                                                            onClick={requestOtp}
+                                                            disabled={otpLoading || !formData.email}
+                                                            className="w-full py-2.5 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm disabled:opacity-50"
                                                         >
                                                             {otpLoading ? (
-                                                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                <span className="flex items-center justify-center gap-2">
+                                                                    <Loader2 className="w-4 h-4 animate-spin" /> Sending Code...
+                                                                </span>
                                                             ) : (
-                                                                'Verify'
+                                                                'Send Verification Code'
                                                             )}
                                                         </button>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setOtpSent(false)}
-                                                        className="text-[10px] text-purple-500 hover:text-purple-700 underline"
-                                                    >
-                                                        Change email or resend
-                                                    </button>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            <div className="flex gap-2">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="000000"
+                                                                    value={otp}
+                                                                    onChange={(e) => {
+                                                                        const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                                        setOtp(val);
+                                                                    }}
+                                                                    className="flex-1 px-4 py-2.5 text-center text-lg tracking-[0.5em] font-mono border-2 border-blue-100 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-white transition-all text-slate-800"
+                                                                    maxLength={6}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={verifyOtp}
+                                                                    disabled={otpLoading || otp.length !== 6}
+                                                                    className="px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:scale-100 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {otpLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify'}
+                                                                </button>
+                                                            </div>
+                                                            <p className="text-xs text-slate-500 text-center">
+                                                                We sent a code to <span className="font-semibold text-slate-700">{formData.email}</span>
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className="grid md:grid-cols-2 gap-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Password</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                                <Lock className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="password"
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={formData.password}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="••••••••"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
 
-                                {/* Terms Checkbox */}
-                                <div className="flex items-start gap-2">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Confirm Password</label>
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                                <Lock className="w-4.5 h-4.5" />
+                                            </div>
+                                            <input
+                                                name="confirmPassword"
+                                                type={showConfirmPassword ? 'text' : 'password'}
+                                                value={formData.confirmPassword}
+                                                onChange={handleInputChange}
+                                                className="w-full pl-11 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                                placeholder="••••••••"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100 transition-colors"
+                                            >
+                                                {showConfirmPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-6 items-center">
                                     <input
                                         type="checkbox"
                                         id="agreeToTerms"
                                         name="agreeToTerms"
                                         checked={formData.agreeToTerms}
                                         onChange={handleInputChange}
-                                        className="mt-0.5 w-3.5 h-3.5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
+                                        className="h-4.5 w-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
                                     />
-                                    <label htmlFor="agreeToTerms" className="text-xs text-gray-600 cursor-pointer">
-                                        By signing up, I agree to the{' '}
-                                        <Link href="/terms" className="text-purple-600 hover:underline font-medium">
-                                            Terms of Service
-                                        </Link>{' '}
-                                        and{' '}
-                                        <Link href="/privacy" className="text-purple-600 hover:underline font-medium">
-                                            Privacy Policy
-                                        </Link>
-                                        .
-                                    </label>
                                 </div>
+                                <label htmlFor="agreeToTerms" className="text-xs text-slate-600 leading-relaxed cursor-pointer select-none">
+                                    I agree to the {' '}
+                                    <Link href="/terms" className="text-blue-600 font-bold hover:underline">
+                                        Terms of Service
+                                    </Link>{' '}
+                                    and {' '}
+                                    <Link href="/privacy" className="text-blue-600 font-bold hover:underline">
+                                        Privacy Policy
+                                    </Link>
+                                    .
+                                </label>
+                            </div>
 
-                                {/* Submit Button */}
-                                <button
-                                    type="button" // Prevent default submission
-                                    onClick={(e) => {
-                                        if (!emailVerified) {
-                                            setError("Please verify your email first");
-                                            return;
-                                        }
-                                        handleSubmit(e as any);
-                                    }}
-                                    disabled={loading || !emailVerified}
-                                    className="w-full py-3 bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-lg font-medium text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {loading ? (
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        'Join as a Creator'
-                                    )}
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    if (!emailVerified) {
+                                        setError("Please verify your email first");
+                                        return;
+                                    }
+                                    handleSubmit(e as any);
+                                }}
+                                disabled={loading || !emailVerified}
+                                className="w-full py-4.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold text-base shadow-xl shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 group"
+                            >
+                                {loading ? (
+                                    <div className="flex items-center gap-2">
+                                        <Loader2 className="w-5 h-5 animate-spin" /> Creating Account...
+                                    </div>
+                                ) : (
+                                    <>
+                                        Join as a Creator <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
+                            </button>
+
+                            <div className="relative my-6">
+                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                                <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-2 text-slate-400 font-medium">Or continue with</span></div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button type="button" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                                    <Chrome className="w-5 h-5 text-slate-900" /> Google
                                 </button>
-                            </form>
-
-                            {/* Login Link */}
-                            <p className="text-center text-sm text-gray-600">
-                                Already have an account?{' '}
-                                <Link href="/login" className="text-purple-600 font-semibold hover:underline">
-                                    Log In
-                                </Link>
-                            </p>
-                        </div>
-                    </div>
+                                <button type="button" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                                    <Github className="w-5 h-5 text-slate-900" /> GitHub
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
                 </div>
             </div>
         </div>

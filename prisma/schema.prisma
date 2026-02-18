@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,7 +15,7 @@ model User {
   email             String               @unique
   passwordHash      String?
   image             String?
-  role              UserRole             @default(INFLUENCER)
+  role              String               @default("INFLUENCER")
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   lastSeenAt        DateTime?
@@ -45,6 +45,14 @@ model BrandProfile {
   brandWallet    BrandWallet?
   campaigns      Campaign[]
   contracts      Contract[]
+  
+  // Onboarding Data
+  onboardingCompleted Boolean @default(false)
+  campaignType        String? // Store as JSON string
+  campaignBudget      String?
+  targetPlatforms     String? // Store as JSON string
+  preferredCreatorType String?
+  campaignGoals       String?
 }
 
 model InfluencerProfile {
@@ -66,12 +74,16 @@ model InfluencerProfile {
   kyc             KYCSubmission?
   payoutRecords   PayoutRecord[]
   payouts         PayoutRequest[]
+
+  // Onboarding Data
+  onboardingCompleted Boolean @default(false)
+  platforms           String? // Store as JSON string
 }
 
 model KYCSubmission {
   id                String            @id @default(cuid())
   profileId         String            @unique
-  status            KYCStatus         @default(NOT_SUBMITTED)
+  status            String         @default("NOT_SUBMITTED")
   documentType      String?
   documentUrl       String?
   documentBackUrl   String?
@@ -80,8 +92,8 @@ model KYCSubmission {
   submittedAt       DateTime?
   reviewedAt        DateTime?
   adminNotes        String?
-  livenessPrompt    LivenessPrompt?
-  livenessResult    LivenessResult?
+  livenessPrompt    String?
+  livenessResult    String?
   selfieCapturedAt  DateTime?
   selfieImageKey    String?
   verifiedByAdminAt DateTime?
@@ -95,12 +107,12 @@ model Campaign {
   description  String?
   requirements String?
   budget       Float?
-  status       CampaignStatus      @default(DRAFT)
+  status       String      @default("DRAFT")
   startDate    DateTime?
   endDate      DateTime?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  images       String[]            @default([])
+  images       String              @default("[]")
   location     String?
   minFollowers Int?                @default(0)
   niche        String?
@@ -116,7 +128,7 @@ model CampaignCandidate {
   id           String            @id @default(cuid())
   campaignId   String
   influencerId String
-  status       CandidateStatus   @default(CONTACTED)
+  status       String   @default("CONTACTED")
   notes        String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -135,7 +147,7 @@ model Offer {
   amount                  Float
   currency                String            @default("INR")
   deliverablesDescription String
-  status                  OfferStatus       @default(PENDING)
+  status                  String       @default("PENDING")
   history                 String?
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
@@ -150,7 +162,7 @@ model Contract {
   totalAmount  Float
   platformFee  Float
   taxAmount    Float               @default(0)
-  status       ContractStatus      @default(DRAFT)
+  status       String      @default("DRAFT")
   startDate    DateTime?
   endDate      DateTime?
   terms        String?
@@ -170,7 +182,7 @@ model Deliverable {
   title           String
   description     String?
   dueDate         DateTime?
-  status          DeliverableStatus @default(PENDING)
+  status          String @default("PENDING")
   submissionUrl   String?
   submissionNotes String?
   submittedAt     DateTime?
@@ -185,7 +197,7 @@ model EscrowTransaction {
   amount            Float
   currency          String                  @default("INR")
   type              String
-  status            EscrowTransactionStatus @default(PENDING)
+  status            String @default("PENDING")
   paymentGatewayRef String?
   invoiceUrl        String?
   createdAt         DateTime                @default(now())
@@ -198,7 +210,7 @@ model PayoutRequest {
   influencerId  String
   amount        Float
   currency      String            @default("INR")
-  status        PayoutStatus      @default(REQUESTED)
+  status        String      @default("REQUESTED")
   bankReference String?
   adminNotes    String?
   requestedAt   DateTime          @default(now())
@@ -228,7 +240,7 @@ model Message {
   attachmentUrl  String?
   deliveredAt    DateTime?
   seenAt         DateTime?
-  status         MessageStatus @default(SENT)
+  status         String @default("SENT")
   sender         User          @relation("SentMessages", fields: [senderId], references: [id])
   thread         ChatThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
 }
@@ -239,7 +251,7 @@ model Dispute {
   raiserId    String
   reason      String
   description String
-  status      DisputeStatus @default(OPEN)
+  status      String @default("OPEN")
   resolution  String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -340,7 +352,7 @@ model Creator {
   backgroundImageUrl   String?                     @map("background_image_url")
   paymentHistory       String?                     @map("payment_history")
   payoutMethods        String?                     @map("payout_methods")
-  verificationStatus   KYCStatus                   @default(NOT_SUBMITTED) @map("verification_status")
+  verificationStatus   String                   @default("NOT_SUBMITTED") @map("verification_status")
   isLiveSyncEnabled    Boolean                     @default(true) @map("is_live_sync_enabled")
   lastTiktokFetchAt    DateTime?                   @map("last_tiktok_fetch_at")
   lastTwitchFetchAt    DateTime?                   @map("last_twitch_fetch_at")
@@ -352,6 +364,10 @@ model Creator {
   selfReportedMetrics  CreatorSelfReportedMetric[]
   socialAccounts       CreatorSocialAccount[]
   user                 OtpUser                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Onboarding Data
+  onboardingCompleted Boolean @default(false)
+  platforms           String? // Store as JSON string
 
   @@map("creators")
 }
@@ -410,7 +426,7 @@ model CreatorMetric {
 model CreatorKYCSubmission {
   id                 String          @id @default(uuid())
   creatorId          String          @unique @map("creator_id")
-  status             KYCStatus       @default(PENDING)
+  status             String       @default("PENDING")
   instagramFollowers Int?            @map("instagram_followers")
   youtubeSubscribers Int?            @map("youtube_subscribers")
   totalPosts         Int?            @map("total_posts")
@@ -420,8 +436,8 @@ model CreatorKYCSubmission {
   reviewedAt         DateTime?       @map("reviewed_at")
   submittedAt        DateTime        @default(now()) @map("submitted_at")
   updatedAt          DateTime        @updatedAt @map("updated_at")
-  livenessPrompt     LivenessPrompt? @map("liveness_prompt")
-  livenessResult     LivenessResult? @map("liveness_result")
+  livenessPrompt     String? @map("liveness_prompt")
+  livenessResult     String? @map("liveness_result")
   selfieCapturedAt   DateTime?       @map("selfie_captured_at")
   selfieImageKey     String?         @map("selfie_image_key")
   verifiedByAdminAt  DateTime?       @map("verified_by_admin_at")
@@ -487,96 +503,4 @@ model PayoutRecord {
   creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
 }
 
-enum UserRole {
-  BRAND
-  INFLUENCER
-  ADMIN
-  MANAGER
-}
 
-enum KYCStatus {
-  NOT_SUBMITTED
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum CampaignStatus {
-  DRAFT
-  ACTIVE
-  PAUSED
-  COMPLETED
-  ARCHIVED
-}
-
-enum CandidateStatus {
-  CONTACTED
-  IN_NEGOTIATION
-  HIRED
-  CONTENT_REVIEW
-  COMPLETED
-  REJECTED
-  OFFERED
-}
-
-enum OfferStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  COUNTERED
-}
-
-enum LivenessPrompt {
-  SMILE
-  BLINK
-}
-
-enum LivenessResult {
-  PASSED
-  FAILED
-  NOT_CHECKED
-}
-
-enum ContractStatus {
-  DRAFT
-  PENDING_ESCROW
-  ACTIVE
-  COMPLETED
-  CANCELLED
-  DISPUTED
-}
-
-enum DeliverableStatus {
-  PENDING
-  SUBMITTED
-  APPROVED
-  REJECTED
-}
-
-enum EscrowTransactionStatus {
-  PENDING
-  FUNDED
-  RELEASED
-  REFUNDED
-  DISPUTED
-}
-
-enum PayoutStatus {
-  REQUESTED
-  PROCESSING
-  PAID
-  FAILED
-}
-
-enum DisputeStatus {
-  OPEN
-  RESOLVED_REFUND
-  RESOLVED_RELEASE
-  CLOSED
-}
-
-enum MessageStatus {
-  SENT
-  DELIVERED
-  SEEN
-}

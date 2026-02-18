@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { CreatorNotificationPopover } from "./CreatorNotificationPopover"
+import { CreatorMobileSidebar } from "./creator-mobile-sidebar"
 
 export function CreatorTopNav() {
     const pathname = usePathname()
@@ -24,6 +25,7 @@ export function CreatorTopNav() {
             </div>
 
             <div className="flex items-center gap-4">
+                <CreatorMobileSidebar />
                 <CreatorNotificationPopover />
             </div>
         </header>

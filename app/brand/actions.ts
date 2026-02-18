@@ -5,7 +5,8 @@ import { pusherServer } from "@/lib/pusher-server";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { createAuditLog, createNotification } from "@/lib/audit";
-import { Prisma, CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@/lib/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -290,8 +291,8 @@ export async function createCampaign(prevState: any, formData: FormData) {
                 "paymentType", "niche", "location", "minFollowers", "images", "updatedAt"
             ) VALUES (
                 ${campaignId}, ${brandId}, ${title}, ${description}, ${requirements}, ${budget}, 
-                ${startDate}, ${endDate}, ${CampaignStatus.ACTIVE}::"CampaignStatus", 
-                ${paymentType}, ${niche}, ${location}, ${minFollowers}, ${images}, NOW()
+                ${startDate}, ${endDate}, ${CampaignStatus.ACTIVE}, 
+                ${paymentType}, ${niche}, ${location}, ${minFollowers}, ${JSON.stringify(images)}, ${new Date()}
             )
         `;
 
@@ -369,7 +370,7 @@ export async function updateCampaign(prevState: any, formData: FormData) {
                 "location" = ${location},
                 "minFollowers" = ${minFollowers},
                 "images" = ${images},
-                "updatedAt" = NOW()
+                "updatedAt" = ${new Date()}
             WHERE "id" = ${campaignId} AND "brandId" = (SELECT "id" FROM "BrandProfile" WHERE "userId" = ${session.user.id})
         `;
 

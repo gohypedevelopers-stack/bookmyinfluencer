@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { motion, AnimatePresence } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,7 +21,10 @@ import {
   Calendar,
   Settings,
   Loader2,
-  Check
+  Check,
+  Facebook,
+  Linkedin,
+  Twitter
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -34,6 +38,7 @@ export default function CreatorDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState<any>(null)
   const [platform, setPlatform] = useState<string>("instagram") // instagram, youtube
+  const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(["instagram"])
   const [dateRange, setDateRange] = useState<number>(30) // 7, 30, 90
 
   useEffect(() => {
@@ -45,6 +50,16 @@ export default function CreatorDashboardPage() {
     try {
       const data = await getCreatorDashboardData(platform, dateRange)
       setDashboardData(data)
+      if (data?.platforms && Array.isArray(data.platforms)) {
+        // Normalize platform names to lowercase for ID matching if needed, but display properly
+        setAvailablePlatforms(data.platforms)
+
+        // If current platform is not in available, switch to first available
+        const currentValid = data.platforms.some((p: string) => p.toLowerCase() === platform.toLowerCase());
+        if (!currentValid && data.platforms.length > 0) {
+          setPlatform(data.platforms[0].toLowerCase());
+        }
+      }
     } catch (error) {
       toast.error("Failed to fetch dashboard data")
     } finally {
@@ -52,6 +67,7 @@ export default function CreatorDashboardPage() {
     }
   }
 
+  // ... (Export function remains same)
   function handleExport() {
     if (!dashboardData) {
       toast.error("No data to export")
@@ -96,6 +112,27 @@ export default function CreatorDashboardPage() {
   const followers = dashboardData?.followers || 0
   const engagementRate = dashboardData?.engagementRate || 0
 
+  // Helper to get Icon
+  const getPlatformIcon = (p: string) => {
+    const lower = p.toLowerCase();
+    if (lower.includes("instagram")) return Instagram;
+    if (lower.includes("youtube")) return Youtube;
+    if (lower.includes("facebook")) return Facebook;
+    if (lower.includes("linkedin")) return Linkedin;
+    if (lower.includes("twitter") || lower.includes("x")) return Twitter;
+    return Users; // Default
+  }
+
+  const getPlatformColor = (p: string) => {
+    const lower = p.toLowerCase();
+    if (lower.includes("instagram")) return "text-pink-600";
+    if (lower.includes("youtube")) return "text-red-600";
+    if (lower.includes("facebook")) return "text-blue-600";
+    if (lower.includes("linkedin")) return "text-blue-700";
+    if (lower.includes("twitter")) return "text-blue-400";
+    return "text-gray-600";
+  }
+
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
       <div className="mx-auto max-w-7xl px-6 py-8">
@@ -129,25 +166,30 @@ export default function CreatorDashboardPage() {
             {/* Platform Filters & Actions */}
             <div className="flex items-center gap-3">
               {/* Platform Filter Tabs */}
-              <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-gray-200">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPlatform("instagram")}
-                  className={platform === "instagram" ? "text-cyan-500 bg-cyan-50 hover:bg-cyan-100" : "text-gray-600 hover:bg-gray-100"}
-                >
-                  <Instagram className="h-4 w-4 mr-2" />
-                  Instagram
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPlatform("youtube")}
-                  className={platform === "youtube" ? "text-red-500 bg-red-50 hover:bg-red-100" : "text-gray-600 hover:bg-gray-100"}
-                >
-                  <Youtube className="h-4 w-4 mr-2" />
-                  YouTube
-                </Button>
+              <div className="flex items-center gap-1 bg-white rounded-xl p-1.5 border border-gray-200 shadow-sm">
+                {availablePlatforms.map((p) => {
+                  const Icon = getPlatformIcon(p);
+                  const isSelected = platform.toLowerCase() === p.toLowerCase();
+                  const colorClass = getPlatformColor(p);
+
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPlatform(p.toLowerCase())}
+                      className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 z-10 ${isSelected ? colorClass : "text-gray-500 hover:text-gray-900"}`}
+                    >
+                      {isSelected && (
+                        <motion.div
+                          layoutId="activePlatform"
+                          className="absolute inset-0 bg-purple-50 rounded-lg -z-10 border border-purple-100"
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      <Icon className="w-4 h-4" />
+                      {p}
+                    </button>
+                  )
+                })}
               </div>
 
               {/* Action Buttons */}
@@ -194,89 +236,99 @@ export default function CreatorDashboardPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-4">
-              <DollarSign className="w-6 h-6" />
-            </div>
-            <p className="text-sm text-gray-500 font-medium mb-1">Total Revenue</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
-              <span className="text-sm font-bold text-green-600 mb-1">+12.5%</span>
-            </div>
-          </Card>
-
-          <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
-              <Handshake className="w-6 h-6" />
-            </div>
-            <p className="text-sm text-gray-500 font-medium mb-1">Active Collaborations</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-gray-900">{activeCollabs} <span className="text-lg text-gray-400 font-normal">Contracts</span></h3>
-              <span className="text-sm font-bold text-green-600 mb-1">+3 today</span>
-            </div>
-          </Card>
-
-          <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
-            <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center text-pink-600 mb-4">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <p className="text-sm text-gray-500 font-medium mb-1">Follower Growth</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold text-gray-900">+{followerGrowth}k</h3>
-              <span className="text-sm font-bold text-green-600 mb-1">+{engagementRate}%</span>
-            </div>
-          </Card>
-        </div>
-
-        <div className="flex gap-8">
-          {/* Main Chart Area */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Campaign Activity</h2>
-              <Link href="/creator/campaigns">
-                <Button variant="ghost" className="text-purple-600 font-semibold hover:bg-purple-50">View All</Button>
-              </Link>
-            </div>
-
-            <Card className="rounded-2xl border-gray-100 shadow-sm p-6 h-[300px] flex items-center justify-center bg-white">
-              <p className="text-gray-400 font-medium">Activity Chart Placeholder</p>
-            </Card>
-          </div>
-
-          {/* Right Sidebar - Deadlines */}
-          <div className="w-80">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Next Deadlines</h2>
-              <Calendar className="w-5 h-5 text-gray-400" />
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="font-bold text-gray-900 text-sm">Nike Summer Campaign</div>
-                  <span className="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">2d</span>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={platform}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
+                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mb-4">
+                  <DollarSign className="w-6 h-6" />
                 </div>
-                <div className="text-xs text-gray-500 mb-3">Reel Draft Review</div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <div className="bg-purple-600 h-1.5 rounded-full w-2/3"></div>
+                <p className="text-sm text-gray-500 font-medium mb-1">Total Revenue</p>
+                <div className="flex items-end gap-2">
+                  <h3 className="text-3xl font-bold text-gray-900">₹{totalRevenue.toLocaleString()}</h3>
+                  <span className="text-sm font-bold text-green-600 mb-1">+12.5%</span>
                 </div>
+              </Card>
+
+              <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+                  <Handshake className="w-6 h-6" />
+                </div>
+                <p className="text-sm text-gray-500 font-medium mb-1">Active Collaborations</p>
+                <div className="flex items-end gap-2">
+                  <h3 className="text-3xl font-bold text-gray-900">{activeCollabs} <span className="text-lg text-gray-400 font-normal">Contracts</span></h3>
+                  <span className="text-sm font-bold text-green-600 mb-1">+3 today</span>
+                </div>
+              </Card>
+
+              <Card className="rounded-2xl border-gray-100 shadow-sm p-6">
+                <div className="w-12 h-12 bg-pink-50 rounded-xl flex items-center justify-center text-pink-600 mb-4">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <p className="text-sm text-gray-500 font-medium mb-1">Follower Growth</p>
+                <div className="flex items-end gap-2">
+                  <h3 className="text-3xl font-bold text-gray-900">+{followerGrowth}k</h3>
+                  <span className="text-sm font-bold text-green-600 mb-1">+{engagementRate}%</span>
+                </div>
+              </Card>
+            </div>
+
+            <div className="flex gap-8">
+              {/* Main Chart Area */}
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-bold text-gray-900">Campaign Activity</h2>
+                  <Link href="/creator/campaigns">
+                    <Button variant="ghost" className="text-purple-600 font-semibold hover:bg-purple-50">View All</Button>
+                  </Link>
+                </div>
+
+                <Card className="rounded-2xl border-gray-100 shadow-sm p-6 h-[300px] flex items-center justify-center bg-white">
+                  <p className="text-gray-400 font-medium">Activity Chart Placeholder</p>
+                </Card>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="font-bold text-gray-900 text-sm">TechPack Unboxing</div>
-                  <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">5d</span>
+              {/* Right Sidebar - Deadlines */}
+              <div className="w-80">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-bold text-gray-900">Next Deadlines</h2>
+                  <Calendar className="w-5 h-5 text-gray-400" />
                 </div>
-                <div className="text-xs text-gray-500 mb-3">Content Shooting</div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <div className="bg-blue-500 h-1.5 rounded-full w-1/4"></div>
+
+                <div className="space-y-4">
+                  <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-bold text-gray-900 text-sm">Nike Summer Campaign</div>
+                      <span className="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">2d</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-3">Reel Draft Review</div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <div className="bg-purple-600 h-1.5 rounded-full w-2/3"></div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-bold text-gray-900 text-sm">TechPack Unboxing</div>
+                      <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">5d</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mb-3">Content Shooting</div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <div className="bg-blue-500 h-1.5 rounded-full w-1/4"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* User Profile Footer */}
         <div className="mt-8 flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
