@@ -923,7 +923,8 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
             followerGrowth: Math.floor(latestFollowers / 1000),
             followers: latestFollowers,
             engagementRate: Number((latestMetric?.engagementRate || 0) * 100).toFixed(1),
-            platform: platform
+            platform: platform,
+            platforms: (creator as any).platforms ? JSON.parse((creator as any).platforms) : ["Instagram", "YouTube"] // Default fallback
         };
 
     } catch (error) {

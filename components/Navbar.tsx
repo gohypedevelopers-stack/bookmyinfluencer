@@ -30,16 +30,16 @@ export function Navbar() {
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-4">
-          <Link href="/login">
-            <Button variant="ghost" className="font-medium">
+          <Button variant="ghost" className="font-medium" asChild>
+            <Link href="/login">
               Log In
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button className="font-medium bg-slate-800 hover:bg-slate-700">
+            </Link>
+          </Button>
+          <Button className="font-medium bg-slate-800 hover:bg-slate-700" asChild>
+            <Link href="/register">
               Sign Up
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </Container>
     </nav>

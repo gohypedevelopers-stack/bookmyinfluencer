@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { BadgeCheck } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
+import { motion } from 'framer-motion';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -19,7 +20,13 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
     if (!creators || creators.length === 0) return null;
 
     return (
-        <div className="w-full">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="w-full"
+        >
             <Swiper
                 modules={[Autoplay]}
                 spaceBetween={24}
@@ -102,6 +109,6 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
                     );
                 })}
             </Swiper>
-        </div>
+        </motion.div>
     );
 }

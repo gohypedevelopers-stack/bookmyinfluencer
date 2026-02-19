@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from "@/lib/db";
-import { KYCStatus, PayoutStatus } from "@prisma/client";
+import { KYCStatus, PayoutStatus } from "@/lib/enums";
 import { revalidatePath } from "next/cache";
 import { getR2SignedUrl } from "@/lib/storage";
 import { getServerSession } from "next-auth";

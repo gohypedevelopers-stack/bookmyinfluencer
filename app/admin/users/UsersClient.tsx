@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
+import { UserRole } from "@/lib/enums";
 import { format } from "date-fns";
 import {
     Search,
@@ -198,15 +199,15 @@ export default function UsersClient({ initialUsers }: UsersClientProps) {
                                                     View Details
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, 'ADMIN')}>
+                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, UserRole.ADMIN)}>
                                                     <ShieldAlert className="mr-2 h-4 w-4" />
                                                     Make Admin
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, 'BRAND')}>
+                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, UserRole.BRAND)}>
                                                     <UserCheck className="mr-2 h-4 w-4" />
                                                     Make Brand
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, 'INFLUENCER')}>
+                                                <DropdownMenuItem onClick={() => handleRoleUpdate(user.id, UserRole.INFLUENCER)}>
                                                     <UserCog className="mr-2 h-4 w-4" />
                                                     Make Influencer
                                                 </DropdownMenuItem>

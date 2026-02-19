@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { createCampaign, updateCampaign } from '@/app/brand/actions';
 import { useRouter } from 'next/navigation';
-import { CampaignStatus } from '@prisma/client';
+import { CampaignStatus } from "@/lib/enums";
 
 
 export default function CampaignWizardClient({ brandId, initialData, campaignId }: { brandId: string, initialData?: any, campaignId?: string }) {
@@ -42,7 +42,7 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
         niche: initialData?.niche || '',
         location: initialData?.location || '',
         minFollowers: initialData?.minFollowers?.toString() || '1000',
-        images: initialData?.images || [] as string[],
+        images: (typeof initialData?.images === 'string' ? JSON.parse(initialData.images) : initialData?.images) || [] as string[],
     });
 
     const [uploading, setUploading] = useState(false);

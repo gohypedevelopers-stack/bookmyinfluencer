@@ -1,7 +1,7 @@
 import { db } from "@/lib/db"
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import CreatorCampaignsClient from "./CreatorCampaignsClient"
-import { CampaignStatus } from "@prisma/client"
+import { CampaignStatus } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
 

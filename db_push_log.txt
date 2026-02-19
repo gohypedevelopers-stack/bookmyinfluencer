@@ -1,0 +1,153 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+Error: P1012
+
+error: Error validating: You defined the enum `UserRole`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:490
+   | 
+489 | 
+490 | enum UserRole {
+491 |   BRAND
+492 |   INFLUENCER
+493 |   ADMIN
+494 |   MANAGER
+495 | }
+   | 
+error: Error validating: You defined the enum `KYCStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:497
+   | 
+496 | 
+497 | enum KYCStatus {
+498 |   NOT_SUBMITTED
+499 |   PENDING
+500 |   APPROVED
+501 |   REJECTED
+502 | }
+   | 
+error: Error validating: You defined the enum `CampaignStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:504
+   | 
+503 | 
+504 | enum CampaignStatus {
+505 |   DRAFT
+506 |   ACTIVE
+507 |   PAUSED
+508 |   COMPLETED
+509 |   ARCHIVED
+510 | }
+   | 
+error: Error validating: You defined the enum `CandidateStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:512
+   | 
+511 | 
+512 | enum CandidateStatus {
+513 |   CONTACTED
+514 |   IN_NEGOTIATION
+515 |   HIRED
+516 |   CONTENT_REVIEW
+517 |   COMPLETED
+518 |   REJECTED
+519 |   OFFERED
+520 | }
+   | 
+error: Error validating: You defined the enum `OfferStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:522
+   | 
+521 | 
+522 | enum OfferStatus {
+523 |   PENDING
+524 |   ACCEPTED
+525 |   REJECTED
+526 |   COUNTERED
+527 | }
+   | 
+error: Error validating: You defined the enum `LivenessPrompt`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:529
+   | 
+528 | 
+529 | enum LivenessPrompt {
+530 |   SMILE
+531 |   BLINK
+532 | }
+   | 
+error: Error validating: You defined the enum `LivenessResult`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:534
+   | 
+533 | 
+534 | enum LivenessResult {
+535 |   PASSED
+536 |   FAILED
+537 |   NOT_CHECKED
+538 | }
+   | 
+error: Error validating: You defined the enum `ContractStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:540
+   | 
+539 | 
+540 | enum ContractStatus {
+541 |   DRAFT
+542 |   PENDING_ESCROW
+543 |   ACTIVE
+544 |   COMPLETED
+545 |   CANCELLED
+546 |   DISPUTED
+547 | }
+   | 
+error: Error validating: You defined the enum `DeliverableStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:549
+   | 
+548 | 
+549 | enum DeliverableStatus {
+550 |   PENDING
+551 |   SUBMITTED
+552 |   APPROVED
+553 |   REJECTED
+554 | }
+   | 
+error: Error validating: You defined the enum `EscrowTransactionStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:556
+   | 
+555 | 
+556 | enum EscrowTransactionStatus {
+557 |   PENDING
+558 |   FUNDED
+559 |   RELEASED
+560 |   REFUNDED
+561 |   DISPUTED
+562 | }
+   | 
+error: Error validating: You defined the enum `PayoutStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:564
+   | 
+563 | 
+564 | enum PayoutStatus {
+565 |   REQUESTED
+566 |   PROCESSING
+567 |   PAID
+568 |   FAILED
+569 | }
+   | 
+error: Error validating: You defined the enum `DisputeStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:571
+   | 
+570 | 
+571 | enum DisputeStatus {
+572 |   OPEN
+573 |   RESOLVED_REFUND
+574 |   RESOLVED_RELEASE
+575 |   CLOSED
+576 | }
+   | 
+error: Error validating: You defined the enum `MessageStatus`. But the current connector does not support enums.
+  -->  prisma\schema.prisma:578
+   | 
+577 | 
+578 | enum MessageStatus {
+579 |   SENT
+580 |   DELIVERED
+581 |   SEEN
+582 | }
+   | 
+
+

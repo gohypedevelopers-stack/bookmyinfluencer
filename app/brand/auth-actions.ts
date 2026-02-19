@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/lib/enums";
 import { hash } from "bcryptjs";
 import { signIn } from "next-auth/react";
 import { sendOtpEmail } from "@/lib/email";

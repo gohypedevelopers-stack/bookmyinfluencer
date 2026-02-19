@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from "@/lib/db";
-import { KYCStatus } from "@prisma/client";
+import { KYCStatus } from "@/lib/enums";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit";
 
