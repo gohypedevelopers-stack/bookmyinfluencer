@@ -7,7 +7,7 @@ import { getManagerStats, getManagerCampaigns } from "./actions";
 
 export default async function ManagerDashboard() {
     const statsResult = await getManagerStats();
-    const stats = statsResult.data || { activeCampaigns: 0, pendingApprovals: 0, activeCandidates: 0 };
+    const stats = statsResult.data || { activeCampaigns: 0, pendingApprovals: 0, completedCampaigns: 0 };
     const campaignsResult = await getManagerCampaigns();
     const campaigns = campaignsResult.data || [];
 

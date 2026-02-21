@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { createNotification } from "@/lib/audit";
 
 export async function createWalletRechargeOrder(amount: number) {
     const session = await getServerSession(authOptions);
@@ -108,7 +109,6 @@ export async function verifyWalletRecharge(
                     walletId: wallet.id,
                     type: "RECHARGE_APPROVED",
                     amount: amount,
-                    title: "Wallet Recharge",
                     reference: paymentId,
                     status: "SUCCESS"
                 }
@@ -387,7 +387,8 @@ export async function manualPayout(
     creatorId: string, // InfluencerProfile ID
     amount: number,
     method: "UPI" | "BANK",
-    utr: string
+    utr: string,
+    notes?: string
 ) {
     const session = await getServerSession(authOptions);
     // Needs ADMIN or MANAGER role
@@ -398,23 +399,17 @@ export async function manualPayout(
     try {
         await db.$transaction(async (tx) => {
             // 1. Verify Campaign/Creator exist
-            // Check for duplicate payout (same UTR or total amount check)
             const existingPayout = await tx.payoutRecord.findFirst({
                 where: {
                     campaignId,
                     creatorId,
-                    utr // strict check on UTR to avoid double entry of same transaction
+                    utr // strict check on UTR
                 }
             });
 
             if (existingPayout) {
                 throw new Error("Payout with this UTR already recorded.");
             }
-
-            // Optional: Check if total payouts exceed contract amount? 
-            // Good for safety, but maybe partials are allowed?
-            // Let's stick to UTR uniqueness for now unless user asked for balance check.
-            // User said "Prevent duplicate payout records for same contract/campaign".
 
             // 2. Create Payout Record
             await tx.payoutRecord.create({
@@ -427,9 +422,56 @@ export async function manualPayout(
                     processedBy: session.user.id
                 }
             });
+
+            // 3. Audit Log
+            await tx.auditLog.create({
+                data: {
+                    action: "MANUAL_PAYOUT",
+                    entity: "Campaign",
+                    entityId: campaignId,
+                    userId: session.user.id,
+                    details: JSON.stringify({ amount, method, utr, creatorId })
+                }
+            });
+
+            // 4. Notifications
+            // Get User IDs
+            const campaign = await tx.campaign.findUnique({
+                where: { id: campaignId },
+                select: { brand: { select: { userId: true } }, title: true }
+            });
+            const influencer = await tx.influencerProfile.findUnique({
+                where: { id: creatorId },
+                select: { userId: true }
+            });
+
+            if (campaign && campaign.brand.userId) {
+                await tx.notification.create({
+                    data: {
+                        userId: campaign.brand.userId,
+                        type: "PAYMENT",
+                        title: "Payout Recorded",
+                        message: `A payout of ₹${amount} has been recorded for campaign "${campaign.title}".`,
+                        link: `/brand/campaigns/${campaignId}`
+                    }
+                });
+            }
+
+            if (influencer && influencer.userId) {
+                await tx.notification.create({
+                    data: {
+                        userId: influencer.userId,
+                        type: "PAYMENT",
+                        title: "Payment Processed",
+                        message: `A payment of ₹${amount} has been processed for campaign "${campaign?.title}". Ref: ${utr}`,
+                        link: `/creator/dashboard`
+                    }
+                });
+            }
         });
 
         revalidatePath(`/manager/campaigns`);
+        revalidatePath(`/admin/campaigns`);
         return { success: true };
     } catch (error: any) {
         console.error("Payout Error:", error);
@@ -450,17 +492,13 @@ export async function approveDeliverableAndLock(contractId: string) {
                 where: { id: contractId },
                 include: {
                     brand: true,
-                    candidate: true
+                    candidate: { include: { campaign: true } },
+                    influencer: true
                 }
             });
             if (!contract) throw new Error("Contract not found");
 
-            // Check if already approved/locked
-            // Logic: "If remaining amount not yet locked: Deduct... Record FINAL_LOCK"
-            // How do we know remaining amount?
-            // contract.totalAmount - (ADVANCE_LOCK amount)
-            // We can query WalletTransactions for this campaign/contract.
-
+            // Calculate lock amount
             const locks = await tx.walletTransaction.findMany({
                 where: {
                     reference: contract.id,
@@ -498,13 +536,10 @@ export async function approveDeliverableAndLock(contractId: string) {
                 });
             }
 
-            // Update Deliverable Status (if linked to one, or just contract)
-            // Here we assume contract-level approval or we need deliverable ID.
-            // "On manager APPROVAL" -> usually approves a submission.
-
+            // Update Contract Status
             await tx.contract.update({
                 where: { id: contractId },
-                data: { status: "COMPLETED" } // or similar
+                data: { status: "COMPLETED" }
             });
 
             // Update candidate status
@@ -514,6 +549,46 @@ export async function approveDeliverableAndLock(contractId: string) {
                     data: { status: "COMPLETED" }
                 });
             }
+
+            // Audit
+            await tx.auditLog.create({
+                data: {
+                    action: "CONTRACT_COMPLETED",
+                    entity: "Contract",
+                    entityId: contractId,
+                    userId: session.user.id,
+                    details: JSON.stringify({ remainingLocked: remaining })
+                }
+            });
+
+            // Notifications
+            // To Brand
+            if (contract.brand.userId) {
+                await tx.notification.create({
+                    data: {
+                        userId: contract.brand.userId,
+                        type: "CAMPAIGN_UPDATE",
+                        title: "Campaign Completed",
+                        message: `Deliverables approved and final amount locked for ${contract.candidate?.campaign?.title}.`,
+                        link: `/brand/campaigns`
+                    }
+                });
+            }
+            // To Creator
+            if (contract.influencer.userId) {
+                await tx.notification.create({
+                    data: {
+                        userId: contract.influencer.userId,
+                        type: "CAMPAIGN_UPDATE",
+                        title: "Campaign Completed",
+                        message: `Your work has been approved! The campaign is in final processing.`,
+                        link: `/creator/dashboard`
+                    }
+                });
+            }
+
+            revalidatePath('/manager/campaigns');
+            revalidatePath('/admin/campaigns');
 
             return { success: true };
         });

@@ -2,11 +2,11 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { DeliverableStatus, PayoutStatus } from "@prisma/client";
+import { DeliverableStatus, PayoutStatus, CandidateStatus, CampaignStatus } from "@/lib/enums";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { CandidateStatus, CampaignStatus } from "@prisma/client";
+
 
 export async function getInfluencerCampaigns() {
     const session = await getServerSession(authOptions);

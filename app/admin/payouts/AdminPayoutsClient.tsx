@@ -2,7 +2,7 @@
 
 import { updatePayoutStatus } from "../actions";
 import { PayoutRequest, InfluencerProfile, User } from "@prisma/client";
-import { PayoutStatus } from "@prisma/client";
+import { PayoutStatus } from "@/lib/enums";
 import { Check, X } from "lucide-react";
 
 type Payout = PayoutRequest & {
@@ -45,18 +45,18 @@ export default function AdminPayoutsClient({ payouts }: { payouts: Payout[] }) {
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                     ${p.status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' :
-                                            p.status === 'FAILED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                     ${p.status === PayoutStatus.PAID ? 'bg-green-50 text-green-700 border-green-200' :
+                                            p.status === PayoutStatus.FAILED ? 'bg-red-50 text-red-700 border-red-200' :
                                                 'bg-blue-50 text-blue-700 border-blue-200'}
                                    `}>
                                         {p.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                                    {p.status === 'REQUESTED' && (
+                                    {p.status === PayoutStatus.REQUESTED && (
                                         <>
                                             <button
-                                                onClick={() => handleAction(p.id, 'PAID')}
+                                                onClick={() => handleAction(p.id, PayoutStatus.PAID)}
                                                 className="px-3 py-1 rounded-md bg-green-50 text-green-600 hover:bg-green-100 text-xs font-bold"
                                             >
                                                 Mark Paid

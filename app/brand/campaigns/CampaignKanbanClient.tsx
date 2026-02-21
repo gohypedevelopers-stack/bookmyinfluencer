@@ -24,7 +24,8 @@ import {
     X,
     MessageCircle
 } from 'lucide-react';
-import { CampaignCandidate, InfluencerProfile, User, Offer, CandidateStatus } from '@prisma/client';
+import { CampaignCandidate, InfluencerProfile, User, Offer } from '@prisma/client';
+import { CandidateStatus } from '@/lib/enums';
 import { updateCandidateStatus } from '../actions';
 import { fundCandidateFromWallet } from '../wallet-actions';
 import { toast } from 'sonner';
@@ -74,7 +75,7 @@ export default function CampaignKanbanClient({ candidates }: CampaignKanbanClien
                         // We can return here as the action updates the status.
                         return;
                     } else {
-                        toast.error(result.error || "Failed to process payment");
+                        toast.error((result as any).error || "Failed to process payment");
                         return; // Don't proceed to update status manually if payment failed
                     }
                 } catch (e: any) {

@@ -4,7 +4,7 @@ import KYCClient from "./KYCClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { KYCStatus } from "@prisma/client";
+import { KYCStatus } from "@/lib/enums";
 
 export default async function KYCPage() {
     const session = await getServerSession(authOptions);

@@ -2,7 +2,7 @@
 
 import { updateKYCStatus } from "../actions";
 import { KYCSubmission, InfluencerProfile, User } from "@prisma/client";
-import { KYCStatus } from "@prisma/client";
+import { KYCStatus } from "@/lib/enums";
 import { Check, X, Clock } from "lucide-react";
 
 type Submission = KYCSubmission & {
@@ -54,16 +54,16 @@ export default function AdminKYCClient({ submissions }: { submissions: Submissio
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                                    {sub.status === 'PENDING' && (
+                                    {sub.status === KYCStatus.PENDING && (
                                         <>
                                             <button
-                                                onClick={() => handleAction(sub.id, 'APPROVED')}
+                                                onClick={() => handleAction(sub.id, KYCStatus.APPROVED)}
                                                 className="p-1 rounded-md bg-green-50 text-green-600 hover:bg-green-100"
                                             >
                                                 <Check className="w-5 h-5" />
                                             </button>
                                             <button
-                                                onClick={() => handleAction(sub.id, 'REJECTED')}
+                                                onClick={() => handleAction(sub.id, KYCStatus.REJECTED)}
                                                 className="p-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100"
                                             >
                                                 <X className="w-5 h-5" />

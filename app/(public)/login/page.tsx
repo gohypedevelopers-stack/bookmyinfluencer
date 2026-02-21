@@ -62,6 +62,8 @@ export default function LoginPage() {
                     }
                 } else if (session?.user?.role === 'BRAND') {
                     router.push('/brand/discover');
+                } else if (session?.user?.role === 'MANAGER') {
+                    router.push('/manager');
                 } else {
                     router.push('/');
                 }

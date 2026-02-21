@@ -105,7 +105,9 @@ export default function AdminCampaignsClient({ campaigns, managers }: AdminCampa
                         <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
                             <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Brand</TableHead>
                             <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Campaign</TableHead>
+                            <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Candidates</TableHead>
                             <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Status</TableHead>
+                            <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Payment State</TableHead>
                             <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Created At</TableHead>
                             <TableHead className="font-bold text-gray-500 text-xs uppercase tracking-wider">Assigned Manager</TableHead>
                             <TableHead className="text-right font-bold text-gray-500 text-xs uppercase tracking-wider">Actions</TableHead>
@@ -119,20 +121,42 @@ export default function AdminCampaignsClient({ campaigns, managers }: AdminCampa
                                         <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-xs">
                                             {campaign.brand.companyName.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <span className="font-medium text-gray-900">{campaign.brand.companyName}</span>
+                                        <div>
+                                            <div className="font-medium text-gray-900">{campaign.brand.companyName}</div>
+                                            <div className="text-[10px] text-gray-500">{campaign.brand.user.email}</div>
+                                        </div>
                                     </div>
                                 </TableCell>
                                 <TableCell className="font-medium text-gray-900">{campaign.title}</TableCell>
                                 <TableCell>
+                                    {campaign.candidates && campaign.candidates.length > 0 ? (
+                                        campaign.candidates.map((cand: any) => (
+                                            <div key={cand.id} className="text-sm">
+                                                <div className="font-medium">{cand.influencer.user.name || "Unknown"}</div>
+                                                <div className="text-[10px] text-gray-500">{cand.influencer.user.email}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <span className="text-gray-400 text-xs italic">No candidates</span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
                                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                                            campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-gray-100 text-gray-700'
+                                        campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
+                                            'bg-gray-100 text-gray-700'
                                         }`}>
                                         {campaign.status}
                                     </span>
                                 </TableCell>
+                                <TableCell>
+                                    {/* Simplified Payment State Logic - in real app, derive from transactions */}
+                                    <span className="text-xs text-gray-600">
+                                        {campaign.status === 'DRAFT' ? 'Draft' :
+                                            campaign.status === 'Programming' ? 'Programming' : 'Standard'}
+                                    </span>
+                                </TableCell>
                                 <TableCell className="text-gray-500 text-xs">
-                                    {new Date(campaign.createdAt).toLocaleDateString()}
+                                    {new Date(campaign.createdAt).toLocaleDateString('en-GB')}
                                 </TableCell>
                                 <TableCell>
                                     <Select
@@ -140,7 +164,7 @@ export default function AdminCampaignsClient({ campaigns, managers }: AdminCampa
                                         onValueChange={(val) => handleAssign(campaign.id, val)}
                                         disabled={loadingMap[campaign.id]}
                                     >
-                                        <SelectTrigger className="w-[200px] h-8 text-xs border-gray-200 bg-gray-50/50">
+                                        <SelectTrigger className="w-[180px] h-8 text-xs border-gray-200 bg-gray-50/50">
                                             <SelectValue placeholder="Assign Manager" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -157,9 +181,11 @@ export default function AdminCampaignsClient({ campaigns, managers }: AdminCampa
                                     </Select>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400">
-                                        <MoreHorizontal className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex justify-end gap-2">
+                                        <Button variant="ghost" size="sm" onClick={() => window.location.href = `/admin/campaigns/${campaign.id}`}>
+                                            View
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
