@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { redirect } from 'next/navigation'
 import { getAuthenticatedCreatorId } from '@/lib/onboarding-auth'
 import ProfileSetupClient from './ProfileSetupClient'
