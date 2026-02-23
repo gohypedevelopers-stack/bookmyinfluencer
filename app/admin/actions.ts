@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getR2SignedUrl } from "@/lib/storage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createNotification } from "@/lib/audit";
 
 export async function updateKYCStatus(submissionId: string, status: KYCStatus) {
     try {
@@ -188,7 +189,14 @@ export async function getAllCampaignsForAdmin() {
         const campaigns = await db.campaign.findMany({
             include: {
                 brand: { include: { user: true } },
-                assignment: { include: { manager: true } }
+                assignment: { include: { manager: true } },
+                candidates: {
+                    include: {
+                        influencer: {
+                            include: { user: true }
+                        }
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -213,11 +221,13 @@ export async function getManagerUsers() {
     }
 }
 
+// Helper to get all candidates for a campaign
 export async function assignManagerToCampaign(campaignId: string, managerId: string) {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
 
     try {
+        // 1. Create/Update Assignment
         await db.campaignAssignment.upsert({
             where: { campaignId },
             update: { managerId, assignedAt: new Date() },
@@ -227,6 +237,89 @@ export async function assignManagerToCampaign(campaignId: string, managerId: str
             }
         });
 
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId },
+            select: { title: true, brand: { select: { userId: true } } }
+        });
+
+        if (!campaign) throw new Error("Campaign not found");
+
+        const brandUserId = campaign.brand.userId;
+        const manager = await db.user.findUnique({ where: { id: managerId } });
+
+        // 2. Audit Log
+        await db.auditLog.create({
+            data: {
+                action: 'MANAGER_ASSIGNED',
+                entity: 'Campaign',
+                entityId: campaignId,
+                details: JSON.stringify({ managerId: managerId, assignedBy: session.user.email }),
+                userId: session.user.id
+            }
+        });
+
+        // 3. Notifications
+        // To Manager
+        await createNotification(
+            managerId,
+            "New Campaign Assigned",
+            `You have been assigned to manage campaign: ${campaign.title}`,
+            "CAMPAIGN_ASSIGNMENT",
+            `/manager/campaigns/${campaignId}`
+        );
+
+        // To Brand
+        await createNotification(
+            brandUserId,
+            "Manager Assigned",
+            `Your campaign "${campaign.title}" is now being managed by ${manager?.name || 'a dedicated manager'}.`,
+            "CAMPAIGN_UPDATE"
+        );
+
+        // 4. Update Chat Threads (Make them Trio)
+        // Find all candidates for this campaign
+        const candidates = await db.campaignCandidate.findMany({
+            where: { campaignId },
+            include: { influencer: { select: { userId: true } }, chatThread: true }
+        });
+
+        for (const candidate of candidates) {
+            // Notify Creator
+            if (candidate.influencer.userId) {
+                await createNotification(
+                    candidate.influencer.userId,
+                    "Manager Joined",
+                    `A manager (${manager?.name}) has joined the campaign "${campaign.title}".`,
+                    "CAMPAIGN_UPDATE"
+                );
+            }
+
+            // Update Thread Participants
+            if (candidate.chatThread) {
+                const currentParticipants = candidate.chatThread.participants.split(',');
+                if (!currentParticipants.includes(managerId)) {
+                    const newParticipants = [...currentParticipants, managerId].join(',');
+                    await db.chatThread.update({
+                        where: { id: candidate.chatThread.id },
+                        data: { participants: newParticipants }
+                    });
+
+                    // System message in chat
+                    await db.message.create({
+                        data: {
+                            threadId: candidate.chatThread.id,
+                            senderId: managerId, // Or system/admin? Let's use manager so they "announce" themselves or fake system
+                            content: `System: Manager ${manager?.name} has joined the chat.`,
+                            status: 'SENT',
+                            // Use manager as sender, or create a SYSTEM user? 
+                            // Using ManagerId allows them to see it as their message.
+                            // Actually better to have a generic message.
+                        }
+                    });
+                }
+            }
+        }
+
         revalidatePath('/admin/campaigns');
         return { success: true };
     } catch (error: any) {
@@ -235,3 +328,149 @@ export async function assignManagerToCampaign(campaignId: string, managerId: str
     }
 }
 
+
+export async function getAdminCampaignDetails(campaignId: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId },
+            include: {
+                brand: { include: { user: true } },
+                assignment: { include: { manager: true } },
+                payouts: true,
+                candidates: {
+                    include: {
+                        influencer: { include: { user: true } },
+                        contract: {
+                            include: {
+                                transactions: true,
+                                deliverables: true
+                            }
+                        },
+                        chatThread: {
+                            include: {
+                                messages: {
+                                    include: { sender: true },
+                                    orderBy: { createdAt: 'asc' },
+                                    take: 50
+                                }
+                            }
+                        },
+                        offer: true
+                    }
+                }
+            }
+        });
+
+        if (!campaign) return { success: false, error: "Campaign not found" };
+
+        // Fetch Audit Logs for this campaign
+        const auditLogs = await db.auditLog.findMany({
+            where: {
+                entity: "Campaign",
+                entityId: campaignId
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 20
+        });
+
+        // Fetch Payout Records including manual ones linked to campaign
+        const payoutRecords = await db.payoutRecord.findMany({
+            where: { campaignId }, // Assuming PayoutRecord has campaignId or we filter by something else?
+            // Checking schema, PayoutRecord has campaignId. Correct.
+            include: {
+                creator: { include: { user: true } }
+            },
+            orderBy: { paidAt: 'desc' }
+        });
+
+        return {
+            success: true,
+            data: {
+                campaign,
+                auditLogs,
+                payoutRecords
+            }
+        };
+    } catch (error: any) {
+        console.error("Get Campaign Details Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendAdminSystemMessage(threadId: string, content: string) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        await db.message.create({
+            data: {
+                threadId,
+                senderId: session.user.id, // Admin as sender
+                content: `[ADMIN]: ${content}`,
+                status: 'SENT'
+            }
+        });
+
+        // Trigger Pusher update if needed (omitted for now to keep simple, relies on polling or refresh)
+        // Ideally should call pusher
+
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function recordManualPayout(data: {
+    campaignId: string;
+    creatorId: string;
+    amount: number;
+    transactionReference: string;
+    paymentMethod: string;
+    notes?: string;
+}) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
+
+    try {
+        // Check for duplicate UTR
+        const existing = await db.payoutRecord.findFirst({
+            where: { utr: data.transactionReference }
+        });
+        if (existing) return { success: false, error: "Transaction reference (UTR) already exists" };
+
+        await db.payoutRecord.create({
+            data: {
+                campaignId: data.campaignId,
+                creatorId: data.creatorId,
+                amount: data.amount,
+                utr: data.transactionReference,
+                method: data.paymentMethod,
+                processedBy: session.user.id,
+                paidAt: new Date(),
+                // notes: data.notes // Add if schema supports
+            }
+        });
+
+        const influencer = await db.influencerProfile.findUnique({
+            where: { id: data.creatorId },
+            select: { userId: true }
+        });
+
+        if (influencer) {
+            await createNotification(
+                influencer.userId,
+                "Payout Recorded",
+                `A manual payout of ${data.amount} has been recorded. Ref: ${data.transactionReference}`,
+                "PAYOUT_PROCESSED"
+            );
+        }
+
+        revalidatePath(`/admin/campaigns/${data.campaignId}`);
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}

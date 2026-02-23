@@ -1,8 +1,34 @@
-export default function ChatPage() {
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getManagerThreads, getManagerMessages } from "../actions";
+import ManagerChatClient from "./ManagerChatClient";
+
+export default async function ManagerChatPage({ searchParams }: { searchParams: Promise<{ threadId?: string }> }) {
+    const session = await getServerSession(authOptions);
+    if (!session || !["MANAGER", "ADMIN"].includes(session.user?.role as string)) {
+        redirect("/");
+    }
+
+    const { threadId } = await searchParams;
+
+    const threadsResult = await getManagerThreads();
+    const threads = threadsResult.success && threadsResult.data ? (threadsResult.data as any[]) : [];
+
+    let messages: any[] = [];
+    if (threadId) {
+        const messagesResult = await getManagerMessages(threadId);
+        if (messagesResult.success && messagesResult.data) {
+            messages = messagesResult.data;
+        }
+    }
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <h1 className="text-2xl font-bold">Manager Chat</h1>
-            <p>Chat integration for managers is coming soon.</p>
-        </div>
+        <ManagerChatClient
+            threads={threads}
+            selectedThreadId={threadId}
+            messages={messages}
+            currentUserId={session.user.id}
+        />
     );
 }

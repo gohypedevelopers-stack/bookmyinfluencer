@@ -1,7 +1,7 @@
 
 import { db } from "@/lib/db";
 import EarningsClient from "./EarningsClient";
-import { ContractStatus, EscrowTransactionStatus } from "@prisma/client";
+import { ContractStatus, EscrowTransactionStatus } from "@/lib/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";

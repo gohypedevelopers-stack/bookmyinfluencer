@@ -9,6 +9,7 @@ import { format } from "date-fns"
 import { useState } from "react"
 import { toast } from "sonner"
 import { verifyCreator, getSignedSelfieUrl } from "../actions"
+import { KYCStatus } from "@/lib/enums"
 import { useEffect as useClientEffect } from "react" // For clarity if needed, or just useEffect
 
 interface UserDetailsModalProps {
@@ -48,7 +49,7 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
         }
     };
 
-    const handleVerification = async (status: 'APPROVED' | 'REJECTED') => {
+    const handleVerification = async (status: KYCStatus) => {
         if (!creator) return toast.error("No creator profile found to verify");
 
         if (!confirm(`Are you sure you want to ${status.toLowerCase()} this creator?`)) return;
@@ -139,7 +140,7 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
                             {creator && kycStatus !== 'APPROVED' && (
                                 <div className="flex gap-2">
                                     <Button
-                                        onClick={() => handleVerification('REJECTED')}
+                                        onClick={() => handleVerification(KYCStatus.REJECTED)}
                                         variant="outline"
                                         className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                                         disabled={loading}
@@ -148,7 +149,7 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
                                         Reject
                                     </Button>
                                     <Button
-                                        onClick={() => handleVerification('APPROVED')}
+                                        onClick={() => handleVerification(KYCStatus.APPROVED)}
                                         className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
                                         disabled={loading}
                                     >
@@ -160,7 +161,7 @@ export function UserDetailsModal({ isOpen, onClose, user, creator, onUpdate }: U
                             {/* Already approved indicator or unverify option */}
                             {creator && kycStatus === 'APPROVED' && (
                                 <Button
-                                    onClick={() => handleVerification('REJECTED')}
+                                    onClick={() => handleVerification(KYCStatus.REJECTED)}
                                     variant="ghost"
                                     size="sm"
                                     className="text-red-500 hover:text-red-700 hover:bg-red-50"

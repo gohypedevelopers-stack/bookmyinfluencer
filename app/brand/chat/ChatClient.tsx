@@ -543,7 +543,7 @@ export default function ChatClient({
                 if (targetId) {
                     setJustUnlockedContractIds(prev => new Set(prev).add(targetId));
                 }
-                logDebug(`Funding successful. Status: ${result.newStatus}, Balance: ₹${result.newWalletBalance}`);
+                logDebug(`Funding successful. Status: ${(result as any).newStatus}, Balance: ₹${(result as any).newWalletBalance}`);
                 toast.success("Advance payment locked successfully. Chat is now enabled.");
                 router.refresh();
             } else {

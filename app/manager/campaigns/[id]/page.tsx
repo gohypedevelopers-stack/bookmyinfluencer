@@ -13,5 +13,10 @@ export default async function ManagerCampaignDetailsPage({ params }: { params: P
         return notFound();
     }
 
-    return <ManagerCampaignDetailsClient campaign={result.data} />;
+    return (
+        <ManagerCampaignDetailsClient
+            campaign={result.data.campaign}
+            auditLogs={result.data.auditLogs}
+        />
+    );
 }

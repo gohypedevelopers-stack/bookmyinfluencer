@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
     ShieldCheck,
@@ -11,7 +12,8 @@ import {
     LogOut,
     Search,
     Bell,
-    ChevronDown
+    ChevronDown,
+    Megaphone
 } from 'lucide-react';
 import { signOut } from "next-auth/react"
 
@@ -20,6 +22,19 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode
 }) {
+    const pathname = usePathname();
+
+    const isActive = (path: string) => {
+        if (path === '/admin' && pathname === '/admin') return true;
+        if (path !== '/admin' && pathname?.startsWith(path)) return true;
+        return false;
+    };
+
+    const linkClass = (path: string) => `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive(path)
+        ? 'bg-blue-50 text-blue-700 font-semibold'
+        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        }`;
+
     return (
         <div className="min-h-screen bg-gray-50 font-sans flex text-gray-900">
             {/* Sidebar */}
@@ -37,27 +52,31 @@ export default function AdminLayout({
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
-                    <Link href="/admin" className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-blue-50 text-blue-700 text-sm font-semibold transition-colors">
+                    <Link href="/admin" className={linkClass('/admin')}>
                         <LayoutDashboard className="w-4.5 h-4.5" />
                         Dashboard
                     </Link>
-                    <Link href="/admin/kyc" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-sm font-medium">
+                    <Link href="/admin/campaigns" className={linkClass('/admin/campaigns')}>
+                        <Megaphone className="w-4.5 h-4.5" />
+                        Campaigns
+                    </Link>
+                    <Link href="/admin/kyc" className={linkClass('/admin/kyc')}>
                         <ShieldCheck className="w-4.5 h-4.5" />
                         Verifications
                     </Link>
-                    <Link href="/admin/transactions" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-sm font-medium">
+                    <Link href="/admin/transactions" className={linkClass('/admin/transactions')}>
                         <ArrowLeftRight className="w-4.5 h-4.5" />
                         Transactions
                     </Link>
-                    <Link href="/admin/disputes" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-sm font-medium">
+                    <Link href="/admin/disputes" className={linkClass('/admin/disputes')}>
                         <AlertCircle className="w-4.5 h-4.5" />
                         Disputes
                     </Link>
-                    <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-sm font-medium">
+                    <Link href="/admin/settings" className={linkClass('/admin/settings')}>
                         <Settings className="w-4.5 h-4.5" />
                         Commission Settings
                     </Link>
-                    <Link href="/admin/users" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-sm font-medium">
+                    <Link href="/admin/users" className={linkClass('/admin/users')}>
                         <Users className="w-4.5 h-4.5" />
                         Users
                     </Link>

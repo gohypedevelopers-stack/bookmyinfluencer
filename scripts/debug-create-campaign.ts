@@ -1,6 +1,6 @@
 
 import { db } from "../lib/db";
-import { CampaignStatus } from "@prisma/client";
+import { CampaignStatus } from "../lib/enums";
 
 async function main() {
     console.log("Starting Debug: Create Campaign...");

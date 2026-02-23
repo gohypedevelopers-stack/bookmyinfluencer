@@ -58,6 +58,7 @@ interface Thread {
     isLastMessageMe?: boolean
     contractStatus?: string | null
     isCampaign?: boolean
+    brandId?: string | null // Added to fix build error
 }
 
 interface Message {

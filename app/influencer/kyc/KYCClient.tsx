@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { submitKYC } from './actions';
-import { KYCStatus } from '@prisma/client';
+import { KYCStatus } from '@/lib/enums';
 import { ShieldCheck, Upload, AlertCircle } from 'lucide-react';
 
 export default function KYCClient({ influencerId, currentStatus }: { influencerId: string, currentStatus: KYCStatus }) {

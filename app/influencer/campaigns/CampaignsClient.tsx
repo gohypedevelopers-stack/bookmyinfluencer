@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { updateCampaignInvitation } from "../actions";
-import { CampaignCandidate, Campaign, BrandProfile, CandidateStatus } from "@prisma/client";
+import { CampaignCandidate, Campaign, BrandProfile } from "@prisma/client";
+import { CandidateStatus } from "@/lib/enums";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, X, Clock, MessageSquare, Briefcase } from "lucide-react";
