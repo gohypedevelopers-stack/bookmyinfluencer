@@ -47,12 +47,18 @@ model BrandProfile {
   contracts      Contract[]
   
   // Onboarding Data
-  onboardingCompleted Boolean @default(false)
-  campaignType        String? // Store as JSON string
-  campaignBudget      String?
-  targetPlatforms     String? // Store as JSON string
+  onboardingCompleted  Boolean @default(false)
+  campaignType         String? // Store as JSON string
+  campaignBudget       String?
+  targetPlatforms      String? // Store as JSON string
   preferredCreatorType String?
-  campaignGoals       String?
+  campaignGoals        String?
+
+  // Creator Matching Preferences
+  minFollowers      Int?
+  maxFollowers      Int?
+  minPricePerPost   Float?
+  maxPricePerPost   Float?
 }
 
 model InfluencerProfile {

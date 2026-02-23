@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, SlidersHorizontal, Instagram, Youtube, TvMinimal, Music, MapPin, Bookmark, BookmarkCheck, TrendingUp, Users, DollarSign, Eye } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { Search, SlidersHorizontal, Instagram, Youtube, TvMinimal, Music, MapPin, Bookmark, BookmarkCheck, Sparkles, X } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 import { getPublicCreators } from '../actions';
-import { useEffect } from 'react';
 import { Slider } from "@/components/ui/slider";
 
 interface Influencer {
-    id: string; // Changed to string to match userId/uuid
+    id: string;
     dbId: string;
     name: string;
     handle: string;
@@ -28,10 +28,20 @@ interface Influencer {
     saved: boolean;
 }
 
-export default function InfluencerDiscovery() {
+function InfluencerDiscoveryInner() {
+    const searchParams = useSearchParams();
+    const fromOnboarding = searchParams.get('fromOnboarding') === '1';
+
+    // Read onboarding preferences from URL (followers in K)
+    const urlMinFollowers = searchParams.get('minFollowers') ? Math.round(Number(searchParams.get('minFollowers')) / 1000) : 0;
+    const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 1000;
+    const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 50;
+    const urlMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 5000;
+
+    const [showOnboardingBanner, setShowOnboardingBanner] = useState(fromOnboarding);
+
     const [selectedTab, setSelectedTab] = useState<'instagram' | 'youtube' | 'tv' | 'music'>('instagram');
     const [showFilters, setShowFilters] = useState(true);
-    // Data State
     const [allInfluencers, setAllInfluencers] = useState<Influencer[]>([]);
     const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -42,13 +52,13 @@ export default function InfluencerDiscovery() {
     const [totalItems, setTotalItems] = useState(0);
     const itemsPerPage = 9;
 
-    // Filters State
+    // Filters State — pre-seeded from onboarding if present
     const [selectedLocation, setSelectedLocation] = useState('India');
     const [selectedCity, setSelectedCity] = useState('Mumbai');
     const [selectedNiche, setSelectedNiche] = useState('All');
-    const [priceRange, setPriceRange] = useState([50, 5000]);
-    const [followersRange, setFollowersRange] = useState([0, 1000]); // in K
-    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([0, 1000]);
+    const [priceRange, setPriceRange] = useState([urlMinPrice, Math.min(urlMaxPrice, 5000)]);
+    const [followersRange, setFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
+    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
     const [showAllNiches, setShowAllNiches] = useState(false);
 
     // Debounce Followers Range
@@ -160,8 +170,20 @@ export default function InfluencerDiscovery() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-
+            {/* Onboarding Match Banner */}
+            {showOnboardingBanner && (
+                <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+                    <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Sparkles className="w-5 h-5 text-yellow-300" />
+                            <span className="font-medium">Matched for you — showing creators based on your preferences</span>
+                        </div>
+                        <button onClick={() => setShowOnboardingBanner(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Platform Tabs */}
             <div className="bg-white border-b border-gray-200">
@@ -556,5 +578,17 @@ export default function InfluencerDiscovery() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function InfluencerDiscovery() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-500 border-t-transparent" />
+            </div>
+        }>
+            <InfluencerDiscoveryInner />
+        </Suspense>
     );
 }

@@ -12,6 +12,10 @@ export async function submitBrandOnboarding(data: {
     platforms: string[];
     creatorType: string;
     campaignGoals: string;
+    minFollowers?: number;
+    maxFollowers?: number;
+    minPricePerPost?: number;
+    maxPricePerPost?: number;
 }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -19,26 +23,28 @@ export async function submitBrandOnboarding(data: {
     }
 
     try {
+        // Note: cast to `any` because prisma generate may not have updated the client types yet.
+        // The columns exist in the DB (db push succeeded).
+        const profileData: any = {
+            companyName: data.brandName,
+            campaignType: data.campaignType,
+            campaignBudget: data.budget,
+            targetPlatforms: JSON.stringify(data.platforms),
+            preferredCreatorType: data.creatorType,
+            campaignGoals: data.campaignGoals,
+            onboardingCompleted: true,
+            minFollowers: data.minFollowers ?? null,
+            maxFollowers: data.maxFollowers ?? null,
+            minPricePerPost: data.minPricePerPost ?? null,
+            maxPricePerPost: data.maxPricePerPost ?? null,
+        };
+
         await db.brandProfile.upsert({
             where: { userId: session.user.id },
-            update: {
-                companyName: data.brandName,
-                campaignType: data.campaignType, // Store directly as string or JSON needed?
-                campaignBudget: data.budget,
-                targetPlatforms: JSON.stringify(data.platforms),
-                preferredCreatorType: data.creatorType,
-                campaignGoals: data.campaignGoals,
-                onboardingCompleted: true,
-            },
+            update: profileData,
             create: {
                 userId: session.user.id,
-                companyName: data.brandName,
-                campaignType: data.campaignType,
-                campaignBudget: data.budget,
-                targetPlatforms: JSON.stringify(data.platforms),
-                preferredCreatorType: data.creatorType,
-                campaignGoals: data.campaignGoals,
-                onboardingCompleted: true,
+                ...profileData,
             }
         });
 

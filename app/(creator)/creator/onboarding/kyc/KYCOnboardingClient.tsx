@@ -76,7 +76,7 @@ export default function KYCOnboardingClient({ userId, existingKey }: KYCOnboardi
                         </p>
 
                         <Button
-                            onClick={() => router.push('/creator/onboarding/finalize')}
+                            onClick={() => router.push('/creator/onboarding/profile-setup')}
                             className="w-full h-14 bg-gray-900 hover:bg-black text-white font-bold text-lg rounded-2xl shadow-xl transition-all hover:scale-[1.02]"
                         >
                             Finalize Profile

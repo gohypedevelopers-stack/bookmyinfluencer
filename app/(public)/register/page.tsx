@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Layers, User, Phone, Instagram, Youtube, Mail, Lock, CheckCircle, ArrowRight, Loader2, Chrome, Github } from 'lucide-react';
 import { registerUserAction } from './actions';
+import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function RegisterPage() {
@@ -563,10 +564,18 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <button type="button" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => signIn('google', { callbackUrl: '/' })}
+                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                                >
                                     <Chrome className="w-5 h-5 text-slate-900" /> Google
                                 </button>
-                                <button type="button" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => signIn('github', { callbackUrl: '/' })}
+                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                                >
                                     <Github className="w-5 h-5 text-slate-900" /> GitHub
                                 </button>
                             </div>
