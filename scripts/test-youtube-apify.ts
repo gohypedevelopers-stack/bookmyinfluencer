@@ -1,4 +1,5 @@
 import { runApifyActor } from "@/lib/apify";
+import * as fs from 'fs';
 
 async function main() {
     const apifyToken = process.env.APIFY_TOKEN;
@@ -30,7 +31,6 @@ async function main() {
     console.log(JSON.stringify(result.data, null, 2));
 
     // Save to file for inspection
-    const fs = require('fs');
     fs.writeFileSync('youtube-apify-response.json', JSON.stringify(result.data, null, 2));
     console.log("\nSaved to youtube-apify-response.json");
 }

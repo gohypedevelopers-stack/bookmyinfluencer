@@ -28,7 +28,7 @@ async function main() {
 
         if (matches.length > 0) {
             console.log("Found YouTube avatar URLs:");
-            matches.forEach((url, i) => {
+            matches.forEach((url: string, i: number) => {
                 console.log(`${i + 1}. ${url}`);
             });
         } else {
@@ -36,9 +36,9 @@ async function main() {
         }
 
         // Also search for any avatar-related fields
-        const avatarFields = raw.match(/"avatar[^"]*":\s*"[^"]+"/g) || [];
+        const avatarFields: string[] = raw.match(/"avatar[^"]*":\s*"[^"]+"/g) || [];
         console.log("\n=== Avatar-related fields ===");
-        avatarFields.forEach(field => console.log(field));
+        avatarFields.forEach((field: string) => console.log(field));
     }
 }
 
