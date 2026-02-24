@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
-
 import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
+  // Fix: Silence "multiple lockfiles" workspace root warning by pinning Turbopack root
+  // to the actual project directory (avoids picking up C:\Users\User\package-lock.json).
+  turbopack: {
+    root: __dirname,
+  },
 
   images: {
     remotePatterns: [
