@@ -490,10 +490,11 @@ export async function approveDeliverableAndLock(contractId: string) {
         return await db.$transaction(async (tx) => {
             const contract = await tx.contract.findUnique({
                 where: { id: contractId },
-                include: {
-                    brand: true,
-                    candidate: { include: { campaign: true } },
-                    influencer: true
+                select: {
+                    id: true, brandId: true, totalAmount: true, candidateId: true, status: true,
+                    brand: { select: { userId: true } },
+                    candidate: { select: { campaignId: true, campaign: { select: { title: true } } } },
+                    influencer: { select: { userId: true } }
                 }
             });
             if (!contract) throw new Error("Contract not found");

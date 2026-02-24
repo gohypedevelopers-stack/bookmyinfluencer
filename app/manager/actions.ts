@@ -9,46 +9,36 @@ import { createNotification } from "@/lib/audit";
 
 export async function getManagerStats() {
     const session = await getServerSession(authOptions);
-    if (!session || !["MANAGER", "ADMIN"].includes(session.user?.role as string)) {
-        return { success: false, error: "Unauthorized" };
+    if (!session || !['MANAGER', 'ADMIN'].includes(session.user?.role as string)) {
+        return { success: false, error: 'Unauthorized' };
     }
 
     try {
-        const stats = {
-            activeCampaigns: 0,
-            pendingApprovals: 0,
-            completedCampaigns: 0
-        };
-
+        // Use slim queries — avoid pulling full campaign+contract+deliverable objects
         const assignments = await db.campaignAssignment.findMany({
             where: { managerId: session.user.id },
-            include: { campaign: true }
+            select: { campaignId: true }
         });
-
         const campaignIds = assignments.map(a => a.campaignId);
 
-        if (campaignIds.length > 0) {
-            const campaigns = await db.campaign.findMany({
-                where: { id: { in: campaignIds } },
-                include: { candidates: { include: { contract: { include: { deliverables: true } } } } }
-            });
-
-            stats.activeCampaigns = campaigns.filter(c => c.status === "ACTIVE").length;
-            stats.completedCampaigns = campaigns.filter(c => c.status === "COMPLETED").length;
-
-            for (const camp of campaigns) {
-                for (const cand of camp.candidates) {
-                    if (cand.contract?.deliverables) {
-                        const pending = cand.contract.deliverables.filter(d => d.status === "SUBMITTED").length;
-                        stats.pendingApprovals += pending;
-                    }
-                }
-            }
+        if (campaignIds.length === 0) {
+            return { success: true, data: { activeCampaigns: 0, pendingApprovals: 0, completedCampaigns: 0 } };
         }
 
-        return { success: true, data: stats };
+        const [activeCampaigns, completedCampaigns, pendingApprovals] = await Promise.all([
+            db.campaign.count({ where: { id: { in: campaignIds }, status: 'ACTIVE' } }),
+            db.campaign.count({ where: { id: { in: campaignIds }, status: 'COMPLETED' } }),
+            db.deliverable.count({
+                where: {
+                    status: 'SUBMITTED',
+                    contract: { candidate: { campaignId: { in: campaignIds } } }
+                }
+            })
+        ]);
+
+        return { success: true, data: { activeCampaigns, pendingApprovals, completedCampaigns } };
     } catch (error: any) {
-        console.error("Manager Stats Error:", error);
+        console.error('Manager Stats Error:', error);
         return { success: false, error: error.message };
     }
 }
@@ -62,16 +52,17 @@ export async function getManagerCampaigns() {
     try {
         const assignments = await db.campaignAssignment.findMany({
             where: { managerId: session.user.id },
-            include: {
+            select: {
                 campaign: {
-                    include: {
-                        brand: { include: { user: true } },
-                        candidates: {
-                            include: {
-                                influencer: { include: { user: true } },
-                                contract: true
-                            }
-                        }
+                    select: {
+                        id: true,
+                        title: true,
+                        status: true,
+                        budget: true,
+                        niche: true,
+                        createdAt: true,
+                        brand: { select: { id: true, companyName: true, user: { select: { name: true, image: true } } } },
+                        _count: { select: { candidates: true } }
                     }
                 }
             },
@@ -113,19 +104,26 @@ export async function getManagerCampaignDetails(id: string) {
         const campaign = await db.campaign.findUnique({
             where: { id },
             include: {
-                brand: { include: { user: true } },
-                assignment: { include: { manager: true } },
-                payouts: true, // Campaign level payouts
+                brand: { select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, email: true, image: true } } } },
+                assignment: { include: { manager: { select: { id: true, name: true, email: true } } } },
+                payouts: { select: { id: true, amount: true, paidAt: true, method: true, utr: true }, orderBy: { paidAt: 'desc' }, take: 20 },
                 candidates: {
                     include: {
-                        influencer: { include: { user: true, kyc: true } },
+                        influencer: {
+                            select: {
+                                id: true, userId: true, followers: true, engagementRate: true, platforms: true,
+                                user: { select: { id: true, name: true, email: true, image: true } },
+                                kyc: { select: { id: true, status: true } }
+                            }
+                        },
                         contract: {
                             include: {
                                 deliverables: true,
-                                transactions: { orderBy: { createdAt: 'desc' } }
+                                transactions: { select: { id: true, amount: true, status: true, createdAt: true }, orderBy: { createdAt: 'desc' }, take: 20 }
                             }
                         },
-                        chatThread: true,
+                        // messages not embedded — load per-thread lazily
+                        chatThread: { select: { id: true, participants: true, updatedAt: true } },
                         offer: true
                     }
                 }
@@ -242,9 +240,10 @@ export async function getManagerPayouts() {
             },
             include: {
                 campaign: { select: { title: true, brand: { select: { companyName: true } } } },
-                creator: { include: { user: { select: { name: true, email: true } } } }
+                creator: { select: { id: true, userId: true, user: { select: { name: true, email: true, image: true } } } }
             },
-            orderBy: { paidAt: 'desc' }
+            orderBy: { paidAt: 'desc' },
+            take: 100
         });
 
         return { success: true, data: payouts };
@@ -268,14 +267,15 @@ export async function getManagerThreads() {
                 messages: {
                     orderBy: { createdAt: 'desc' },
                     take: 1,
-                    include: { sender: true }
+                    select: { id: true, content: true, createdAt: true, senderId: true, sender: { select: { id: true, name: true, image: true } } }
                 },
                 candidate: {
-                    include: {
-                        influencer: { include: { user: true } },
-                        campaign: { include: { brand: { include: { user: true } } } },
-                        contract: true,
-                        offer: true
+                    select: {
+                        id: true,
+                        influencer: { select: { id: true, userId: true, user: { select: { id: true, name: true, image: true } } } },
+                        campaign: { select: { id: true, title: true, brand: { select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, image: true } } } } } },
+                        contract: { select: { id: true, status: true } },
+                        offer: { select: { id: true, amount: true, status: true } }
                     }
                 }
             },
@@ -324,8 +324,9 @@ export async function getManagerMessages(threadId: string) {
 
         const messages = await db.message.findMany({
             where: { threadId },
-            include: { sender: { select: { id: true, name: true, image: true } } },
-            orderBy: { createdAt: 'asc' }
+            select: { id: true, content: true, senderId: true, createdAt: true, read: true, status: true, attachmentUrl: true, attachmentType: true, sender: { select: { id: true, name: true, image: true } } },
+            orderBy: { createdAt: 'asc' },
+            take: 50  // Last 50 messages; client can load more
         });
 
         return { success: true, data: messages };

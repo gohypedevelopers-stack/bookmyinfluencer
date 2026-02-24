@@ -71,27 +71,28 @@ export default async function ChatPage({
         },
         include: {
             candidate: {
-                include: {
+                select: {
+                    id: true, status: true,
                     influencer: {
-                        include: {
+                        select: {
+                            id: true, userId: true,
                             user: { select: { id: true, name: true, image: true } }
                         }
                     },
-                    offer: true,
+                    offer: { select: { id: true, amount: true, status: true } },
                     campaign: { select: { id: true, title: true } },
                     contract: {
-                        include: {
-                            transactions: true // Needed to calculate advance amount
+                        select: {
+                            id: true, status: true,
+                            transactions: { select: { amount: true, status: true } }
                         }
                     }
                 }
             },
             messages: {
-                take: 1, // We only need the last message for the list
+                take: 1,
                 orderBy: { createdAt: 'desc' },
-                include: {
-                    sender: { select: { id: true, name: true, image: true } }
-                }
+                select: { id: true, content: true, createdAt: true, senderId: true, sender: { select: { id: true, name: true, image: true } } }
             }
         },
         orderBy: { updatedAt: 'desc' }
@@ -102,12 +103,13 @@ export default async function ChatPage({
     if (threadId) {
         const threadMessages = await db.message.findMany({
             where: { threadId },
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: 'desc' },
+            take: 50,  // Load most recent 50; older messages loaded on demand
             include: {
                 sender: { select: { id: true, name: true, image: true } }
             }
         });
-        activeThreadMessages = threadMessages;
+        activeThreadMessages = threadMessages.reverse(); // restore chronological order
     }
 
     // Map to shape expected by ChatClient
@@ -167,12 +169,13 @@ export default async function ChatPage({
     if (activeThread && !threadId && activeThreadMessages.length === 0) {
         const threadMessages = await db.message.findMany({
             where: { threadId: activeThread.id },
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
             include: {
                 sender: { select: { id: true, name: true, image: true } }
             }
         });
-        activeThreadMessages = threadMessages;
+        activeThreadMessages = threadMessages.reverse();
     }
 
     return (

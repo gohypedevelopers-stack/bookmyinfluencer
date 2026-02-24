@@ -11,7 +11,8 @@ export default async function AdminPayoutsPage() {
                 include: { user: true }
             }
         },
-        orderBy: { requestedAt: 'desc' }
+        orderBy: { requestedAt: 'desc' },
+        take: 100
     });
 
     return <AdminPayoutsClient payouts={payouts} />;

@@ -89,35 +89,24 @@ export async function getCreatorNotifications() {
     if (!userId) return { notifications: [], unreadMessageCount: 0 };
 
     try {
-        const [notifications, threads] = await Promise.all([
+        const [notifications, unreadMessageCount] = await Promise.all([
             db.notification.findMany({
                 where: {
                     userId: userId,
-                    read: false // Only fetch unread for the popover specific list? Or all? Usually popover shows all recent. 
-                    // The previous code fetched only unread: `read: false`. 
-                    // But usually notifications list shows history too. 
-                    // Let's keep `read: false` as per previous code to match "unread" logic, or maybe fetch recent 10?
-                    // Previous code: where: { userId, read: false }
+                    read: false
                 },
-                orderBy: { createdAt: 'desc' }
+                orderBy: { createdAt: 'desc' },
+                take: 20
             }),
-            db.chatThread.findMany({
+            db.message.count({
                 where: {
-                    participants: { contains: userId }
-                },
-                include: {
-                    messages: {
-                        where: {
-                            senderId: { not: userId },
-                            read: false
-                        },
-                        select: { id: true }
-                    }
+                    thread: { participants: { contains: userId } },
+                    senderId: { not: userId },
+                    read: false
                 }
             })
         ]);
 
-        const unreadMessageCount = threads.reduce((acc, thread) => acc + thread.messages.length, 0);
 
         return { notifications, unreadMessageCount };
     } catch (error) {
@@ -159,15 +148,18 @@ export async function getCreatorThreads() {
             include: {
                 messages: {
                     orderBy: { createdAt: 'desc' },
-                    take: 1
+                    take: 1,
+                    select: { id: true, content: true, createdAt: true, senderId: true }
                 },
                 candidate: {
-                    include: {
+                    select: {
+                        id: true,
                         contract: { select: { status: true } },
                         campaign: {
-                            include: {
+                            select: {
+                                id: true, title: true,
                                 brand: {
-                                    include: { user: true }
+                                    select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, image: true } } }
                                 }
                             }
                         }
@@ -194,7 +186,7 @@ export async function getCreatorThreads() {
             if (otherUserIds.length > 0) {
                 const users = await db.user.findMany({
                     where: { id: { in: otherUserIds } },
-                    include: { brandProfile: true }
+                    select: { id: true, name: true, image: true, brandProfile: { select: { id: true, companyName: true } } }
                 });
                 users.forEach(u => directUsersMap.set(u.id, u));
             }
@@ -257,11 +249,17 @@ export async function getThreadMessages(threadId: string) {
     try {
         const messages = await db.message.findMany({
             where: { threadId },
-            orderBy: { createdAt: 'asc' }, // Oldest first for chat
-            include: {
-                sender: true
+            orderBy: { createdAt: 'desc' },
+            take: 50,  // Most recent 50; older loaded on demand
+            select: {
+                id: true,
+                content: true,
+                senderId: true,
+                createdAt: true,
+                sender: { select: { id: true, name: true, image: true } }
             }
         });
+        messages.reverse(); // restore chronological order
 
         return messages.map(msg => ({
             id: msg.id,
@@ -590,9 +588,9 @@ export async function getCreatorEarnings() {
     try {
         const influencer = await db.influencerProfile.findUnique({
             where: { userId: userId },
-            include: {
-                user: true,
-                payouts: true // PayoutRequest (old flow / withdrawals)
+            select: {
+                id: true,
+                user: { select: { email: true } }
             }
         });
 
@@ -606,18 +604,21 @@ export async function getCreatorEarnings() {
 
         const payoutRecords = await db.payoutRecord.findMany({
             where: { creatorId: influencer.id },
-            include: {
+            select: {
+                id: true, amount: true, paidAt: true, method: true, utr: true,
                 campaign: { select: { title: true, brand: { select: { companyName: true } } } }
             },
-            orderBy: { paidAt: 'desc' }
+            orderBy: { paidAt: 'desc' },
+            take: 50
         });
 
         const contracts = await db.contract.findMany({
             where: { influencerId: influencer.id },
-            include: {
-                transactions: true, // EscrowTransaction
-                brand: { include: { user: true } }
-            }
+            select: {
+                id: true,
+                transactions: { select: { amount: true, status: true } }
+            },
+            take: 50
         });
 
         let lifetimeEarnings = 0;
@@ -886,25 +887,19 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
             });
 
             if (influencer) {
-                // Get contracts and their escrow transactions
-                const contracts = await db.contract.findMany({
+                // Sum released escrow via aggregate - much more efficient
+                const revenueAgg = await db.escrowTransaction.aggregate({
                     where: {
-                        influencerId: influencer.id,
-                        status: { in: ['ACTIVE', 'COMPLETED'] }
+                        contract: {
+                            influencerId: influencer.id,
+                            status: { in: ['ACTIVE', 'COMPLETED'] }
+                        },
+                        status: 'RELEASED',
+                        createdAt: { gte: startDate }
                     },
-                    include: {
-                        transactions: {
-                            where: {
-                                status: 'RELEASED',
-                                createdAt: { gte: startDate }
-                            }
-                        }
-                    }
+                    _sum: { amount: true }
                 });
-
-                // Sum released escrow
-                totalRevenue = contracts.reduce((sum, c) =>
-                    sum + c.transactions.reduce((tSum, t) => tSum + t.amount, 0), 0);
+                totalRevenue = revenueAgg._sum.amount || 0;
 
                 // Count active contracts
                 activeCollaborations = await db.contract.count({
