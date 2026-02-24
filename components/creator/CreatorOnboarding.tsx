@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
     ArrowRight, Check, ChevronLeft, Sparkles, Instagram, Youtube, Facebook,
     Twitter, Linkedin, Gamepad2, Dumbbell, Utensils, Laptop, Shirt,
-    GraduationCap, Globe, Heart, DollarSign, TrendingUp, User
+    GraduationCap, Globe, Heart, IndianRupee, TrendingUp, User, Zap
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { submitCreatorOnboarding } from "@/app/actions/onboarding";
@@ -18,6 +18,7 @@ type CreatorData = {
     niche: string
     followers: string
     engagement: string
+    minimumPrice: string
     rates: string
 }
 
@@ -28,8 +29,9 @@ const steps = [
     { id: 4, title: "Niche" },
     { id: 5, title: "Followers" },
     { id: 6, title: "Engagement" },
-    { id: 7, title: "Rates" },
-    { id: 8, title: "Success" }
+    { id: 7, title: "Min Price" },
+    { id: 8, title: "Rates" },
+    { id: 9, title: "Success" }
 ]
 
 export default function CreatorOnboarding() {
@@ -45,11 +47,12 @@ export default function CreatorOnboarding() {
         niche: "",
         followers: "",
         engagement: "",
+        minimumPrice: "",
         rates: ""
     })
 
     const handleNext = async () => {
-        if (currentStep === 7) {
+        if (currentStep === 8) {
             // Submitting data
             setIsSubmitting(true);
             const result = await submitCreatorOnboarding(formData);
@@ -151,7 +154,7 @@ export default function CreatorOnboarding() {
                 </div>
 
                 {/* Back Button */}
-                {currentStep > 1 && currentStep < 8 && (
+                {currentStep > 1 && currentStep < 9 && (
                     <button
                         onClick={handleBack}
                         className="absolute top-8 left-8 p-2 rounded-full hover:bg-white/10 transition-colors text-white/80"
@@ -423,7 +426,7 @@ export default function CreatorOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* Step 7: Rates */}
+                        {/* Step 7: Minimum Price */}
                         {currentStep === 7 && (
                             <motion.div
                                 key="step7"
@@ -434,15 +437,60 @@ export default function CreatorOnboarding() {
                                 animate="center"
                                 exit="exit"
                             >
+                                <div className="text-center space-y-3">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-emerald-400 to-teal-500 rounded-2xl rotate-3 shadow-lg mb-2">
+                                        <Zap className="w-8 h-8 text-white" />
+                                    </div>
+                                    <h2 className="text-3xl font-bold">Your Minimum Price?</h2>
+                                    <p className="text-white/70 text-base leading-relaxed max-w-sm mx-auto">
+                                        Setting a competitive minimum price boosts your visibility and increases your chances of brand collaborations & promotions.
+                                    </p>
+                                </div>
+
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 font-bold text-2xl">₹</span>
+                                    <input
+                                        type="number"
+                                        value={formData.minimumPrice}
+                                        onChange={(e) => updateData("minimumPrice", e.target.value)}
+                                        placeholder="e.g. 500"
+                                        className="w-full pl-16 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white"
+                                        autoFocus
+                                    />
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handleNext}
+                                    disabled={!formData.minimumPrice}
+                                    className="w-full py-5 bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl font-bold text-lg hover:border-white/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    Continue
+                                </motion.button>
+                            </motion.div>
+                        )}
+
+                        {/* Step 8: Rates */}
+                        {currentStep === 8 && (
+                            <motion.div
+                                key="step8"
+                                className="w-full max-w-md space-y-8"
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                            >
                                 <h2 className="text-3xl font-bold text-center">Starting Rates?</h2>
 
                                 <div className="relative">
-                                    <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 w-8 h-8" />
+                                    <IndianRupee className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 w-8 h-8" />
                                     <input
                                         type="number"
                                         value={formData.rates}
                                         onChange={(e) => updateData("rates", e.target.value)}
-                                        placeholder="100"
+                                        placeholder="1000"
                                         className="w-full pl-20 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white"
                                         autoFocus
                                     />
@@ -453,18 +501,23 @@ export default function CreatorOnboarding() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleNext}
-                                    disabled={!formData.rates}
-                                    className="w-full py-5 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-green-500/30 disabled:opacity-50 transition-all"
+                                    disabled={!formData.rates || isSubmitting}
+                                    className="w-full py-5 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-green-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                 >
-                                    Complete Setup
+                                    {isSubmitting ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Saving…
+                                        </>
+                                    ) : "Complete Setup"}
                                 </motion.button>
                             </motion.div>
                         )}
 
-                        {/* Step 8: Success */}
-                        {currentStep === 8 && (
+                        {/* Step 9: Success */}
+                        {currentStep === 9 && (
                             <motion.div
-                                key="step8"
+                                key="step9"
                                 className="flex flex-col items-center text-center space-y-8"
                                 custom={direction}
                                 variants={slideVariants}
