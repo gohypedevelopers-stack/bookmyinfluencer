@@ -11,14 +11,11 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full bg-white flex flex-col">
       <Navbar />
-      {/* Main Content Wrapper */}
-      <main id="main-content" className="flex-1 w-full">
-        <HeroSection />
-        <FeaturesSection />
-        <TalentSection />
-        <WorkflowSection />
-        <CallToAction />
-      </main>
+      <HeroSection />
+      <FeaturesSection />
+      <TalentSection />
+      <WorkflowSection />
+      <CallToAction />
       <Footer />
     </div>
   )
