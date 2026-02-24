@@ -187,18 +187,19 @@ export async function getAllCampaignsForAdmin() {
 
     try {
         const campaigns = await db.campaign.findMany({
-            include: {
-                brand: { include: { user: true } },
-                assignment: { include: { manager: true } },
-                candidates: {
-                    include: {
-                        influencer: {
-                            include: { user: true }
-                        }
-                    }
-                }
+            select: {
+                id: true,
+                title: true,
+                status: true,
+                budget: true,
+                createdAt: true,
+                niche: true,
+                brand: { select: { id: true, companyName: true, userId: true, user: { select: { name: true, email: true, image: true } } } },
+                assignment: { select: { managerId: true, manager: { select: { id: true, name: true, email: true } } } },
+                _count: { select: { candidates: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            take: 100
         });
         return { success: true, data: campaigns };
     } catch (error: any) {
@@ -337,27 +338,20 @@ export async function getAdminCampaignDetails(campaignId: string) {
         const campaign = await db.campaign.findUnique({
             where: { id: campaignId },
             include: {
-                brand: { include: { user: true } },
-                assignment: { include: { manager: true } },
-                payouts: true,
+                brand: { select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, email: true, image: true } } } },
+                assignment: { include: { manager: { select: { id: true, name: true, email: true } } } },
+                payouts: { select: { id: true, amount: true, paidAt: true, method: true, utr: true }, orderBy: { paidAt: 'desc' }, take: 20 },
                 candidates: {
                     include: {
-                        influencer: { include: { user: true } },
+                        influencer: { include: { user: { select: { id: true, name: true, email: true, image: true } } } },
                         contract: {
                             include: {
-                                transactions: true,
+                                transactions: { select: { id: true, amount: true, status: true, createdAt: true } },
                                 deliverables: true
                             }
                         },
-                        chatThread: {
-                            include: {
-                                messages: {
-                                    include: { sender: true },
-                                    orderBy: { createdAt: 'asc' },
-                                    take: 50
-                                }
-                            }
-                        },
+                        // Messages NOT included here — load per-thread via getAdminThreadMessages
+                        chatThread: { select: { id: true, participants: true, updatedAt: true } },
                         offer: true
                     }
                 }
@@ -366,33 +360,24 @@ export async function getAdminCampaignDetails(campaignId: string) {
 
         if (!campaign) return { success: false, error: "Campaign not found" };
 
-        // Fetch Audit Logs for this campaign
+        // Fetch Audit Logs for this campaign (capped)
         const auditLogs = await db.auditLog.findMany({
-            where: {
-                entity: "Campaign",
-                entityId: campaignId
-            },
+            where: { entity: "Campaign", entityId: campaignId },
             orderBy: { createdAt: 'desc' },
             take: 20
         });
 
-        // Fetch Payout Records including manual ones linked to campaign
+        // Payout Records (capped at 50)
         const payoutRecords = await db.payoutRecord.findMany({
-            where: { campaignId }, // Assuming PayoutRecord has campaignId or we filter by something else?
-            // Checking schema, PayoutRecord has campaignId. Correct.
-            include: {
-                creator: { include: { user: true } }
-            },
-            orderBy: { paidAt: 'desc' }
+            where: { campaignId },
+            select: { id: true, amount: true, paidAt: true, method: true, utr: true, creator: { select: { id: true, user: { select: { name: true, email: true } } } } },
+            orderBy: { paidAt: 'desc' },
+            take: 50
         });
 
         return {
             success: true,
-            data: {
-                campaign,
-                auditLogs,
-                payoutRecords
-            }
+            data: { campaign, auditLogs, payoutRecords }
         };
     } catch (error: any) {
         console.error("Get Campaign Details Error:", error);

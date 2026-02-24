@@ -407,21 +407,26 @@ export async function getPublicCreators(filter?: {
         // Fetch from Creator table (OTP auth system)
         const creators = await db.creator.findMany({
             where: creatorWhere,
-            include: {
-                user: true,
-                metrics: true,
-                selfReportedMetrics: true
+            select: {
+                id: true, userId: true, fullName: true, displayName: true,
+                niche: true, pricing: true, instagramUrl: true,
+                profileImageUrl: true, backgroundImageUrl: true, autoProfileImageUrl: true,
+                verificationStatus: true,
+                user: { select: { email: true } },
+                metrics: { select: { followersCount: true, engagementRate: true, viewsCount: true }, orderBy: { date: 'desc' }, take: 1 },
+                selfReportedMetrics: { select: { followersCount: true }, take: 1 }
             },
-            take: 50
+            take: 30
         });
 
-        // Fetch from InfluencerProfile table (NextAuth system)
         const influencerProfiles = await db.influencerProfile.findMany({
             where: influencerWhere,
-            include: {
-                user: true
+            select: {
+                id: true, userId: true, followers: true, engagementRate: true,
+                niche: true, platforms: true, bio: true,
+                user: { select: { id: true, name: true, image: true } }
             },
-            take: 50
+            take: 30
         });
 
         // Map Creator data to UI format
@@ -442,7 +447,7 @@ export async function getPublicCreators(filter?: {
             return {
                 id: c.userId,
                 dbId: c.id,
-                name: c.displayName || c.fullName || c.user?.name || "Influencer",
+                name: c.displayName || c.fullName || "Influencer",
                 handle: c.instagramUrl ? `@${c.instagramUrl.split('/').pop()}` : '@creator',
                 niche: c.niche || 'General',
                 location: 'India',
@@ -453,8 +458,8 @@ export async function getPublicCreators(filter?: {
                 verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
                 priceRange: formatPriceRange(c.pricing),
-                thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || c.user?.image || "",
-                profileImage: c.profileImageUrl || c.autoProfileImageUrl || c.user?.image || "",
+                thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
+                profileImage: c.profileImageUrl || c.autoProfileImageUrl || "",
                 bannerImage: c.backgroundImageUrl || null,
                 saved: false
             };
@@ -726,39 +731,30 @@ export async function getBrandStats() {
     try {
         const brand = await db.brandProfile.findUnique({
             where: { userId: session.user.id },
-            include: {
-                contracts: {
-                    include: { transactions: true }
-                },
-                campaigns: true
-            }
+            select: { id: true }
         });
 
         if (!brand) return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
 
-        // 1. Total Spent (Escrow Released + Funded?)
-        let totalSpent = 0;
-        let activeEscrow = 0;
+        // Use aggregate SUM — DB computes server-side, minimal transfer
+        const [releasedSum, fundedSum, completedCampaigns] = await Promise.all([
+            db.escrowTransaction.aggregate({
+                where: { contract: { brandId: brand.id }, status: EscrowTransactionStatus.RELEASED },
+                _sum: { amount: true }
+            }),
+            db.escrowTransaction.aggregate({
+                where: { contract: { brandId: brand.id }, status: EscrowTransactionStatus.FUNDED },
+                _sum: { amount: true }
+            }),
+            db.campaign.count({
+                where: { brandId: brand.id, status: CampaignStatus.COMPLETED }
+            })
+        ]);
 
-        brand.contracts.forEach(contract => {
-            contract.transactions.forEach(tx => {
-                if (tx.status === EscrowTransactionStatus.RELEASED) {
-                    totalSpent += tx.amount;
-                } else if (tx.status === EscrowTransactionStatus.FUNDED) {
-                    activeEscrow += tx.amount;
-                    totalSpent += tx.amount; // Count funded as spent/committed
-                }
-            });
-        });
+        const activeEscrow = fundedSum._sum.amount || 0;
+        const totalSpent = (releasedSum._sum.amount || 0) + activeEscrow;
 
-        // 3. Completed Campaigns
-        const completedCampaigns = brand.campaigns.filter(c => c.status === CampaignStatus.COMPLETED).length;
-
-        return {
-            totalSpent,
-            activeEscrow,
-            completedCampaigns
-        };
+        return { totalSpent, activeEscrow, completedCampaigns };
 
     } catch (error) {
         console.error("Stats Error", error);

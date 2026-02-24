@@ -6,9 +6,19 @@ export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
     const users = await db.user.findMany({
-        orderBy: {
-            createdAt: 'desc'
-        }
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            image: true,
+            passwordHash: true,
+            createdAt: true,
+            updatedAt: true,
+            lastSeenAt: true
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 200
     });
 
     const serializedUsers = users.map(user => ({
