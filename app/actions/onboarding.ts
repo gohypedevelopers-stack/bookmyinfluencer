@@ -23,36 +23,58 @@ export async function submitBrandOnboarding(data: {
     }
 
     try {
-        // Note: cast to `any` because prisma generate may not have updated the client types yet.
-        // The columns exist in the DB (db push succeeded).
-        const profileData: any = {
-            companyName: data.brandName,
-            campaignType: data.campaignType,
-            campaignBudget: data.budget,
-            targetPlatforms: JSON.stringify(data.platforms),
-            preferredCreatorType: data.creatorType,
-            campaignGoals: data.campaignGoals,
-            onboardingCompleted: true,
-            minFollowers: data.minFollowers ?? null,
-            maxFollowers: data.maxFollowers ?? null,
-            minPricePerPost: data.minPricePerPost ?? null,
-            maxPricePerPost: data.maxPricePerPost ?? null,
-        };
+        const userId = session.user.id;
 
-        await db.brandProfile.upsert({
-            where: { userId: session.user.id },
-            update: profileData,
-            create: {
-                userId: session.user.id,
-                ...profileData,
-            }
+        // Check if profile already exists
+        const existing = await db.brandProfile.findUnique({
+            where: { userId },
+            select: { id: true }
         });
+
+        if (existing) {
+            // Update existing profile — preserves all old data not included here
+            await db.brandProfile.update({
+                where: { userId },
+                data: {
+                    companyName: data.brandName,
+                    campaignType: data.campaignType,
+                    campaignBudget: data.budget,
+                    targetPlatforms: JSON.stringify(data.platforms),
+                    preferredCreatorType: data.creatorType,
+                    campaignGoals: data.campaignGoals,
+                    onboardingCompleted: true,
+                    minFollowers: data.minFollowers ?? null,
+                    maxFollowers: data.maxFollowers ?? null,
+                    minPricePerPost: data.minPricePerPost ?? null,
+                    maxPricePerPost: data.maxPricePerPost ?? null,
+                }
+            });
+        } else {
+            // Create new profile
+            await db.brandProfile.create({
+                data: {
+                    userId,
+                    companyName: data.brandName,
+                    campaignType: data.campaignType,
+                    campaignBudget: data.budget,
+                    targetPlatforms: JSON.stringify(data.platforms),
+                    preferredCreatorType: data.creatorType,
+                    campaignGoals: data.campaignGoals,
+                    onboardingCompleted: true,
+                    minFollowers: data.minFollowers ?? null,
+                    maxFollowers: data.maxFollowers ?? null,
+                    minPricePerPost: data.minPricePerPost ?? null,
+                    maxPricePerPost: data.maxPricePerPost ?? null,
+                }
+            });
+        }
 
         revalidatePath("/brand/dashboard");
         return { success: true };
-    } catch (error) {
-        console.error("Brand onboarding error:", error);
-        return { error: "Failed to save onboarding data" };
+    } catch (error: any) {
+        const msg = error?.message || String(error);
+        console.error("Brand onboarding error:", msg);
+        return { error: `Brand save failed: ${msg.substring(0, 300)}` };
     }
 }
 
@@ -64,6 +86,7 @@ export async function submitCreatorOnboarding(data: {
     niche: string;
     followers: string;
     engagement: string;
+    minimumPrice: string;
     rates: string;
 }) {
     const creatorId = await getAuthenticatedCreatorId();
@@ -72,29 +95,56 @@ export async function submitCreatorOnboarding(data: {
     }
 
     try {
-        // Update Creator model (linked to OtpUser)
-        await db.creator.update({
-            where: { id: creatorId },
-            data: {
-                fullName: data.fullName,
-                niche: data.niche,
-                platforms: JSON.stringify(data.platforms),
-                onboardingCompleted: true,
-                pricing: data.rates, // Mapping rates to pricing
-                // Store self-reported metrics?
-                // For now, these fields don't map directly to Creator columns except maybe constructing a JSON in a new field if needed.
-                // But we have `CreatorSelfReportedMetric` model.
-            }
+        // Check if creator already exists
+        const existing = await db.creator.findUnique({
+            where: { userId: creatorId },
+            select: { id: true }
         });
 
-        // Also try to update legacy InfluencerProfile if it exists (via User linked to same email)
-        // This is complex because we don't easily know the legacy User ID from OtpUser without email lookup.
-        // But for now, updating Creator is the priority for the new flow.
+        if (existing) {
+            // Update existing creator — preserves all old data not included here
+            await db.creator.update({
+                where: { userId: creatorId },
+                data: {
+                    fullName: data.fullName,
+                    niche: data.niche,
+                    platforms: JSON.stringify(data.platforms),
+                    onboardingCompleted: true,
+                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
+                    rawSocialData: JSON.stringify({
+                        selfReported: {
+                            followers: data.followers,
+                            engagement: data.engagement,
+                        }
+                    }),
+                }
+            });
+        } else {
+            // Create new creator record
+            await db.creator.create({
+                data: {
+                    userId: creatorId,
+                    fullName: data.fullName,
+                    niche: data.niche,
+                    platforms: JSON.stringify(data.platforms),
+                    onboardingCompleted: true,
+                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
+                    rawSocialData: JSON.stringify({
+                        selfReported: {
+                            followers: data.followers,
+                            engagement: data.engagement,
+                        }
+                    }),
+                }
+            });
+        }
 
         revalidatePath("/creator/dashboard");
         return { success: true };
-    } catch (error) {
-        console.error("Creator onboarding error:", error);
-        return { error: "Failed to save onboarding data" };
+    } catch (error: any) {
+        const msg = error?.message || String(error);
+        console.error("Creator onboarding error:", msg);
+        console.error("Creator ID used:", creatorId);
+        return { error: `Creator save failed: ${msg.substring(0, 300)}` };
     }
 }
