@@ -9,8 +9,17 @@ export async function registerUserAction(formData: FormData) {
         const password = formData.get("password") as string
         const fullName = formData.get("fullName") as string
         const mobileNumber = formData.get("mobileNumber") as string
+        const primaryPlatform = formData.get("primaryPlatform") as string
         const instagramUrl = formData.get("instagramUrl") as string
         const youtubeUrl = formData.get("youtubeUrl") as string
+
+        // Onboarding data
+        const platforms = formData.get("platforms") as string // JSON string array
+        const niche = formData.get("niche") as string
+        const followers = formData.get("followers") as string
+        const engagement = formData.get("engagement") as string
+        const minimumPrice = formData.get("minimumPrice") as string
+        const rates = formData.get("rates") as string
 
         // Validate required fields
         if (!email || !password || !fullName) {
@@ -42,14 +51,29 @@ export async function registerUserAction(formData: FormData) {
 
         const newUser = existingOtpUser;
 
-        // Create Creator profile linked to the OtpUser
+        // Create Creator profile linked to the OtpUser with BOTH registration + onboarding data
         await db.creator.create({
             data: {
                 userId: newUser.id,
                 fullName,
                 phone: mobileNumber,
                 instagramUrl: instagramUrl || null,
-                youtubeUrl: youtubeUrl || null
+                youtubeUrl: youtubeUrl || null,
+                // Onboarding data — set completed so middleware skips onboarding redirect
+                onboardingCompleted: true,
+                niche: niche || null,
+                platforms: platforms || null,
+                pricing: (minimumPrice || rates)
+                    ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
+                    : null,
+                rawSocialData: (followers || engagement)
+                    ? JSON.stringify({
+                        selfReported: {
+                            followers: followers || "",
+                            engagement: engagement || "",
+                        }
+                    })
+                    : null,
             }
         })
 

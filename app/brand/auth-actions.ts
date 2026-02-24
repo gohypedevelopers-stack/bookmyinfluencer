@@ -73,13 +73,25 @@ export async function verifyEmailOtp(email: string, otp: string) {
     return { success: true, message: "Email verified successfully!" };
 }
 
-// Register Brand
+// Register Brand (with merged onboarding data)
 export async function registerBrand(formData: FormData) {
     const companyName = formData.get('companyName') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const website = formData.get('website') as string;
     const industry = formData.get('industry') as string;
+
+    // Onboarding data
+    const brandName = formData.get('brandName') as string;
+    const campaignType = formData.get('campaignType') as string;
+    const campaignBudget = formData.get('campaignBudget') as string;
+    const targetPlatforms = formData.get('targetPlatforms') as string;
+    const preferredCreatorType = formData.get('preferredCreatorType') as string;
+    const campaignGoals = formData.get('campaignGoals') as string;
+    const minFollowers = formData.get('minFollowers') as string;
+    const maxFollowers = formData.get('maxFollowers') as string;
+    const minPricePerPost = formData.get('minPricePerPost') as string;
+    const maxPricePerPost = formData.get('maxPricePerPost') as string;
 
     if (!companyName || !email || !password) {
         return { success: false, error: "Company name, email, and password are required." };
@@ -97,18 +109,29 @@ export async function registerBrand(formData: FormData) {
 
         const hashedPassword = await hash(password, 12);
 
-        // Transactional create
+        // Transactional create with both registration + onboarding data
         const user = await db.user.create({
             data: {
-                name: companyName,
+                name: brandName || companyName,
                 email,
                 passwordHash: hashedPassword,
                 role: UserRole.BRAND,
                 brandProfile: {
                     create: {
-                        companyName,
-                        website,
-                        industry
+                        companyName: brandName || companyName,
+                        website: website || null,
+                        industry: industry || null,
+                        // Onboarding data — set completed so middleware skips redirect
+                        onboardingCompleted: true,
+                        campaignType: campaignType || null,
+                        campaignBudget: campaignBudget || null,
+                        targetPlatforms: targetPlatforms || null,
+                        preferredCreatorType: preferredCreatorType || null,
+                        campaignGoals: campaignGoals || null,
+                        minFollowers: minFollowers ? parseInt(minFollowers) : null,
+                        maxFollowers: maxFollowers ? parseInt(maxFollowers) : null,
+                        minPricePerPost: minPricePerPost ? parseFloat(minPricePerPost) : null,
+                        maxPricePerPost: maxPricePerPost ? parseFloat(maxPricePerPost) : null,
                     }
                 }
             }
