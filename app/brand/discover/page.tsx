@@ -22,6 +22,12 @@ interface Influencer {
     verified: boolean;
     tags: string[];
     priceRange: string;
+    price: number;
+    pricePost: number;
+    priceStory: number;
+    priceCollab: number;
+    priceType: string;
+    isApproved: boolean;
     thumbnail: string;
     profileImage: string;
     bannerImage: string | null;
@@ -124,20 +130,11 @@ function InfluencerDiscoveryInner() {
         }
 
         // Price
-        // Assuming priceRangeStr format "₹100-500" or similar in `inf.priceRange`
-        // We'll try to parse it. If logic is complex, might need robust parsing.
-        // For now, let's assume we filter if we can parse.
-        // If Price filter is critical, we need standardized price field.
-        // Checking `Influencer` interface: priceRange: string.
         results = results.filter(inf => {
-            if (!inf.priceRange) return true;
-            const prices = inf.priceRange.replace(/[^0-9-]/g, '').split('-').map(Number);
-            const minPrice = prices[0] || 0;
-            const maxPrice = prices[1] || minPrice;
-
-            // Check overlap
+            const price = inf.price || 0;
             const [filterMin, filterMax] = priceRange;
-            return Math.max(minPrice, filterMin) <= Math.min(maxPrice, filterMax);
+            if (filterMax === 5000) return price >= filterMin;
+            return price >= filterMin && price <= filterMax;
         });
 
         // Pagination
@@ -474,11 +471,24 @@ function InfluencerDiscoveryInner() {
                                                 )}
                                             </div>
 
-                                            {/* Footer */}
+                                            {/* Footer - multi-rate pricing */}
                                             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                                <div>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Starting From</p>
-                                                    <div className="font-bold text-gray-900 text-sm bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md inline-block">{influencer.priceRange}</div>
+                                                <div className="flex gap-2">
+                                                    {[
+                                                        { label: 'Story', val: influencer.priceStory },
+                                                        { label: 'Post', val: influencer.pricePost },
+                                                        { label: 'Collab', val: influencer.priceCollab },
+                                                    ].map(({ label, val }) => (
+                                                        <div key={label} className="text-center">
+                                                            <p className="text-[9px] text-gray-400 uppercase font-bold mb-0.5">{label}</p>
+                                                            <div className="font-bold text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md">
+                                                                {val > 0
+                                                                    ? (influencer.isApproved ? `₹${val}` : '★★★')
+                                                                    : <span className="text-gray-400">—</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                                 <Link
                                                     href={`/brand/discover/${influencer.id}`}

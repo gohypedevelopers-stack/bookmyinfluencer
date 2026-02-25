@@ -36,6 +36,9 @@ export default async function InfluencerProfilePage({
     let profile: any = profileData;
     if (profileData) {
         profile.kycStatus = profileData.kyc?.status || 'PENDING';
+        profile.isApproved = profile.kycStatus === 'APPROVED';
+        profile.price = (profileData as any).price || 0;
+        profile.priceType = (profileData as any).priceType || 'Per Post';
     }
 
     // 2. If not found, try to find in new Creator table (by ID or UserID)
@@ -84,6 +87,9 @@ export default async function InfluencerProfilePage({
                 followers: followers,
                 engagementRate: latestMetric?.engagementRate || null,
                 pricing: creator.pricing || null,
+                price: (creator as any).price || 0,
+                priceType: (creator as any).priceType || 'Per Post',
+                isApproved: creator.verificationStatus === 'APPROVED' || creator.verificationStatus === 'VERIFIED',
                 bannerImage: creator.backgroundImageUrl || null,
                 createdAt: creator.user.createdAt,
                 updatedAt: creator.user.createdAt,
@@ -99,6 +105,7 @@ export default async function InfluencerProfilePage({
                     updatedAt: creator.user.createdAt,
                     passwordHash: null,
                     kycStatus: creator.verificationStatus as any,
+                    isApproved: creator.verificationStatus === 'APPROVED' || creator.verificationStatus === 'VERIFIED',
                     lastSeenAt: null
                 }
             } as any;

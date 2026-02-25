@@ -63,6 +63,11 @@ export async function registerUserAction(formData: FormData) {
                 onboardingCompleted: true,
                 niche: niche || null,
                 platforms: platforms || null,
+                priceStory: formData.get("priceStory") ? parseInt(formData.get("priceStory") as string) : null,
+                pricePost: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : null,
+                priceCollab: formData.get("priceCollab") ? parseInt(formData.get("priceCollab") as string) : null,
+                price: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : (parseInt(rates) || null),
+                priceType: formData.get("priceType") as string || "Per Post",
                 pricing: (minimumPrice || rates)
                     ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
                     : null,
@@ -74,7 +79,7 @@ export async function registerUserAction(formData: FormData) {
                         }
                     })
                     : null,
-            }
+            } as any
         })
 
         // Also create a User record for NextAuth login

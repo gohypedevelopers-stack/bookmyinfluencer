@@ -11,7 +11,7 @@ export default function InfluencerProfileClient({
     profile,
     session
 }: {
-    profile: FullProfile;
+    profile: FullProfile & { isApproved?: boolean; price?: number; priceStory?: number; pricePost?: number; priceCollab?: number; priceType?: string };
     session: Session | null;
 }) {
     // Parsing pricing - it's stored as JSON string in SQLite
@@ -21,6 +21,12 @@ export default function InfluencerProfileClient({
     } catch {
         pricing = {};
     }
+
+    const priceTiers = [
+        { label: 'Story Rate', icon: 'photo_camera', color: 'emerald', val: profile.priceStory || 0, unit: 'story' },
+        { label: 'Post Rate', icon: 'payments', color: 'blue', val: profile.pricePost || profile.price || 0, unit: 'post', badge: 'Primary Rate' },
+        { label: 'Collab Rate', icon: 'handshake', color: 'purple', val: profile.priceCollab || 0, unit: 'collab', badge: 'Best Value' },
+    ];
 
     return (
         <div className="bg-gray-50 text-gray-900 antialiased min-h-screen">
@@ -172,40 +178,33 @@ export default function InfluencerProfileClient({
                                 <div className="lg:col-span-1">
                                     <div className="sticky top-24 space-y-6">
                                         <h2 className="text-xl font-bold text-gray-900 px-1">Service Pricing</h2>
-                                        {/* Pricing Card 1 */}
-                                        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-lg transition-all hover:border-teal-500/30 group">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
-                                                    <span className="material-symbols-outlined">amp_stories</span>
+                                        {priceTiers.map((tier) => (
+                                            <div key={tier.label} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-lg transition-all hover:border-teal-500/30 group relative overflow-hidden">
+                                                {tier.badge && (
+                                                    <div className="absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">{tier.badge}</div>
+                                                )}
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className={`bg-${tier.color}-50 text-${tier.color}-700 p-2 rounded-lg`}>
+                                                        <span className="material-symbols-outlined">{tier.icon}</span>
+                                                    </div>
                                                 </div>
-                                                <span className="bg-gray-100 text-gray-600 text-[10px] uppercase font-bold px-2 py-1 rounded">Popular</span>
-                                            </div>
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">Instagram Story</h3>
-                                            <div className="flex items-baseline gap-1 mb-4">
-                                                <span className="text-3xl font-extrabold text-teal-600">₹{pricing.story || 500}</span>
-                                                <span className="text-gray-500 text-sm">/ set</span>
-                                            </div>
-                                            <button className="w-full py-2.5 rounded-lg border-2 border-gray-100 text-gray-900 font-bold text-sm hover:border-teal-600 hover:text-teal-600 transition-colors">
-                                                Add to Campaign
-                                            </button>
-                                        </div>
-                                        {/* Pricing Card 2 */}
-                                        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-lg transition-all hover:border-teal-500/30 group relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">Best Value</div>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="bg-purple-50 text-purple-700 p-2 rounded-lg">
-                                                    <span className="material-symbols-outlined">movie</span>
+                                                <h3 className="text-lg font-bold text-gray-900 mb-1">{tier.label}</h3>
+                                                <div className="flex items-baseline gap-1 mb-4">
+                                                    <span className="text-3xl font-extrabold text-teal-600">
+                                                        {tier.val > 0
+                                                            ? (profile.isApproved ? `₹${tier.val}` : '★★★★')
+                                                            : <span className="text-gray-400 text-xl">Not set</span>
+                                                        }
+                                                    </span>
+                                                    {tier.val > 0 && (
+                                                        <span className="text-gray-500 text-sm">/ {tier.unit}</span>
+                                                    )}
                                                 </div>
+                                                <button className="w-full py-2.5 rounded-lg border-2 border-gray-100 text-gray-900 font-bold text-sm hover:border-teal-600 hover:text-teal-600 transition-colors">
+                                                    Add to Campaign
+                                                </button>
                                             </div>
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">Reel Production</h3>
-                                            <div className="flex items-baseline gap-1 mb-4">
-                                                <span className="text-3xl font-extrabold text-teal-600">₹{pricing.reel || 1200}</span>
-                                                <span className="text-gray-500 text-sm">/ video</span>
-                                            </div>
-                                            <button className="w-full py-2.5 rounded-lg bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-colors shadow-md">
-                                                Select Package
-                                            </button>
-                                        </div>
+                                        ))}
 
                                     </div>
                                 </div>
@@ -213,7 +212,7 @@ export default function InfluencerProfileClient({
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

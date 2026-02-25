@@ -411,11 +411,12 @@ export async function getPublicCreators(filter?: {
                 id: true, userId: true, fullName: true, displayName: true,
                 niche: true, pricing: true, instagramUrl: true,
                 profileImageUrl: true, backgroundImageUrl: true, autoProfileImageUrl: true,
-                verificationStatus: true,
+                verificationStatus: true, price: true, priceType: true,
+                priceStory: true, pricePost: true, priceCollab: true,
                 user: { select: { email: true } },
                 metrics: { select: { followersCount: true, engagementRate: true, viewsCount: true }, orderBy: { date: 'desc' }, take: 1 },
                 selfReportedMetrics: { select: { followersCount: true }, take: 1 }
-            },
+            } as any,
             take: 30
         });
 
@@ -423,9 +424,10 @@ export async function getPublicCreators(filter?: {
             where: influencerWhere,
             select: {
                 id: true, userId: true, followers: true, engagementRate: true,
-                niche: true, platforms: true, bio: true,
+                niche: true, platforms: true, bio: true, price: true, priceType: true,
+                priceStory: true, pricePost: true, priceCollab: true,
                 user: { select: { id: true, name: true, image: true } }
-            },
+            } as any,
             take: 30
         });
 
@@ -458,6 +460,12 @@ export async function getPublicCreators(filter?: {
                 verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
                 priceRange: formatPriceRange(c.pricing),
+                price: c.price || 0,
+                priceStory: c.priceStory || 0,
+                pricePost: c.pricePost || 0,
+                priceCollab: c.priceCollab || 0,
+                priceType: c.priceType || 'Per Post',
+                isApproved: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || "",
                 bannerImage: c.backgroundImageUrl || null,
@@ -492,6 +500,12 @@ export async function getPublicCreators(filter?: {
                 verified: inf.kycStatus === 'APPROVED',
                 tags: nicheArray.slice(0, 3),
                 priceRange: formatPriceRange(inf.pricing),
+                price: inf.price || 0,
+                priceStory: inf.priceStory || 0,
+                pricePost: inf.pricePost || 0,
+                priceCollab: inf.priceCollab || 0,
+                priceType: inf.priceType || 'Per Post',
+                isApproved: true, // Legacy profiles assumed approved for now or add logic
                 thumbnail: inf.user?.image || "",
                 profileImage: inf.user?.image || "",
                 bannerImage: null, // InfluencerProfile doesn't have a banner image field yet
@@ -554,8 +568,14 @@ export async function getPublicCreatorById(id: string) {
                 bannerImage: creator.backgroundImageUrl,
                 instagramUrl: creator.instagramUrl,
                 youtubeUrl: creator.youtubeUrl,
-                pricing: safeJsonParse(creator.pricing as string),
-                verificationStatus: creator.verificationStatus,
+                pricing: safeJsonParse((creator as any).pricing as string),
+                price: (creator as any).price || 0,
+                priceStory: (creator as any).priceStory || 0,
+                pricePost: (creator as any).pricePost || 0,
+                priceCollab: (creator as any).priceCollab || 0,
+                priceType: (creator as any).priceType || 'Per Post',
+                verificationStatus: (creator as any).verificationStatus,
+                isApproved: (creator as any).verificationStatus === 'APPROVED' || (creator as any).verificationStatus === 'VERIFIED',
                 stats: {
                     followers: primaryMetric?.followersCount || selfMetric?.followersCount || 0,
                     engagementRate: (primaryMetric?.engagementRate || 0),
@@ -586,8 +606,14 @@ export async function getPublicCreatorById(id: string) {
                     bannerImage: null,
                     instagramUrl: profile.instagramHandle ? `https://instagram.com/${profile.instagramHandle}` : null,
                     youtubeUrl: null,
-                    pricing: safeJsonParse(profile.pricing as string),
+                    pricing: safeJsonParse((profile as any).pricing as string),
+                    price: (profile as any).price || 0,
+                    priceStory: (profile as any).priceStory || 0,
+                    pricePost: (profile as any).pricePost || 0,
+                    priceCollab: (profile as any).priceCollab || 0,
+                    priceType: (profile as any).priceType || 'Per Post',
                     verificationStatus: 'APPROVED',
+                    isApproved: true,
                     stats: {
                         followers: profile.followers || 0,
                         engagementRate: (profile.engagementRate || 0),

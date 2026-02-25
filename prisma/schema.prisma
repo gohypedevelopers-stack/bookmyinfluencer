@@ -74,6 +74,11 @@ model InfluencerProfile {
   engagementRate  Float               @default(0)
   socialData      String?
   pricing         String?
+  price           Int?
+  priceStory      Int?
+  pricePost       Int?
+  priceCollab     Int?
+  priceType       String?             @default("Per Post")
   applications    CampaignCandidate[]
   contracts       Contract[]
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -350,6 +355,11 @@ model Creator {
   bio                  String?
   autoBio              String?                     @map("auto_bio")
   pricing              String?
+  price                Int?                        @map("price")
+  priceStory           Int?                        @map("price_story")
+  pricePost            Int?                        @map("price_post")
+  priceCollab          Int?                        @map("price_collab")
+  priceType            String?                     @default("Per Post") @map("price_type")
   mediaKit             String?                     @map("media_kit")
   rawSocialData        String?                     @map("raw_social_data")
   lastYoutubeFetchAt   DateTime?                   @map("last_youtube_fetch_at")
