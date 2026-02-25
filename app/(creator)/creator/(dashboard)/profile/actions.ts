@@ -131,11 +131,6 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
                 if (username.startsWith("@")) username = username.substring(1);
                 providerId = username;
             }
-        } else if (provider === "tiktok") {
-            if (!url.includes("tiktok.com/")) return { error: "Invalid TikTok URL" }
-            username = url.split("tiktok.com/")[1]?.split("/")[0] || "tiktok_user"
-            if (username.startsWith("@")) username = username.substring(1);
-            providerId = username
         } else if (provider === "twitch") {
             if (!url.includes("twitch.tv/")) return { error: "Invalid Twitch URL" }
             username = url.split("twitch.tv/")[1]?.split("/")[0] || "twitch_user"
@@ -201,12 +196,6 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
             if (socialType === "OAUTH") {
                 updateData.lastYoutubeFetchAt = new Date();
                 if (username) updateData.autoDisplayName = username.substring(0, 100);
-                if (finalEncodedData) updateData.rawSocialData = JSON.stringify(finalEncodedData);
-            }
-        } else if (provider === "tiktok") {
-            updateData.tiktokUrl = url;
-            if (socialType === "OAUTH") {
-                updateData.lastTiktokFetchAt = new Date();
                 if (finalEncodedData) updateData.rawSocialData = JSON.stringify(finalEncodedData);
             }
         } else if (provider === "twitch") {
