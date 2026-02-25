@@ -256,7 +256,6 @@ export default function CreatorOnboarding() {
                                     {[
                                         { id: "Instagram", icon: Instagram, color: "group-hover:text-pink-400" },
                                         { id: "YouTube", icon: Youtube, color: "group-hover:text-red-500" },
-                                        { id: "TikTok", label: "TikTok", color: "group-hover:text-cyan-400" }, // Custom
                                         { id: "Twitter (X)", icon: Twitter, color: "group-hover:text-blue-400" },
                                         { id: "LinkedIn", icon: Linkedin, color: "group-hover:text-blue-600" },
                                         { id: "Facebook", icon: Facebook, color: "group-hover:text-blue-500" },

@@ -43,7 +43,6 @@ const platforms = [
     { value: '', label: 'Select Platform' },
     { value: 'instagram', label: 'Instagram' },
     { value: 'youtube', label: 'YouTube' },
-    { value: 'tiktok', label: 'TikTok' },
     { value: 'twitter', label: 'Twitter/X' },
     { value: 'linkedin', label: 'LinkedIn' },
     { value: 'facebook', label: 'Facebook' },
@@ -1147,7 +1146,6 @@ export default function RegisterPage() {
                                     {[
                                         { id: "Instagram", icon: Instagram, activeColor: "text-pink-500" },
                                         { id: "YouTube", icon: Youtube, activeColor: "text-red-500" },
-                                        { id: "TikTok", label: "TikTok", activeColor: "text-cyan-500" },
                                         { id: "Twitter (X)", icon: Twitter, activeColor: "text-blue-400" },
                                         { id: "LinkedIn", icon: Linkedin, activeColor: "text-blue-700" },
                                         { id: "Facebook", icon: Facebook, activeColor: "text-blue-600" },

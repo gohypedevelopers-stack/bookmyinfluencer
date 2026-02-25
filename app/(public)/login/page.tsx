@@ -238,20 +238,13 @@ export default function LoginPage() {
                             <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400 font-medium">Or continue with</span></div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3">
                             <button
                                 type="button"
                                 onClick={() => signIn('google', { callbackUrl: '/' })}
                                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
                             >
                                 <Chrome className="w-5 h-5 text-slate-900" /> Google
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => signIn('github', { callbackUrl: '/' })}
-                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
-                            >
-                                <Github className="w-5 h-5 text-slate-900" /> GitHub
                             </button>
                         </div>
                     </form>

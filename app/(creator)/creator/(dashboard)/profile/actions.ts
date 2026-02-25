@@ -8,7 +8,7 @@ import { runApifyActor } from "@/lib/apify";
 import { normalizeYoutubeMetrics, parseYoutubeChannel } from "@/lib/metrics-util";
 
 // Generic function to update any social profile (Instagram, YouTube, etc.)
-export async function updateSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch", url: string, followersCount: number = 0) {
+export async function updateSocialProfile(provider: "instagram" | "youtube" | "twitch", url: string, followersCount: number = 0) {
     try {
         const userId = await getAuthenticatedCreatorId()
         if (!userId) {
@@ -242,7 +242,7 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
     }
 }
 
-export async function disconnectSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch") {
+export async function disconnectSocialProfile(provider: "instagram" | "youtube" | "twitch") {
     try {
         const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
@@ -271,7 +271,7 @@ export async function disconnectSocialProfile(provider: "instagram" | "youtube" 
         const updateData: any = {}
         if (provider === "instagram") updateData.instagramUrl = null
         if (provider === "youtube") updateData.youtubeUrl = null
-        if (provider === "tiktok") updateData.tiktokUrl = null
+
 
         await db.creator.update({
             where: { id: creator.id },
@@ -323,7 +323,7 @@ export async function syncAllSocialData() {
             let url = "";
             if (account.provider === "instagram") url = creator.instagramUrl || "";
             if (account.provider === "youtube") url = creator.youtubeUrl || "";
-            if (account.provider === "tiktok") url = (creator as any).tiktokUrl || "";
+
             if (account.provider === "twitch") url = (creator as any).twitchUrl || "";
 
             if (url) {
