@@ -31,35 +31,24 @@ export async function registerUserAction(formData: FormData) {
             where: { email },
             include: { creator: true }
         })
-        const existingUser = await db.user.findUnique({ where: { email } })
-
-        if (existingUser) {
-            throw new Error("User already exists. Please login.")
-        }
-
-        if (existingOtpUser && existingOtpUser.creator) {
-            throw new Error("Creator account already exists. Please login.")
-        }
-
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 10)
 
         // Ensure the user has verified their email via OTP
         if (!existingOtpUser || !existingOtpUser.verifiedAt) {
             throw new Error("Phone/Email verification required. Please verify your email first.")
         }
 
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 10)
         const newUser = existingOtpUser;
 
-        // Create Creator profile linked to the OtpUser with BOTH registration + onboarding data
-        await db.creator.create({
-            data: {
-                userId: newUser.id,
+        // Create or Update Creator profile
+        await db.creator.upsert({
+            where: { userId: newUser.id },
+            update: {
                 fullName,
                 phone: mobileNumber,
                 instagramUrl: instagramUrl || null,
                 youtubeUrl: youtubeUrl || null,
-                // Onboarding data — set completed so middleware skips onboarding redirect
                 onboardingCompleted: true,
                 niche: niche || null,
                 platforms: platforms || null,
@@ -79,18 +68,50 @@ export async function registerUserAction(formData: FormData) {
                         }
                     })
                     : null,
-            } as any
-        })
+            },
+            create: {
+                userId: newUser.id,
+                fullName,
+                phone: mobileNumber,
+                instagramUrl: instagramUrl || null,
+                youtubeUrl: youtubeUrl || null,
+                onboardingCompleted: true,
+                niche: niche || null,
+                platforms: platforms || null,
+                priceStory: formData.get("priceStory") ? parseInt(formData.get("priceStory") as string) : null,
+                pricePost: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : null,
+                priceCollab: formData.get("priceCollab") ? parseInt(formData.get("priceCollab") as string) : null,
+                price: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : (parseInt(rates) || null),
+                priceType: formData.get("priceType") as string || "Per Post",
+                pricing: (minimumPrice || rates)
+                    ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
+                    : null,
+                rawSocialData: (followers || engagement)
+                    ? JSON.stringify({
+                        selfReported: {
+                            followers: followers || "",
+                            engagement: engagement || "",
+                        }
+                    })
+                    : null,
+            }
+        });
 
-        // Also create a User record for NextAuth login
-        await db.user.create({
-            data: {
+        // Create or Update User record for NextAuth login
+        await db.user.upsert({
+            where: { email },
+            update: {
+                name: fullName,
+                passwordHash,
+                role: "INFLUENCER"
+            },
+            create: {
                 email,
                 name: fullName,
                 passwordHash,
                 role: "INFLUENCER"
             }
-        })
+        });
 
         return { success: true, email }
     } catch (error: any) {

@@ -163,7 +163,7 @@ export default function BrandRegisterPage() {
     // Registration data
     const [formData, setFormData] = useState({
         companyName: '',
-        industry: '',
+        industries: [] as string[],
         website: '',
         email: '',
         password: '',
@@ -259,7 +259,7 @@ export default function BrandRegisterPage() {
         fd.append('email', formData.email);
         fd.append('password', formData.password);
         fd.append('website', formData.website);
-        fd.append('industry', formData.industry);
+        fd.append('industry', formData.industries.join(', '));
         // Onboarding data
         fd.append('brandName', onboardingData.brandName || formData.companyName);
         fd.append('campaignType', onboardingData.campaignType);
@@ -285,7 +285,7 @@ export default function BrandRegisterPage() {
     // Validation
     const canProceed = (): boolean => {
         switch (currentStep) {
-            case 1: return !!formData.companyName;
+            case 1: return !!formData.companyName && formData.industries.length > 0;
             case 2: return emailVerified;
             case 3: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 8 && formData.agreeToTerms;
             case 4: return true;
@@ -492,17 +492,87 @@ export default function BrandRegisterPage() {
                                 {/* Industry */}
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Industry Type</label>
-                                    <div className="relative">
-                                        <select name="industry" value={formData.industry} onChange={handleInputChange}
-                                            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
-                                            <option value="" style={{ background: '#ffffff', color: '#94a3b8' }}>Select your industry</option>
-                                            {['Technology', 'Fashion & Apparel', 'Beauty & Cosmetics', 'Health & Wellness', 'Food & Beverage', 'Finance', 'Education', 'Entertainment', 'Travel', 'Other'].map(opt => (
-                                                <option key={opt} value={opt.toLowerCase()} style={{ background: '#ffffff', color: '#334155' }}>{opt}</option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
+                                    <div className="space-y-4">
+                                        {/* Industry Dropdown */}
+                                        <div className="relative">
+                                            <select
+                                                name="industrySelect"
+                                                value=""
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val && !formData.industries.includes(val)) {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            industries: [...prev.industries, val]
+                                                        }));
+                                                    }
+                                                }}
+                                                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option value="" style={{ background: '#ffffff', color: '#94a3b8' }}>Select existing industry</option>
+                                                {['Technology', 'Fashion & Apparel', 'Beauty & Cosmetics', 'Health & Wellness', 'Food & Beverage', 'Finance', 'Education', 'Entertainment', 'Travel'].map(opt => (
+                                                    <option key={opt} value={opt} style={{ background: '#ffffff', color: '#334155' }}>{opt}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
+                                            </div>
                                         </div>
+
+                                        {/* Custom Industry Input */}
+                                        <div className="relative group">
+                                            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                                            <input
+                                                type="text"
+                                                placeholder="Add custom industry (press Enter)"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        const target = e.target as HTMLInputElement;
+                                                        const val = target.value.trim();
+                                                        if (val && !formData.industries.includes(val)) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                industries: [...prev.industries, val]
+                                                            }));
+                                                            target.value = '';
+                                                        }
+                                                    }
+                                                }}
+                                                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm font-bold placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all"
+                                            />
+                                        </div>
+
+                                        {/* Selection Chips */}
+                                        <AnimatePresence>
+                                            {formData.industries.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {formData.industries.map((ind) => (
+                                                        <motion.div
+                                                            key={ind}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            exit={{ opacity: 0, scale: 0.8 }}
+                                                            className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl group"
+                                                        >
+                                                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">{ind}</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        industries: prev.industries.filter(i => i !== ind)
+                                                                    }));
+                                                                }}
+                                                                className="text-blue-400 hover:text-blue-600 transition-colors"
+                                                            >
+                                                                <Zap size={10} className="fill-current" />
+                                                            </button>
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
 
