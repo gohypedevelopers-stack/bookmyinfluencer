@@ -142,7 +142,7 @@ const NextButton = ({
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         disabled={disabled}
-        className="group relative w-full py-4.5 text-white font-black text-base rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_20px_40px_-12px_rgba(236,72,153,0.3)]"
+        className="group relative w-full py-3 text-white font-black text-sm rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_20px_40px_-12px_rgba(236,72,153,0.3)]"
     >
         <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-500 group-hover:scale-105 transition-transform duration-500" />
 
@@ -153,7 +153,7 @@ const NextButton = ({
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
         />
 
-        <div className="relative flex items-center justify-center gap-2 py-4 z-20">
+        <div className="relative flex items-center justify-center gap-2 py-2 z-20">
             {btnLoading ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
             ) : (
