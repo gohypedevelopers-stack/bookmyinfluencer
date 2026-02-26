@@ -32,39 +32,36 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { chi
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="w-full"
     >
-        <div className="w-full max-w-md mx-auto rounded-[2rem] shadow-2xl overflow-hidden relative group p-[1px] border border-slate-200/50">
-
-
-            <div className="w-full h-full rounded-[1.9rem] overflow-hidden"
+        <div className="w-full max-w-md mx-auto rounded-[2.5rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.08)] overflow-hidden relative group p-[2px] bg-gradient-to-br from-white/80 via-white/40 to-white/80 border border-white/50">
+            <div className="w-full h-full rounded-[2.4rem] overflow-hidden"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.98)',
-                    backdropFilter: 'blur(32px)',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(40px)',
                 }}>
                 {/* Card Header */}
-                <div className="px-6 py-5 flex items-center gap-3 border-b border-slate-100"
-                    style={{ background: 'white' }}>
-                    <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <div className="px-8 py-6 flex items-center gap-4 border-b border-slate-50/50"
+                    style={{ background: 'rgba(255, 255, 255, 0.5)' }}>
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/10">
                         <Target className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <span className="text-slate-900 font-black text-sm tracking-tighter uppercase italic block leading-tight">BookMyInfluencers</span>
+                        <span className="text-slate-900 font-black text-sm tracking-tighter uppercase block leading-tight">BookMyInfluencers</span>
                         <span className="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em]">Brand Solutions</span>
                     </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-[3px] bg-slate-100 relative">
+                <div className="w-full h-[4px] bg-slate-50 relative">
                     <motion.div
-                        className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500"
+                        className="h-full bg-gradient-to-r from-blue-500 via-indigo-600 to-cyan-400"
                         initial={{ width: "0%" }}
                         animate={{ width: `${progressPercentage}%` }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        transition={{ duration: 0.6, ease: "circOut" }}
                     />
-                    <div className="absolute right-0 top-0 w-12 h-full bg-gradient-to-l from-white/20 to-transparent" />
                 </div>
 
                 {/* Card Body */}
-                <div className="p-6 sm:p-10 text-slate-800">
+                <div className="p-8 sm:p-10 text-slate-800">
                     {children}
                 </div>
             </div>
@@ -85,14 +82,22 @@ const NextButton = ({
     loading?: boolean;
 }) => (
     <motion.button
-        whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(59, 130, 246, 0.4)' }}
+        whileHover={{ scale: 1.01, translateY: -2 }}
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         disabled={disabled}
-        className="group relative w-full py-4 text-white font-black text-base rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-2xl"
+        className="group relative w-full py-4.5 text-white font-black text-base rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_20px_40px_-12px_rgba(59,130,246,0.3)]"
     >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-600 to-cyan-500 group-hover:opacity-90 transition-opacity" />
-        <div className="relative flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 group-hover:scale-105 transition-transform duration-500" />
+
+        {/* Shine Animation */}
+        <motion.div
+            className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 z-10"
+            animate={{ left: ['-100%', '200%'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+        />
+
+        <div className="relative flex items-center justify-center gap-2 py-4 z-20">
             {btnLoading ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
             ) : (
@@ -100,6 +105,36 @@ const NextButton = ({
             )}
         </div>
     </motion.button>
+);
+
+const GlassIcon = ({ children, color = "blue", size = "large" }: { children: React.ReactNode, color?: string, size?: "small" | "large" }) => (
+    <div className={`relative ${size === 'large' ? 'w-48 h-48' : 'w-16 h-16'} flex items-center justify-center group`}>
+        {/* Outer Deep Glow */}
+        <div className={`absolute inset-[-20%] blur-[80px] opacity-15 bg-${color}-400 rounded-full group-hover:opacity-25 transition-opacity duration-700`} />
+
+        {/* Refined Glass Plate with Multiple Layers */}
+        <div className="absolute inset-0 rounded-[2.5rem] bg-white/20 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+            {/* Glossy Refraction Layer */}
+            <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-40 transform rotate-[15deg]" />
+
+            {/* Inner Glow Stripe */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+            {/* Side Glow Stripe */}
+            <div className="absolute top-0 right-0 h-full w-[1px] bg-gradient-to-b from-transparent via-white/40 to-transparent" />
+        </div>
+
+        {/* Floating Aura for Icon */}
+        <div className={`absolute inset-[15%] rounded-[2rem] blur-2xl opacity-20 bg-${color}-400 group-hover:scale-110 transition-transform duration-700`} />
+
+        {/* High-Reflect Shadow */}
+        <div className="absolute bottom-[5%] left-[10%] right-[10%] h-[15%] rounded-full bg-slate-900/10 blur-xl translate-z-[-20px]" />
+
+        {/* Content */}
+        <div className="relative z-10 select-none transform transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+            {children}
+        </div>
+    </div>
 );
 
 const TOTAL_STEPS = 12;
@@ -300,25 +335,32 @@ export default function BrandRegisterPage() {
     ) : null;
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-            {/* === PREMIUM 3D BRAND BACKGROUND === */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#f8fafc]">
-                {/* Drifting Neon Beams */}
-                <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] animate-drift" />
-                <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[140px] animate-drift-slow" />
+        <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+            {/* === PREMIUM MESH BACKGROUND === */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                {/* Mesh Gradient Blobs */}
+                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-400/10 rounded-full blur-[120px] animate-blob" />
+                <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] bg-indigo-400/10 rounded-full blur-[120px] animate-blob animation-delay-2000" />
+                <div className="absolute bottom-[-10%] left-[20%] w-[55%] h-[55%] bg-cyan-400/10 rounded-full blur-[120px] animate-blob animation-delay-4000" />
+                <div className="absolute bottom-[10%] right-[10%] w-[45%] h-[45%] bg-blue-500/5 rounded-full blur-[120px] animate-blob" />
+
+                {/* Noise Texture Overlay */}
+                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
 
                 <style jsx>{`
-                    @keyframes drift {
-                        0%, 100% { transform: translate(0, 0) scale(1) }
-                        50% { transform: translate(100px, 50px) scale(1.1) }
+                    @keyframes blob {
+                        0% { transform: translate(0px, 0px) scale(1); }
+                        33% { transform: translate(30px, -50px) scale(1.1); }
+                        66% { transform: translate(-20px, 20px) scale(0.9); }
+                        100% { transform: translate(0px, 0px) scale(1); }
                     }
-                    @keyframes drift-slow {
-                        0%, 100% { transform: translate(0, 0) scale(1.1) }
-                        50% { transform: translate(-80px, -40px) scale(1) }
+                    .animation-delay-2000 { animation-delay: 2s; }
+                    .animation-delay-4000 { animation-delay: 4s; }
+                    .animate-blob {
+                        animation: blob 15s infinite alternate ease-in-out;
                     }
                 `}</style>
 
-                {/* 3D Animated Objects Layer */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -333,49 +375,38 @@ export default function BrandRegisterPage() {
                             <motion.div
                                 animate={{
                                     y: [0, -40, 0],
-                                    rotateY: [0, 360],
-                                    rotateZ: [5, -5, 5]
+                                    rotateY: [0, 15, -15, 0],
+                                    rotateX: [0, 10, -10, 0],
                                 }}
-                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[12%] left-[8%] w-40 h-40 flex items-center justify-center transition-all duration-1000"
+                                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute top-[12%] left-[8%] z-0"
                             >
-                                <div className="relative w-full h-full flex items-center justify-center">
-                                    <div className="absolute inset-0 blur-[60px] opacity-20 bg-blue-400 rounded-full animate-pulse" />
+                                <GlassIcon color="blue">
                                     {currentStep <= 4 ? (
-                                        <Rocket className="w-20 h-20 text-blue-600 drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]" />
+                                        <div className="text-7xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 20px rgba(59,130,246,0.3))' }}>{"\uD83D\uDE80"}</div>
                                     ) : (
-                                        <div className="relative flex items-center justify-center">
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400 via-blue-500 to-indigo-600 rounded-[2rem] blur-xl opacity-50" />
-                                            <Target className="w-20 h-20 text-white p-4 rounded-[1.8rem] bg-gradient-to-tr from-cyan-400 via-blue-500 to-indigo-600 shadow-2xl relative z-10" />
-                                        </div>
+                                        <div className="text-6xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 20px rgba(6,182,212,0.3))' }}>{"\uD83C\uDFAF"}</div>
                                     )}
-                                </div>
+                                </GlassIcon>
                             </motion.div>
 
                             {/* Bottom Right - Dynamic Object */}
                             <motion.div
                                 animate={{
                                     y: [0, 50, 0],
-                                    rotateX: [0, 360],
-                                    rotateY: [180, -180]
+                                    rotateX: [0, 15, -15, 0],
+                                    rotateY: [0, -10, 10, 0],
                                 }}
-                                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute bottom-[15%] right-[10%] w-48 h-48"
+                                transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute bottom-[10%] right-[10%] z-0"
                             >
-                                <div className="relative w-full h-full flex items-center justify-center">
-                                    <div className="absolute inset-0 blur-[80px] opacity-15 bg-cyan-400 rounded-full" />
+                                <GlassIcon color="cyan">
                                     {currentStep <= 4 ? (
-                                        <div className="w-24 h-24 rounded-3xl border-4 border-cyan-400/50 flex items-center justify-center relative overflow-hidden group">
-                                            <div className="absolute inset-0 bg-cyan-400/10 backdrop-blur-md" />
-                                            <Layers className="relative w-12 h-12 text-cyan-500" />
-                                        </div>
+                                        <div className="text-5xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 15px rgba(6,182,212,0.3))' }}>{"\uD83D\uDCCA"}</div>
                                     ) : (
-                                        <div className="w-28 h-28 bg-white/50 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-6 shadow-xl overflow-hidden group">
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent" />
-                                            <Megaphone className="w-full h-full text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-                                        </div>
+                                        <div className="text-6xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 15px rgba(59,130,246,0.3))' }}>{"\uD83D\uDCE2"}</div>
                                     )}
-                                </div>
+                                </GlassIcon>
                             </motion.div>
 
                             {/* Floating Kinetic Growth Particles */}
@@ -403,9 +434,13 @@ export default function BrandRegisterPage() {
                                     className="absolute"
                                 >
                                     {i % 2 === 0 ? (
-                                        <TrendingUp className="w-6 h-6 text-blue-400 opacity-40" />
+                                        <GlassIcon color="blue" size="small">
+                                            <div className="text-xl">{"\uD83D\uDCC8"}</div>
+                                        </GlassIcon>
                                     ) : (
-                                        <Sparkles className="w-5 h-5 text-cyan-400 opacity-30" />
+                                        <GlassIcon color="cyan" size="small">
+                                            <div className="text-lg">{"\u2728"}</div>
+                                        </GlassIcon>
                                     )}
                                 </motion.div>
                             ))}
@@ -438,7 +473,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight">Enter brand details</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Enter brand details</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Phase 1: Registration</p>
                                 </div>
                                 <ErrorDisplay />
@@ -486,7 +521,7 @@ export default function BrandRegisterPage() {
 
                                 <p className="text-center text-xs text-slate-400 font-bold">
                                     MEMBER ALREADY?{' '}
-                                    <Link href="/brand/login" className="text-blue-600 hover:text-blue-500 transition-colors tracking-tighter uppercase italic">Sign In Here →</Link>
+                                    <Link href="/brand/login" className="text-blue-600 hover:text-blue-500 transition-colors tracking-tighter uppercase">Sign In Here →</Link>
                                 </p>
                             </div>
                         </CardWrapper>
@@ -497,7 +532,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight">Verify company email</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Verify company email</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Security Check</p>
                                 </div>
                                 <ErrorDisplay />
@@ -568,7 +603,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight">Create secure password</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Create secure password</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Finalize Account</p>
                                 </div>
                                 <ErrorDisplay />
@@ -636,7 +671,7 @@ export default function BrandRegisterPage() {
                                     <Rocket className="w-12 h-12 text-white relative z-10" />
                                 </motion.div>
                                 <div>
-                                    <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter mb-2">Registration complete!</h1>
+                                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Registration complete!</h1>
                                     <p className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mb-4">Phase 2: Discovery Setup</p>
                                     <p className="text-sm text-slate-500 max-w-[280px] mx-auto font-bold leading-relaxed">
                                         Let's personalize your discovery engine to find creators who match your brand's vision.
@@ -652,7 +687,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight italic">What's your brand name?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">What's your brand name?</h2>
                                     <p className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mt-1 opacity-80">Defining Identity</p>
                                 </div>
                                 <div className="relative group">
@@ -674,7 +709,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight">Campaign objective?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Campaign objective?</h2>
                                     <p className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mt-1 opacity-80">Campaign Strategy</p>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
@@ -697,7 +732,7 @@ export default function BrandRegisterPage() {
                                             <div className={`p-2.5 rounded-xl ${onboardingData.campaignType === option.label ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400 group-hover:text-blue-500 transition-colors'}`}>
                                                 <option.icon size={20} />
                                             </div>
-                                            <span className={`font-black uppercase italic tracking-tighter text-sm ${onboardingData.campaignType === option.label ? 'text-white' : 'text-slate-500'}`}>{option.label}</span>
+                                            <span className={`font-black uppercase tracking-tighter text-sm ${onboardingData.campaignType === option.label ? 'text-white' : 'text-slate-500'}`}>{option.label}</span>
                                         </motion.button>
                                     ))}
                                 </div>
@@ -710,7 +745,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight italic">Total budget?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Total budget?</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Budget Planning</p>
                                 </div>
                                 <div className="space-y-3">
@@ -723,7 +758,7 @@ export default function BrandRegisterPage() {
                                                 : 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
                                                 }`}
                                         >
-                                            <span className={`font-black italic tracking-tight text-base ${onboardingData.budget === option ? 'text-white' : 'text-slate-500 uppercase'}`}>{option}</span>
+                                            <span className={`font-black tracking-tight text-base ${onboardingData.budget === option ? 'text-white' : 'text-slate-500 uppercase'}`}>{option}</span>
                                             {onboardingData.budget === option ? (
                                                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shadow-lg">
                                                     <Check size={18} className="text-white" />
@@ -746,7 +781,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight">Target creator size?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Target creator size?</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Audience Scale</p>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -771,7 +806,7 @@ export default function BrandRegisterPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className={`font-black uppercase italic tracking-tighter text-sm ${isSelected ? 'text-white' : 'text-slate-900'}`}>{tier.label}</div>
+                                                <div className={`font-black uppercase tracking-tighter text-sm ${isSelected ? 'text-white' : 'text-slate-900'}`}>{tier.label}</div>
                                                 <div className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>{tier.desc}</div>
                                                 <div className={`mt-3 inline-block text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
                                                     {tier.badge}
@@ -790,7 +825,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-white italic tracking-tight">Budget per post?</h2>
+                                    <h2 className="text-2xl font-black text-white tracking-tight">Budget per post?</h2>
                                     <p className="text-sm font-black text-blue-400 uppercase tracking-[0.2em] mt-1 opacity-80">Unit Economics</p>
                                 </div>
                                 <div className="space-y-3">
@@ -806,7 +841,7 @@ export default function BrandRegisterPage() {
                                                     }`}
                                             >
                                                 <div>
-                                                    <div className={`font-black italic tracking-tight text-base ${isSelected ? 'text-white' : 'text-slate-900'}`}>{tier.label}</div>
+                                                    <div className={`font-black tracking-tight text-base ${isSelected ? 'text-white' : 'text-slate-900'}`}>{tier.label}</div>
                                                     <div className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>Target per collaboration</div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
@@ -829,7 +864,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight italic">Target platforms?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Target platforms?</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Channel Selection</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 pb-2">
@@ -854,7 +889,7 @@ export default function BrandRegisterPage() {
                                                 <div className={`p-3 rounded-2xl transition-all ${isActive ? `bg-gradient-to-br ${p.color} text-white shadow-lg` : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
                                                     <p.icon className="w-6 h-6" />
                                                 </div>
-                                                <span className={`font-black uppercase italic tracking-tighter text-[11px] ${isActive ? 'text-blue-900 border-b border-blue-200' : 'text-slate-500'}`}>{p.id}</span>
+                                                <span className={`font-black uppercase tracking-tighter text-[11px] ${isActive ? 'text-blue-900 border-b border-blue-200' : 'text-slate-500'}`}>{p.id}</span>
                                             </motion.button>
                                         );
                                     })}
@@ -871,7 +906,7 @@ export default function BrandRegisterPage() {
                         <CardWrapper stepKey="step11" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 italic tracking-tight italic">Campaign goals?</h2>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Campaign goals?</h2>
                                     <p className="text-sm text-blue-600 font-bold uppercase tracking-wider mt-1 opacity-80">Final Briefing</p>
                                 </div>
                                 <ErrorDisplay />
@@ -911,7 +946,7 @@ export default function BrandRegisterPage() {
                                 </div>
 
                                 <div>
-                                    <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter mb-2">Welcome aboard!</h1>
+                                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Welcome aboard!</h1>
                                     <p className="text-sm font-black text-emerald-600 uppercase tracking-[0.2em] mb-4">Account Activated</p>
                                     <p className="text-sm text-slate-500 max-w-[280px] mx-auto font-bold leading-relaxed">
                                         Your brand profile is ready. We've matched you with elite creators based on your goals.

@@ -18,11 +18,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 const TOTAL_STEPS = 11;
 
 const stepTitles = [
-    "Welcome",
     "Enter your details",
     "Add your social handles",
     "Verify your email",
     "Create a secure password",
+    "Welcome",
     "Select platforms",
     "Your niche",
     "Follower count",
@@ -30,6 +30,36 @@ const stepTitles = [
     "Minimum price",
     "All done!"
 ];
+
+const GlassIcon = ({ children, color = "pink", size = "large" }: { children: React.ReactNode, color?: string, size?: "small" | "large" }) => (
+    <div className={`relative ${size === 'large' ? 'w-48 h-48' : 'w-16 h-16'} flex items-center justify-center group`}>
+        {/* Outer Deep Glow */}
+        <div className={`absolute inset-[-20%] blur-[80px] opacity-15 bg-${color}-400 rounded-full group-hover:opacity-25 transition-opacity duration-700`} />
+
+        {/* Refined Glass Plate with Multiple Layers */}
+        <div className="absolute inset-0 rounded-[2.5rem] bg-white/20 backdrop-blur-[40px] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+            {/* Glossy Refraction Layer */}
+            <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-40 transform rotate-[15deg]" />
+
+            {/* Inner Glow Stripe */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
+
+            {/* Side Glow Stripe */}
+            <div className="absolute top-0 right-0 h-full w-[1px] bg-gradient-to-b from-transparent via-white/40 to-transparent" />
+        </div>
+
+        {/* Floating Aura for Icon */}
+        <div className={`absolute inset-[15%] rounded-[2rem] blur-2xl opacity-20 bg-${color}-400 group-hover:scale-110 transition-transform duration-700`} />
+
+        {/* High-Reflect Shadow */}
+        <div className="absolute bottom-[5%] left-[10%] right-[10%] h-[15%] rounded-full bg-slate-900/10 blur-xl translate-z-[-20px]" />
+
+        {/* Content */}
+        <div className="relative z-10 select-none transform transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
+            {children}
+        </div>
+    </div>
+);
 
 // 1. slideVariants
 const slideVariants = {
@@ -48,7 +78,6 @@ const platforms = [
     { value: 'facebook', label: 'Facebook' },
 ];
 
-// 2. CardWrapper
 const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number }) => (
     <motion.div
         key={stepKey}
@@ -60,50 +89,36 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { chi
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="w-full"
     >
-        <div className="w-full max-w-md mx-auto rounded-[2rem] shadow-2xl overflow-hidden relative group p-[2px]"
-            style={{
-                background: 'linear-gradient(45deg, #ec4899, #8b5cf6, #06b6d4, #ec4899)',
-                backgroundSize: '400% 400%',
-                animation: 'gradient-shift 8s ease infinite'
-            }}>
-            <style jsx>{`
-                @keyframes gradient-shift {
-                    0% { background-position: 0% 50% }
-                    50% { background-position: 100% 50% }
-                    100% { background-position: 0% 50% }
-                }
-            `}</style>
-
-            <div className="w-full h-full rounded-[1.9rem] overflow-hidden"
+        <div className="w-full max-w-md mx-auto rounded-[2.5rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] overflow-hidden relative group p-[2px] bg-gradient-to-br from-white/80 via-white/40 to-white/80 border border-white/50">
+            <div className="w-full h-full rounded-[2.4rem] overflow-hidden"
                 style={{
-                    background: 'rgba(255, 255, 255, 0.98)',
-                    backdropFilter: 'blur(32px)',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(40px)',
                 }}>
                 {/* Card Header */}
-                <div className="px-6 py-5 flex items-center gap-3 border-b border-slate-100"
-                    style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(139, 92, 246, 0.05))' }}>
-                    <div className="w-9 h-9 bg-gradient-to-br from-pink-500 via-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/10">
+                <div className="px-8 py-6 flex items-center gap-4 border-b border-slate-50/50"
+                    style={{ background: 'rgba(255, 255, 255, 0.4)' }}>
+                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/10">
                         <Sparkles className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <span className="text-slate-900 font-black text-sm tracking-tighter uppercase italic block leading-tight">BookMyInfluencers</span>
+                        <span className="text-slate-900 font-black text-sm tracking-tighter uppercase block leading-tight">BookMyInfluencers</span>
                         <span className="text-[10px] text-pink-600 font-bold uppercase tracking-[0.2em]">Premium Platform</span>
                     </div>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-[3px] bg-slate-100 relative">
+                <div className="w-full h-[4px] bg-slate-50 relative">
                     <motion.div
-                        className="h-full bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-500"
+                        className="h-full bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-400"
                         initial={{ width: "0%" }}
                         animate={{ width: `${progressPercentage}%` }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        transition={{ duration: 0.6, ease: "circOut" }}
                     />
-                    <div className="absolute right-0 top-0 w-12 h-full bg-gradient-to-l from-white/40 to-transparent" />
                 </div>
 
                 {/* Card Body */}
-                <div className="p-6 sm:p-10 text-slate-800">
+                <div className="p-8 sm:p-10 text-slate-800">
                     {children}
                 </div>
             </div>
@@ -111,7 +126,6 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { chi
     </motion.div>
 );
 
-// 3. NextButton
 const NextButton = ({
     label = "Next",
     onClick,
@@ -124,14 +138,22 @@ const NextButton = ({
     loading?: boolean;
 }) => (
     <motion.button
-        whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(236, 72, 153, 0.4)' }}
+        whileHover={{ scale: 1.01, translateY: -2 }}
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         disabled={disabled}
-        className="group relative w-full py-4 text-white font-black text-base rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-2xl"
+        className="group relative w-full py-4.5 text-white font-black text-base rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-[0_20px_40px_-12px_rgba(236,72,153,0.3)]"
     >
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-violet-600 to-cyan-500 group-hover:opacity-90 transition-opacity" />
-        <div className="relative flex items-center justify-center gap-2">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-500 group-hover:scale-105 transition-transform duration-500" />
+
+        {/* Shine Animation */}
+        <motion.div
+            className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 z-10"
+            animate={{ left: ['-100%', '200%'] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+        />
+
+        <div className="relative flex items-center justify-center gap-2 py-4 z-20">
             {btnLoading ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
             ) : (
@@ -286,11 +308,11 @@ export default function RegisterPage() {
     // Validation per step
     const canProceed = (): boolean => {
         switch (currentStep) {
-            case 1: return true; // Welcome
-            case 2: return !!formData.fullName && !!formData.mobileNumber && !!formData.primaryPlatform;
-            case 3: return true; // social handles are optional
-            case 4: return emailVerified;
-            case 5: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
+            case 1: return !!formData.fullName && !!formData.mobileNumber && !!formData.primaryPlatform;
+            case 2: return true; // social handles are optional
+            case 3: return emailVerified;
+            case 4: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
+            case 5: return true; // Welcome
             case 6: return onboardingData.platforms.length > 0;
             case 7: return !!onboardingData.niche;
             case 8: return !!onboardingData.followers;
@@ -322,9 +344,8 @@ export default function RegisterPage() {
 
     // 3D Background config per step group
     const getStepGroup = (step: number) => {
-        if (step === 1) return 'onboarding'; // Welcome
-        if (step <= 5) return 'registration';
-        if (step <= 8) return 'onboarding';
+        if (step <= 4) return 'registration';
+        if (step <= 8) return 'onboarding'; // Welcome(5), Platforms(6), Niche(7), Followers(8)
         if (step <= 10) return 'pricing';
         return 'completion';
     };
@@ -332,507 +353,223 @@ export default function RegisterPage() {
     const stepGroup = getStepGroup(currentStep);
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans" style={{ perspective: '1200px', background: '#f8fafc' }}>
-            {/* ====== PREMIUM DARK AURORA BACKGROUND ====== */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden font-sans" style={{ perspective: '1200px' }}>
+            {/* === PREMIUM MESH BACKGROUND === */}
+            {/* Mesh Gradient Blobs */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-pink-400/10 rounded-full blur-[120px] animate-blob" />
+            <div className="absolute top-[20%] left-[-10%] w-[50%] h-[50%] bg-purple-400/10 rounded-full blur-[120px] animate-blob animation-delay-2000" />
+            <div className="absolute bottom-[-10%] right-[20%] w-[55%] h-[55%] bg-cyan-400/10 rounded-full blur-[120px] animate-blob animation-delay-4000" />
+            <div className="absolute bottom-[10%] left-[10%] w-[45%] h-[45%] bg-pink-500/5 rounded-full blur-[120px] animate-blob" />
 
-                {/* Base light mesh gradient */}
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(241,245,249,1) 0%, rgba(248,250,252,1) 70%)' }} />
+            {/* Noise Texture Overlay */}
+            <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
 
-                {/* Aurora beam 1 - Teal */}
+            <style jsx>{`
+                    @keyframes blob {
+                        0% { transform: translate(0px, 0px) scale(1); }
+                        33% { transform: translate(30px, -50px) scale(1.1); }
+                        66% { transform: translate(-20px, 20px) scale(0.9); }
+                        100% { transform: translate(0px, 0px) scale(1); }
+                    }
+                    .animation-delay-2000 { animation-delay: 2s; }
+                    .animation-delay-4000 { animation-delay: 4s; }
+                    .animate-blob {
+                        animation: blob 15s infinite alternate ease-in-out;
+                    }
+                `}</style>
+
+            {/* Glassmorphic Gold Orb - Right */}
+            <motion.div
+                animate={{
+                    y: [0, 25, 0],
+                    x: [0, -8, 0],
+                    scale: [1, 1.12, 1],
+                }}
+                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-[20%] right-[8%]"
+            >
+                <div className="w-24 h-24 rounded-full" style={{
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.35), rgba(234,179,8,0.15))',
+                    backdropFilter: 'blur(12px)',
+                    border: '1.5px solid rgba(255,255,255,0.25)',
+                    boxShadow: '0 8px 32px rgba(245,158,11,0.25), inset 0 -4px 12px rgba(255,255,255,0.1), inset 0 4px 12px rgba(245,158,11,0.15)',
+                }}>
+                    <div className="absolute top-3 left-4 w-7 h-4 rounded-full bg-white/20 blur-sm" style={{ transform: 'rotate(-25deg)' }} />
+                </div>
+            </motion.div>
+
+            {/* Money Bag - Center Left */}
+            <motion.div
+                animate={{
+                    y: [0, -35, 0],
+                    rotate: [-8, 8, -8],
+                    scale: [1, 1.05, 1],
+                }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-[45%] left-[4%]"
+            >
+                <div className="text-6xl" style={{ filter: 'drop-shadow(0 0 20px rgba(16,185,129,0.5))' }}>
+                    💰
+                </div>
+            </motion.div>
+
+            {/* 3D Floating Chart - Bottom Right */}
+            <motion.div
+                animate={{
+                    y: [0, -18, 0],
+                    rotateX: [10, -5, 10],
+                    rotateZ: [-3, 3, -3],
+                }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-[15%] right-[10%]"
+                style={{ transformStyle: 'preserve-3d' }}
+            >
+                <div className="text-7xl" style={{ filter: 'drop-shadow(0 0 20px rgba(16,185,129,0.4))' }}>
+                    📈
+                </div>
+            </motion.div>
+
+            {/* Floating gold particles */}
+            {[
+                { top: '30%', left: '22%', delay: 0, size: 10 },
+                { top: '55%', right: '20%', delay: 1.2, size: 7 },
+                { top: '72%', left: '18%', delay: 2.4, size: 8 },
+                { top: '18%', right: '28%', delay: 0.6, size: 6 },
+                { top: '65%', right: '6%', delay: 1.8, size: 9 },
+            ].map((p, i) => (
                 <motion.div
-                    animate={{ x: ['-10%', '10%', '-10%'], y: ['-5%', '8%', '-5%'], rotate: [-12, -8, -12] }}
-                    transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -top-[20%] -left-[10%] w-[70%] h-[60%]"
-                    style={{ background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.08) 0%, transparent 70%)', filter: 'blur(60px)' }}
-                />
-
-                {/* Aurora beam 2 - Violet */}
-                <motion.div
-                    animate={{ x: ['5%', '-8%', '5%'], y: ['3%', '-5%', '3%'], rotate: [8, 15, 8] }}
-                    transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute top-[10%] -right-[15%] w-[65%] h-[55%]"
-                    style={{ background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.1) 0%, transparent 70%)', filter: 'blur(60px)' }}
-                />
-
-                {/* Aurora beam 3 - Rose */}
-                <motion.div
-                    animate={{ x: ['-5%', '12%', '-5%'], y: ['0%', '-8%', '0%'] }}
-                    transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute bottom-[0%] left-[10%] w-[60%] h-[45%]"
-                    style={{ background: 'radial-gradient(ellipse at center, rgba(236,72,153,0.06) 0%, transparent 65%)', filter: 'blur(70px)' }}
-                />
-
-                {/* Subtle grid overlay */}
-                <div className="absolute inset-0 opacity-[0.03]" style={{
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)`,
-                    backgroundSize: '60px 60px',
-                }} />
-
-                {/* Step-group glow accent */}
-                <motion.div
-                    key={stepGroup + '-glow'}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0.1, 0.2, 0.1] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0"
+                    key={`price-p-${i}`}
+                    animate={{
+                        y: [0, -25, 0],
+                        opacity: [0.2, 0.6, 0.2],
+                        scale: [1, 1.4, 1],
+                    }}
+                    transition={{ duration: 4 + i * 0.8, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
+                    className="absolute rounded-full"
                     style={{
-                        background: stepGroup === 'registration'
-                            ? 'radial-gradient(ellipse at 20% 80%, rgba(6,182,212,0.05) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.04) 0%, transparent 50%)'
-                            : stepGroup === 'onboarding'
-                                ? 'radial-gradient(ellipse at 25% 25%, rgba(236,72,153,0.04) 0%, transparent 50%), radial-gradient(ellipse at 75% 75%, rgba(168,85,247,0.05) 0%, transparent 50%)'
-                                : stepGroup === 'pricing'
-                                    ? 'radial-gradient(ellipse at 30% 70%, rgba(245,158,11,0.04) 0%, transparent 50%), radial-gradient(ellipse at 70% 30%, rgba(16,185,129,0.04) 0%, transparent 50%)'
-                                    : 'radial-gradient(ellipse at 50% 30%, rgba(34,211,238,0.06) 0%, transparent 45%), radial-gradient(ellipse at 50% 80%, rgba(168,85,247,0.05) 0%, transparent 50%)'
+                        ...p,
+                        width: p.size,
+                        height: p.size,
+                        background: 'linear-gradient(135deg, rgba(245,158,11,0.7), rgba(234,179,8,0.4))',
+                        boxShadow: `0 0 ${p.size * 2}px rgba(245,158,11,0.3)`,
                     }}
                 />
+            ))}
 
+            {/* 3D Animated Objects Layer for Premium Influencer Theme */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <AnimatePresence mode="wait">
-                    {/* ---- REGISTRATION GROUP (Steps 1-4): Rocket / Launch Theme ---- */}
-                    {stepGroup === 'registration' && (
+                    <motion.div
+                        key={getStepGroup(currentStep)}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.2 }}
+                        transition={{ duration: 1, ease: "circOut" }}
+                        className="absolute inset-0"
+                    >
+                        {/* Top Left - Dynamic Influencer Object */}
                         <motion.div
-                            key="reg-3d"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="absolute inset-0"
+                            animate={{
+                                y: [0, -40, 0],
+                                rotateY: [0, 15, -15, 0],
+                                rotateX: [0, 10, -10, 0],
+                            }}
+                            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute top-[12%] left-[8%] z-0"
                         >
-                            {/* 3D Floating Cube - Top Left */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -25, 0],
-                                    rotateX: [0, 360],
-                                    rotateY: [0, 360],
-                                }}
-                                transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotateX: { duration: 20, repeat: Infinity, ease: "linear" }, rotateY: { duration: 15, repeat: Infinity, ease: "linear" } }}
-                                className="absolute top-[12%] left-[8%]"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                <div className="w-20 h-20 relative" style={{ transformStyle: 'preserve-3d' }}>
-                                    {/* Cube faces */}
-                                    <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.15), rgba(79,70,229,0.1))', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.05)', transform: 'translateZ(40px)' }} />
-                                    <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(236,72,153,0.08))', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.05)', transform: 'rotateY(90deg) translateZ(40px)' }} />
-                                    <div className="absolute inset-0 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(139,92,246,0.08))', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.05)', transform: 'rotateX(90deg) translateZ(40px)' }} />
-                                </div>
-                            </motion.div>
-
-                            {/* 3D Glassmorphic Sphere - Top Right */}
-                            <motion.div
-                                animate={{
-                                    y: [0, 20, 0],
-                                    x: [0, -10, 0],
-                                    scale: [1, 1.08, 1],
-                                }}
-                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[8%] right-[10%]"
-                            >
-                                <div className="w-28 h-28 rounded-full relative" style={{
-                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.2))',
-                                    backdropFilter: 'blur(12px)',
-                                    border: '1.5px solid rgba(255,255,255,0.8)',
-                                    boxShadow: '0 8px 32px rgba(0,0,0,0.05), inset 0 -4px 12px rgba(255,255,255,0.5), inset 0 4px 12px rgba(0,0,0,0.02)',
-                                }}>
-                                    {/* Inner highlight for 3D depth */}
-                                    <div className="absolute top-3 left-4 w-8 h-5 rounded-full bg-white/40 blur-sm" style={{ transform: 'rotate(-30deg)' }} />
-                                </div>
-                            </motion.div>
-
-                            {/* 3D Rocket Emoji/Icon - Center Left */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -40, 0],
-                                    x: [0, 15, 0],
-                                    rotate: [-15, -5, -15],
-                                }}
-                                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[40%] left-[5%]"
-                            >
-                                <div className="text-7xl drop-shadow-2xl" style={{ filter: 'drop-shadow(0 0 20px rgba(139,92,246,0.2))' }}>
-                                    🚀
-                                </div>
-                            </motion.div>
-
-                            {/* 3D Ring - Bottom Right */}
-                            <motion.div
-                                animate={{
-                                    rotateX: [60, 60],
-                                    rotateZ: [0, 360],
-                                    y: [0, -15, 0],
-                                }}
-                                transition={{ rotateZ: { duration: 12, repeat: Infinity, ease: "linear" }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }}
-                                className="absolute bottom-[15%] right-[8%]"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                <div className="w-24 h-24 rounded-full" style={{
-                                    border: '6px solid transparent',
-                                    borderTop: '6px solid rgba(139,92,246,0.5)',
-                                    borderRight: '6px solid rgba(99,102,241,0.4)',
-                                    borderBottom: '6px solid rgba(59,130,246,0.3)',
-                                    borderLeft: '6px solid rgba(79,70,229,0.45)',
-                                    boxShadow: '0 0 30px rgba(139,92,246,0.2)',
-                                }} />
-                            </motion.div>
-
-                            {/* Small floating particles */}
-                            {[
-                                { top: '25%', left: '18%', delay: 0, size: 8 },
-                                { top: '60%', right: '15%', delay: 1.5, size: 6 },
-                                { top: '75%', left: '25%', delay: 3, size: 10 },
-                                { top: '15%', right: '30%', delay: 0.8, size: 5 },
-                                { top: '50%', right: '5%', delay: 2.2, size: 7 },
-                            ].map((particle, i) => (
-                                <motion.div
-                                    key={`reg-particle-${i}`}
-                                    animate={{
-                                        y: [0, -20, 0],
-                                        opacity: [0.3, 0.7, 0.3],
-                                        scale: [1, 1.3, 1],
-                                    }}
-                                    transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: particle.delay }}
-                                    className="absolute rounded-full"
-                                    style={{
-                                        ...particle,
-                                        width: particle.size,
-                                        height: particle.size,
-                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.6), rgba(139,92,246,0.4))',
-                                        boxShadow: `0 0 ${particle.size * 2}px rgba(139,92,246,0.3)`,
-                                    }}
-                                />
-                            ))}
+                            <GlassIcon color="pink">
+                                {currentStep <= 5 ? (
+                                    <div className="text-7xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 20px rgba(236,72,153,0.3))' }}>{"\uD83D\uDE80"}</div>
+                                ) : (
+                                    <div className="text-6xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 20px rgba(236,72,153,0.3))' }}>{"\uD83D\uDCF8"}</div>
+                                )}
+                            </GlassIcon>
                         </motion.div>
-                    )}
 
-                    {/* ---- ONBOARDING GROUP (Steps 5-7): Diamond / Sparkle Theme ---- */}
-                    {stepGroup === 'onboarding' && (
+                        {/* Bottom Right - Dynamic Object */}
                         <motion.div
-                            key="onb-3d"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="absolute inset-0"
+                            animate={{
+                                y: [0, 50, 0],
+                                rotateX: [0, 15, -15, 0],
+                                rotateY: [0, -10, 10, 0],
+                            }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute bottom-[10%] right-[10%] z-0"
                         >
-                            {/* 3D Diamond - Top Right */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -20, 0],
-                                    rotateY: [0, 360],
-                                    rotateZ: [0, 10, -10, 0],
-                                }}
-                                transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut" }, rotateY: { duration: 18, repeat: Infinity, ease: "linear" }, rotateZ: { duration: 8, repeat: Infinity, ease: "easeInOut" } }}
-                                className="absolute top-[10%] right-[12%]"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                <div className="text-8xl" style={{ filter: 'drop-shadow(0 0 25px rgba(168,85,247,0.5))' }}>
-                                    💎
-                                </div>
-                            </motion.div>
-
-                            {/* Glassmorphic Hexagon - Left */}
-                            <motion.div
-                                animate={{
-                                    y: [0, 25, 0],
-                                    rotate: [0, 180, 360],
-                                    scale: [1, 1.1, 1],
-                                }}
-                                transition={{ y: { duration: 7, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 25, repeat: Infinity, ease: "linear" }, scale: { duration: 6, repeat: Infinity, ease: "easeInOut" } }}
-                                className="absolute top-[30%] left-[6%]"
-                            >
-                                <div className="w-20 h-20" style={{
-                                    background: 'linear-gradient(135deg, rgba(236,72,153,0.3), rgba(168,85,247,0.2))',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1.5px solid rgba(255,255,255,0.2)',
-                                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                                    boxShadow: '0 8px 32px rgba(168,85,247,0.15)',
-                                }} />
-                            </motion.div>
-
-                            {/* 3D Floating Star - Bottom Right */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -30, 0],
-                                    rotateZ: [0, 360],
-                                    scale: [0.9, 1.15, 0.9],
-                                }}
-                                transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotateZ: { duration: 20, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
-                                className="absolute bottom-[18%] right-[10%]"
-                            >
-                                <div className="text-6xl" style={{ filter: 'drop-shadow(0 0 20px rgba(251,191,36,0.5))' }}>
-                                    ⭐
-                                </div>
-                            </motion.div>
-
-                            {/* Glassmorphic Pill - Bottom Left */}
-                            <motion.div
-                                animate={{
-                                    y: [0, 15, 0],
-                                    x: [0, 10, 0],
-                                    rotate: [12, -5, 12],
-                                }}
-                                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute bottom-[25%] left-[8%]"
-                            >
-                                <div className="w-16 h-32 rounded-full" style={{
-                                    background: 'linear-gradient(to bottom, rgba(236,72,153,0.25), rgba(168,85,247,0.15))',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '1px solid rgba(255,255,255,0.2)',
-                                    boxShadow: '0 8px 32px rgba(168,85,247,0.15), inset 0 2px 8px rgba(255,255,255,0.1)',
-                                }}>
-                                    <div className="absolute top-4 left-3 w-5 h-3 rounded-full bg-white/15 blur-sm" />
-                                </div>
-                            </motion.div>
-
-                            {/* Sparkle particles */}
-                            {[
-                                { top: '20%', left: '20%', delay: 0 },
-                                { top: '45%', right: '18%', delay: 1 },
-                                { top: '70%', left: '15%', delay: 2 },
-                                { top: '35%', right: '25%', delay: 0.5 },
-                                { top: '58%', left: '10%', delay: 1.8 },
-                                { top: '12%', left: '35%', delay: 2.5 },
-                            ].map((s, i) => (
-                                <motion.div
-                                    key={`onb-sparkle-${i}`}
-                                    animate={{
-                                        opacity: [0, 1, 0],
-                                        scale: [0.5, 1.2, 0.5],
-                                        rotate: [0, 180, 360],
-                                    }}
-                                    transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: s.delay }}
-                                    className="absolute text-lg"
-                                    style={s}
-                                >
-                                    ✦
-                                </motion.div>
-                            ))}
+                            <GlassIcon color="cyan">
+                                {currentStep <= 5 ? (
+                                    <div className="text-5xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 15px rgba(6,182,212,0.3))' }}>{"\uD83D\uDCCA"}</div>
+                                ) : (
+                                    <div className="text-6xl group-hover:scale-110 transition-transform duration-500" style={{ filter: 'drop-shadow(0 10px 15px rgba(239,68,68,0.3))' }}>{"\uD83C\uDFAC"}</div>
+                                )}
+                            </GlassIcon>
                         </motion.div>
-                    )}
 
-                    {/* ---- PRICING GROUP (Steps 8-10): Coins / Money Theme ---- */}
-                    {stepGroup === 'pricing' && (
-                        <motion.div
-                            key="price-3d"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="absolute inset-0"
-                        >
-                            {/* 3D Coin Stack - Top Left */}
+                        {/* Floating Hearts & Sparkles Particles */}
+                        {[1, 2, 3, 4, 5, 6].map(i => (
                             <motion.div
-                                animate={{
-                                    y: [0, -20, 0],
-                                    rotateY: [0, 360],
+                                key={`particle-${i}`}
+                                initial={{
+                                    x: (i * 15) + "%",
+                                    y: "110%",
+                                    opacity: 0,
+                                    scale: 0.5
                                 }}
-                                transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut" }, rotateY: { duration: 10, repeat: Infinity, ease: "linear" } }}
-                                className="absolute top-[12%] left-[8%]"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                <div className="text-7xl" style={{ filter: 'drop-shadow(0 0 25px rgba(245,158,11,0.6))' }}>
-                                    🪙
-                                </div>
-                            </motion.div>
-
-                            {/* Glassmorphic Gold Orb - Right */}
-                            <motion.div
                                 animate={{
-                                    y: [0, 25, 0],
-                                    x: [0, -8, 0],
-                                    scale: [1, 1.12, 1],
+                                    y: "-20%",
+                                    opacity: [0, 0.4, 0],
+                                    scale: [0.5, 1.2, 0.5],
+                                    rotate: [0, 360]
                                 }}
-                                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[20%] right-[8%]"
-                            >
-                                <div className="w-24 h-24 rounded-full" style={{
-                                    background: 'linear-gradient(135deg, rgba(245,158,11,0.35), rgba(234,179,8,0.15))',
-                                    backdropFilter: 'blur(12px)',
-                                    border: '1.5px solid rgba(255,255,255,0.25)',
-                                    boxShadow: '0 8px 32px rgba(245,158,11,0.25), inset 0 -4px 12px rgba(255,255,255,0.1), inset 0 4px 12px rgba(245,158,11,0.15)',
-                                }}>
-                                    <div className="absolute top-3 left-4 w-7 h-4 rounded-full bg-white/20 blur-sm" style={{ transform: 'rotate(-25deg)' }} />
-                                </div>
-                            </motion.div>
-
-                            {/* Money Bag - Center Left */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -35, 0],
-                                    rotate: [-8, 8, -8],
-                                    scale: [1, 1.05, 1],
+                                transition={{
+                                    duration: 8 + Math.random() * 5,
+                                    repeat: Infinity,
+                                    delay: i * 2,
+                                    ease: "linear"
                                 }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[45%] left-[4%]"
+                                className="absolute"
                             >
-                                <div className="text-6xl" style={{ filter: 'drop-shadow(0 0 20px rgba(16,185,129,0.5))' }}>
-                                    💰
-                                </div>
+                                {i % 2 === 0 ? (
+                                    <GlassIcon color="pink" size="small">
+                                        <div className="text-xl">{"\u2764\uFE0F"}</div>
+                                    </GlassIcon>
+                                ) : (
+                                    <GlassIcon color="cyan" size="small">
+                                        <div className="text-lg">{"\u2728"}</div>
+                                    </GlassIcon>
+                                )}
                             </motion.div>
-
-                            {/* 3D Floating Chart - Bottom Right */}
-                            <motion.div
-                                animate={{
-                                    y: [0, -18, 0],
-                                    rotateX: [10, -5, 10],
-                                    rotateZ: [-3, 3, -3],
-                                }}
-                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute bottom-[15%] right-[10%]"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                <div className="text-7xl" style={{ filter: 'drop-shadow(0 0 20px rgba(16,185,129,0.4))' }}>
-                                    📈
-                                </div>
-                            </motion.div>
-
-                            {/* Floating gold particles */}
-                            {[
-                                { top: '30%', left: '22%', delay: 0, size: 10 },
-                                { top: '55%', right: '20%', delay: 1.2, size: 7 },
-                                { top: '72%', left: '18%', delay: 2.4, size: 8 },
-                                { top: '18%', right: '28%', delay: 0.6, size: 6 },
-                                { top: '65%', right: '6%', delay: 1.8, size: 9 },
-                            ].map((p, i) => (
-                                <motion.div
-                                    key={`price-p-${i}`}
-                                    animate={{
-                                        y: [0, -25, 0],
-                                        opacity: [0.2, 0.6, 0.2],
-                                        scale: [1, 1.4, 1],
-                                    }}
-                                    transition={{ duration: 4 + i * 0.8, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
-                                    className="absolute rounded-full"
-                                    style={{
-                                        ...p,
-                                        width: p.size,
-                                        height: p.size,
-                                        background: 'linear-gradient(135deg, rgba(245,158,11,0.7), rgba(234,179,8,0.4))',
-                                        boxShadow: `0 0 ${p.size * 2}px rgba(245,158,11,0.3)`,
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
-                    )}
-
-                    {/* 3D Animated Objects Layer for Premium Influencer Theme */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={getStepGroup(currentStep)}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.2 }}
-                                transition={{ duration: 1, ease: "circOut" }}
-                                className="absolute inset-0"
-                            >
-                                {/* Top Left - Dynamic Influencer Object */}
-                                <motion.div
-                                    animate={{
-                                        y: [0, -40, 0],
-                                        rotateY: [0, 360],
-                                        rotateZ: [5, -5, 5]
-                                    }}
-                                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute top-[12%] left-[8%] w-40 h-40 flex items-center justify-center transition-all duration-1000"
-                                >
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <div className="absolute inset-0 blur-[60px] opacity-40 bg-pink-500 rounded-full animate-pulse" />
-                                        {currentStep <= 5 ? (
-                                            <Rocket className="w-20 h-20 text-pink-500 drop-shadow-[0_0_20px_rgba(236,72,153,0.6)]" />
-                                        ) : (
-                                            <div className="relative flex items-center justify-center">
-                                                <div className="absolute inset-0 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-[2rem] blur-xl opacity-50" />
-                                                <Instagram className="w-20 h-20 text-white p-4 rounded-[1.8rem] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 shadow-2xl relative z-10" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-
-                                {/* Bottom Right - Dynamic Object */}
-                                <motion.div
-                                    animate={{
-                                        y: [0, 50, 0],
-                                        rotateX: [0, 360],
-                                        rotateY: [180, -180]
-                                    }}
-                                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute bottom-[15%] right-[10%] w-48 h-48"
-                                >
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <div className="absolute inset-0 blur-[80px] opacity-25 bg-cyan-400 rounded-full" />
-                                        {currentStep <= 5 ? (
-                                            <div className="w-24 h-24 rounded-3xl border-4 border-cyan-400/50 flex items-center justify-center relative overflow-hidden group">
-                                                <div className="absolute inset-0 bg-cyan-400/10 backdrop-blur-md" />
-                                                <Layers className="relative w-12 h-12 text-cyan-400" />
-                                            </div>
-                                        ) : (
-                                            <div className="w-28 h-28 bg-white/5 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden group">
-                                                <div className="absolute inset-0 bg-gradient-to-tr from-red-600/20 to-transparent" />
-                                                <Youtube className="w-full h-full text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-
-                                {/* Floating Hearts & Sparkles Particles */}
-                                {[1, 2, 3, 4, 5, 6].map(i => (
-                                    <motion.div
-                                        key={`particle-${i}`}
-                                        initial={{
-                                            x: (i * 15) + "%",
-                                            y: "110%",
-                                            opacity: 0,
-                                            scale: 0.5
-                                        }}
-                                        animate={{
-                                            y: "-20%",
-                                            opacity: [0, 0.4, 0],
-                                            scale: [0.5, 1.2, 0.5],
-                                            rotate: [0, 360]
-                                        }}
-                                        transition={{
-                                            duration: 8 + Math.random() * 5,
-                                            repeat: Infinity,
-                                            delay: i * 2,
-                                            ease: "linear"
-                                        }}
-                                        className="absolute"
-                                    >
-                                        {i % 2 === 0 ? (
-                                            <Heart className="w-6 h-6 text-pink-500 fill-pink-500/20" />
-                                        ) : (
-                                            <Sparkles className="w-5 h-5 text-yellow-400" />
-                                        )}
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
+                        ))}
+                    </motion.div>
                 </AnimatePresence>
             </div>
 
             {/* Back Button */}
-            {currentStep > 1 && !isSubmitting && (
-                <button onClick={goBack}
-                    className="fixed top-6 left-6 z-50 p-2.5 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-white transition-colors text-slate-500 hover:text-slate-900 shadow-sm">
-                    <ChevronLeft size={24} />
-                </button>
-            )}
+            {
+                currentStep > 1 && !isSubmitting && (
+                    <button onClick={goBack}
+                        className="fixed top-6 left-6 z-50 p-2.5 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-white transition-colors text-slate-500 hover:text-slate-900 shadow-sm">
+                        <ChevronLeft size={24} />
+                    </button>
+                )
+            }
 
             {/* Step Counter */}
-            {currentStep < TOTAL_STEPS && (
-                <div className="fixed top-6 right-6 z-50 px-4 py-2 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 text-slate-600 text-sm font-bold shadow-sm">
-                    {currentStep} / {TOTAL_STEPS - 1}
-                </div>
-            )}
+            {
+                currentStep < TOTAL_STEPS && (
+                    <div className="fixed top-6 right-6 z-50 px-4 py-2 rounded-full bg-white/80 backdrop-blur-md border border-slate-200 text-slate-600 text-sm font-bold shadow-sm">
+                        {currentStep} / {TOTAL_STEPS - 1}
+                    </div>
+                )
+            }
 
             {/* Slide Content */}
             <div className="relative z-10 w-full max-w-lg">
                 <AnimatePresence initial={false} custom={direction} mode="wait">
 
-                    {/* ===== STEP 2: Enter your details ===== */}
-                    {currentStep === 2 && (
-                        <CardWrapper stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 1: Enter your details ===== */}
+                    {currentStep === 1 && (
+                        <CardWrapper stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-5">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900">Enter your details</h2>
@@ -911,9 +648,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 3: Social Handles ===== */}
-                    {currentStep === 3 && (
-                        <CardWrapper stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 2: Social Handles ===== */}
+                    {currentStep === 2 && (
+                        <CardWrapper stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-5">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900">Add your social handles</h2>
@@ -945,9 +682,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 4: Email Verification ===== */}
-                    {currentStep === 4 && (
-                        <CardWrapper stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 3: Email Verification ===== */}
+                    {currentStep === 3 && (
+                        <CardWrapper stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-5">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900">Verify your email</h2>
@@ -1040,9 +777,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 5: Password ===== */}
-                    {currentStep === 5 && (
-                        <CardWrapper stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 4: Password ===== */}
+                    {currentStep === 4 && (
+                        <CardWrapper stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="space-y-5">
                                 <div>
                                     <h2 className="text-xl font-bold text-slate-900">Create a secure password</h2>
@@ -1115,9 +852,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 1: Welcome (Onboarding Start) ===== */}
-                    {currentStep === 1 && (
-                        <CardWrapper stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 5: Welcome (Onboarding Start) ===== */}
+                    {currentStep === 5 && (
+                        <CardWrapper stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
                             <div className="flex flex-col items-center text-center space-y-6 py-6">
                                 <div className="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl rotate-3 shadow-lg flex items-center justify-center">
                                     <Sparkles className="w-10 h-10 text-white" />
@@ -1292,11 +1029,11 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div className="relative">
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">%</span>
+                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 font-extrabold text-2xl pointer-events-none z-10">%</span>
                                     <input type="number" value={onboardingData.engagement}
                                         onChange={(e) => updateOnboarding("engagement", e.target.value)}
                                         placeholder="e.g. 4.5"
-                                        className="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-2xl text-center font-bold placeholder-slate-400 focus:bg-white focus:border-cyan-500/30 focus:outline-none transition-all text-slate-900"
+                                        className="w-full px-4 pr-14 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-2xl text-center font-bold placeholder-slate-400 focus:bg-white focus:border-cyan-500/30 focus:outline-none transition-all text-slate-900"
                                         autoFocus />
                                 </div>
 
@@ -1453,6 +1190,6 @@ export default function RegisterPage() {
             <div className="fixed bottom-4 left-0 w-full text-center text-slate-400 text-xs">
                 Trusted by 10,000+ creators worldwide
             </div>
-        </div>
+        </div >
     );
 }
