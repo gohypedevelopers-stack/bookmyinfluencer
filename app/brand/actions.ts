@@ -399,9 +399,22 @@ export async function getPublicCreators(filter?: {
         const creatorWhere: any = {};
         const influencerWhere: any = {};
 
+        // Helper to match niche (handles composite like "Fashion & Health")
+        const getNicheFilters = (nicheStr: string) => {
+            return nicheStr
+                .split(/[&,]/)
+                .map(s => s.trim())
+                .filter(Boolean);
+        };
+
         if (filter?.niche && filter.niche !== 'All') {
-            creatorWhere.niche = { contains: filter.niche, mode: 'insensitive' };
-            // InfluencerProfile has niche as string array, handle differently
+            const niches = getNicheFilters(filter.niche);
+            if (niches.length > 0) {
+                creatorWhere.OR = niches.map(n => ({
+                    niche: { contains: n, mode: 'insensitive' }
+                }));
+                // For influencerProfile, niche is often CSV, but we'll apply it in the combined filter too
+            }
         }
 
         // Fetch from Creator table (OTP auth system)
@@ -516,11 +529,13 @@ export async function getPublicCreators(filter?: {
         // Combine all creators
         let allCreators = [...mappedCreators, ...mappedInfluencers];
 
-        // Apply niche filter for influencers (since array field needs different handling)
+        // Apply niche filter broadly (covers cases where one model's niche field differs)
         if (filter?.niche && filter.niche !== 'All') {
-            allCreators = allCreators.filter((c: any) =>
-                c.niche.toLowerCase().includes(filter.niche!.toLowerCase())
-            );
+            const niches = getNicheFilters(filter.niche).map(n => n.toLowerCase());
+            allCreators = allCreators.filter((c: any) => {
+                const creatorNiche = c.niche.toLowerCase();
+                return niches.some(n => creatorNiche.includes(n));
+            });
         }
 
         // Apply followers range filter

@@ -26,9 +26,11 @@ export async function registerUserAction(formData: FormData) {
             throw new Error("Missing required fields")
         }
 
+        const normalizedEmail = email.trim().toLowerCase();
+
         // Check if user already exists
         const existingOtpUser = await db.otpUser.findUnique({
-            where: { email },
+            where: { email: normalizedEmail },
             include: { creator: true }
         })
 
@@ -99,14 +101,14 @@ export async function registerUserAction(formData: FormData) {
 
         // Create or Update User record for NextAuth login
         await db.user.upsert({
-            where: { email },
+            where: { email: normalizedEmail },
             update: {
                 name: fullName,
                 passwordHash,
                 role: "INFLUENCER"
             },
             create: {
-                email,
+                email: normalizedEmail,
                 name: fullName,
                 passwordHash,
                 role: "INFLUENCER"

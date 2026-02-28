@@ -14,9 +14,6 @@ const TOTAL_SLIDES = 8
 const PLATFORMS = [
     { id: 'instagram', label: 'Instagram', icon: Instagram, color: 'from-pink-500 to-purple-500', bg: 'bg-pink-500/10', border: 'border-pink-500/30', text: 'text-pink-400' },
     { id: 'youtube', label: 'YouTube', icon: Youtube, color: 'from-red-500 to-red-600', bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
-    { id: 'twitter', label: 'Twitter (X)', icon: Twitter, color: 'from-sky-400 to-blue-500', bg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-400' },
-    { id: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: 'from-blue-600 to-blue-700', bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
-    { id: 'facebook', label: 'Facebook', icon: Facebook, color: 'from-blue-500 to-indigo-600', bg: 'bg-indigo-500/10', border: 'border-indigo-500/30', text: 'text-indigo-400' },
 ]
 
 const NICHES = [
@@ -72,6 +69,7 @@ export default function ProfileSetupClient({ userId }: { userId: string }) {
     const [followerRange, setFollowerRange] = useState('')
     const [engagementRate, setEngagementRate] = useState('')
     const [collaborationRate, setCollaborationRate] = useState('')
+    const [priceType, setPriceType] = useState('Per Post')
     const [showFollowerDropdown, setShowFollowerDropdown] = useState(false)
 
     const goNext = useCallback(() => {
@@ -104,6 +102,7 @@ export default function ProfileSetupClient({ userId }: { userId: string }) {
                 followerRange,
                 engagementRate,
                 collaborationRate,
+                priceType
             })
             router.push('/creator/onboarding/finalize')
         } catch (e) {
@@ -400,18 +399,30 @@ export default function ProfileSetupClient({ userId }: { userId: string }) {
                                 </div>
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Collaboration rates?</h2>
                                 <p className="text-white/50 text-sm mb-8">Your starting price per post/reel/video.</p>
-                                <div className="relative">
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 font-bold text-lg">₹</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={collaborationRate}
-                                        onChange={(e) => setCollaborationRate(e.target.value)}
-                                        placeholder="e.g. 5000"
-                                        className="w-full pl-10 pr-16 py-4 bg-white/5 border-2 border-white/10 rounded-2xl text-white text-lg placeholder:text-white/30 focus:outline-none focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 transition-all"
-                                        onKeyDown={(e) => e.key === 'Enter' && canProceed() && goNext()}
-                                    />
-                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 text-xs font-bold uppercase">INR</span>
+                                <div className="relative w-full flex items-center gap-3">
+                                    <div className="relative flex-1">
+                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/40 font-bold text-lg pointer-events-none">₹</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={collaborationRate}
+                                            onChange={(e) => setCollaborationRate(e.target.value)}
+                                            placeholder="e.g. 5000"
+                                            className="w-full pl-10 pr-16 py-4 bg-white/5 border-2 border-white/10 rounded-2xl text-white text-lg placeholder:text-white/30 focus:outline-none focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 transition-all appearance-none"
+                                            onKeyDown={(e) => e.key === 'Enter' && canProceed() && goNext()}
+                                        />
+                                        <span className="absolute right-5 top-1/2 -translate-y-1/2 text-white/30 text-xs font-bold uppercase pointer-events-none">INR</span>
+                                    </div>
+                                    <select
+                                        value={priceType}
+                                        onChange={(e) => setPriceType(e.target.value)}
+                                        className="py-4 px-4 bg-white/5 border-2 border-white/10 rounded-2xl text-base font-bold text-white focus:outline-none focus:border-purple-400/60 transition-all cursor-pointer appearance-none min-w-[140px] text-center"
+                                        style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+                                    >
+                                        <option value="Per Post" className="text-gray-900 font-medium">per post</option>
+                                        <option value="Per Story" className="text-gray-900 font-medium">per story</option>
+                                        <option value="Per Collab" className="text-gray-900 font-medium">per collab</option>
+                                    </select>
                                 </div>
                                 <p className="text-white/30 text-xs mt-3">
                                     💡 You can always adjust this later from your dashboard.

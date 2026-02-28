@@ -23,6 +23,7 @@ type OnboardingData = {
     platforms: string[]
     creatorType: string
     campaignGoals: string
+    priceType: string
 }
 
 // Follower tiers
@@ -101,7 +102,8 @@ export default function BrandOnboarding() {
         maxPricePerPost: 10000,
         platforms: [],
         creatorType: "",
-        campaignGoals: ""
+        campaignGoals: "",
+        priceType: "Per Post"
     })
 
     const SUBMIT_STEP = 9 // step 9 (Goals) triggers submission before step 10 (Success)
@@ -438,6 +440,16 @@ export default function BrandOnboarding() {
                                     <h2 className="text-3xl font-bold text-gray-900">Budget per post?</h2>
                                     <p className="text-gray-500 mt-2">How much are you willing to pay a creator per collaboration?</p>
                                 </div>
+
+                                <select
+                                    value={formData.priceType}
+                                    onChange={(e) => updateData("priceType", e.target.value)}
+                                    className="w-full p-4 border-2 border-gray-200 rounded-2xl text-lg font-bold text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer appearance-none text-center bg-white shadow-sm"
+                                >
+                                    <option value="Per Post">Per Post</option>
+                                    <option value="Per Story">Per Story</option>
+                                    <option value="Per Collab">Per Collab</option>
+                                </select>
                                 <div className="space-y-3">
                                     {priceTiers.map((tier) => {
                                         const isSelected = formData.minPricePerPost === tier.min && formData.maxPricePerPost === tier.max
@@ -454,7 +466,7 @@ export default function BrandOnboarding() {
                                             >
                                                 <div>
                                                     <div className="font-bold text-lg text-gray-900">{tier.label}</div>
-                                                    <div className="text-sm text-gray-500 mt-0.5">per post / collaboration</div>
+                                                    <div className="text-sm text-gray-500 mt-0.5">{formData.priceType.toLowerCase()}</div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">{tier.badge}</span>
@@ -625,7 +637,7 @@ export default function BrandOnboarding() {
                                     </span>
                                     <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-medium border border-emerald-100 flex items-center gap-1.5">
                                         <DollarSign size={14} />
-                                        {priceTiers.find(t => t.min === formData.minPricePerPost)?.label ?? "Any"} per post
+                                        {priceTiers.find(t => t.min === formData.minPricePerPost)?.label ?? "Any"} {formData.priceType.toLowerCase()}
                                     </span>
                                     {formData.platforms.length > 0 && (
                                         <span className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full font-medium border border-purple-100 flex items-center gap-1.5">

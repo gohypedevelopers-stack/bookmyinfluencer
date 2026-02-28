@@ -16,6 +16,7 @@ export async function submitBrandOnboarding(data: {
     maxFollowers?: number;
     minPricePerPost?: number;
     maxPricePerPost?: number;
+    priceType?: string;
 }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -47,6 +48,7 @@ export async function submitBrandOnboarding(data: {
                     maxFollowers: data.maxFollowers ?? null,
                     minPricePerPost: data.minPricePerPost ?? null,
                     maxPricePerPost: data.maxPricePerPost ?? null,
+                    priceType: data.priceType ?? "Per Post",
                 }
             });
         } else {
@@ -65,6 +67,7 @@ export async function submitBrandOnboarding(data: {
                     maxFollowers: data.maxFollowers ?? null,
                     minPricePerPost: data.minPricePerPost ?? null,
                     maxPricePerPost: data.maxPricePerPost ?? null,
+                    priceType: data.priceType ?? "Per Post",
                 }
             });
         }

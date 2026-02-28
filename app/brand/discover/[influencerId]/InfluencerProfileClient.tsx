@@ -190,10 +190,10 @@ export default function InfluencerProfileClient({
                                                 </div>
                                                 <h3 className="text-lg font-bold text-gray-900 mb-1">{tier.label}</h3>
                                                 <div className="flex items-baseline gap-1 mb-4">
-                                                    <span className="text-3xl font-extrabold text-teal-600">
+                                                    <span className="text-3xl font-extrabold text-teal-600 tracking-widest">
                                                         {tier.val > 0
-                                                            ? (profile.isApproved ? `₹${tier.val}` : '★★★★')
-                                                            : <span className="text-gray-400 text-xl">Not set</span>
+                                                            ? ('*'.repeat(tier.val.toString().length))
+                                                            : <span className="text-gray-400 text-xl tracking-normal">Not set</span>
                                                         }
                                                     </span>
                                                     {tier.val > 0 && (

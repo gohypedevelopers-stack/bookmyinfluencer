@@ -71,35 +71,21 @@ export function HeroSection() {
                         transition={{ duration: 0.7, ease: "easeOut" }}
                         className="flex-1 relative w-full max-w-xl lg:max-w-[600px]"
                     >
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                        <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border-4 border-white/50 backdrop-blur-sm group">
                             {/* Main Image */}
-                            <div className="aspect-[4/3] bg-slate-100 relative">
+                            <div className="aspect-[4/3] bg-slate-900 relative rounded-2xl overflow-hidden">
                                 <Image
-                                    src="/images/hero.svg"
-                                    alt="Content Creator working"
+                                    src="/images/hero-new-2.jpg"
+                                    alt="Connect Brands and Creators"
                                     fill
                                     sizes="(max-width: 768px) 100vw, 50vw"
-                                    className="object-cover"
+                                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                     priority
                                 />
+                                {/* subtle overlay to make the image blend better if needed */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                             </div>
                         </div>
-
-                        {/* Floating Card */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
-                            className="absolute -bottom-6 left-4 bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-4 border border-slate-100 sm:left-6"
-                        >
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                <Banknote className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Payouts</p>
-                                <p className="text-xl font-bold text-slate-900">₹12.4M+</p>
-                            </div>
-                        </motion.div>
 
                         {/* Background Decoration */}
                         <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 rounded-full blur-3xl" />

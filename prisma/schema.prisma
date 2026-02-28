@@ -59,6 +59,7 @@ model BrandProfile {
   maxFollowers      Int?
   minPricePerPost   Float?
   maxPricePerPost   Float?
+  priceType         String?      @default("Per Post")
 }
 
 model InfluencerProfile {

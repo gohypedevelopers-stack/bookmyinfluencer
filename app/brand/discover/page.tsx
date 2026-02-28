@@ -41,7 +41,7 @@ function InfluencerDiscoveryInner() {
     // Read onboarding preferences from URL (followers in K)
     const urlMinFollowers = searchParams.get('minFollowers') ? Math.round(Number(searchParams.get('minFollowers')) / 1000) : 0;
     const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 1000;
-    const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 50;
+    const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
     const urlMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 5000;
 
     const [showOnboardingBanner, setShowOnboardingBanner] = useState(fromOnboarding);
@@ -153,7 +153,7 @@ function InfluencerDiscoveryInner() {
         setSelectedLocation('India');
         setSelectedCity('Mumbai');
         setSelectedNiche('All');
-        setPriceRange([50, 5000]);
+        setPriceRange([0, 5000]);
         setFollowersRange([0, 1000]);
         setSearchQuery('');
         // Fetch will trigger automatically due to effect on state change
@@ -322,7 +322,7 @@ function InfluencerDiscoveryInner() {
                                         </label>
                                         <div className="px-2">
                                             <Slider
-                                                min={50}
+                                                min={0}
                                                 max={5000}
                                                 step={50}
                                                 value={priceRange}
@@ -331,7 +331,7 @@ function InfluencerDiscoveryInner() {
                                                 className="py-4"
                                             />
                                             <div className="flex justify-between mt-2 text-xs text-gray-500">
-                                                <span>₹50</span>
+                                                <span>₹0</span>
                                                 <span>₹5k+</span>
                                             </div>
                                         </div>
@@ -483,7 +483,7 @@ function InfluencerDiscoveryInner() {
                                                             <p className="text-[9px] text-gray-400 uppercase font-bold mb-0.5">{label}</p>
                                                             <div className="font-bold text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md">
                                                                 {val > 0
-                                                                    ? (influencer.isApproved ? `₹${val}` : '★★★')
+                                                                    ? ('*'.repeat(val.toString().length))
                                                                     : <span className="text-gray-400">—</span>
                                                                 }
                                                             </div>

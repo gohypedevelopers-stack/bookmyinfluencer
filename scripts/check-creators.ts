@@ -1,25 +1,29 @@
-import { PrismaClient } from "@prisma/client";
-const p = new PrismaClient();
-async function main() {
-    // Replicate what getPublicCreators does
-    const creators = await p.creator.findMany({
-        include: {
-            user: true,
-            metrics: true,
-            selfReportedMetrics: true
-        },
-        take: 50
-    });
-    console.log(`Creators found: ${creators.length}`);
-    creators.forEach(c => {
-        console.log(`  ${c.displayName || c.fullName} | user.email: ${(c as any).user?.email} | status: ${c.verificationStatus}`);
-    });
 
-    // Replicate InfluencerProfile query
-    const influencerProfiles = await p.influencerProfile.findMany({
-        include: { user: true },
-        take: 50
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function main() {
+    console.log('--- CREATORS ---');
+    const creators = await prisma.creator.findMany({
+        select: {
+            id: true,
+            fullName: true,
+            email: true,
+            verificationStatus: true,
+            niche: true
+        }
     });
-    console.log(`\nInfluencer Profiles found: ${influencerProfiles.length}`);
+    console.log(JSON.stringify(creators, null, 2));
+
+    console.log('\n--- INFLUENCER PROFILES ---');
+    const profiles = await prisma.influencerProfile.findMany({
+        select: {
+            id: true,
+            niche: true,
+            user: { select: { name: true, email: true } }
+        }
+    });
+    console.log(JSON.stringify(profiles, null, 2));
 }
-main().finally(() => p.$disconnect());
+
+main().catch(console.error).finally(() => prisma.$disconnect());

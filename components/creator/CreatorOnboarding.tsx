@@ -20,6 +20,7 @@ type CreatorData = {
     engagement: string
     minimumPrice: string
     rates: string
+    priceType: string
 }
 
 const steps = [
@@ -48,7 +49,8 @@ export default function CreatorOnboarding() {
         followers: "",
         engagement: "",
         minimumPrice: "",
-        rates: ""
+        rates: "",
+        priceType: "Per Post"
     })
 
     const handleNext = async () => {
@@ -256,9 +258,6 @@ export default function CreatorOnboarding() {
                                     {[
                                         { id: "Instagram", icon: Instagram, color: "group-hover:text-pink-400" },
                                         { id: "YouTube", icon: Youtube, color: "group-hover:text-red-500" },
-                                        { id: "Twitter (X)", icon: Twitter, color: "group-hover:text-blue-400" },
-                                        { id: "LinkedIn", icon: Linkedin, color: "group-hover:text-blue-600" },
-                                        { id: "Facebook", icon: Facebook, color: "group-hover:text-blue-500" },
                                     ].map((p) => (
                                         <motion.button
                                             key={p.id}
@@ -446,16 +445,28 @@ export default function CreatorOnboarding() {
                                     </p>
                                 </div>
 
-                                <div className="relative">
-                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 font-bold text-2xl">₹</span>
-                                    <input
-                                        type="number"
-                                        value={formData.minimumPrice}
-                                        onChange={(e) => updateData("minimumPrice", e.target.value)}
-                                        placeholder="e.g. 500"
-                                        className="w-full pl-16 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white"
-                                        autoFocus
-                                    />
+                                <div className="relative w-full flex items-center gap-3">
+                                    <div className="relative flex-1">
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 font-bold text-2xl pointer-events-none">₹</span>
+                                        <input
+                                            type="number"
+                                            value={formData.minimumPrice}
+                                            onChange={(e) => updateData("minimumPrice", e.target.value)}
+                                            placeholder="e.g. 500"
+                                            className="w-full pl-16 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <select
+                                        value={formData.priceType}
+                                        onChange={(e) => updateData("priceType", e.target.value)}
+                                        className="py-6 px-6 bg-white/10 border-2 border-white/20 rounded-2xl text-xl font-bold focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all text-white cursor-pointer appearance-none min-w-[160px] text-center"
+                                        style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+                                    >
+                                        <option value="Per Post" className="text-gray-900 font-medium">per post</option>
+                                        <option value="Per Story" className="text-gray-900 font-medium">per story</option>
+                                        <option value="Per Collab" className="text-gray-900 font-medium">per collab</option>
+                                    </select>
                                 </div>
 
                                 <motion.button
@@ -483,17 +494,31 @@ export default function CreatorOnboarding() {
                             >
                                 <h2 className="text-3xl font-bold text-center">Starting Rates?</h2>
 
-                                <div className="relative">
-                                    <IndianRupee className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 w-8 h-8" />
-                                    <input
-                                        type="number"
-                                        value={formData.rates}
-                                        onChange={(e) => updateData("rates", e.target.value)}
-                                        placeholder="1000"
-                                        className="w-full pl-20 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white"
-                                        autoFocus
-                                    />
-                                    <span className="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 font-medium">per post</span>
+                                <div className="relative w-full flex items-center gap-3">
+                                    <div className="relative flex-1">
+                                        <IndianRupee className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 w-8 h-8 pointer-events-none" />
+                                        <input
+                                            type="number"
+                                            value={formData.rates}
+                                            onChange={(e) => {
+                                                updateData("rates", e.target.value);
+                                                updateData("minimumPrice", e.target.value); // Sync them
+                                            }}
+                                            placeholder="1000"
+                                            className="w-full pl-20 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <select
+                                        value={formData.priceType}
+                                        onChange={(e) => updateData("priceType", e.target.value)}
+                                        className="py-6 px-6 bg-white/10 border-2 border-white/20 rounded-2xl text-xl font-bold focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all text-white cursor-pointer appearance-none min-w-[160px] text-center"
+                                        style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+                                    >
+                                        <option value="Per Post" className="text-gray-900 font-medium">per post</option>
+                                        <option value="Per Story" className="text-gray-900 font-medium">per story</option>
+                                        <option value="Per Collab" className="text-gray-900 font-medium">per collab</option>
+                                    </select>
                                 </div>
 
                                 <motion.button
