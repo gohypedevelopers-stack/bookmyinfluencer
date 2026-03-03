@@ -9,7 +9,7 @@ import { motion } from "framer-motion"
 
 export function HeroSection() {
     return (
-        <section className="w-full bg-white py-20 lg:py-32 overflow-hidden">
+        <section className="w-full bg-white py-12 md:py-20 lg:py-32 overflow-hidden">
             <Container>
                 <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
 
@@ -19,7 +19,7 @@ export function HeroSection() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
-                            className="text-4xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]"
+                            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]"
                         >
                             The Most Trusted <br />
                             Bridge Between <br />

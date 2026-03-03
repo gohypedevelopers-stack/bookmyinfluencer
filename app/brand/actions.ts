@@ -169,7 +169,19 @@ export async function sendMessage(threadId: string, senderId: string, content: s
             const recipientId = participants.find(p => p !== senderId);
 
             if (recipientId) {
+                // Push real-time message event
                 await pusherServer.trigger(recipientId, 'message:new', message);
+
+                // Also create a Notification record so it shows in the bell menu
+                const senderName = message.sender?.name || 'Someone';
+                const preview = content ? (content.length > 60 ? content.slice(0, 57) + '...' : content) : (attachmentType ? `Sent a ${attachmentType}` : 'Sent a message');
+                await createNotification(
+                    recipientId,
+                    `New message from ${senderName}`,
+                    preview,
+                    'MESSAGE',
+                    '/brand/messages'
+                );
             }
         }
 

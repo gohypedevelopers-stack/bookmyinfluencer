@@ -52,24 +52,20 @@ export async function POST(req: NextRequest) {
                 where: { creatorId: creator.id },
                 update: {
                     status: "PENDING",
+                    selfieImageKey: key,
+                    selfieCapturedAt: new Date(),
+                    livenessPrompt: prompt,
+                    livenessResult: result
                 },
                 create: {
                     creatorId: creator.id,
                     status: "PENDING",
+                    selfieImageKey: key,
+                    selfieCapturedAt: new Date(),
+                    livenessPrompt: prompt,
+                    livenessResult: result
                 },
             });
-
-            // Force update new fields via raw SQL to bypass stale Prisma types
-            await db.$executeRawUnsafe(
-                `UPDATE creator_kyc_submissions 
-                 SET selfie_image_key = $1, 
-                     selfie_captured_at = $2, 
-                     liveness_prompt = $3, 
-                     liveness_result = $4,
-                     status = 'PENDING'
-                 WHERE creator_id = $5`,
-                key, new Date(), prompt, result, creator.id
-            );
 
             // Update Creator verification status
             await (db.creator as any).update({
@@ -90,28 +86,24 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ success: true, key: profile.kyc.selfieImageKey });
             }
 
-            await (db as any).kycSubmission.upsert({
+            await (db as any).kYCSubmission.upsert({
                 where: { profileId: profile.id },
                 update: {
                     status: "PENDING",
+                    selfieImageKey: key,
+                    selfieCapturedAt: new Date(),
+                    livenessPrompt: prompt,
+                    livenessResult: result
                 },
                 create: {
                     profileId: profile.id,
                     status: "PENDING",
+                    selfieImageKey: key,
+                    selfieCapturedAt: new Date(),
+                    livenessPrompt: prompt,
+                    livenessResult: result
                 },
             });
-
-            // Force update new fields via raw SQL
-            await db.$executeRawUnsafe(
-                `UPDATE "KYCSubmission" 
-                 SET "selfieImageKey" = $1, 
-                     "selfieCapturedAt" = $2, 
-                     "livenessPrompt" = $3, 
-                     "livenessResult" = $4,
-                     status = 'PENDING'
-                 WHERE "profileId" = $5`,
-                key, new Date(), prompt, result, profile.id
-            );
         }
 
         return NextResponse.json({ success: true, key });

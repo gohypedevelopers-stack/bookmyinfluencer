@@ -11,20 +11,20 @@ export function CallToAction() {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     return (
-        <section className="w-full py-12 bg-white">
+        <section className="w-full py-4 sm:py-12 bg-white">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="bg-[#2b5d8f] rounded-3xl p-12 lg:p-20 text-center text-white shadow-2xl relative overflow-hidden"
+                    className="bg-[#2b5d8f] rounded-3xl p-8 sm:p-12 lg:p-20 text-center text-white shadow-2xl relative overflow-hidden mx-4 sm:mx-0"
                 >
                     {/* Background pattern */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
-                    <h2 className="text-3xl lg:text-5xl font-bold mb-6 relative z-10">Ready to scale your influence?</h2>
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 relative z-10">Ready to scale your influence?</h2>
                     <p className="text-blue-100 text-lg mb-10 max-w-2xl mx-auto relative z-10">
                         Join 15,000+ brands and creators making meaningful connections today.
                     </p>

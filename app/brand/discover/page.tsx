@@ -37,6 +37,7 @@ interface Influencer {
 function InfluencerDiscoveryInner() {
     const searchParams = useSearchParams();
     const fromOnboarding = searchParams.get('fromOnboarding') === '1';
+    const initialQuery = searchParams.get('q') || '';
 
     // Read onboarding preferences from URL (followers in K)
     const urlMinFollowers = searchParams.get('minFollowers') ? Math.round(Number(searchParams.get('minFollowers')) / 1000) : 0;
@@ -51,7 +52,7 @@ function InfluencerDiscoveryInner() {
     const [allInfluencers, setAllInfluencers] = useState<Influencer[]>([]);
     const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(initialQuery);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);

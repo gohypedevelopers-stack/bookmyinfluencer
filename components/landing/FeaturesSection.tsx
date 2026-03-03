@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 
 export function FeaturesSection() {
     return (
-        <section className="w-full py-24 bg-white">
+        <section className="w-full py-16 md:py-24 bg-white">
             <Container className="text-center">
                 {/* Trusted By */}
                 <motion.div
@@ -25,7 +25,7 @@ export function FeaturesSection() {
                                 whileInView={{ opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1, duration: 0.5 }}
-                                className={`text-2xl font-serif font-bold text-slate-700 ${brand === "Forbes" ? "italic" : ""} ${brand === "WIRED" ? "tracking-tight" : ""}`}
+                                className={`text-xl sm:text-2xl font-serif font-bold text-slate-700 ${brand === "Forbes" ? "italic" : ""} ${brand === "WIRED" ? "tracking-tight" : ""}`}
                             >
                                 {brand}
                             </motion.h3>

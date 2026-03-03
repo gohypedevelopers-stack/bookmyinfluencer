@@ -42,14 +42,14 @@ export async function TalentSection() {
     }
 
     return (
-        <section className="w-full py-20 bg-slate-50 overflow-hidden">
+        <section className="w-full py-16 md:py-20 bg-slate-50 overflow-hidden">
             <Container>
-                <div className="flex justify-between items-end mb-12">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
                     <div>
                         <h2 className="text-3xl font-bold text-slate-900 mb-2">Top Trending Talent</h2>
                         <p className="text-slate-600">Discover creators with high engagement rates.</p>
                     </div>
-                    <Link href="/discover" className="hidden sm:flex items-center text-blue-600 font-medium hover:text-blue-700">
+                    <Link href="/discover" className="flex items-center text-blue-600 font-medium hover:text-blue-700">
                         View All Creators <ArrowRight className="w-4 h-4 ml-1" />
                     </Link>
                 </div>

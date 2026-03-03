@@ -13,9 +13,10 @@ import {
 import { registerUserAction } from './actions';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LivePhotoCapture from "@/components/kyc/LivePhotoCapture";
 
 // Total steps
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 12;
 
 // 1. slideVariants
 const slideVariants = {
@@ -154,8 +155,9 @@ export default function RegisterPage() {
     const [otpLoading, setOtpLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCustomNiche, setIsCustomNiche] = useState(false);
+    const [kycCompleted, setKycCompleted] = useState(false);
 
-    const progressPercentage = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
+    const progressPercentage = ((currentStep - 1) / (12 - 1)) * 100;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -235,16 +237,21 @@ export default function RegisterPage() {
         fd.append('niche', onboardingData.niche);
         fd.append('followers', onboardingData.followers);
         fd.append('engagement', onboardingData.engagement);
-        fd.append('minimumPrice', onboardingData.minimumPrice);
-        fd.append('rates', onboardingData.rates);
         fd.append('priceStory', onboardingData.priceStory);
         fd.append('pricePost', onboardingData.pricePost);
         fd.append('priceCollab', onboardingData.priceCollab);
-        fd.append('priceType', onboardingData.priceType);
 
         try {
             await registerUserAction(fd);
-            // Move to success step
+
+            // Log the user in silently to establish session for KYC upload API
+            await signIn('credentials', {
+                email: formData.email,
+                password: formData.password,
+                redirect: false,
+            });
+
+            // Move to KYC step
             setDirection(1);
             setCurrentStep(11);
         } catch (err: any) {
@@ -630,7 +637,7 @@ export default function RegisterPage() {
                             <div className="w-full max-w-md space-y-6 flex flex-col items-center">
                                 <h2 className="text-3xl font-bold text-center">Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
-                                    <div className="grid grid-cols-2 gap-3 w-full h-[360px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="grid grid-cols-2 gap-3 w-full pr-2">
                                         {[
                                             { name: "Fashion", icon: Shirt },
                                             { name: "Tech", icon: Laptop },
@@ -671,7 +678,7 @@ export default function RegisterPage() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 w-full pt-10">
+                                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 w-full pt-4">
                                         <div className="relative">
                                             <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-white/40" />
                                             <input
@@ -768,36 +775,49 @@ export default function RegisterPage() {
                                     )}
                                 </AnimatePresence>
 
-                                <div className="relative w-full flex items-center gap-3">
-                                    <div className="relative flex-1">
-                                        <IndianRupee className="absolute left-6 top-1/2 -translate-y-1/2 text-white/60 w-8 h-8 pointer-events-none" />
-                                        <input type="number" value={onboardingData.rates}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                updateOnboarding("rates", val);
-                                                updateOnboarding("minimumPrice", val); // Sync them
-                                                updateOnboarding("pricePost", val);
-                                            }}
-                                            placeholder="1000"
-                                            className="w-full pl-20 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-4xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none" />
+                                <div className="w-full space-y-4">
+                                    {/* Per Story Input */}
+                                    <div className="relative w-full">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 bg-white/10 px-3 py-1 rounded-lg text-sm font-bold tracking-wide">
+                                            STORY
+                                        </div>
+                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 pointer-events-none" />
+                                        <input type="number" value={onboardingData.priceStory}
+                                            onChange={(e) => updateOnboarding("priceStory", e.target.value)}
+                                            placeholder="500"
+                                            className="w-full pl-32 pr-6 py-5 bg-white/10 border-2 border-white/20 rounded-2xl text-2xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none" />
                                     </div>
-                                    <select
-                                        value={onboardingData.priceType}
-                                        onChange={(e) => updateOnboarding("priceType", e.target.value)}
-                                        className="py-6 px-6 bg-white/10 border-2 border-white/20 rounded-2xl text-xl font-bold focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all text-white cursor-pointer appearance-none min-w-[160px] text-center"
-                                        style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
-                                    >
-                                        <option value="Per Post" className="text-gray-900 font-medium">per post</option>
-                                        <option value="Per Story" className="text-gray-900 font-medium">per story</option>
-                                        <option value="Per Collab" className="text-gray-900 font-medium">per collab</option>
-                                    </select>
+
+                                    {/* Per Post Input */}
+                                    <div className="relative w-full">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 bg-white/10 px-3 py-1 rounded-lg text-sm font-bold tracking-wide">
+                                            POST
+                                        </div>
+                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 pointer-events-none" />
+                                        <input type="number" value={onboardingData.pricePost}
+                                            onChange={(e) => updateOnboarding("pricePost", e.target.value)}
+                                            placeholder="1000"
+                                            className="w-full pl-32 pr-6 py-5 bg-white/10 border-2 border-white/20 rounded-2xl text-2xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none" />
+                                    </div>
+
+                                    {/* Per Collab Input */}
+                                    <div className="relative w-full">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 bg-white/10 px-3 py-1 rounded-lg text-sm font-bold tracking-wide">
+                                            COLLAB
+                                        </div>
+                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 pointer-events-none" />
+                                        <input type="number" value={onboardingData.priceCollab}
+                                            onChange={(e) => updateOnboarding("priceCollab", e.target.value)}
+                                            placeholder="5000"
+                                            className="w-full pl-32 pr-6 py-5 bg-white/10 border-2 border-white/20 rounded-2xl text-2xl font-bold placeholder-white/20 focus:bg-white/20 focus:border-white/50 focus:outline-none transition-all shadow-inner text-white appearance-none" />
+                                    </div>
                                 </div>
 
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleFinalSubmit}
-                                    disabled={!onboardingData.rates || isSubmitting}
+                                    disabled={(!onboardingData.priceStory && !onboardingData.pricePost && !onboardingData.priceCollab) || isSubmitting}
                                     className="w-full mt-6 py-5 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xl font-bold rounded-2xl shadow-lg hover:shadow-green-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
@@ -808,9 +828,37 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 11: Final Success ===== */}
+                    {/* ===== STEP 11: Live Photo KYC ===== */}
                     {currentStep === 11 && (
-                        <CardWrapper stepKey="step11" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper stepKey="step11" direction={direction} progressPercentage={90}>
+                            <div className="w-full max-w-md space-y-6 flex flex-col justify-center items-center relative z-10 text-white">
+                                <div className="text-center space-y-2 mb-2 w-full">
+                                    <h2 className="text-3xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60 drop-shadow-sm">Identity Verification</h2>
+                                    <p className="text-white/60 text-sm">Take a quick selfie to verify your identity and build trust with brands.</p>
+                                </div>
+                                <div className="w-full bg-white/5 p-4 rounded-3xl border border-white/10 backdrop-blur-md">
+                                    <LivePhotoCapture
+                                        userId={""} // The API fetches userId from the active session we just created
+                                        onUploadSuccess={(key: string) => {
+                                            setKycCompleted(true);
+                                            setDirection(1);
+                                            setCurrentStep(12);
+                                        }}
+                                    />
+                                </div>
+                                <button onClick={() => {
+                                    setDirection(1);
+                                    setCurrentStep(12);
+                                }} className="text-white/40 hover:text-white font-medium text-sm transition-colors text-center w-full mt-4 underline decoration-white/20">
+                                    Skip for now (Do this later from Dashboard)
+                                </button>
+                            </div>
+                        </CardWrapper>
+                    )}
+
+                    {/* ===== STEP 12: Final Success ===== */}
+                    {currentStep === 12 && (
+                        <CardWrapper stepKey="step12" direction={direction} progressPercentage={100}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-28 h-28 bg-white/20 rounded-full flex items-center justify-center relative">
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}>
@@ -831,14 +879,7 @@ export default function RegisterPage() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    onClick={async () => {
-                                        const result = await signIn('credentials', {
-                                            email: formData.email,
-                                            password: formData.password,
-                                            redirect: false,
-                                        });
-                                        router.push(result?.ok ? '/creator/dashboard' : '/login');
-                                    }}
+                                    onClick={() => router.push('/creator/dashboard')}
                                     className="px-12 py-5 mt-6 bg-white text-purple-600 text-xl font-bold rounded-full hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-all flex items-center gap-3"
                                 >
                                     Go to Dashboard <ArrowRight size={24} />

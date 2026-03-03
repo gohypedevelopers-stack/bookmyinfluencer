@@ -52,7 +52,7 @@ export function WorkflowSection() {
     const [activeTab, setActiveTab] = useState<'brand' | 'creator'>('brand')
 
     return (
-        <section className="w-full py-24 bg-white text-center overflow-hidden">
+        <section className="w-full py-16 md:py-24 bg-white text-center overflow-hidden">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -86,14 +86,14 @@ export function WorkflowSection() {
 
                         <button
                             onClick={() => setActiveTab('brand')}
-                            className={`relative z-10 px-8 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${activeTab === 'brand' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-8 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${activeTab === 'brand' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Brand
                         </button>
                         <button
                             onClick={() => setActiveTab('creator')}
-                            className={`relative z-10 px-8 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${activeTab === 'creator' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-8 py-3 rounded-full text-sm font-bold transition-colors duration-300 ${activeTab === 'creator' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Creator

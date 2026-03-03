@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher-server";
 
 export async function createAuditLog(
     action: string,
@@ -30,7 +31,7 @@ export async function createNotification(
     link?: string
 ) {
     try {
-        await db.notification.create({
+        const notification = await db.notification.create({
             data: {
                 userId,
                 title,
@@ -39,6 +40,24 @@ export async function createNotification(
                 link
             }
         });
+
+        // Push real-time event via Pusher so connected clients update instantly
+        try {
+            await pusherServer.trigger(`user-${userId}`, 'notification:new', {
+                notification: {
+                    id: notification.id,
+                    type: notification.type,
+                    title: notification.title,
+                    message: notification.message,
+                    link: notification.link,
+                    createdAt: notification.createdAt,
+                    read: false,
+                }
+            });
+        } catch (pusherErr) {
+            // Don't fail if Pusher is unavailable
+            console.warn("Pusher trigger failed:", pusherErr);
+        }
     } catch (e) {
         console.error("Notification Error", e);
     }

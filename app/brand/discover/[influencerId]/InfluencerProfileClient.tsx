@@ -4,6 +4,8 @@ import { InfluencerProfile, User } from "@prisma/client";
 import { useState } from "react";
 import Link from "next/link";
 import { Session } from "next-auth";
+import { Loader2, X, CheckCircle2 } from "lucide-react";
+import { getBrandCampaigns, inviteInfluencer } from "../../actions";
 
 type FullProfile = InfluencerProfile & { user: User; bannerImage?: string | null };
 
@@ -14,6 +16,38 @@ export default function InfluencerProfileClient({
     profile: FullProfile & { isApproved?: boolean; price?: number; priceStory?: number; pricePost?: number; priceCollab?: number; priceType?: string };
     session: Session | null;
 }) {
+    // Invite Modal State
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [campaigns, setCampaigns] = useState<{ id: string, title: string }[]>([]);
+    const [selectedCampaign, setSelectedCampaign] = useState('');
+    const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [inviteError, setInviteError] = useState('');
+
+    const handleOpenInvite = async () => {
+        setShowInviteModal(true);
+        // Fetch campaigns
+        const res = await getBrandCampaigns();
+        if (res.success && res.campaigns) {
+            setCampaigns(res.campaigns);
+            if (res.campaigns.length > 0) setSelectedCampaign(res.campaigns[0].id);
+        }
+    };
+
+    const handleInvite = async () => {
+        if (!selectedCampaign) return;
+        setInviteStatus('loading');
+        const res = await inviteInfluencer(selectedCampaign, profile.userId);
+        if (res.success) {
+            setInviteStatus('success');
+            setTimeout(() => {
+                setShowInviteModal(false);
+                setInviteStatus('idle');
+            }, 2000);
+        } else {
+            setInviteStatus('error');
+            setInviteError(res.error || 'Failed to invite');
+        }
+    };
     // Parsing pricing - it's stored as JSON string in SQLite
     let pricing: { story?: number; reel?: number;[key: string]: any } = {};
     try {
@@ -30,6 +64,78 @@ export default function InfluencerProfileClient({
 
     return (
         <div className="bg-gray-50 text-gray-900 antialiased min-h-screen">
+            {/* Invite Modal */}
+            {showInviteModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-gray-900">Invite to Campaign</h3>
+                            <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        {inviteStatus === 'success' ? (
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle2 className="w-8 h-8" />
+                                </div>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2">Invitation Sent!</h4>
+                                <p className="text-gray-500">This creator has been added to your campaign candidates.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Select Campaign</label>
+                                    {campaigns.length > 0 ? (
+                                        <select
+                                            value={selectedCampaign}
+                                            onChange={(e) => setSelectedCampaign(e.target.value)}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition-all font-medium"
+                                        >
+                                            {campaigns.map(c => (
+                                                <option key={c.id} value={c.id}>{c.title}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                                            You have no active campaigns. <Link href="/brand/campaigns/new" className="underline font-bold">Create one first.</Link>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {inviteStatus === 'error' && (
+                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+                                        {inviteError}
+                                    </div>
+                                )}
+
+                                <div className="pt-4 flex gap-3">
+                                    <button
+                                        onClick={() => setShowInviteModal(false)}
+                                        className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleInvite}
+                                        disabled={campaigns.length === 0 || inviteStatus === 'loading'}
+                                        className="flex-1 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {inviteStatus === 'loading' ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Sending...
+                                            </>
+                                        ) : 'Send Invite'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div className="flex w-full overflow-hidden">
                 {/* Main Content Wrapper */}
                 <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
@@ -66,13 +172,12 @@ export default function InfluencerProfileClient({
                                                         <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
                                                         Save
                                                     </button>
-                                                    <Link
-                                                        href={`/brand/campaigns/new?influencerId=${profile.id}`}
+                                                    <button onClick={handleOpenInvite}
                                                         className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-500 via-teal-600 to-teal-500 bg-size-200 animate-gradient-x text-white hover:shadow-teal-500/40 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center gap-2 group"
                                                     >
                                                         <span className="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform duration-300">campaign</span>
                                                         <span className="tracking-wide">Request Collaboration</span>
-                                                    </Link>
+                                                    </button>
                                                 </>
                                             ) : (
                                                 <Link
@@ -118,7 +223,7 @@ export default function InfluencerProfileClient({
                                                 <option>Last 3 Months</option>
                                             </select>
                                         </div>
-                                        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
                                                 <div className="absolute -right-4 -top-4 bg-gray-50 w-20 h-20 rounded-full group-hover:bg-teal-500/10 transition-colors"></div>
                                                 <div className="relative z-10">
