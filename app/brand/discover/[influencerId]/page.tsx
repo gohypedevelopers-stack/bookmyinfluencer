@@ -119,5 +119,22 @@ export default async function InfluencerProfilePage({
         </div>;
     }
 
+    // Check saved status
+    if (session?.user?.role === 'BRAND') {
+        const brand = await db.brandProfile.findUnique({ where: { userId: session.user.id } });
+        if (brand && (db as any).savedInfluencer) {
+            // @ts-ignore
+            const isSaved = await db.savedInfluencer.findUnique({
+                where: {
+                    brandId_influencerId: {
+                        brandId: brand.id,
+                        influencerId: profile.id
+                    }
+                }
+            });
+            profile.saved = !!isSaved;
+        }
+    }
+
     return <InfluencerProfileClient profile={profile} session={session} />;
 }

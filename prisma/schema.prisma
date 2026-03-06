@@ -60,6 +60,19 @@ model BrandProfile {
   minPricePerPost   Float?
   maxPricePerPost   Float?
   priceType         String?      @default("Per Post")
+
+  savedInfluencers  SavedInfluencer[]
+}
+
+model SavedInfluencer {
+  id           String            @id @default(cuid())
+  brandId      String
+  influencerId String
+  createdAt    DateTime          @default(now())
+  brand        BrandProfile      @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, influencerId])
 }
 
 model InfluencerProfile {
@@ -86,6 +99,7 @@ model InfluencerProfile {
   kyc             KYCSubmission?
   payoutRecords   PayoutRecord[]
   payouts         PayoutRequest[]
+  savedInfluencers SavedInfluencer[]
 
   // Onboarding Data
   onboardingCompleted Boolean @default(false)

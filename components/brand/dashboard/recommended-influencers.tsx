@@ -4,16 +4,20 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowLeft } from "lucide-react"
+import { ArrowRight, ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react"
 import { useState } from "react"
+import { toggleSavedInfluencer } from "@/app/brand/savedActions";
+import { toast } from "sonner";
 
 interface Influencer {
     id: string
     name: string
+    dbId?: string
     handle: string
     niche: string
     profileImage: string
     bannerImage?: string | null
+    saved?: boolean
     stats: {
         followers: string | number
         engagement: string | number
@@ -25,7 +29,8 @@ interface RecommendedInfluencersProps {
     influencers: Influencer[]
 }
 
-export function RecommendedInfluencers({ influencers }: RecommendedInfluencersProps) {
+export function RecommendedInfluencers({ influencers: initialInfluencers }: RecommendedInfluencersProps) {
+    const [influencers, setInfluencers] = useState(initialInfluencers)
     const [startIndex, setStartIndex] = useState(0)
     const itemsPerPage = 3
 
@@ -39,6 +44,34 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
     const handleNext = () => {
         if (canGoForward) setStartIndex(prev => Math.min(influencers.length - itemsPerPage, prev + itemsPerPage))
     }
+
+    const handleToggleSave = async (id: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const infIndex = influencers.findIndex(i => i.id === id);
+        if (infIndex === -1) return;
+
+        const inf = influencers[infIndex];
+        const originalSaved = inf.saved || false;
+
+        // Optimistically update
+        const newInfluencers = [...influencers];
+        newInfluencers[infIndex] = { ...inf, saved: !originalSaved };
+        setInfluencers(newInfluencers);
+
+        try {
+            const res = await toggleSavedInfluencer(id);
+            if (!res.success) throw new Error(res.error);
+            toast.success(res.isSaved ? "Saved to collection" : "Removed from collection");
+        } catch (error) {
+            // Revert on failure
+            toast.error("Failed to toggle save status");
+            const reverted = [...newInfluencers];
+            reverted[infIndex] = { ...inf, saved: originalSaved };
+            setInfluencers(reverted);
+        }
+    };
 
     const visibleInfluencers = influencers.slice(startIndex, startIndex + itemsPerPage)
 
@@ -75,18 +108,31 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {visibleInfluencers.map((influencer) => (
-                    <Card key={influencer.id} className="overflow-hidden border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div className={`h-24 relative overflow-hidden ${!influencer.bannerImage ? (influencer.niche.includes('Lifestyle') ? 'bg-blue-50' : influencer.niche.includes('Teach') ? 'bg-green-50' : 'bg-pink-50') : ''}`}>
-                            {influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:')) && (
+                    <Card key={influencer.id} className="overflow-hidden border-gray-100 shadow-sm hover:shadow-md transition-shadow relative">
+                        <div className="h-32 relative overflow-hidden">
+                            {influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:')) ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={influencer.bannerImage}
                                     alt="Cover"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover object-top"
                                 />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-teal-400 via-blue-400 to-indigo-500" />
                             )}
+                            {/* Bookmark Button */}
+                            <button
+                                onClick={(e) => handleToggleSave(influencer.id, e)}
+                                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm z-10"
+                            >
+                                {influencer.saved ? (
+                                    <BookmarkCheck className="w-4 h-4 text-teal-600 fill-current" />
+                                ) : (
+                                    <Bookmark className="w-4 h-4 text-gray-600" />
+                                )}
+                            </button>
                         </div>
-                        <div className="px-6 pb-6 mt-[-30px]">
+                        <div className="px-6 pb-6 mt-[-34px] relative">
                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white mb-3">
                                 <Image
                                     src={influencer.profileImage && influencer.profileImage.length > 0 ? influencer.profileImage : "/images/elena.png"}

@@ -425,7 +425,7 @@ export default function InfluencerProfile() {
                                     {tier.val > 0 ? (
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-2xl font-extrabold text-teal-600 tracking-widest">
-                                                {'★'.repeat(Math.min(5, Math.ceil(tier.val / 1000)))}
+                                                ₹{'*'.repeat(String(tier.val).length)}
                                             </span>
                                             <span className="text-gray-400 text-sm">/ {tier.unit}</span>
                                         </div>

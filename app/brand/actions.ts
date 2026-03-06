@@ -456,6 +456,23 @@ export async function getPublicCreators(filter?: {
             take: 30
         });
 
+        // Check for logged in brand to get saved status
+        const session = await getServerSession(authOptions);
+        let savedInfluencerIds = new Set<string>();
+        if (session && session.user.role === 'BRAND') {
+            const brand = await db.brandProfile.findUnique({
+                where: { userId: session.user.id }
+            });
+            if (brand && (db as any).savedInfluencer) {
+                // @ts-ignore
+                const saved = await db.savedInfluencer.findMany({
+                    where: { brandId: brand.id },
+                    select: { influencerId: true }
+                });
+                savedInfluencerIds = new Set(saved.map((s: any) => s.influencerId));
+            }
+        }
+
         // Map Creator data to UI format
         const mappedCreators = creators.map((c: any) => {
             const primaryMetric = c.metrics?.[0];
@@ -494,7 +511,7 @@ export async function getPublicCreators(filter?: {
                 thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || "",
                 bannerImage: c.backgroundImageUrl || null,
-                saved: false
+                saved: savedInfluencerIds.has(c.userId)
             };
         });
 
@@ -534,7 +551,7 @@ export async function getPublicCreators(filter?: {
                 thumbnail: inf.user?.image || "",
                 profileImage: inf.user?.image || "",
                 bannerImage: null, // InfluencerProfile doesn't have a banner image field yet
-                saved: false
+                saved: savedInfluencerIds.has(inf.userId)
             };
         });
 

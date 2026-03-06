@@ -190,7 +190,7 @@ export default function InfluencerProfileClient({
                                                     </div>
                                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{service.label}</h3>
                                                     <div className="flex items-baseline gap-1 mb-4">
-                                                        <span className="text-3xl font-extrabold text-teal-600">₹{service.price}</span>
+                                                        <span className="text-3xl font-extrabold text-teal-600 tracking-widest">₹{'*'.repeat(String(service.price).length)}</span>
                                                         <span className="text-gray-500 text-sm">/ deliverable</span>
                                                     </div>
                                                     <Link

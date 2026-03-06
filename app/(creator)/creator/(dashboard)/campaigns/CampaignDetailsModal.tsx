@@ -106,11 +106,11 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                 <div className="relative">
                     {/* Header Image/Gradient */}
                     <div className="h-32 w-full relative overflow-hidden bg-gray-900">
-                        {campaign.brand.user?.image ? (
+                        {campaign.images && campaign.images.length > 0 ? (
                             <img
-                                src={campaign.brand.user.image}
-                                alt="Cover"
-                                className="w-full h-full object-cover opacity-60 blur-sm scale-110"
+                                src={campaign.images[0]}
+                                alt="Campaign Cover"
+                                className="w-full h-full object-cover"
                             />
                         ) : (
                             <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>

@@ -43,9 +43,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full overflow-x-hidden antialiased bg-background text-foreground`}
       >
         <Providers>
-          <div className="flex w-full flex-col min-h-screen">
-            {children}
-          </div>
+          {children}
         </Providers>
       </body>
     </html >

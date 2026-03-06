@@ -59,7 +59,7 @@ const NextButton = ({
     <button
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-6"
+        className="w-full py-3 text-white font-bold rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
@@ -79,13 +79,27 @@ const followerTiers = [
     { label: "Mega", desc: "500K+ followers", badge: "Massive Impact", min: 500000, max: 10000000, color: "from-orange-400 to-rose-500" },
 ];
 
-// Price tiers
-const priceTiers = [
-    { label: "₹500 – ₹2,000", badge: "Budget Friendly", min: 500, max: 2000 },
-    { label: "₹2,000 – ₹10,000", badge: "Standard", min: 2000, max: 10000 },
-    { label: "₹10,000 – ₹50,000", badge: "Premium", min: 10000, max: 50000 },
-    { label: "₹50,000+", badge: "Elite", min: 50000, max: 1000000 },
-];
+// Price tiers — differ by collaboration type
+const priceTypeMap: Record<string, { label: string; badge: string; min: number; max: number }[]> = {
+    'Per Post': [
+        { label: '₹500 – ₹2,000', badge: 'Budget Friendly', min: 500, max: 2000 },
+        { label: '₹2,000 – ₹10,000', badge: 'Standard', min: 2000, max: 10000 },
+        { label: '₹10,000 – ₹50,000', badge: 'Premium', min: 10000, max: 50000 },
+        { label: '₹50,000+', badge: 'Elite', min: 50000, max: 1000000 },
+    ],
+    'Per Story': [
+        { label: '₹200 – ₹1,000', badge: 'Budget Friendly', min: 200, max: 1000 },
+        { label: '₹1,000 – ₹5,000', badge: 'Standard', min: 1000, max: 5000 },
+        { label: '₹5,000 – ₹20,000', badge: 'Premium', min: 5000, max: 20000 },
+        { label: '₹20,000+', badge: 'Elite', min: 20000, max: 500000 },
+    ],
+    'Per Collab': [
+        { label: '₹5,000 – ₹25,000', badge: 'Budget Friendly', min: 5000, max: 25000 },
+        { label: '₹25,000 – ₹1,00,000', badge: 'Standard', min: 25000, max: 100000 },
+        { label: '₹1,00,000 – ₹5,00,000', badge: 'Premium', min: 100000, max: 500000 },
+        { label: '₹5,00,000+', badge: 'Elite', min: 500000, max: 10000000 },
+    ],
+};
 
 export default function BrandRegisterPage() {
     const router = useRouter();
@@ -264,23 +278,36 @@ export default function BrandRegisterPage() {
     ) : null;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4 overflow-hidden font-sans">
-            {/* Progress Bar */}
-            <div className="fixed top-0 left-0 w-full h-1.5 bg-gray-200 z-50">
-                <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${progressPercentage}%` }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-                />
-            </div>
+        <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans" style={{ background: "radial-gradient(ellipse at 20% 50%, #dbeafe 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #ede9fe 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #e0f2fe 0%, transparent 50%), #f8fafc" }}>
 
-            <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 md:p-12 relative overflow-hidden min-h-[580px] flex flex-col">
+            {/* Decorative blobs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <motion.div animate={{ y: [0, -24, 0], x: [0, 12, 0] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-10 left-[6%] w-80 h-80 bg-blue-200/25 rounded-full blur-3xl" />
+                <motion.div animate={{ y: [0, 20, 0], x: [0, -14, 0] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute bottom-10 right-[6%] w-80 h-80 bg-violet-200/25 rounded-full blur-3xl" />
+                <motion.div animate={{ y: [0, -16, 0] }} transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-indigo-100/20 rounded-full blur-3xl" />
+                <div className="absolute top-12 right-12 opacity-[0.15]" style={{ backgroundImage: "radial-gradient(circle, #3b82f6 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
+                <div className="absolute bottom-12 left-12 opacity-[0.15]" style={{ backgroundImage: "radial-gradient(circle, #6366f1 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
+            </div>
+            <div className="w-full max-w-lg bg-white/90 backdrop-blur-sm border border-white/80 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.09),0_0_0_1px_rgba(99,102,241,0.06)] relative overflow-hidden min-h-0 flex flex-col z-10 p-8 md:p-10">
+
+                {/* In-card progress bar */}
+                <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-100 z-20">
+                    <motion.div
+                        className="h-full rounded-r-full"
+                        style={{ background: "linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6)" }}
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${progressPercentage}%` }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                    />
+                </div>
                 {/* Back Button */}
                 {currentStep > 1 && currentStep < 12 && (
                     <button
                         onClick={goBack}
-                        className="absolute top-8 left-8 p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700 z-20"
+                        className="absolute top-6 left-6 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700 z-20"
                     >
                         <ChevronLeft size={22} />
                     </button>
@@ -288,12 +315,12 @@ export default function BrandRegisterPage() {
 
                 {/* Step Counter */}
                 {currentStep < 12 && (
-                    <div className="absolute top-8 right-8 text-xs font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full z-20">
+                    <div className="absolute top-6 right-6 text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full z-20">
                         {currentStep} / {TOTAL_STEPS - 1}
                     </div>
                 )}
 
-                <div className="flex-1 flex flex-col justify-center mt-8">
+                <div className="flex-1 flex flex-col justify-center mt-4">
                     <ErrorDisplay />
                     <AnimatePresence initial={false} custom={direction} mode="wait">
 
@@ -302,24 +329,24 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step1" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Enter brand details</h2>
-                                        <p className="text-gray-500 mt-2">Registration - Phase 1</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Enter brand details</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Registration - Phase 1</p>
                                     </div>
 
                                     {/* Company Name */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Company Name</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Company Name</label>
                                         <div className="relative">
-                                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                             <input name="companyName" type="text" value={formData.companyName} onChange={handleInputChange}
-                                                className="w-full pl-12 pr-4 py-4 text-base border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                                                className="w-full pl-11 pr-4 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                 placeholder="e.g. Acme Global" required />
                                         </div>
                                     </div>
 
                                     {/* Industry */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Industry Type</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Industry Type</label>
                                         <div className="space-y-4">
                                             <div className="relative">
                                                 <select
@@ -337,7 +364,7 @@ export default function BrandRegisterPage() {
                                                             setShowCustomIndustry(false);
                                                         }
                                                     }}
-                                                    className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-700 text-base focus:outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer"
+                                                    className="w-full px-4 py-3 bg-[#f0f4ff]/50 border border-slate-200 rounded-2xl text-slate-700 text-base focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 transition-all appearance-none cursor-pointer"
                                                 >
                                                     <option value="" disabled>Select industry</option>
                                                     {['Technology', 'Fashion & Apparel', 'Beauty & Cosmetics', 'Health & Wellness', 'Food & Beverage', 'Finance', 'Education', 'Entertainment', 'Travel', 'Others'].map(opt => (
@@ -382,7 +409,7 @@ export default function BrandRegisterPage() {
                                                                         setShowCustomIndustry(false);
                                                                     }
                                                                 }}
-                                                                className="px-5 py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                                                                className="px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
                                                             >
                                                                 Add
                                                             </button>
@@ -417,20 +444,20 @@ export default function BrandRegisterPage() {
 
                                     {/* Website */}
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Website URL</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Website URL</label>
                                         <div className="relative">
-                                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                             <input name="website" type="url" value={formData.website} onChange={handleInputChange}
-                                                className="w-full pl-12 pr-4 py-4 text-base border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                                                className="w-full pl-11 pr-4 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                 placeholder="https://www.yourbrand.com" />
                                         </div>
                                     </div>
 
                                     <NextButton label="Next" onClick={goNext} disabled={!canProceed()} />
 
-                                    <p className="text-center text-sm text-gray-500 mt-4">
+                                    <p className="text-center text-sm text-slate-400 mt-4">
                                         Member already?{' '}
-                                        <Link href="/brand/login" className="text-blue-600 font-semibold hover:underline">Sign In</Link>
+                                        <Link href="/brand/login" className="text-indigo-600 font-semibold hover:underline">Sign In</Link>
                                     </p>
                                 </div>
                             </CardWrapper>
@@ -441,24 +468,24 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step2" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Verify company email</h2>
-                                        <p className="text-gray-500 mt-2">Security Check</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify company email</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Security Check</p>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Work Email</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Work Email</label>
                                         <div className="relative">
-                                            <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 ${emailVerified ? 'text-emerald-500' : 'text-gray-400'}`} />
+                                            <Mail className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${emailVerified ? 'text-emerald-500' : 'text-gray-400'}`} />
                                             <input name="email" type="email" value={formData.email} onChange={handleInputChange}
-                                                className={`w-full pl-12 pr-28 py-4 text-base border-2 rounded-2xl focus:outline-none transition-colors ${emailVerified
+                                                className={`w-full pl-11 pr-28 py-3 text-base border rounded-2xl focus:outline-none transition-all ${emailVerified
                                                     ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                                                    : 'bg-gray-50 border-gray-200 focus:border-blue-500'
+                                                    : 'bg-[#f0f4ff]/50 border-slate-200 focus:border-indigo-500'
                                                     }`}
                                                 placeholder="hello@acme.com" required disabled={emailVerified} />
                                             {emailVerified && <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 w-5 h-5" />}
                                             {!emailVerified && formData.email && !otpSent && (
                                                 <button type="button" onClick={requestOtp} disabled={otpLoading || timer > 0}
-                                                    className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50">
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-all disabled:opacity-50">
                                                     {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : timer > 0 ? `${timer}s` : 'Send OTP'}
                                                 </button>
                                             )}
@@ -468,7 +495,7 @@ export default function BrandRegisterPage() {
                                     {/* OTP Entry */}
                                     {otpSent && !emailVerified && (
                                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-gray-100">
-                                            <label className="text-sm font-semibold text-gray-700 ml-1">Verification Code</label>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Verification Code</label>
                                             <div className="flex gap-2">
                                                 {[0, 1, 2, 3, 4, 5].map((i) => (
                                                     <input key={i} type="text" maxLength={1} value={otp[i] || ''}
@@ -480,20 +507,20 @@ export default function BrandRegisterPage() {
                                                         onKeyDown={(e) => {
                                                             if (e.key === 'Backspace' && !otp[i] && i > 0) { const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement; prev?.focus(); }
                                                         }}
-                                                        className="flex-1 aspect-square text-center text-xl font-bold border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 bg-gray-50"
+                                                        className="flex-1 aspect-square text-center text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-300 bg-[#f0f4ff]/50 focus:bg-white transition-all text-slate-800"
                                                     />
                                                 ))}
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
-                                                <button type="button" onClick={requestOtp} disabled={otpLoading || timer > 0} className="text-sm text-blue-600 font-semibold hover:underline">
+                                                <button type="button" onClick={requestOtp} disabled={otpLoading || timer > 0} className="text-sm text-indigo-600 font-semibold hover:underline">
                                                     {timer > 0 ? `Retry in ${timer}s` : 'Resend OTP'}
                                                 </button>
-                                                <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setError(''); }} className="text-sm text-gray-500 font-medium hover:text-gray-800">
+                                                <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setError(''); }} className="text-sm text-slate-400 font-medium hover:text-slate-700">
                                                     Change Email
                                                 </button>
                                             </div>
                                             <button type="button" onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
-                                                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                                className="w-full py-3 text-white rounded-2xl font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-md shadow-indigo-200/50" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
                                                 {otpLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm OTP'}
                                             </button>
                                         </motion.div>
@@ -512,7 +539,7 @@ export default function BrandRegisterPage() {
                                                     }
                                                     goNext();
                                                 }}
-                                                className="w-full py-4 text-gray-500 font-semibold rounded-2xl border-2 border-gray-200 hover:bg-gray-50 transition-all"
+                                                className="w-full py-2.5 text-slate-400 font-semibold rounded-2xl border border-slate-200 hover:bg-slate-50 transition-all text-sm"
                                             >
                                                 Skip Verification for now
                                             </button>
@@ -527,16 +554,16 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step3" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Create secure password</h2>
-                                        <p className="text-gray-500 mt-2">Finalize Account</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create secure password</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Finalize Account</p>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Password</label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                             <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
-                                                className="w-full pl-12 pr-12 py-4 text-base border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                                                className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                 placeholder="••••••••" required />
                                             <button type="button" onClick={() => setShowPassword(!showPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
@@ -546,11 +573,11 @@ export default function BrandRegisterPage() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-gray-700 ml-1">Confirm Password</label>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Confirm Password</label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                             <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
-                                                className="w-full pl-12 pr-12 py-4 text-base border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                                                className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                 placeholder="••••••••" required />
                                             <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
@@ -567,11 +594,11 @@ export default function BrandRegisterPage() {
                                     )}
 
                                     {/* Terms */}
-                                    <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                                    <div className="flex items-start gap-3 p-3.5 bg-[#f0f4ff]/50 border border-slate-200 rounded-2xl">
                                         <input type="checkbox" id="agreeToTerms" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange}
-                                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600 cursor-pointer" />
-                                        <label htmlFor="agreeToTerms" className="text-sm text-gray-600 cursor-pointer">
-                                            I agree to the <Link href="/terms" className="text-blue-600 font-medium hover:underline">Terms of Service</Link> & <Link href="/privacy" className="text-blue-600 font-medium hover:underline">Privacy Policy</Link>
+                                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 accent-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                                        <label htmlFor="agreeToTerms" className="text-sm text-slate-500 cursor-pointer">
+                                            I agree to the <Link href="/terms" className="text-indigo-600 font-semibold hover:underline">Terms of Service</Link> & <Link href="/privacy" className="text-indigo-600 font-semibold hover:underline">Privacy Policy</Link>
                                         </label>
                                     </div>
 
@@ -584,11 +611,11 @@ export default function BrandRegisterPage() {
                         {currentStep === 4 && (
                             <CardWrapper stepKey="step4" direction={direction}>
                                 <div className="flex flex-col items-center text-center space-y-6 pt-6">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-full flex items-center justify-center mb-2">
-                                        <Target className="w-10 h-10 text-blue-600" />
+                                    <div className="w-20 h-20 rounded-2xl rotate-3 flex items-center justify-center mb-4 shadow-xl shadow-blue-200/60" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+                                        <Target className="w-10 h-10 text-white" />
                                     </div>
-                                    <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Registration complete!</h1>
-                                    <p className="text-lg text-gray-500 max-w-sm">
+                                    <h1 className="text-3xl font-extrabold tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Registration complete!</h1>
+                                    <p className="text-sm text-slate-500 max-w-sm">
                                         Let's personalize your discovery engine to find creators who match your brand's vision.
                                     </p>
                                     <div className="pt-4 w-full">
@@ -603,15 +630,15 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step5" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">What is your Brand Name?</h2>
-                                        <p className="text-gray-500 mt-2">Defining Identity</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>What is your Brand Name?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Defining Identity</p>
                                     </div>
                                     <div className="relative">
-                                        <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                         <input type="text" value={onboardingData.brandName}
                                             onChange={(e) => updateOnboarding('brandName', e.target.value)}
                                             onKeyDown={(e) => { if (e.key === 'Enter' && onboardingData.brandName) goNext(); }}
-                                            className="w-full pl-12 pr-4 py-4 text-xl border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors bg-gray-50 focus:bg-white"
+                                            className="w-full pl-11 pr-4 py-3 text-lg border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-400 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                             placeholder="Enter public name" autoFocus />
                                     </div>
                                     <NextButton label="Continue" onClick={goNext} disabled={!onboardingData.brandName} />
@@ -624,8 +651,8 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step6" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">What type of campaign?</h2>
-                                        <p className="text-gray-500 mt-2">Campaign Strategy</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>What type of campaign?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Campaign Strategy</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
                                         {[
@@ -644,10 +671,10 @@ export default function BrandRegisterPage() {
                                                         : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                                     }`}
                                             >
-                                                <div className={`p-3 rounded-xl transition-colors ${onboardingData.campaignType === option.label ? 'bg-blue-200 text-blue-700' : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'}`}>
+                                                <div className={`p-3 rounded-xl transition-colors ${onboardingData.campaignType === option.label ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'}`}>
                                                     <option.icon size={22} />
                                                 </div>
-                                                <span className="font-semibold text-gray-800">{option.label}</span>
+                                                <span className="font-semibold text-slate-700">{option.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -660,8 +687,8 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step7" direction={direction}>
                                 <div className="space-y-5">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Total campaign budget?</h2>
-                                        <p className="text-gray-500 mt-2">Budget Planning</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Total campaign budget?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Budget Planning</p>
                                     </div>
                                     <div className="space-y-3">
                                         {["Under ₹10,000", "₹10,000 – ₹50,000", "₹50,000 – ₹2,00,000", "₹2,00,000 – ₹5,00,000", "₹5,00,000 – ₹10,00,000", "₹10,00,000+"].map((option) => (
@@ -679,7 +706,7 @@ export default function BrandRegisterPage() {
                                         ))}
                                     </div>
                                     <div className="flex justify-end pt-2">
-                                        <button onClick={goNext} className="text-blue-600 font-semibold hover:underline text-sm">Skip this step</button>
+                                        <button onClick={goNext} className="text-indigo-500 font-semibold hover:underline text-sm">Skip this step</button>
                                     </div>
                                 </div>
                             </CardWrapper>
@@ -690,8 +717,8 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step8" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Target creator size?</h2>
-                                        <p className="text-gray-500 mt-2">Select the follower range that fits your campaign.</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Target creator size?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Select the follower range that fits your campaign.</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {followerTiers.map((tier) => {
@@ -700,7 +727,7 @@ export default function BrandRegisterPage() {
                                                 <button key={tier.label}
                                                     onClick={() => { updateOnboarding('minFollowers', tier.min); updateOnboarding('maxFollowers', tier.max); }}
                                                     className={`p-5 border-2 rounded-2xl text-left transition-all hover:shadow-md relative overflow-hidden group
-                                                    ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                                                    ${isSelected ? 'border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100/50' : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'}`}
                                                 >
                                                     <div className="flex items-start justify-between mb-3">
                                                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center`}>
@@ -729,35 +756,43 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step9" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Budget per post?</h2>
-                                        <p className="text-gray-500 mt-2">How much are you willing to pay a creator per collaboration?</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Budget range?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Select a pricing type and your budget per collaboration.</p>
                                     </div>
 
-                                    <select
-                                        value={onboardingData.priceType}
-                                        onChange={(e) => updateOnboarding('priceType', e.target.value)}
-                                        className="w-full p-4 mb-2 border-2 border-gray-200 rounded-2xl text-lg font-bold text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer appearance-none text-center bg-white shadow-sm"
-                                    >
-                                        <option value="Per Post">Per Post</option>
-                                        <option value="Per Story">Per Story</option>
-                                        <option value="Per Collab">Per Collab</option>
-                                    </select>
+                                    {/* Price Type Selector — pill buttons */}
+                                    <div className="flex gap-2 mb-1">
+                                        {['Per Post', 'Per Story', 'Per Collab'].map((type) => (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => updateOnboarding('priceType', type)}
+                                                className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border ${onboardingData.priceType === type
+                                                    ? 'border-indigo-500 text-indigo-700 shadow-md shadow-indigo-100/60'
+                                                    : 'border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/30'
+                                                    }`}
+                                                style={onboardingData.priceType === type ? { background: "linear-gradient(135deg, #eef2ff, #ede9fe)" } : {}}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
 
                                     <div className="space-y-3">
-                                        {priceTiers.map((tier) => {
+                                        {(priceTypeMap[onboardingData.priceType] ?? priceTypeMap['Per Post']).map((tier) => {
                                             const isSelected = onboardingData.minPricePerPost === tier.min && onboardingData.maxPricePerPost === tier.max;
                                             return (
                                                 <button key={tier.label}
                                                     onClick={() => { updateOnboarding('minPricePerPost', tier.min); updateOnboarding('maxPricePerPost', tier.max); goNext(); }}
                                                     className={`w-full p-5 border-2 rounded-2xl text-left transition-all flex items-center justify-between group
-                                                    ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                                                    ${isSelected ? 'border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100/50' : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'}`}
                                                 >
                                                     <div>
                                                         <div className="font-bold text-lg text-gray-900">{tier.label}</div>
                                                         <div className="text-sm text-gray-500 mt-0.5">{onboardingData.priceType.toLowerCase()}</div>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">{tier.badge}</span>
+                                                        <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full group-hover:bg-indigo-100 group-hover:text-indigo-700 transition-colors">{tier.badge}</span>
                                                         {isSelected && <Check className="text-blue-600" size={18} />}
                                                     </div>
                                                 </button>
@@ -765,7 +800,7 @@ export default function BrandRegisterPage() {
                                         })}
                                     </div>
                                     <div className="flex justify-end pt-2">
-                                        <button onClick={goNext} className="text-blue-600 font-semibold hover:underline text-sm">Skip this step</button>
+                                        <button onClick={goNext} className="text-indigo-500 font-semibold hover:underline text-sm">Skip this step</button>
                                     </div>
                                 </div>
                             </CardWrapper>
@@ -776,8 +811,8 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step10" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Target Platforms?</h2>
-                                        <p className="text-gray-500 mt-2">Select all that apply</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Target Platforms?</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Select all that apply</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 pb-2">
                                         {[
@@ -790,8 +825,8 @@ export default function BrandRegisterPage() {
                                                     onClick={() => togglePlatform(p.id)}
                                                     className={`p-6 border-2 rounded-2xl flex flex-col items-center gap-4 transition-all
                                                     ${isActive
-                                                            ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
-                                                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                                            ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-400 shadow-md shadow-indigo-100/50'
+                                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30'
                                                         }`}
                                                 >
                                                     <p.icon className={`w-10 h-10 ${isActive ? p.color : 'text-gray-400'}`} />
@@ -810,8 +845,8 @@ export default function BrandRegisterPage() {
                             <CardWrapper stepKey="step11" direction={direction}>
                                 <div className="space-y-6">
                                     <div className="text-center md:text-left mb-4">
-                                        <h2 className="text-3xl font-bold text-gray-900">Campaign Goals</h2>
-                                        <p className="text-gray-500 mt-2">Tell us a bit more about what you want to achieve.</p>
+                                        <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Campaign Goals</h2>
+                                        <p className="text-sm text-slate-400 mt-1">Tell us a bit more about what you want to achieve.</p>
                                     </div>
                                     <textarea value={onboardingData.campaignGoals}
                                         onChange={(e) => updateOnboarding('campaignGoals', e.target.value)}

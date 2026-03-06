@@ -1,8 +1,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
-
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -30,9 +32,21 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid file type. Only JPG, PNG, WEBP, and GIF are allowed." }, { status: 400 });
         }
 
+        // Save to /public/uploads directory
+        const uploadsDir = join(process.cwd(), "public", "uploads");
+        if (!existsSync(uploadsDir)) {
+            await mkdir(uploadsDir, { recursive: true });
+        }
+
+        const ext = file.type.split("/")[1] || "jpg";
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const filePath = join(uploadsDir, fileName);
+
         const buffer = Buffer.from(await file.arrayBuffer());
-        const base64 = buffer.toString('base64');
-        const url = `data:${file.type};base64,${base64}`;
+        await writeFile(filePath, buffer);
+
+        // Return a public URL path
+        const url = `/uploads/${fileName}`;
 
         return NextResponse.json({ success: true, url });
 

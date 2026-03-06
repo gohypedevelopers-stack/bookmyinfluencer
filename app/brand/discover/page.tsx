@@ -374,16 +374,16 @@ function InfluencerDiscoveryInner() {
                                 {filteredInfluencers.length > 0 ? filteredInfluencers.map((influencer) => (
                                     <div key={influencer.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                         {/* Banner */}
-                                        <div className={`relative h-32 overflow-hidden`}>
+                                        <div className="relative h-36 overflow-hidden">
                                             {(influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:'))) ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img
                                                     src={influencer.bannerImage}
                                                     alt={influencer.name + ' banner'}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover object-top"
                                                 />
                                             ) : (
-                                                <div className={`w-full h-full bg-gradient-to-r from-teal-400 to-blue-500`} />
+                                                <div className="w-full h-full bg-gradient-to-br from-teal-400 via-blue-400 to-indigo-500" />
                                             )}
 
                                             {/* Top Right Actions */}

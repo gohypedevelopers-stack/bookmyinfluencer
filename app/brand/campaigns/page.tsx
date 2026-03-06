@@ -25,17 +25,30 @@ export default async function CampaignsPage() {
         ORDER BY c."createdAt" DESC
     ` as any[];
 
-    const campaigns = campaignsRaw.map(c => ({
-        ...c,
-        // Ensure dates are Date objects if driver returns strings
-        createdAt: new Date(c.createdAt),
-        startDate: c.startDate ? new Date(c.startDate) : null,
-        endDate: c.endDate ? new Date(c.endDate) : null,
-        // Map count
-        _count: {
-            candidates: Number(c.candidatesCount || 0)
+    const campaigns = campaignsRaw.map(c => {
+        // Raw SQL returns `images` as a JSON string from Postgres — parse it into a real array
+        let images: string[] = [];
+        if (c.images) {
+            if (Array.isArray(c.images)) {
+                images = c.images;
+            } else if (typeof c.images === 'string') {
+                try { images = JSON.parse(c.images); } catch { images = []; }
+            }
         }
-    }));
+
+        return {
+            ...c,
+            images,
+            // Ensure dates are Date objects if driver returns strings
+            createdAt: new Date(c.createdAt),
+            startDate: c.startDate ? new Date(c.startDate) : null,
+            endDate: c.endDate ? new Date(c.endDate) : null,
+            // Map count
+            _count: {
+                candidates: Number(c.candidatesCount || 0)
+            }
+        };
+    });
 
     return <CampaignListClient campaigns={campaigns} />;
 }

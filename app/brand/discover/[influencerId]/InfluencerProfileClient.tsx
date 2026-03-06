@@ -4,10 +4,13 @@ import { InfluencerProfile, User } from "@prisma/client";
 import { useState } from "react";
 import Link from "next/link";
 import { Session } from "next-auth";
-import { Loader2, X, CheckCircle2 } from "lucide-react";
+import { Loader2, X, CheckCircle2, UserPlus, Star, Instagram, Youtube, MapPin, Share2, MessageSquare, Flag, Play, LayoutGrid, Copy, FileText, ArrowRight, BookmarkCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { getBrandCampaigns, inviteInfluencer } from "../../actions";
+import { toggleSavedInfluencer } from "@/app/brand/savedActions";
+import { toast } from "sonner";
 
-type FullProfile = InfluencerProfile & { user: User; bannerImage?: string | null };
+type FullProfile = InfluencerProfile & { user: User; bannerImage?: string | null; saved?: boolean };
 
 export default function InfluencerProfileClient({
     profile,
@@ -22,6 +25,21 @@ export default function InfluencerProfileClient({
     const [selectedCampaign, setSelectedCampaign] = useState('');
     const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [inviteError, setInviteError] = useState('');
+    const [isSaved, setIsSaved] = useState(profile.saved || false);
+
+    const handleToggleSave = async () => {
+        const previousState = isSaved;
+        setIsSaved(!previousState);
+
+        try {
+            const res = await toggleSavedInfluencer(profile.id);
+            if (!res.success) throw new Error(res.error);
+            toast.success(res.isSaved ? "Saved to collection" : "Removed from collection");
+        } catch (error) {
+            toast.error("Failed to update save status");
+            setIsSaved(previousState);
+        }
+    };
 
     const handleOpenInvite = async () => {
         setShowInviteModal(true);
@@ -168,9 +186,14 @@ export default function InfluencerProfileClient({
                                         <div className="flex gap-3 mt-2 md:mt-0 w-full md:w-auto">
                                             {session?.user?.role === 'BRAND' || session?.user?.role === 'ADMIN' ? (
                                                 <>
-                                                    <button className="flex-1 md:flex-none h-11 px-6 bg-teal-50 text-teal-600 hover:bg-teal-100 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
-                                                        Save
+                                                    <button
+                                                        onClick={handleToggleSave}
+                                                        className={`flex-1 md:flex-none h-11 px-6 ${isSaved ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-teal-50 text-teal-600 hover:bg-teal-100'} rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2`}
+                                                    >
+                                                        <span className={isSaved ? "" : "material-symbols-outlined text-[20px]"}>
+                                                            {isSaved ? <BookmarkCheck className="w-5 h-5 fill-current" /> : "bookmark_border"}
+                                                        </span>
+                                                        {isSaved ? "Saved" : "Save"}
                                                     </button>
                                                     <button onClick={handleOpenInvite}
                                                         className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-500 via-teal-600 to-teal-500 bg-size-200 animate-gradient-x text-white hover:shadow-teal-500/40 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center gap-2 group"
@@ -297,7 +320,7 @@ export default function InfluencerProfileClient({
                                                 <div className="flex items-baseline gap-1 mb-4">
                                                     <span className="text-3xl font-extrabold text-teal-600 tracking-widest">
                                                         {tier.val > 0
-                                                            ? ('*'.repeat(tier.val.toString().length))
+                                                            ? `₹${'*'.repeat(tier.val.toString().length)}`
                                                             : <span className="text-gray-400 text-xl tracking-normal">Not set</span>
                                                         }
                                                     </span>

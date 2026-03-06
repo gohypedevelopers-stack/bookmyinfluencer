@@ -78,9 +78,11 @@ export default async function BrandDashboardPage() {
                         {/* CTA Card */}
                         <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg overflow-hidden relative">
                             <div className="relative z-10">
-                                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mb-4 text-xl font-bold">
-                                    <Plus className="w-6 h-6 text-white" />
-                                </div>
+                                <Link href="/brand/campaigns/new">
+                                    <div className="w-10 h-10 bg-blue-500 hover:bg-blue-400 transition-colors rounded-full flex items-center justify-center mb-4 cursor-pointer">
+                                        <Plus className="w-6 h-6 text-white" />
+                                    </div>
+                                </Link>
                                 <h3 className="text-xl font-bold mb-2">Ready to grow?</h3>
                                 <p className="text-blue-100 mb-6 text-sm">Launch a new campaign and start reaching millions of customers today.</p>
                                 <Link href="/brand/campaigns/new">
