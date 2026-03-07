@@ -101,6 +101,13 @@ const priceTypeMap: Record<string, { label: string; badge: string; min: number; 
     ],
 };
 
+const priceTiers = [
+    { label: "₹500 – ₹2,000", badge: "Budget Friendly", min: 500, max: 2000 },
+    { label: "₹2,000 – ₹10,000", badge: "Standard", min: 2000, max: 10000 },
+    { label: "₹10,000 – ₹50,000", badge: "Premium", min: 10000, max: 50000 },
+    { label: "₹50,000+", badge: "Elite", min: 50000, max: 1000000 },
+]
+
 export default function BrandRegisterPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
@@ -506,7 +513,7 @@ export default function BrandRegisterPage() {
                                         {otpSent && !emailVerified && (
                                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-gray-100">
                                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Verification Code</label>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 justify-center">
                                                     {[0, 1, 2, 3, 4, 5].map((i) => (
                                                         <input key={i} type="text" maxLength={1} value={otp[i] || ''}
                                                             onChange={(e) => {
@@ -517,7 +524,7 @@ export default function BrandRegisterPage() {
                                                             onKeyDown={(e) => {
                                                                 if (e.key === 'Backspace' && !otp[i] && i > 0) { const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement; prev?.focus(); }
                                                             }}
-                                                            className="flex-1 aspect-square text-center text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 bg-slate-50 focus:bg-white transition-all text-slate-800"
+                                                            className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 bg-slate-50 focus:bg-white transition-all text-slate-800"
                                                         />
                                                     ))}
                                                 </div>

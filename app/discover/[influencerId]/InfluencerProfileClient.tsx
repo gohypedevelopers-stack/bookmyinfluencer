@@ -9,6 +9,11 @@ type FullProfile = InfluencerProfile & {
     user: User;
     kycStatus?: string;
     bannerImage?: string | null;
+    price?: number | null;
+    priceStory?: number | null;
+    pricePost?: number | null;
+    priceCollab?: number | null;
+    priceType?: string | null;
 };
 
 const PRICE_LABELS: Record<string, { label: string, icon: string, color: string }> = {
@@ -35,23 +40,32 @@ export default function InfluencerProfileClient({
     profile: FullProfile;
     session: Session | null;
 }) {
-    // Parsing pricing - it's stored as JSON string
-    let pricingData: Record<string, any> = {};
+    // Parsing pricing - it's stored as JSON string natively in InfluencerProfile
+    let parsedPricing: Record<string, any> = {};
     try {
-        pricingData = profile.pricing ? JSON.parse(profile.pricing as string) : {};
+        parsedPricing = profile.pricing ? JSON.parse(profile.pricing as string) : {};
     } catch {
-        pricingData = {};
+        parsedPricing = {};
     }
 
-    // Filter out metadata and focus on service keys
-    const services = Object.entries(pricingData)
-        .filter(([key, value]) => PRICE_LABELS[key] && value && typeof value === 'string' && value !== '0')
-        .map(([key, value]) => ({
-            key,
-            id: key,
-            price: value,
-            ...PRICE_LABELS[key]
-        }));
+    // Build services array. Always show core columns for consistent layout.
+    const services = [
+        { key: 'instaStory', id: 'instaStory', price: profile.priceStory || 0, ...PRICE_LABELS['instaStory'] },
+        { key: 'instaPost', id: 'instaPost', price: profile.pricePost || 0, ...PRICE_LABELS['instaPost'] },
+        { key: 'instaReel', id: 'instaReel', price: profile.priceCollab || profile.price || 0, ...PRICE_LABELS['instaReel'] },
+    ];
+
+    // If there were any other custom services in parsedPricing, add them too
+    Object.entries(parsedPricing)
+        .filter(([key, value]) => !['instaStory', 'instaPost', 'instaReel'].includes(key) && PRICE_LABELS[key] && value && typeof value === 'string' && value !== '0')
+        .forEach(([key, value]) => {
+            services.push({
+                key,
+                id: key,
+                price: value,
+                ...PRICE_LABELS[key]
+            });
+        });
 
     const followers = profile.followers || 0;
     const engagement = profile.engagementRate ? `${profile.engagementRate}%` : '5.8%'; // Fallback if null
@@ -190,8 +204,15 @@ export default function InfluencerProfileClient({
                                                     </div>
                                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{service.label}</h3>
                                                     <div className="flex items-baseline gap-1 mb-4">
-                                                        <span className="text-3xl font-extrabold text-teal-600 tracking-widest">₹{'*'.repeat(String(service.price).length)}</span>
-                                                        <span className="text-gray-500 text-sm">/ deliverable</span>
+                                                        <span className="text-3xl font-extrabold text-teal-600 tracking-widest">
+                                                            {service.price > 0
+                                                                ? `₹${'*'.repeat(String(service.price).length)}`
+                                                                : <span className="text-gray-400 text-xl tracking-normal">Not set</span>
+                                                            }
+                                                        </span>
+                                                        {service.price > 0 && (
+                                                            <span className="text-gray-500 text-sm">/ deliverable</span>
+                                                        )}
                                                     </div>
                                                     <Link
                                                         href={(session?.user as any)?.role === 'BRAND' || (session?.user as any)?.role === 'ADMIN'

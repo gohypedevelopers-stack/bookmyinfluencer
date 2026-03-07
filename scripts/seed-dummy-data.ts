@@ -76,13 +76,20 @@ async function main() {
                     engagementRate: 5.2,
                     pricePost: 500,
                     onboardingCompleted: true,
+                    kyc: {
+                        create: {
+                            status: 'APPROVED',
+                            submittedAt: new Date(),
+                            verifiedByAdminAt: new Date(),
+                        }
+                    }
                 },
             },
         },
     });
     console.log(`Created Legacy Creator: ${creatorUser1.email}`);
 
-    // --- Dummy Creator 2 (V2 Schema - OtpUser & Creator models based on schema analysis) ---
+    // --- Dummy Creator 2 (V2 Schema) ---
     const otpCreator2 = await prisma.otpUser.upsert({
         where: { email: 'creator2@example.com' },
         update: {},
@@ -99,7 +106,15 @@ async function main() {
                     bio: 'All about fashion and lifestyle.',
                     pricePost: 300,
                     onboardingCompleted: true,
-                    verificationStatus: 'APPROVED'
+                    verificationStatus: 'APPROVED',
+                    metrics: {
+                        create: {
+                            provider: 'instagram',
+                            followersCount: 85000,
+                            engagementRate: 4.8,
+                            viewsCount: '12K',
+                        }
+                    }
                 }
             }
         }
@@ -123,12 +138,44 @@ async function main() {
                     bio: 'Let us play some games.',
                     pricePost: 800,
                     onboardingCompleted: true,
-                    verificationStatus: 'APPROVED'
+                    verificationStatus: 'APPROVED',
+                    metrics: {
+                        create: {
+                            provider: 'youtube',
+                            followersCount: 250000,
+                            engagementRate: 6.5,
+                            viewsCount: '45K',
+                        }
+                    }
                 }
             }
         }
     });
     console.log(`Created V2 Creator: ${otpCreator3.email}`);
+
+    // --- Dummy Brand 3 ---
+    const brandUser3 = await prisma.user.upsert({
+        where: { email: 'brand3@example.com' },
+        update: {},
+        create: {
+            email: 'brand3@example.com',
+            name: 'EcoHome Decor',
+            passwordHash,
+            role: 'BRAND',
+            brandProfile: {
+                create: {
+                    companyName: 'EcoHome',
+                    website: 'https://ecohome.example.com',
+                    industry: 'Home & Living',
+                    description: 'Sustainable home decor brand.',
+                    location: 'Portland, OR',
+                    onboardingCompleted: true,
+                    walletBalance: 8000,
+                },
+            },
+        },
+    });
+    console.log(`Created Brand: ${brandUser3.email}`);
 
     console.log('Seeding complete.');
 }
