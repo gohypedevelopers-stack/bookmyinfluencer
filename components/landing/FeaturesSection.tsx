@@ -37,12 +37,12 @@ export function FeaturesSection() {
                             {[1, 2, 3].map((setIndex) => (
                                 <div key={`row1-${setIndex}`} className="flex items-center gap-20 md:gap-32">
                                     {[
-                                        { name: "Fabhotels", src: "/images/logos/fabhotels.avif", width: 220, height: 60 },
-                                        { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 60 },
-                                        { name: "Homify", src: "/images/logos/homify.avif", width: 180, height: 60 },
-                                        { name: "IndianOil", src: "/images/logos/indianoil.avif", width: 180, height: 60 },
-                                        { name: "Lazada", src: "/images/logos/lazada.avif", width: 200, height: 60 },
-                                        { name: "Yatra", src: "/images/logos/yatra.png", width: 180, height: 60 },
+                                        { name: "Fabhotels", src: "/images/logos/fabhotels.avif", width: 220, height: 100 },
+                                        { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 100 },
+                                        { name: "Homify", src: "/images/logos/homify.avif", width: 180, height: 100 },
+                                        { name: "IndianOil", src: "/images/logos/indianoil.avif", width: 180, height: 100 },
+                                        { name: "Lazada", src: "/images/logos/lazada.avif", width: 200, height: 100 },
+                                        { name: "Yatra", src: "/images/logos/yatra.png", width: 180, height: 100 },
                                     ].map((brand, i) => (
                                         <div
                                             key={`${setIndex}-r1-${brand.name}-${i}`}
@@ -53,7 +53,7 @@ export function FeaturesSection() {
                                                 alt={brand.name}
                                                 width={brand.width}
                                                 height={brand.height}
-                                                className="h-14 md:h-16 w-auto object-contain"
+                                                className="h-20 md:h-45 w-auto object-contain"
                                             />
                                         </div>
                                     ))}
@@ -83,7 +83,7 @@ export function FeaturesSection() {
                                                 alt={brand.name}
                                                 width={brand.width}
                                                 height={brand.height}
-                                                className="h-16 md:h-20 w-auto object-contain"
+                                                className="h-16 md:h-45 w-auto object-contain"
                                             />
                                         </div>
                                     ))}
