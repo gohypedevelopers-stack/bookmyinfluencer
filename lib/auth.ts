@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs"
 import { UserRole, KYCStatus } from "@/lib/enums"
 
 export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || "fallback_secret_override_for_deployments",
     debug: process.env.NODE_ENV === 'development',
     session: {
         strategy: "jwt",

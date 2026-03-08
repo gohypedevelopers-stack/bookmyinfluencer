@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Helper to extract readable price range from raw pricing JSON
 function formatPriceRange(pricing: string | null): string {
     if (!pricing) return '₹100-₹500';
