@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { UserRole } from "@/lib/enums";
 import { hash } from "bcryptjs";
-import { signIn } from "next-auth/react";
+
 import { sendOtpEmail } from "@/lib/email";
 
 // In-memory OTP storage (in production, use Redis or database)
