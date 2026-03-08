@@ -16,7 +16,7 @@ function getTransporter() {
         service: "gmail",
         auth: {
             user: env.smtpUser,
-            pass: env.smtpPass, // App Password without spaces
+            pass: env.smtpPass?.replace(/\s/g, ""), // App Password without spaces
         },
         // In dev, allow unauthorized to bypass self-signed cert issues if any
         // Note: Gmail generally has valid certs, but this helps in some local network setups
