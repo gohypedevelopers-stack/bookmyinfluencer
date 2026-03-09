@@ -31,7 +31,7 @@ export async function registerUserAction(formData: FormData) {
         // Check if user already exists
         let existingOtpUser = await db.otpUser.findUnique({
             where: { email: normalizedEmail },
-            include: { creator: true }
+            select: { id: true, verifiedAt: true }
         })
 
         if (!existingOtpUser || !existingOtpUser.verifiedAt) {
@@ -45,7 +45,7 @@ export async function registerUserAction(formData: FormData) {
                     verifiedAt: new Date(),
                     createdAt: new Date(),
                 },
-                include: { creator: true }
+                select: { id: true, verifiedAt: true }
             });
         }
 

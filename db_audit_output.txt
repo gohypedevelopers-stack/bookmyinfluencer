@@ -1,0 +1,47 @@
+--- Comprehensive Column Check for "creators" ---
+public.creators.auto_bio: text
+public.creators.auto_display_name: text
+public.creators.auto_profile_image_url: text
+public.creators.background_image_url: text
+public.creators.bio: text
+public.creators.display_name: text
+public.creators.email: text
+public.creators.full_name: text
+public.creators.id: text
+public.creators.instagram_url: text
+public.creators.is_live_sync_enabled: boolean
+public.creators.last_instagram_fetch_at: timestamp without time zone
+public.creators.last_tiktok_fetch_at: timestamp without time zone
+public.creators.last_twitch_fetch_at: timestamp without time zone
+public.creators.last_youtube_fetch_at: timestamp without time zone
+public.creators.media_kit: text
+public.creators.niche: text
+public.creators.notification_settings: text
+public.creators.onboardingCompleted: boolean
+public.creators.payment_history: text
+public.creators.payout_methods: text
+public.creators.phone: text
+public.creators.platforms: text
+public.creators.price: integer
+public.creators.price_collab: integer
+public.creators.price_post: integer
+public.creators.price_story: integer
+public.creators.price_type: text
+public.creators.pricing: text
+public.creators.profile_image_url: text
+public.creators.raw_social_data: text
+public.creators.tiktok_url: text
+public.creators.twitch_url: text
+public.creators.user_id: text
+public.creators.verification_status: text
+public.creators.verified_at: timestamp without time zone
+public.creators.youtube_url: text
+
+--- Checking current database and search path ---
+[
+  {
+    "current_database": "neondb",
+    "current_schema": "public",
+    "current_user": "neondb_owner"
+  }
+]
