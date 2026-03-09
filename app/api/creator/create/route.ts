@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 })
   }
 
-  const parsed = bodySchema.safeParse(await req.json().catch(() => null))
+  const requestBody = await req.json().catch(() => null)
+  const parsed = bodySchema.safeParse(requestBody)
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "invalid_input" }, { status: 400 })
   }
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
   const data = parsed.data
 
   // Create/Update creator
-  const creator = await db.creator.upsert({
+  await db.creator.upsert({
     where: { userId: session.userId },
     update: {
       fullName: data.fullName,
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
   // Handle Public Fetch if requested (Logic added dynamically to avoid circular deps if any)
   // We check for the flag in the request body roughly, or add it to schema.
   // Let's assume the client sends it.
-  const reqJson = await req.json().catch(() => ({}));
+  const reqJson = requestBody || {};
   /* Legacy YouTube API Auto-Fetch - Removed in favor of Apify Logic
   if (reqJson.fetchPublic && data.youtube && process.env.YOUTUBE_API_KEY) {
     try {

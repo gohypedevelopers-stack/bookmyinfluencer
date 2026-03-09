@@ -2,131 +2,182 @@ import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import GithubProvider from "next-auth/providers/github"
-import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
+
+import { db } from "@/lib/db"
 import { UserRole, KYCStatus } from "@/lib/enums"
 
+function getNextAuthSecret() {
+    const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
+    if (!secret && process.env.NODE_ENV === "production") {
+        throw new Error("Missing NEXTAUTH_SECRET or AUTH_SECRET in production")
+    }
+    return secret
+}
+
+const providers: NextAuthOptions["providers"] = [
+    CredentialsProvider({
+        name: "Credentials",
+        credentials: {
+            email: { label: "Email", type: "email" },
+            password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+            if (!credentials?.email || !credentials?.password) {
+                console.warn("[AUTH][credentials] Missing credentials")
+                return null
+            }
+
+            const normalizedEmail = credentials.email.trim().toLowerCase()
+            console.info("[AUTH][credentials] Login attempt", { email: normalizedEmail })
+
+            try {
+                const user = await db.user.findUnique({
+                    where: { email: normalizedEmail },
+                    include: { influencerProfile: { select: { kyc: true } } },
+                })
+
+                if (!user || !user.passwordHash) {
+                    const otpUser = await db.otpUser.findUnique({
+                        where: { email: normalizedEmail },
+                        select: { id: true },
+                    })
+
+                    if (otpUser) {
+                        console.error("[AUTH][credentials] OTP user exists without shadow User/password login", {
+                            email: normalizedEmail,
+                            otpUserId: otpUser.id,
+                        })
+                    } else {
+                        console.warn("[AUTH][credentials] User not found", { email: normalizedEmail })
+                    }
+                    return null
+                }
+
+                const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+                if (!isValid) {
+                    console.warn("[AUTH][credentials] Password mismatch", { email: normalizedEmail })
+                    return null
+                }
+
+                let kycStatus: KYCStatus = (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus
+                let onboardingComplete = false
+
+                if (user.role === "INFLUENCER") {
+                    const otpUser = await db.otpUser.findUnique({
+                        where: { email: user.email },
+                        select: { id: true },
+                    })
+
+                    if (otpUser) {
+                        const creator = await db.creator.findUnique({
+                            where: { userId: otpUser.id },
+                            select: { verificationStatus: true, onboardingCompleted: true },
+                        })
+
+                        if (creator) {
+                            if (creator.verificationStatus && creator.verificationStatus !== "NOT_SUBMITTED") {
+                                kycStatus = creator.verificationStatus as KYCStatus
+                            }
+                            onboardingComplete = creator.onboardingCompleted
+                        }
+                    }
+                } else if (user.role === "BRAND") {
+                    const brand = await db.brandProfile.findUnique({
+                        where: { userId: user.id },
+                        select: { onboardingCompleted: true },
+                    })
+                    if (brand) {
+                        onboardingComplete = brand.onboardingCompleted
+                    }
+                }
+
+                console.info("[AUTH][credentials] Login successful", {
+                    email: normalizedEmail,
+                    role: user.role,
+                    onboardingComplete,
+                    kycStatus,
+                })
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role as UserRole,
+                    image: user.image,
+                    kycStatus,
+                    onboardingComplete,
+                }
+            } catch (error) {
+                console.error("[AUTH][credentials] Database failure", {
+                    email: normalizedEmail,
+                    name: error instanceof Error ? error.name : "UnknownError",
+                    message: error instanceof Error ? error.message : String(error),
+                })
+
+                if (
+                    process.env.NODE_ENV === "development" &&
+                    normalizedEmail === "test@dev.local" &&
+                    credentials.password === "dev123"
+                ) {
+                    console.warn("[AUTH][credentials] DEV bypass user granted")
+                    return {
+                        id: "dev-test-user-id",
+                        name: "Dev Test User",
+                        email: "test@dev.local",
+                        role: "BRAND" as UserRole,
+                        image: null,
+                        kycStatus: "APPROVED" as KYCStatus,
+                    }
+                }
+
+                return null
+            }
+        },
+    }),
+]
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        })
+    )
+}
+
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+    providers.push(
+        GithubProvider({
+            clientId: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        })
+    )
+}
+
 export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET || "fallback_secret_override_for_deployments",
-    debug: process.env.NODE_ENV === 'development',
+    secret: getNextAuthSecret(),
+    debug: process.env.NODE_ENV === "development",
     session: {
         strategy: "jwt",
     },
     pages: {
         signIn: "/login",
     },
-    providers: [
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" }
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    console.log('❌ Missing credentials')
-                    return null
-                }
-
-                console.log('🔐 Login attempt for:', credentials.email);
-
-                try {
-                    const user = await db.user.findUnique({
-                        where: { email: credentials.email.trim().toLowerCase() },
-                        include: { influencerProfile: { select: { kyc: true } } }
-                    })
-
-                    if (!user || !user.passwordHash) {
-                        console.log('❌ User not found or no password hash')
-                        return null
-                    }
-
-                    console.log('✅ User found:', user.email, '- Role:', user.role)
-
-                    const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
-
-                    if (!isValid) {
-                        console.log('❌ Password mismatch')
-                        return null
-                    }
-
-                    console.log('✅ Login successful!')
-
-                    // Determine KYC status: check BOTH legacy KYCSubmission AND new Creator table
-                    let kycStatus: KYCStatus = (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus;
-                    let onboardingComplete = false;
-
-                    if (user.role === 'INFLUENCER') {
-                        // Check Creator table via OtpUser email linkage
-                        const otpUser = await db.otpUser.findUnique({
-                            where: { email: user.email },
-                            select: { id: true }
-                        });
-                        if (otpUser) {
-                            const creator = await db.creator.findUnique({
-                                where: { userId: otpUser.id },
-                                select: { verificationStatus: true, onboardingCompleted: true }
-                            });
-                            if (creator) {
-                                // If Creator has verificationStatus, use it
-                                if (creator.verificationStatus && creator.verificationStatus !== 'NOT_SUBMITTED') {
-                                    kycStatus = creator.verificationStatus as KYCStatus;
-                                }
-                                // Onboarding is complete if flag is set
-                                onboardingComplete = creator.onboardingCompleted;
-                            }
-                        }
-                        console.log('📋 Creator KYC:', kycStatus, 'Onboarding complete:', onboardingComplete);
-                    } else if (user.role === 'BRAND') {
-                        // Check BrandProfile table
-                        const brand = await db.brandProfile.findUnique({
-                            where: { userId: user.id },
-                            select: { onboardingCompleted: true }
-                        });
-                        if (brand) {
-                            onboardingComplete = brand.onboardingCompleted;
-                        }
-                        console.log('📋 Brand Onboarding complete:', onboardingComplete);
-                    }
-
-                    return {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        role: user.role as UserRole,
-                        image: user.image,
-                        kycStatus,
-                        onboardingComplete
-                    }
-                } catch (error) {
-                    console.error("Auth error:", error);
-                    // DEV BYPASS: Allow test login when DB is unreachable
-                    if (process.env.NODE_ENV === 'development' &&
-                        credentials.email === 'test@dev.local' &&
-                        credentials.password === 'dev123') {
-                        console.warn("⚠️ DEV BYPASS: Logging in as test user (DB unreachable)");
-                        return {
-                            id: 'dev-test-user-id',
-                            name: 'Dev Test User',
-                            email: 'test@dev.local',
-                            role: 'BRAND' as UserRole,
-                            image: null,
-                            kycStatus: 'APPROVED' as KYCStatus
-                        }
-                    }
-                    return null;
-                }
+    providers,
+    logger: {
+        error(code, metadata) {
+            console.error("[NextAuth][error]", code, metadata)
+        },
+        warn(code) {
+            console.warn("[NextAuth][warn]", code)
+        },
+        debug(code, metadata) {
+            if (process.env.NODE_ENV !== "production") {
+                console.debug("[NextAuth][debug]", code, metadata)
             }
-        }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-        GithubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID!,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-        }),
-    ],
+        },
+    },
     callbacks: {
         async jwt({ token, user, trigger, session }) {
             if (user) {
@@ -136,7 +187,6 @@ export const authOptions: NextAuthOptions = {
                 token.onboardingComplete = (user as any).onboardingComplete || false
             }
 
-            // Support session updates from client
             if (trigger === "update" && session) {
                 return { ...token, ...session }
             }
@@ -148,9 +198,9 @@ export const authOptions: NextAuthOptions = {
                 session.user.role = token.role as UserRole
                 session.user.id = token.id as string
                 session.user.kycStatus = token.kycStatus as KYCStatus
-                    ; (session.user as any).onboardingComplete = token.onboardingComplete || false
+                ; (session.user as any).onboardingComplete = token.onboardingComplete || false
             }
             return session
-        }
-    }
+        },
+    },
 }
