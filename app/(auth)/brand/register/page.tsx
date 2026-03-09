@@ -232,6 +232,14 @@ export default function BrandRegisterPage() {
 
         const res = await registerBrand(fd);
         if (res.success) {
+
+            // Log the user in silently to establish session
+            await signIn('credentials', {
+                email: formData.email,
+                password: formData.password,
+                redirect: false,
+            });
+
             setDirection(1);
             setCurrentStep(12);
         } else {

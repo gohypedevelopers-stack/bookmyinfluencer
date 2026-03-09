@@ -140,6 +140,6 @@ export async function registerUserAction(formData: FormData) {
         return { success: true, email }
     } catch (error: any) {
         console.error("Registration error:", error)
-        throw new Error(error.message || "Registration failed")
+        return { success: false, error: error.message || "Registration failed" }
     }
 }

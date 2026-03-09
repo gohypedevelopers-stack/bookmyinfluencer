@@ -242,7 +242,13 @@ export default function RegisterPage() {
         fd.append('priceCollab', onboardingData.priceCollab);
 
         try {
-            await registerUserAction(fd);
+            const res = await registerUserAction(fd);
+
+            if (!res?.success) {
+                setError(res?.error || 'Registration failed. Please try again.');
+                setIsSubmitting(false);
+                return;
+            }
 
             // Log the user in silently to establish session for KYC upload API
             await signIn('credentials', {
