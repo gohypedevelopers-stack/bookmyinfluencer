@@ -38,10 +38,14 @@ export async function POST(req: NextRequest) {
 
         // Update DB - We check both systems
         // 1. Creator system (New)
-        const creator = await (db.creator as any).findUnique({
-            where: { userId: userId },
-            include: { kycSubmission: true }
+        const otpUser = await db.otpUser.findUnique({
+            where: { email: session.user.email as string }
         });
+
+        const creator = otpUser ? await (db.creator as any).findUnique({
+            where: { userId: otpUser.id },
+            include: { kycSubmission: true }
+        }) : null;
 
         if (creator) {
             if (creator.kycSubmission?.status === "APPROVED") {
@@ -107,8 +111,8 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ success: true, key });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Selfie upload error:", error);
-        return NextResponse.json({ error: "Failed to upload selfie" }, { status: 500 });
+        return NextResponse.json({ error: error?.message || "Failed to upload selfie" }, { status: 500 });
     }
 }
