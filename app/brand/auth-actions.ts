@@ -109,6 +109,18 @@ export async function registerBrand(formData: FormData) {
 
         const hashedPassword = await hash(password, 12);
 
+        const safeParseInt = (val: any) => {
+            if (!val || typeof val !== 'string') return null;
+            const parsed = parseInt(val, 10);
+            return isNaN(parsed) ? null : parsed;
+        };
+
+        const safeParseFloat = (val: any) => {
+            if (!val || typeof val !== 'string') return null;
+            const parsed = parseFloat(val);
+            return isNaN(parsed) ? null : parsed;
+        };
+
         // Transactional create with both registration + onboarding data
         const user = await db.user.create({
             data: {
@@ -128,10 +140,10 @@ export async function registerBrand(formData: FormData) {
                         targetPlatforms: targetPlatforms || null,
                         preferredCreatorType: preferredCreatorType || null,
                         campaignGoals: campaignGoals || null,
-                        minFollowers: minFollowers ? parseInt(minFollowers) : null,
-                        maxFollowers: maxFollowers ? parseInt(maxFollowers) : null,
-                        minPricePerPost: minPricePerPost ? parseFloat(minPricePerPost) : null,
-                        maxPricePerPost: maxPricePerPost ? parseFloat(maxPricePerPost) : null,
+                        minFollowers: safeParseInt(minFollowers),
+                        maxFollowers: safeParseInt(maxFollowers),
+                        minPricePerPost: safeParseFloat(minPricePerPost),
+                        maxPricePerPost: safeParseFloat(maxPricePerPost),
                     }
                 }
             }

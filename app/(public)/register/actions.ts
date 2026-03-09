@@ -53,6 +53,18 @@ export async function registerUserAction(formData: FormData) {
         const passwordHash = await bcrypt.hash(password, 10)
         const newUser = existingOtpUser;
 
+        const safeParseInt = (val: any) => {
+            if (!val || typeof val !== 'string') return null;
+            const parsed = parseInt(val, 10);
+            return isNaN(parsed) ? null : parsed;
+        };
+
+        const parsedPriceStory = safeParseInt(formData.get("priceStory"));
+        const parsedPricePost = safeParseInt(formData.get("pricePost"));
+        const parsedPriceCollab = safeParseInt(formData.get("priceCollab"));
+        const parsedRates = safeParseInt(rates);
+        const fallbackPrice = parsedPricePost !== null ? parsedPricePost : parsedRates;
+
         // Create or Update Creator profile
         await db.creator.upsert({
             where: { userId: newUser.id },
@@ -64,10 +76,10 @@ export async function registerUserAction(formData: FormData) {
                 onboardingCompleted: true,
                 niche: niche || null,
                 platforms: platforms || null,
-                priceStory: formData.get("priceStory") ? parseInt(formData.get("priceStory") as string) : null,
-                pricePost: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : null,
-                priceCollab: formData.get("priceCollab") ? parseInt(formData.get("priceCollab") as string) : null,
-                price: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : (parseInt(rates) || null),
+                priceStory: parsedPriceStory,
+                pricePost: parsedPricePost,
+                priceCollab: parsedPriceCollab,
+                price: fallbackPrice,
                 priceType: formData.get("priceType") as string || "Per Post",
                 pricing: (minimumPrice || rates)
                     ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
@@ -90,10 +102,10 @@ export async function registerUserAction(formData: FormData) {
                 onboardingCompleted: true,
                 niche: niche || null,
                 platforms: platforms || null,
-                priceStory: formData.get("priceStory") ? parseInt(formData.get("priceStory") as string) : null,
-                pricePost: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : null,
-                priceCollab: formData.get("priceCollab") ? parseInt(formData.get("priceCollab") as string) : null,
-                price: formData.get("pricePost") ? parseInt(formData.get("pricePost") as string) : (parseInt(rates) || null),
+                priceStory: parsedPriceStory,
+                pricePost: parsedPricePost,
+                priceCollab: parsedPriceCollab,
+                price: fallbackPrice,
                 priceType: formData.get("priceType") as string || "Per Post",
                 pricing: (minimumPrice || rates)
                     ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
