@@ -8,15 +8,29 @@ export async function getAuthenticatedCreatorId() {
     try {
         const session = await getServerSession(authOptions)
         if (session?.user?.email) {
-            // Try to find OtpUser linked to same email
+            const normalizedEmail = session.user.email.trim().toLowerCase()
+
             const otpUser = await db.otpUser.findUnique({
-                where: { email: session.user.email },
+                where: { email: normalizedEmail },
                 select: { id: true }
             })
             if (otpUser) return otpUser.id
 
-            // Fallback: use the NextAuth user ID directly (for users who registered via credentials without OTP)
-            if (session.user.id) return session.user.id
+            if (session.user.id) {
+                const user = await db.user.findUnique({
+                    where: { id: session.user.id },
+                    select: { email: true }
+                })
+
+                if (user?.email) {
+                    const fallbackOtpUser = await db.otpUser.findUnique({
+                        where: { email: user.email.trim().toLowerCase() },
+                        select: { id: true }
+                    })
+
+                    if (fallbackOtpUser) return fallbackOtpUser.id
+                }
+            }
         }
     } catch (e) {
         console.error("NextAuth session check failed", e)

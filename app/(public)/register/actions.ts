@@ -1,6 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
+import { ensureCreatorAuthUser, syncCreatorProfileByEmail } from "@/lib/auth-sync"
 import bcrypt from "bcryptjs"
 
 export async function registerUserAction(formData: FormData) {
@@ -28,30 +29,15 @@ export async function registerUserAction(formData: FormData) {
 
         const normalizedEmail = email.trim().toLowerCase();
 
-        // Check if user already exists
-        let existingOtpUser = await db.otpUser.findUnique({
-            where: { email: normalizedEmail },
-            select: { id: true, verifiedAt: true }
-        })
-
-        if (!existingOtpUser || !existingOtpUser.verifiedAt) {
-            // If the user skipped verification from the UI or didn't exist, we auto-create one
-            // to allow registration to proceed (since UI allows bypassing).
-            existingOtpUser = await db.otpUser.upsert({
-                where: { email: normalizedEmail },
-                update: { verifiedAt: new Date() },
-                create: {
-                    email: normalizedEmail,
-                    verifiedAt: new Date(),
-                    createdAt: new Date(),
-                },
-                select: { id: true, verifiedAt: true }
-            });
-        }
-
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10)
-        const newUser = existingOtpUser;
+        const verifiedAt = new Date()
+        const { otpUser } = await ensureCreatorAuthUser({
+            email: normalizedEmail,
+            name: fullName,
+            passwordHash,
+            otpVerifiedAt: verifiedAt,
+        })
 
         const safeParseInt = (val: any) => {
             if (!val || typeof val !== 'string') return null;
@@ -65,81 +51,41 @@ export async function registerUserAction(formData: FormData) {
         const parsedRates = safeParseInt(rates);
         const fallbackPrice = parsedPricePost !== null ? parsedPricePost : parsedRates;
 
-        // Create or Update Creator profile
-        await db.creator.upsert({
-            where: { userId: newUser.id },
-            update: {
-                fullName,
-                phone: mobileNumber,
-                instagramUrl: instagramUrl || null,
-                youtubeUrl: youtubeUrl || null,
-                onboardingCompleted: true,
-                niche: niche || null,
-                platforms: platforms || null,
-                priceStory: parsedPriceStory,
-                pricePost: parsedPricePost,
-                priceCollab: parsedPriceCollab,
-                price: fallbackPrice,
-                priceType: formData.get("priceType") as string || "Per Post",
-                pricing: (minimumPrice || rates)
-                    ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
-                    : null,
-                rawSocialData: (followers || engagement)
-                    ? JSON.stringify({
-                        selfReported: {
-                            followers: followers || "",
-                            engagement: engagement || "",
-                        }
-                    })
-                    : null,
-            },
-            create: {
-                userId: newUser.id,
-                fullName,
-                phone: mobileNumber,
-                instagramUrl: instagramUrl || null,
-                youtubeUrl: youtubeUrl || null,
-                onboardingCompleted: true,
-                niche: niche || null,
-                platforms: platforms || null,
-                priceStory: parsedPriceStory,
-                pricePost: parsedPricePost,
-                priceCollab: parsedPriceCollab,
-                price: fallbackPrice,
-                priceType: formData.get("priceType") as string || "Per Post",
-                pricing: (minimumPrice || rates)
-                    ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
-                    : null,
-                rawSocialData: (followers || engagement)
-                    ? JSON.stringify({
-                        selfReported: {
-                            followers: followers || "",
-                            engagement: engagement || "",
-                        }
-                    })
-                    : null,
-            }
-        });
+        await syncCreatorProfileByEmail(normalizedEmail, {
+            fullName,
+            phone: mobileNumber || null,
+            niche: niche || null,
+            instagramUrl: instagramUrl || null,
+            youtubeUrl: youtubeUrl || null,
+            onboardingCompleted: true,
+            platforms: platforms || null,
+            priceStory: parsedPriceStory,
+            pricePost: parsedPricePost,
+            priceCollab: parsedPriceCollab,
+            price: fallbackPrice,
+            priceType: formData.get("priceType") as string || "Per Post",
+            pricing: (minimumPrice || rates)
+                ? JSON.stringify({ minimumPrice: minimumPrice || "", rates: rates || "" })
+                : null,
+            rawSocialData: (followers || engagement)
+                ? JSON.stringify({
+                    selfReported: {
+                        followers: followers || "",
+                        engagement: engagement || "",
+                    }
+                })
+                : null,
+        })
 
-        // Create or Update User record for NextAuth login
-        await db.user.upsert({
-            where: { email: normalizedEmail },
-            update: {
-                name: fullName,
-                passwordHash,
-                role: "INFLUENCER"
-            },
-            create: {
-                email: normalizedEmail,
-                name: fullName,
-                passwordHash,
-                role: "INFLUENCER"
-            }
-        });
+        console.info("[REGISTER] Creator registration synced", {
+            email: normalizedEmail,
+            otpUserId: otpUser.id,
+        })
 
         return { success: true, email }
     } catch (error: any) {
         console.error("Registration error:", error)
+
         return { success: false, error: error.message || "Registration failed" }
     }
 }

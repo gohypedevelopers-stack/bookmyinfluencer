@@ -7,6 +7,30 @@ import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
 import { UserRole, KYCStatus } from "@/lib/enums"
 
+async function getCreatorAuthState(email: string) {
+    const otpUser = await db.otpUser.findUnique({
+        where: { email },
+        select: { id: true },
+    })
+
+    if (!otpUser) {
+        return {
+            otpUserId: null,
+            creator: null,
+        }
+    }
+
+    const creator = await db.creator.findUnique({
+        where: { userId: otpUser.id },
+        select: { verificationStatus: true, onboardingCompleted: true },
+    })
+
+    return {
+        otpUserId: otpUser.id,
+        creator,
+    }
+}
+
 function getNextAuthSecret() {
     const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
     if (!secret && process.env.NODE_ENV === "production") {
@@ -38,15 +62,12 @@ const providers: NextAuthOptions["providers"] = [
                 })
 
                 if (!user || !user.passwordHash) {
-                    const otpUser = await db.otpUser.findUnique({
-                        where: { email: normalizedEmail },
-                        select: { id: true },
-                    })
+                    const creatorState = await getCreatorAuthState(normalizedEmail)
 
-                    if (otpUser) {
+                    if (creatorState.otpUserId) {
                         console.error("[AUTH][credentials] OTP user exists without shadow User/password login", {
                             email: normalizedEmail,
-                            otpUserId: otpUser.id,
+                            otpUserId: creatorState.otpUserId,
                         })
                     } else {
                         console.warn("[AUTH][credentials] User not found", { email: normalizedEmail })
@@ -64,23 +85,13 @@ const providers: NextAuthOptions["providers"] = [
                 let onboardingComplete = false
 
                 if (user.role === "INFLUENCER") {
-                    const otpUser = await db.otpUser.findUnique({
-                        where: { email: user.email },
-                        select: { id: true },
-                    })
+                    const creatorState = await getCreatorAuthState(user.email)
 
-                    if (otpUser) {
-                        const creator = await db.creator.findUnique({
-                            where: { userId: otpUser.id },
-                            select: { verificationStatus: true, onboardingCompleted: true },
-                        })
-
-                        if (creator) {
-                            if (creator.verificationStatus && creator.verificationStatus !== "NOT_SUBMITTED") {
-                                kycStatus = creator.verificationStatus as KYCStatus
-                            }
-                            onboardingComplete = creator.onboardingCompleted
+                    if (creatorState.creator) {
+                        if (creatorState.creator.verificationStatus && creatorState.creator.verificationStatus !== "NOT_SUBMITTED") {
+                            kycStatus = creatorState.creator.verificationStatus as KYCStatus
                         }
+                        onboardingComplete = creatorState.creator.onboardingCompleted
                     }
                 } else if (user.role === "BRAND") {
                     const brand = await db.brandProfile.findUnique({

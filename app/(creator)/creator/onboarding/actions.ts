@@ -17,21 +17,14 @@ export async function completeOnboarding(payload?: {
             redirect("/verify")
         }
 
-        // Check if the user exists in the database
-        // If not, create it (handles legacy sessions with invalid userIds)
+        // Check if the verified onboarding user exists in the OTP auth table.
         const existingUser = await db.otpUser.findUnique({
             where: { id: userId }
         })
 
         if (!existingUser) {
-            // Create a placeholder user for this session
-            await db.otpUser.create({
-                data: {
-                    id: userId,
-                    email: `user-${userId.substring(0, 8)}@placeholder.local`,
-                    verifiedAt: new Date(),
-                }
-            })
+            console.error("[Onboarding] Missing verified OTP user for creator onboarding", { userId })
+            throw new Error("Verified creator session not found. Please verify your email again.")
         }
 
         // Check if creator profile exists to determine if we should reset status
