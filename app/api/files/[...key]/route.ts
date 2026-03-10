@@ -17,7 +17,7 @@ const s3Client = new S3Client({
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { key: string[] } }
+    { params }: { params: Promise<{ key: string[] }> }
 ) {
     // Correctly await params in Next.js 15+ if needed, but here it's usually passed if not dynamic-async
     const key = (await params).key.join("/");
