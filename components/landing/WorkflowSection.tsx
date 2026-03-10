@@ -61,10 +61,10 @@ export function WorkflowSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                    <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
                         Streamlined <span className="text-indigo-600">Workflow</span>
                     </h2>
-                    <p className="text-xl text-slate-600 mb-16 max-w-2xl mx-auto font-medium">
+                    <p className="text-lg sm:text-xl text-slate-600 mb-12 sm:mb-16 max-w-2xl mx-auto font-medium">
                         Whether you're hiring or getting hired, we've made the process simple, secure, and lightning-fast.
                     </p>
                 </motion.div>
@@ -87,14 +87,14 @@ export function WorkflowSection() {
 
                         <button
                             onClick={() => setActiveTab('brand')}
-                            className={`relative z-10 px-10 sm:px-14 py-4 rounded-[1.5rem] text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'brand' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'brand' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Brand
                         </button>
                         <button
                             onClick={() => setActiveTab('creator')}
-                            className={`relative z-10 px-10 sm:px-14 py-4 rounded-[1.5rem] text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'creator' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'creator' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Creator
@@ -118,16 +118,16 @@ export function WorkflowSection() {
                                     transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                                     className="flex flex-col items-center group relative px-4"
                                 >
-                                    <div className="relative mb-10 w-36 h-36 flex items-center justify-center">
+                                    <div className="relative mb-8 sm:mb-10 w-28 h-28 sm:w-36 sm:h-36 flex items-center justify-center">
                                         {/* Outer Rotating Ring */}
                                         <div className="absolute inset-0 rounded-full border-2 border-dashed border-slate-200 animate-spin-slow group-hover:border-indigo-600/30 transition-colors" />
 
                                         {/* Main Step Circle */}
-                                        <div className={`relative w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-xl border border-slate-100 z-10 
+                                        <div className={`relative w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center shadow-xl border border-slate-100 z-10 
                       transition-all duration-500 group-hover:scale-110 group-hover:rotate-[15deg] group-hover:border-indigo-600 group-hover:shadow-indigo-100 ${activeTab === 'brand' ? 'text-indigo-600' : 'text-blue-600'
                                             }`}
                                         >
-                                            <span className="text-4xl font-black italic tracking-tighter text-slate-900">{item.step}</span>
+                                            <span className="text-3xl sm:text-4xl font-black italic tracking-tighter text-slate-900">{item.step}</span>
                                         </div>
 
                                         {/* Premium Glow */}

@@ -32,7 +32,7 @@ export function CallToAction() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
-                            className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-tight"
+                            className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-tight"
                         >
                             Ready to Scale Your <br />
                             <span className="text-indigo-100">Global Reach?</span>
@@ -43,7 +43,7 @@ export function CallToAction() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.3 }}
-                            className="text-white/90 text-xl lg:text-2xl mb-12 max-w-3xl mx-auto font-medium"
+                            className="text-white/90 text-lg lg:text-2xl mb-12 max-w-3xl mx-auto font-medium"
                         >
                             Join the elite network of 25,000+ top-tier brands and creators making high-impact connections today.
                         </motion.p>
@@ -55,7 +55,7 @@ export function CallToAction() {
                             transition={{ delay: 0.4 }}
                             className="flex flex-col sm:flex-row gap-6 justify-center"
                         >
-                            <Button size="lg" className="bg-white text-indigo-600 hover:bg-slate-50 font-black h-16 px-12 rounded-[2rem] text-lg transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 tracking-widest uppercase text-xs" asChild>
+                            <Button size="lg" className="bg-white text-indigo-600 hover:bg-slate-50 font-black h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-base sm:text-lg transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 tracking-widest uppercase text-xs" asChild>
                                 <Link href="/login">
                                     Get Started Free
                                 </Link>
@@ -64,7 +64,7 @@ export function CallToAction() {
                                 onClick={() => setIsModalOpen(true)}
                                 size="lg"
                                 variant="outline"
-                                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-md h-16 px-12 rounded-[2rem] text-lg transition-all hover:scale-105 active:scale-95 font-black tracking-widest uppercase text-xs"
+                                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-md h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-base sm:text-lg transition-all hover:scale-105 active:scale-95 font-black tracking-widest uppercase text-xs"
                             >
                                 Contact Sales
                             </Button>

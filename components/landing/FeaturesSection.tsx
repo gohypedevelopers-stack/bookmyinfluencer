@@ -33,10 +33,10 @@ export function FeaturesSection() {
 
                         {/* Top Row - Scrolls Left */}
                         <motion.div
-                            className="flex items-center gap-24 md:gap-40 whitespace-nowrap animate-infinite-scroll hover:[animation-play-state:paused]"
+                            className="flex items-center gap-12 md:gap-40 whitespace-nowrap animate-infinite-scroll hover:[animation-play-state:paused]"
                         >
                             {[1, 2, 3].map((setIndex) => (
-                                <div key={`row1-${setIndex}`} className="flex items-center gap-24 md:gap-40">
+                                <div key={`row1-${setIndex}`} className="flex items-center gap-12 md:gap-40">
                                     {[
                                         { name: "Fabhotels", src: "/images/logos/fabhotels.avif", width: 220, height: 100 },
                                         { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 100 },
@@ -64,10 +64,10 @@ export function FeaturesSection() {
 
                         {/* Bottom Row - Scrolls Right (Reverse) */}
                         <motion.div
-                            className="flex items-center gap-24 md:gap-40 whitespace-nowrap animate-infinite-scroll-reverse hover:[animation-play-state:paused]"
+                            className="flex items-center gap-12 md:gap-40 whitespace-nowrap animate-infinite-scroll-reverse hover:[animation-play-state:paused]"
                         >
                             {[1, 2, 3].map((setIndex) => (
-                                <div key={`row2-${setIndex}`} className="flex items-center gap-24 md:gap-40">
+                                <div key={`row2-${setIndex}`} className="flex items-center gap-12 md:gap-40">
                                     {[
                                         { name: "Mash", src: "/images/logos/mash.avif", width: 160, height: 60 },
                                         { name: "Neo", src: "/images/logos/neo.avif", width: 180, height: 60 },
@@ -101,8 +101,8 @@ export function FeaturesSection() {
                     transition={{ duration: 0.6 }}
                     className="max-w-3xl mx-auto mb-20"
                 >
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 tracking-tight">Standardizing the <span className="text-indigo-600">Industry</span></h2>
-                    <p className="text-xl text-slate-600 leading-relaxed font-medium">We build the infrastructure for secure and professional creative collaborations.</p>
+                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 tracking-tight">Standardizing the <span className="text-indigo-600">Industry</span></h2>
+                    <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed font-medium">We build the infrastructure for secure and professional creative collaborations.</p>
                 </motion.div>
 
                 <div className="grid md:grid-cols-3 gap-8 md:gap-10">
@@ -147,7 +147,7 @@ export function FeaturesSection() {
                                 <div className={`absolute -inset-2 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.03] blur-2xl transition-opacity duration-700`} />
 
                                 {/* Icon Container */}
-                                <div className={`relative mb-10 p-5 rounded-2xl ${feature.iconBg} border border-white shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+                                <div className={`relative mb-6 sm:mb-10 p-4 sm:p-5 rounded-xl sm:rounded-2xl ${feature.iconBg} border border-white shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                                     <feature.icon className={`w-8 h-8 text-transparent bg-clip-text bg-gradient-to-br ${feature.gradient}`} style={{ color: 'unset', fill: 'none', stroke: 'url(#feature-grad-' + i + ')' }} />
                                     <svg width="0" height="0">
                                         <linearGradient id={`feature-grad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">

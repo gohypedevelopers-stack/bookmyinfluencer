@@ -43,18 +43,18 @@ export function TestimonialsSection() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-20"
+                    className="text-center mb-16 sm:mb-20"
                 >
-                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
                         Proven Results for <span className="text-indigo-600">Industry Leaders</span>
                     </h2>
-                    <p className="text-xl text-slate-600 max-w-2xl mx-auto font-medium">
+                    <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
                         Join thousands of brands and creators who are scaling their impact with our platform.
                     </p>
                 </motion.div>
 
                 {/* Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-20 sm:mb-24">
                     {STATS.map((stat, i) => (
                         <motion.div
                             key={i}
@@ -62,13 +62,13 @@ export function TestimonialsSection() {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 text-center group hover:bg-slate-50 transition-all duration-500"
+                            className="bg-white border border-slate-100 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-slate-200/50 text-center group hover:bg-slate-50 transition-all duration-500"
                         >
-                            <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform">
-                                <stat.icon className="w-6 h-6" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform">
+                                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
-                            <div className="text-4xl font-black text-slate-900 mb-2 tracking-tighter">{stat.value}</div>
-                            <div className="text-slate-500 font-bold uppercase tracking-widest text-xs">{stat.label}</div>
+                            <div className="text-3xl sm:text-4xl font-black text-slate-900 mb-2 tracking-tighter">{stat.value}</div>
+                            <div className="text-slate-500 font-bold uppercase tracking-widest text-[10px] sm:text-xs">{stat.label}</div>
                         </motion.div>
                     ))}
                 </div>
@@ -84,7 +84,7 @@ export function TestimonialsSection() {
                             transition={{ delay: i * 0.2 }}
                             className="relative group h-full"
                         >
-                            <div className="h-full bg-slate-100 border border-slate-200 p-10 rounded-[2.5rem] flex flex-col hover:border-indigo-200 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50">
+                            <div className="h-full bg-slate-100 border border-slate-200 p-8 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col hover:border-indigo-200 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50">
                                 <div className="flex gap-1 mb-8">
                                     {[1, 2, 3, 4, 5].map((s) => (
                                         <Star key={s} className="w-4 h-4 fill-indigo-600 text-indigo-600" />

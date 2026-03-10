@@ -88,21 +88,21 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
                                     <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-black/5 opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
                                     <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-all duration-500" />
 
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-                                        <div className="flex items-center gap-1.5 mb-1.5 transform group-hover:-translate-y-1 transition-transform duration-500">
-                                            <h3 className="font-extrabold text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
-                                            <BadgeCheck className="w-5 h-5 text-indigo-600 drop-shadow-sm flex-shrink-0" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-10">
+                                        <div className="flex items-center gap-1.5 mb-1transform group-hover:-translate-y-1 transition-transform duration-500">
+                                            <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
+                                            <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 drop-shadow-sm flex-shrink-0" />
                                         </div>
-                                        <p className="text-sm text-slate-600 font-medium mb-5 truncate group-hover:text-slate-900 transition-colors">{creator.niche || 'General Content'}</p>
+                                        <p className="text-xs sm:text-sm text-slate-600 font-medium mb-4 sm:mb-5 truncate group-hover:text-slate-900 transition-colors">{creator.niche || 'General Content'}</p>
 
-                                        <div className="flex items-center justify-between text-xs font-bold border-t border-slate-100 pt-4 group-hover:border-slate-200 transition-colors">
+                                        <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold border-t border-slate-100 pt-3 sm:pt-4 group-hover:border-slate-200 transition-colors">
                                             <div className="space-y-1">
                                                 <p className="text-slate-500 uppercase tracking-tighter">Followers</p>
-                                                <p className="text-slate-900 text-sm font-black">{fmtFollowers}</p>
+                                                <p className="text-slate-900 text-xs sm:text-sm font-black">{fmtFollowers}</p>
                                             </div>
                                             <div className="text-right space-y-1">
                                                 <p className="text-slate-500 uppercase tracking-tighter">Engagement</p>
-                                                <p className="text-indigo-600 text-sm font-black">{engagement.toFixed(1)}%</p>
+                                                <p className="text-indigo-600 text-xs sm:text-sm font-black">{engagement.toFixed(1)}%</p>
                                             </div>
                                         </div>
                                     </div>
