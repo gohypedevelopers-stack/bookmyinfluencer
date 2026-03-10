@@ -159,6 +159,7 @@ export default async function ChatPage({
             offer: t.candidate?.offer,
             campaign: t.candidate?.campaign,
             contract: t.candidate?.contract,
+            candidateStatus: t.candidate?.status,
             lastMessage: t.messages[0] // Since we ordered by desc and took 1
         };
     }).filter((t) => t.influencer) as any[];
