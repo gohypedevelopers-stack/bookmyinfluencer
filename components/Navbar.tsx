@@ -4,10 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Container } from "@/components/container"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ArrowUpRight } from "lucide-react"
+import { JoinSelectionModal } from "./landing/JoinSelectionModal"
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
@@ -41,10 +43,11 @@ export function Navbar() {
           <Link href="/login" className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors uppercase tracking-widest">
             Log In
           </Link>
-          <Button className="font-black bg-slate-900 text-white hover:bg-slate-800 px-8 h-12 rounded-xl text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200" asChild>
-            <Link href="/register">
-              Join Now
-            </Link>
+          <Button
+            onClick={() => setIsJoinModalOpen(true)}
+            className="font-black bg-slate-900 text-white hover:bg-slate-800 px-8 h-12 rounded-xl text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200"
+          >
+            Join Now
           </Button>
         </div>
 
@@ -76,13 +79,24 @@ export function Navbar() {
               <Button variant="outline" className="w-full justify-center border-slate-200 text-slate-900 font-black h-16 rounded-2xl text-xs uppercase tracking-widest shadow-sm" onClick={toggleMobileMenu} asChild>
                 <Link href="/login">Log In</Link>
               </Button>
-              <Button className="w-full justify-center bg-indigo-600 text-white hover:bg-indigo-700 font-black h-16 rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-indigo-100" onClick={toggleMobileMenu} asChild>
-                <Link href="/register">Join Now</Link>
+              <Button
+                className="w-full justify-center bg-indigo-600 text-white hover:bg-indigo-700 font-black h-16 rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-indigo-100"
+                onClick={() => {
+                  toggleMobileMenu();
+                  setIsJoinModalOpen(true);
+                }}
+              >
+                Join Now
+                <ArrowUpRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
           </Container>
         </div>
       )}
+      <JoinSelectionModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+      />
     </nav>
   )
 }
