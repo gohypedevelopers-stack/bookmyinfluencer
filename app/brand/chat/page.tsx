@@ -75,16 +75,16 @@ export default async function ChatPage({
                     id: true, status: true,
                     influencer: {
                         select: {
-                            id: true, userId: true,
+                            id: true, userId: true, instagramHandle: true,
                             user: { select: { id: true, name: true, image: true } }
                         }
                     },
-                    offer: { select: { id: true, amount: true, status: true } },
+                    offer: { select: { id: true, amount: true, status: true, deliverablesDescription: true } },
                     campaign: { select: { id: true, title: true } },
                     contract: {
                         select: {
-                            id: true, status: true,
-                            transactions: { select: { amount: true, status: true } }
+                            id: true, status: true, totalAmount: true,
+                            transactions: { select: { amount: true, status: true, type: true } }
                         }
                     }
                 }

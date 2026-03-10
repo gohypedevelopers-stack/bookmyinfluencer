@@ -368,6 +368,7 @@ export async function fundContractFromWallet(contractId: string) {
 
             revalidatePath(`/brand/wallet`);
             revalidatePath(`/brand/campaigns`);
+            revalidatePath(`/brand/chat`);
             return {
                 success: true,
                 contractId,
