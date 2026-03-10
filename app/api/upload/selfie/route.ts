@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getVerifiedUserIdFromCookies } from "@/lib/session";
 import { uploadToR2 } from "@/lib/storage";
 import { db } from "@/lib/db";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
+
 // Manually defining types to bypass Prisma generation issues during dev
 type LivenessPrompt = "SMILE" | "BLINK";
 type LivenessResult = "PASSED" | "FAILED" | "NOT_CHECKED";
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    const userId = await getVerifiedUserIdFromCookies();
+    if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id;
 
     try {
         const formData = await req.formData();
@@ -29,18 +31,43 @@ export async function POST(req: NextRequest) {
         const timestamp = Date.now();
         const key = `kyc/selfie/${userId}/${timestamp}.jpg`;
 
-        // Upload to R2 - Fallback to mock succeed in dev if R2 is not configured
-        if (!process.env.R2_ACCOUNT_ID || !process.env.R2_ACCESS_KEY_ID) {
-            console.warn("⚠️ R2 Storage not configured. Using mock success for development.");
-        } else {
-            await uploadToR2(buffer, key, "image/jpeg");
+        // Upload Strategy
+        const hasR2 = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID);
+        let uploadPerformed = false;
+
+        if (hasR2) {
+            try {
+                await uploadToR2(buffer, key, "image/jpeg");
+                uploadPerformed = true;
+            } catch (err: any) {
+                console.error("KYC R2 Upload failed:", err);
+                if (process.env.NODE_ENV === "production") throw err;
+            }
         }
 
-        // Update DB - We check both systems
-        // 1. Creator system (New)
+        if (!uploadPerformed && process.env.NODE_ENV !== "production") {
+            try {
+                const devDir = join(process.cwd(), "public", "uploads", "kyc");
+                if (!existsSync(devDir)) await mkdir(devDir, { recursive: true });
+                await writeFile(join(devDir, `${timestamp}.jpg`), buffer);
+                uploadPerformed = true;
+                console.log("Local KYC upload success (dev mode)");
+            } catch (fsErr) {
+                console.error("Local KYC backup failed:", fsErr);
+            }
+        }
+
+        if (!uploadPerformed && process.env.NODE_ENV === "production") {
+            return NextResponse.json({ error: "Storage misconfigured in production" }, { status: 500 });
+        }
+
+
+        // 1. Unified Creator system lookup
         const otpUser = await db.otpUser.findUnique({
-            where: { email: session.user.email as string }
+            where: { id: userId },
+            include: { creator: { include: { kycSubmission: true } } }
         });
+
 
         const creator = otpUser ? await (db.creator as any).findUnique({
             where: { userId: otpUser.id },
