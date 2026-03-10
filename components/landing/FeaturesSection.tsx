@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 
 export function FeaturesSection() {
     return (
-        <section className="w-full py-24 md:py-32 bg-[#fafafa] relative overflow-hidden">
+        <section className="w-full py-24 md:py-32 bg-slate-100 relative overflow-hidden">
             {/* Subtle background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden opacity-40">
                 <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-100/50 rounded-full blur-[120px]" />
@@ -27,8 +27,8 @@ export function FeaturesSection() {
                     {/* Infinite Animated Carousel Container - Two Rows */}
                     <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-12 bg-transparent">
                         {/* Gradient masks for smooth fading at the edges */}
-                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-[#fafafa] to-transparent z-10 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-[#fafafa] to-transparent z-10 pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-slate-100 to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-slate-100 to-transparent z-10 pointer-events-none" />
 
                         {/* Top Row - Scrolls Left */}
                         <motion.div
