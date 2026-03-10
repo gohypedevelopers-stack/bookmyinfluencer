@@ -70,39 +70,45 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
 
                     return (
                         <SwiperSlide key={creator.id}>
-                            <Link href={`/creators/${creator.id}`} className="block h-full transition-transform duration-300 hover:-translate-y-1">
-                                <div className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 bg-white">
+                            <Link href={`/creators/${creator.id}`} className="block h-full transition-all duration-500">
+                                <div className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden cursor-pointer border border-slate-200 bg-white group shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 hover:border-indigo-200">
                                     {imageSrc ? (
                                         <Image
                                             src={imageSrc}
                                             alt={displayName}
                                             fill
                                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                            className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500" />
+                                        <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200" />
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90" />
 
-                                    <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                                        <div className="flex items-center gap-1 mb-1">
-                                            <h3 className="font-bold text-lg text-white truncate max-w-[85%]">{displayName}</h3>
-                                            <BadgeCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                                    {/* Premium Overlay - Light Mode Refined */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-black/5 opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-all duration-500" />
+
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+                                        <div className="flex items-center gap-1.5 mb-1.5 transform group-hover:-translate-y-1 transition-transform duration-500">
+                                            <h3 className="font-extrabold text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
+                                            <BadgeCheck className="w-5 h-5 text-indigo-600 drop-shadow-sm flex-shrink-0" />
                                         </div>
-                                        <p className="text-sm text-slate-300 mb-3 truncate">{creator.niche || 'General Content'}</p>
+                                        <p className="text-sm text-slate-600 font-medium mb-5 truncate group-hover:text-slate-900 transition-colors">{creator.niche || 'General Content'}</p>
 
-                                        <div className="flex items-center justify-between text-xs font-medium border-t border-white/20 pt-3">
-                                            <div>
-                                                <p className="text-slate-400">Followers</p>
-                                                <p>{fmtFollowers}</p>
+                                        <div className="flex items-center justify-between text-xs font-bold border-t border-slate-100 pt-4 group-hover:border-slate-200 transition-colors">
+                                            <div className="space-y-1">
+                                                <p className="text-slate-500 uppercase tracking-tighter">Followers</p>
+                                                <p className="text-slate-900 text-sm font-black">{fmtFollowers}</p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-slate-400">Engagement</p>
-                                                <p className="text-green-400">{engagement.toFixed(1)}%</p>
+                                            <div className="text-right space-y-1">
+                                                <p className="text-slate-500 uppercase tracking-tighter">Engagement</p>
+                                                <p className="text-indigo-600 text-sm font-black">{engagement.toFixed(1)}%</p>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Glow Indicator */}
+                                    <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-indigo-600 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </div>
                             </Link>
                         </SwiperSlide>

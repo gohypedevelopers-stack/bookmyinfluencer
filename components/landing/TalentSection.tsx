@@ -87,15 +87,19 @@ export async function TalentSection() {
     const creators = [...dbCreators, ...DUMMY_CREATORS].slice(0, 12);
 
     return (
-        <section className="w-full py-16 md:py-20 bg-slate-50 overflow-hidden">
+        <section className="w-full py-20 md:py-32 bg-slate-50/50 overflow-hidden transition-colors duration-500">
             <Container>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
-                    <div>
-                        <h2 className="text-3xl font-bold text-slate-900 mb-2">Top Trending Talent</h2>
-                        <p className="text-slate-600">Discover creators with high engagement rates.</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-16">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <span className="h-px w-8 bg-indigo-600" />
+                            <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">Premium Selection</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Top Trending <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Talent</span></h2>
+                        <p className="text-slate-600 text-lg font-medium">Connect with creators who are shaping the digital landscape.</p>
                     </div>
-                    <Link href="/discover" className="flex items-center text-blue-600 font-medium hover:text-blue-700">
-                        Explore All Creators <ArrowRight className="w-4 h-4 ml-1" />
+                    <Link href="/discover" className="group flex items-center bg-white border border-slate-200 px-8 py-4 rounded-2xl text-slate-900 font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all hover:scale-105 shadow-lg shadow-slate-200/50">
+                        Explore Marketplace <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                     </Link>
                 </div>
 
