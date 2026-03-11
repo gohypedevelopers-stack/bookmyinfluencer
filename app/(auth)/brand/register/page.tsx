@@ -59,7 +59,7 @@ const NextButton = ({
     <button
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-3 text-white font-bold rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6)" }}
+        className="w-full py-3.5 text-white font-black rounded-2xl disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-6 shadow-[0_12px_24px_-6px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_30px_-8px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]" style={{ background: "linear-gradient(135deg, #4f46e5, #6366f1, #4338ca)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
@@ -304,23 +304,20 @@ export default function BrandRegisterPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center overflow-hidden relative font-sans p-3 md:p-5"
-            style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1060 45%, #24243e 100%)" }}>
+            style={{ background: "radial-gradient(circle at top right, #f8fafc 0%, #f1f5f9 100%)" }}>
 
-            {/* Animated background orbs */}
+            {/* Animated background orbs - adjusted for light theme */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <motion.div animate={{ scale: [1, 1.18, 1], opacity: [0.35, 0.55, 0.35] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-40 -left-40 w-[550px] h-[550px] rounded-full blur-3xl"
-                    style={{ background: "radial-gradient(circle, rgba(99,102,241,0.45) 0%, transparent 65%)" }} />
-                <motion.div animate={{ scale: [1, 1.22, 1], opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-                    className="absolute -bottom-40 -right-40 w-[550px] h-[550px] rounded-full blur-3xl"
-                    style={{ background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 65%)" }} />
-                <motion.div animate={{ y: [0, -28, 0] }} transition={{ duration: 13, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-                    className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full blur-3xl opacity-20"
-                    style={{ background: "radial-gradient(circle, rgba(59,130,246,0.7) 0%, transparent 70%)" }} />
+                <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-40 -left-20 w-[600px] h-[600px] rounded-full blur-[120px]"
+                    style={{ background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)" }} />
+                <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute -bottom-40 -right-20 w-[600px] h-[600px] rounded-full blur-[120px]"
+                    style={{ background: "radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%)" }} />
             </div>
             {/* Split-panel card */}
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }}
-                className="w-full max-w-xl relative z-10 rounded-3xl overflow-hidden flex shadow-[0_40px_100px_rgba(0,0,0,0.55)]">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full max-w-xl relative z-10 rounded-[2.5rem] overflow-hidden flex shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] border border-slate-200/60 ring-1 ring-slate-200/50">
 
                 {/* RIGHT: White form panel */}
                 <div className="flex-1 bg-white flex flex-col relative overflow-hidden min-h-0">
@@ -354,7 +351,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step1" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Enter brand details</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Enter Brand Details</h2>
                                             <p className="text-sm text-slate-400 mt-1">Registration - Phase 1</p>
                                         </div>
 
@@ -364,7 +361,7 @@ export default function BrandRegisterPage() {
                                             <div className="relative">
                                                 <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="companyName" type="text" value={formData.companyName} onChange={handleInputChange}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all bg-slate-50/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                     placeholder="e.g. Acme Global" required />
                                             </div>
                                         </div>
@@ -389,7 +386,7 @@ export default function BrandRegisterPage() {
                                                                 setShowCustomIndustry(false);
                                                             }
                                                         }}
-                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 transition-all appearance-none cursor-pointer"
+                                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all appearance-none cursor-pointer"
                                                     >
                                                         <option value="" disabled>Select industry</option>
                                                         {['Technology', 'Fashion & Apparel', 'Beauty & Cosmetics', 'Health & Wellness', 'Food & Beverage', 'Finance', 'Education', 'Entertainment', 'Travel', 'Others'].map(opt => (
@@ -473,7 +470,7 @@ export default function BrandRegisterPage() {
                                             <div className="relative">
                                                 <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="website" type="url" value={formData.website} onChange={handleInputChange}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all bg-slate-50/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                     placeholder="https://www.yourbrand.com" />
                                             </div>
                                         </div>
@@ -493,7 +490,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step2" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify company email</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Verify company email</h2>
                                             <p className="text-sm text-slate-400 mt-1">Security Check</p>
                                         </div>
 
@@ -579,7 +576,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step3" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create secure password</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Create secure password</h2>
                                             <p className="text-sm text-slate-400 mt-1">Finalize Account</p>
                                         </div>
 
@@ -588,7 +585,7 @@ export default function BrandRegisterPage() {
                                             <div className="relative">
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
-                                                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400"
+                                                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all bg-slate-50/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                     placeholder="••••••••" required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
@@ -602,7 +599,7 @@ export default function BrandRegisterPage() {
                                             <div className="relative">
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
-                                                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400"
+                                                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all bg-slate-50/50 focus:bg-white text-slate-800 placeholder-slate-400"
                                                     placeholder="••••••••" required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
@@ -639,7 +636,7 @@ export default function BrandRegisterPage() {
                                         <div className="w-20 h-20 rounded-2xl rotate-3 flex items-center justify-center mb-4 shadow-xl shadow-blue-200/60" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
                                             <Target className="w-10 h-10 text-white" />
                                         </div>
-                                        <h1 className="text-3xl font-extrabold tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Registration complete!</h1>
+                                        <h1 className="text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Registration complete!</h1>
                                         <p className="text-sm text-slate-500 max-w-sm">
                                             Let's personalize your discovery engine to find creators who match your brand's vision.
                                         </p>
@@ -655,7 +652,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step5" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>What is your Brand Name?</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is your Brand Name?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Defining Identity</p>
                                         </div>
                                         <div className="relative">
@@ -676,7 +673,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step6" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>What type of campaign?</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What type of campaign?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Campaign Strategy</p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
@@ -712,7 +709,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step7" direction={direction}>
                                     <div className="space-y-5">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Total campaign budget?</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Total campaign budget?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Budget Planning</p>
                                         </div>
                                         <div className="space-y-3">
@@ -742,7 +739,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step8" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Target creator size?</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Target creator size?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Select the follower range that fits your campaign.</p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -781,7 +778,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step9" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center md:text-left mb-4">
-                                            <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Budget range?</h2>
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Budget range?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Select a pricing type and your budget per collaboration.</p>
                                         </div>
 

@@ -33,24 +33,24 @@ export function JoinSelectionModal({ isOpen, onClose }: JoinSelectionModalProps)
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-[100] flex items-start justify-center sm:justify-end p-4 sm:p-6 pt-16 sm:pt-6 sm:pr-12 pointer-events-none">
                     {/* Dark Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        transition={{ duration: 0.2 }}
+                        className="absolute inset-0 bg-slate-900/10 backdrop-blur-[2px] pointer-events-auto"
                     />
 
                     {/* Modal Content */}
                     <motion.div
                         ref={modalRef}
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative w-full max-w-3xl bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] overflow-y-auto"
+                        initial={{ opacity: 0, scale: 0.95, y: -20, x: 0 }}
+                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20, x: 0 }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative w-full max-w-sm bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden pointer-events-auto"
                     >
                         {/* Close Button */}
                         <button
@@ -60,49 +60,42 @@ export function JoinSelectionModal({ isOpen, onClose }: JoinSelectionModalProps)
                             <X className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
 
-                        <div className="p-4 sm:p-8">
-                            <div className="text-center mb-6 sm:mb-8">
-                                <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-1 tracking-tight uppercase italic underline decoration-indigo-600/30 underline-offset-8">Join Bookmy<span className="text-indigo-600">influencer</span></h2>
-                                <p className="text-slate-500 font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] mt-3">Choose your path to excellence</p>
+                        <div className="p-5 sm:p-6">
+                            <div className="text-center mb-6">
+                                <h2 className="text-lg font-black text-slate-900 tracking-tight uppercase italic underline decoration-emerald-500/30 underline-offset-4">Join Our Platform</h2>
                             </div>
 
-                            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 gap-3">
                                 {/* Creator Card */}
                                 <Link
                                     href="/register"
                                     onClick={onClose}
-                                    className="group relative flex flex-col p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-500 hover:scale-[1.02] hover:bg-white hover:border-indigo-600 hover:shadow-2xl hover:shadow-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="group relative flex items-center p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl transition-all duration-300 hover:bg-white hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100/50"
                                 >
-                                    <div className="mb-4 w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-sm">
-                                        <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                                        <Users className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-1 tracking-tight group-hover:text-indigo-600 transition-colors">Join as a Creator</h3>
-                                    <p className="text-slate-500 font-medium leading-relaxed mb-4 text-xs sm:text-sm flex-grow">
-                                        Find deals, showcase portfolio, and grow collaborations.
-                                    </p>
-                                    <div className="flex items-center text-indigo-600 font-extrabold tracking-widest text-[9px] sm:text-[10px] uppercase">
-                                        Continue as Creator
-                                        <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1 transition-transform" />
+                                    <div className="ml-4 text-left">
+                                        <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">Join as a Creator</h3>
+                                        <p className="text-slate-500 text-[11px] font-medium leading-tight">Partnerships & Growth</p>
                                     </div>
+                                    <ArrowRight className="w-4 h-4 ml-auto text-emerald-600 group-hover:translate-x-1 transition-transform" />
                                 </Link>
 
                                 {/* Brand Card */}
                                 <Link
                                     href="/brand/register"
                                     onClick={onClose}
-                                    className="group relative flex flex-col p-5 sm:p-6 bg-slate-50 border border-slate-200 rounded-[1.5rem] sm:rounded-[2rem] transition-all duration-500 hover:scale-[1.02] hover:bg-white hover:border-blue-600 hover:shadow-2xl hover:shadow-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="group relative flex items-center p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl transition-all duration-300 hover:bg-white hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-100/50"
                                 >
-                                    <div className="mb-4 w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-sm">
-                                        <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                                        <Building2 className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-1 tracking-tight group-hover:text-blue-600 transition-colors">Join as a Brand</h3>
-                                    <p className="text-slate-500 font-medium leading-relaxed mb-4 text-xs sm:text-sm flex-grow">
-                                        Launch campaigns and manage collaborations easily.
-                                    </p>
-                                    <div className="flex items-center text-blue-600 font-extrabold tracking-widest text-[9px] sm:text-[10px] uppercase">
-                                        Continue as Brand
-                                        <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1 transition-transform" />
+                                    <div className="ml-4 text-left">
+                                        <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">Join as a Brand</h3>
+                                        <p className="text-slate-500 text-[11px] font-medium leading-tight">Campaigns & Strategy</p>
                                     </div>
+                                    <ArrowRight className="w-4 h-4 ml-auto text-indigo-600 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </div>
 
