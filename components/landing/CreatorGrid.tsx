@@ -8,7 +8,7 @@ const ALL_CREATORS = [
     {
         id: "dummy-1",
         name: "Aryan Sharma",
-        image: "/images/dummy/lifestyle.png",
+        image: "/images/elena.png",
         category: "Lifestyle & Fitness",
         followers: "850K+",
         engagement: "4.8%",
@@ -18,7 +18,7 @@ const ALL_CREATORS = [
     {
         id: "dummy-2",
         name: "Sanya Malhotra",
-        image: "/images/dummy/fashion.png",
+        image: "/images/julian.png",
         category: "Fashion & Beauty",
         followers: "1.2M+",
         engagement: "5.2%",
@@ -28,7 +28,7 @@ const ALL_CREATORS = [
     {
         id: "dummy-3",
         name: "Rohan Varma",
-        image: "/images/dummy/tech.png",
+        image: "/images/marco.png",
         category: "Tech & Gadgets",
         followers: "450K+",
         engagement: "6.1%",

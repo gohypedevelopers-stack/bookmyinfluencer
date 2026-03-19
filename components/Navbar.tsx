@@ -15,7 +15,7 @@ export function Navbar() {
 
   return (
 
-    <nav className="border-b border-slate-200/50 sticky top-0 z-[100] bg-white/70 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+    <nav className="border-b border-slate-200/50 sticky top-0 z-[100] bg-white/80 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
       <Container className="h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           {/* Logo placeholder - using text/icon */}

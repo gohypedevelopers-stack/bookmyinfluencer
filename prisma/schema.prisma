@@ -55,6 +55,7 @@ model BrandProfile {
   user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   brandWallet          BrandWallet?
   campaigns            Campaign[]
+  brandCampaigns       BrandCampaign[]
   contracts            Contract[]
   savedInfluencers     SavedInfluencer[]
 }
@@ -141,6 +142,76 @@ model Campaign {
   candidates   CampaignCandidate[]
   payouts      PayoutRecord[]
   transactions WalletTransaction[]
+}
+
+model BrandCampaign {
+  id                  String                 @id @default(cuid())
+  brandId             String
+  title               String?
+  summary             String?
+  totalBudget         Float
+  category            String
+  categoryLabel       String?
+  minFollowers        Int
+  maxFollowers        Int
+  status              String                 @default("active")
+  targetAcceptedCount Int                    @default(20)
+  activeRequestLimit  Int                    @default(20)
+  matchingTriggeredAt DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  brand               BrandProfile           @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  requests            CollaborationRequest[]
+
+  @@index([brandId, status])
+  @@index([category, minFollowers, maxFollowers])
+}
+
+model Influencer {
+  id             String                 @id @default(cuid())
+  sourceKey      String                 @unique
+  sourceType     String
+  sourceUserId   String?
+  email          String?
+  displayName    String
+  category       String?
+  rawCategory    String?
+  followersCount Int                    @default(0)
+  engagementRate Float                  @default(0)
+  priceStory     Int?
+  pricePost      Int?
+  priceCollab    Int?
+  platforms      String?
+  profileImageUrl String?
+  active         Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  requests       CollaborationRequest[]
+
+  @@index([category, followersCount])
+  @@index([active, engagementRate, followersCount])
+}
+
+model CollaborationRequest {
+  id              String        @id @default(cuid())
+  campaignId      String
+  influencerId    String
+  status          String        @default("pending")
+  sentAt          DateTime      @default(now())
+  expiresAt       DateTime
+  respondedAt     DateTime?
+  acceptedAt      DateTime?
+  expiredAt       DateTime?
+  archivedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  campaign        BrandCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer      Influencer    @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, influencerId])
+  @@index([status, expiresAt])
+  @@index([campaignId, status])
 }
 
 model CampaignCandidate {

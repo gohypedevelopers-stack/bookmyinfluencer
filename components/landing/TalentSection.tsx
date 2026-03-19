@@ -12,7 +12,7 @@ const DUMMY_CREATORS = [
         id: "dummy-1",
         displayName: "Aryan Sharma",
         fullName: "Aryan Sharma",
-        profileImageUrl: "/images/dummy/lifestyle.png",
+        profileImageUrl: "/images/elena.png",
         niche: "Lifestyle & Fitness",
         metrics: [{ followersCount: 850000, engagementRate: 4.8 }],
         verificationStatus: 'APPROVED'
@@ -21,7 +21,7 @@ const DUMMY_CREATORS = [
         id: "dummy-2",
         displayName: "Sanya Malhotra",
         fullName: "Sanya Malhotra",
-        profileImageUrl: "/images/dummy/fashion.png",
+        profileImageUrl: "/images/julian.png",
         niche: "Fashion & Beauty",
         metrics: [{ followersCount: 1250000, engagementRate: 5.2 }],
         verificationStatus: 'APPROVED'
@@ -30,7 +30,7 @@ const DUMMY_CREATORS = [
         id: "dummy-3",
         displayName: "Rohan Varma",
         fullName: "Rohan Varma",
-        profileImageUrl: "/images/dummy/tech.png",
+        profileImageUrl: "/images/marco.png",
         niche: "Tech & Gadgets",
         metrics: [{ followersCount: 450000, engagementRate: 6.1 }],
         verificationStatus: 'APPROVED'

@@ -33,7 +33,7 @@ const platforms = [
 ];
 
 const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number }) => (
-    <div className="w-full max-w-[26rem] bg-white/90 backdrop-blur-sm border border-white/80 rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.08),0_0_0_1px_rgba(99,102,241,0.05)] overflow-hidden min-h-0 flex flex-col items-center justify-center relative z-10 text-slate-900">
+    <div className="relative z-10 flex h-full min-h-0 w-full flex-col text-slate-900">
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-100">
             <motion.div
@@ -53,7 +53,7 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { chi
             animate="center"
             exit="exit"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="w-full px-8 py-5 md:px-10 flex flex-col items-center justify-center flex-1"
+            className="flex flex-1 flex-col items-center justify-center w-full max-w-[560px] mx-auto px-6 py-8 md:px-8"
         >
             {children}
         </motion.div>
@@ -76,7 +76,7 @@ const NextButton = ({
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-3 text-white rounded-2xl font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-4 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+        className="w-full py-4 text-white rounded-2xl font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</>
@@ -102,7 +102,7 @@ const ProceedButton = ({
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-3 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-4 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+        className="w-full py-4 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</>
@@ -304,6 +304,23 @@ export default function RegisterPage() {
         }
     };
 
+    const sidebarContent = (): { icon: React.ReactNode; tag: string; title: string; desc: string } => {
+        if (currentStep === 1) return { icon: <User className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Start your creator profile", desc: "Set up the essentials so brands can understand who you are from the first screen." };
+        if (currentStep === 2) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Social Presence", title: "Show your channels", desc: "Add your public handles so collaborations can connect to the audience you already built." };
+        if (currentStep === 3) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
+        if (currentStep === 4) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
+        if (currentStep === 5) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
+        if (currentStep === 6) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
+        if (currentStep === 7) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
+        if (currentStep === 8) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
+        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
+        if (currentStep === 10) return { icon: <IndianRupee className="w-8 h-8 text-white" />, tag: "Pricing", title: "Set your rates", desc: "Transparent pricing helps brands move faster when they find the right creator match." };
+        if (currentStep === 11) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
+        return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Ready for discovery", desc: "Your creator profile is now ready to be seen by brands looking for the right voice and audience." };
+    };
+
+    const sidebar = sidebarContent();
+
     return (
         <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans text-slate-900" style={{ background: "radial-gradient(ellipse at 20% 50%, #e0e7ff 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #fce7f3 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #dbeafe 0%, transparent 50%), #f8fafc" }}>
 
@@ -320,26 +337,97 @@ export default function RegisterPage() {
                 <div className="absolute bottom-12 left-12 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #8b5cf6 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
             </div>
 
-            {/* Back Button */}
-            {
-                currentStep > 1 && !isSubmitting && currentStep < 11 && (
-                    <button onClick={goBack}
-                        className="fixed lg:absolute top-8 left-8 z-50 p-2 rounded-full hover:bg-slate-200 transition-colors text-slate-500">
-                        <ChevronLeft size={28} />
-                    </button>
-                )
-            }
-
             {/* Slide Content */}
-            <div className="relative z-10 w-full max-w-[28rem] flex items-center justify-center">
-                <AnimatePresence initial={false} custom={direction} mode="wait">
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full max-w-[28rem] md:max-w-[960px] min-h-[600px] overflow-hidden rounded-[2rem] border border-slate-200/60 ring-1 ring-white/60 shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] flex"
+            >
+                <div className="hidden md:flex flex-col w-[34%] min-h-[600px] overflow-hidden relative"
+                    style={{ background: "linear-gradient(165deg, #4f46e5 0%, #7c3aed 100%)" }}>
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+                        <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[50%] bg-gradient-to-br from-indigo-400/30 to-transparent blur-3xl rotate-12" />
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[120%] h-[50%] bg-gradient-to-tl from-violet-400/30 to-transparent blur-3xl -rotate-12" />
+                    </div>
+
+                    <div className="relative z-10 flex flex-col h-full p-8 text-white">
+                        <div className="mb-12 flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+                                <User size={22} className="text-white" />
+                            </div>
+                            <span className="text-xl font-black tracking-tight">Bookmyinfluencer</span>
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-center">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentStep}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[11px] font-bold uppercase tracking-wider text-white/80">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                        {sidebar.tag}
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <h2 className="text-4xl font-black leading-tight tracking-tight">
+                                            {sidebar.title}
+                                        </h2>
+                                        <p className="text-lg text-indigo-100 font-medium leading-relaxed max-w-sm">
+                                            {sidebar.desc}
+                                        </p>
+                                    </div>
+
+                                    <div className="pt-4 flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                                            {sidebar.icon}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-4">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="w-9 h-9 rounded-full border-2 border-indigo-600 bg-slate-200 flex items-center justify-center overflow-hidden">
+                                        <img src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="creator" className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                                <div className="w-9 h-9 rounded-full border-2 border-indigo-600 bg-white/10 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">
+                                    +10k
+                                </div>
+                            </div>
+                            <p className="text-xs font-black text-white/50 uppercase tracking-[0.1em]">
+                                Trusted by ambitious creators
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex-1 bg-white/90 backdrop-blur-sm flex flex-col relative overflow-hidden min-h-[600px]">
+                    {currentStep > 1 && !isSubmitting && currentStep < 11 && (
+                        <button
+                            onClick={goBack}
+                            className="absolute top-5 left-5 z-20 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700"
+                        >
+                            <ChevronLeft size={22} />
+                        </button>
+                    )}
+
+                    <AnimatePresence initial={false} custom={direction} mode="wait">
 
                     {/* ===== STEP 1: Enter your details ===== */}
                     {currentStep === 1 && (
                         <CardWrapper stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-indigo-200/60" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg></div>
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create your account</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create your account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Join thousands of creators earning with top brands.</p>
 
                                 <AnimatePresence>
@@ -414,7 +502,7 @@ export default function RegisterPage() {
                     {currentStep === 2 && (
                         <CardWrapper stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Link your social profiles to get discovered.</p>
 
                                 <div className="relative group">
@@ -440,7 +528,7 @@ export default function RegisterPage() {
                     {currentStep === 3 && (
                         <CardWrapper stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">We'll send an OTP to confirm your email.</p>
 
                                 <AnimatePresence mode="wait">
@@ -543,7 +631,7 @@ export default function RegisterPage() {
                     {currentStep === 4 && (
                         <CardWrapper stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Choose a strong password to protect your account.</p>
 
                                 <AnimatePresence mode="wait">
@@ -630,7 +718,7 @@ export default function RegisterPage() {
                         <CardWrapper stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-4">
                                 <div className="text-center">
-                                    <h2 className="text-xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
+                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
                                     <p className="text-slate-400 text-xs">Pick the ones you create on.</p>
                                 </div>
 
@@ -674,8 +762,8 @@ export default function RegisterPage() {
                     {/* ===== STEP 7: Niche ===== */}
                     {currentStep === 7 && (
                         <CardWrapper stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
-                            <div className="w-full max-w-md space-y-6 flex flex-col items-center">
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
+                            <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
                                     <div className="grid grid-cols-2 gap-2.5 w-full">
                                         {[
@@ -744,7 +832,7 @@ export default function RegisterPage() {
                     {currentStep === 8 && (
                         <CardWrapper stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
                                 <div className="space-y-4">
                                     {["1K - 10K", "10K - 50K", "50K - 100K", "100K - 500K", "500K+"].map((range) => (
                                         <motion.button
@@ -775,11 +863,11 @@ export default function RegisterPage() {
                         <CardWrapper stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="text-center">
-                                    <h2 className="text-xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
+                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
                                     <p className="text-xs text-slate-400">Optional, but helps you stand out.</p>
                                 </div>
 
-                                <div className="max-w-[220px] mx-auto flex items-center bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl shadow-sm focus-within:border-[#4f46e5] focus-within:ring-1 focus-within:ring-[#4f46e5] focus-within:bg-white transition-all overflow-hidden">
+                                <div className="max-w-[280px] mx-auto flex items-center bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl shadow-sm focus-within:border-[#4f46e5] focus-within:ring-1 focus-within:ring-[#4f46e5] focus-within:bg-white transition-all overflow-hidden">
                                     <input type="number" value={onboardingData.engagement}
                                         onChange={(e) => updateOnboarding("engagement", e.target.value)}
                                         placeholder="e.g. 4.5"
@@ -802,11 +890,11 @@ export default function RegisterPage() {
                     {/* ===== STEP 10: Pricing ===== */}
                     {currentStep === 10 && (
                         <CardWrapper stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
-                            <div className="w-full max-w-md space-y-6 flex flex-col justify-center items-center">
+                            <div className="w-full max-w-[520px] space-y-6 flex flex-col justify-center items-center">
                                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-emerald-400 to-teal-500 rounded-2xl rotate-3 shadow-lg mb-2">
                                     <Zap className="w-8 h-8 text-white" />
                                 </div>
-                                <h2 className="text-2xl font-extrabold text-center mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Minimum Price?</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Minimum Price?</h2>
                                 <p className="text-slate-500 text-center max-w-xs mb-4">Setting a competitive minimum price boosts your visibility.</p>
 
                                 <AnimatePresence mode="wait">
@@ -874,7 +962,7 @@ export default function RegisterPage() {
                     {/* ===== STEP 11: Live Photo KYC ===== */}
                     {currentStep === 11 && (
                         <CardWrapper stepKey="step11" direction={direction} progressPercentage={90}>
-                            <div className="w-full max-w-md space-y-6 flex flex-col justify-center items-center relative z-10 text-white">
+                            <div className="w-full max-w-[520px] space-y-6 flex flex-col justify-center items-center relative z-10 text-white">
                                 <div className="text-center space-y-2 mb-2 w-full">
                                     <h2 className="text-3xl md:text-3xl font-bold text-slate-900 drop-shadow-sm">Identity Verification</h2>
                                     <p className="text-slate-500 text-sm">Take a quick selfie to verify your identity and build trust with brands.</p>
@@ -931,11 +1019,12 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                </AnimatePresence>
-            </div>
+                    </AnimatePresence>
+                </div>
+            </motion.div>
 
             {/* Footer */}
-            <div className="fixed bottom-6 w-full text-center text-slate-400 text-xs pointer-events-none">
+            <div className="fixed bottom-6 w-full text-center text-slate-400 text-xs pointer-events-none md:hidden">
                 <p>Trusted by 10,000+ creators worldwide</p>
             </div>
         </div >

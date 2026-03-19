@@ -14,21 +14,37 @@ const protectedModels = [
 
 const RETRYABLE_DB_ERROR_PATTERNS = [
     /can't reach database server/i,
+    /error in postgresql connection/i,
     /server has closed the connection/i,
     /connection terminated unexpectedly/i,
+    /kind:\s*closed/i,
     /timed out fetching a new connection/i,
     /socket hang up/i,
+    /forcibly closed by the remote host/i,
+    /connection reset/i,
+    /econnreset/i,
     /too many connections/i,
     /prepared statement .* does not exist/i,
 ]
 
-const MAX_DB_RETRY_ATTEMPTS = 2
+const RETRYABLE_DB_ERROR_CODES = new Set([
+    "P1001", // Can't reach database server
+    "P1002", // Database server timed out
+    "P1017", // Server has closed the connection
+    "P1008", // Operations timed out
+])
+
+const MAX_DB_RETRY_ATTEMPTS = 3
 
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function isRetryableDbError(error: unknown) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return RETRYABLE_DB_ERROR_CODES.has(error.code)
+    }
+
     if (
         error instanceof Prisma.PrismaClientInitializationError ||
         error instanceof Prisma.PrismaClientRustPanicError ||

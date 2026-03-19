@@ -24,7 +24,7 @@ const TESTIMONIALS = [
         name: "Aisha Patel",
         role: "Creative Director at Vibe",
         content: "The Tri-Chat system is a game changer. Having our account manager in the loop ensures everything runs smoothly without any miscommunications.",
-        image: "/images/lady.png",
+        image: "/images/elena.png",
         metrics: { label: "Reach Growth", value: "+125%" }
     }
 ]

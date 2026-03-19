@@ -108,7 +108,7 @@ export function WorkflowSection() {
                     <div className="hidden md:block absolute top-[4.5rem] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent -z-10" />
 
                     <div className="grid md:grid-cols-3 gap-16 md:gap-8">
-                        <AnimatePresence mode="wait">
+                        <AnimatePresence initial={false}>
                             {stepsData[activeTab].map((item, i) => (
                                 <motion.div
                                     key={`${activeTab}-${i}`}

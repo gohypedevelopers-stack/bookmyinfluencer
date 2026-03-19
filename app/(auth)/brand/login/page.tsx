@@ -2,14 +2,14 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { getSession, signIn, signOut } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle2, Lock, ShieldCheck, Smartphone, Eye, EyeOff } from "lucide-react"
+import { inspectBrandLoginEmail } from "@/app/brand/auth-actions"
+import { CheckCircle2, Lock, ShieldCheck, Eye, EyeOff } from "lucide-react"
 
 function BrandLoginForm() {
     const [email, setEmail] = useState("")
@@ -17,12 +17,13 @@ function BrandLoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
+    const [successMessage, setSuccessMessage] = useState("")
     const router = useRouter()
     const searchParams = useSearchParams()
 
     useEffect(() => {
         if (searchParams.get('registered') === 'true') {
-            setError("Account created! Please sign in.") // Using error state for success msg temporarily or add new state
+            setSuccessMessage("Brand account created successfully. Please sign in.")
         }
     }, [searchParams])
 
@@ -31,33 +32,51 @@ function BrandLoginForm() {
         setIsLoading(true)
         setError("")
 
+        const normalizedEmail = email.trim().toLowerCase()
+
         try {
-            // Using standard NextAuth credentials login
-            // Note: detailed error handling omitted for brevity
             const res = await signIn("credentials", {
-                email,
+                email: normalizedEmail,
                 password,
-                redirect: false
+                redirect: false,
             })
 
             if (res?.error) {
-                setError("Invalid credentials. Try 'BrandPassword123!' if you just registered.")
+                const diagnostic = await inspectBrandLoginEmail(normalizedEmail)
+                setError(diagnostic.message || "Invalid email or password.")
                 setIsLoading(false)
-            } else {
-                router.push("/brand")
+                return
             }
+
+            const session = await getSession()
+            if (session?.user?.role === "BRAND" || session?.user?.role === "ADMIN") {
+                router.push("/brand")
+                router.refresh()
+                return
+            }
+
+            await signOut({ redirect: false })
+
+            if (session?.user?.role === "INFLUENCER") {
+                setError("This email is linked to an influencer account. Use creator sign in or a different business email for your brand.")
+            } else if (session?.user?.role === "MANAGER") {
+                setError("This email is linked to a manager account, not a brand account.")
+            } else {
+                setError("This login is not connected to a brand account.")
+            }
+            setIsLoading(false)
         } catch (err) {
-            setError("Something went wrong.")
+            setError("Something went wrong while signing in.")
             setIsLoading(false)
         }
     }
 
     return (
         <>
-            {searchParams.get('registered') && (
-                <p className="text-green-600 font-medium mt-2">
-                    Account created successfully! Please sign in.
-                </p>
+            {successMessage && (
+                <div className="rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700">
+                    {successMessage}
+                </div>
             )}
             <form className="space-y-8" onSubmit={handleLogin}>
                 <div className="space-y-4">
@@ -84,7 +103,6 @@ function BrandLoginForm() {
                         <Input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder=""
                             className="h-12 bg-gray-50 border-gray-200 pr-10"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -111,7 +129,7 @@ function BrandLoginForm() {
                 )}
 
                 <Button disabled={isLoading} className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-200 mt-4">
-                    {isLoading ? "Signing in..." : "Sign In to Dashboard "}
+                    {isLoading ? "Signing in..." : "Sign In to Dashboard"}
                 </Button>
             </form>
         </>
@@ -121,9 +139,7 @@ function BrandLoginForm() {
 export default function BrandLoginPage() {
     return (
         <div className="min-h-screen w-full flex">
-            {/* Left Panel - Value Props */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-blue-900 text-white flex-col justify-center p-16 overflow-hidden">
-                {/* Background Image / Overlay */}
                 <div className="absolute inset-0 z-0">
                     <Image
                         src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2874&auto=format&fit=crop"
@@ -156,7 +172,7 @@ export default function BrandLoginPage() {
                         {[
                             "Real-time Campaign Analytics",
                             "Automated Escrow Payments",
-                            "AI-Powered Influencer Discovery"
+                            "AI-Powered Influencer Discovery",
                         ].map((item, i) => (
                             <div key={i} className="flex items-center gap-4">
                                 <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0">
@@ -168,12 +184,11 @@ export default function BrandLoginPage() {
                     </div>
 
                     <div className="mt-20 text-sm text-white/40">
-                         2024 InfluencerCRM. All rights reserved.
+                        2024 InfluencerCRM. All rights reserved.
                     </div>
                 </div>
             </div>
 
-            {/* Right Panel - Login Form */}
             <div className="flex-1 flex items-center justify-center p-8 bg-white">
                 <div className="w-full max-w-md space-y-8">
                     <div>
@@ -187,12 +202,15 @@ export default function BrandLoginPage() {
                         <BrandLoginForm />
                     </Suspense>
 
-                    <div className="text-center pt-4">
+                    <div className="space-y-2 text-center pt-4">
                         <p className="text-gray-600 text-sm">
-                            Don't have a brand account?{" "}
+                            Don&apos;t have a brand account?{" "}
                             <Link href="/brand/register" className="font-bold text-blue-600 hover:underline">
                                 Create Brand Account
                             </Link>
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                            If this email belongs to a creator account, use the general sign-in page instead.
                         </p>
                     </div>
 
