@@ -7,8 +7,9 @@ import { hash } from "bcryptjs";
 import { sendOtpEmail } from "@/lib/email";
 import { createBrandCampaignWorkflow } from "@/services/collabService";
 import { ensureRequestExpiryJobStarted } from "@/jobs/requestExpiryJob";
+import { hashOtp, constantTimeEqualHex } from "@/lib/otp";
 
-const otpStore = new Map<string, { otp: string; expiresAt: number }>();
+
 
 function generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -61,13 +62,12 @@ async function findExistingAccountByEmail(email: string) {
         where: {
             email: normalizedEmail,
         },
-        select: {
-            id: true,
-            email: true,
+        include: {
+            creator: true,
         },
     });
 
-    if (otpUser) {
+    if (otpUser && otpUser.creator) {
         return {
             source: 'otp_user',
             role: 'INFLUENCER',
@@ -145,9 +145,21 @@ export async function sendEmailOtp(email: string) {
     }
 
     const otp = generateOtp();
-    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const otpHash = hashOtp(normalizedEmail, otp);
 
-    otpStore.set(normalizedEmail, { otp, expiresAt });
+    const otpUser = await db.otpUser.upsert({
+        where: { email: normalizedEmail },
+        update: {},
+        create: { email: normalizedEmail },
+        select: { id: true }
+    });
+
+    await db.emailOtp.upsert({
+        where: { userId: otpUser.id },
+        update: { otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
+        create: { userId: otpUser.id, otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
+    });
 
     const emailResult = await sendOtpEmail(normalizedEmail, otp);
     if (!emailResult.success) {
@@ -164,21 +176,36 @@ export async function verifyEmailOtp(email: string, otp: string) {
         return { success: false, error: 'Email and OTP are required.' };
     }
 
-    const stored = otpStore.get(normalizedEmail);
+    const otpUser = await db.otpUser.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true },
+    });
+
+    if (!otpUser) {
+        return { success: false, error: 'No OTP found. Please request a new one.' };
+    }
+
+    const stored = await db.emailOtp.findUnique({
+        where: { userId: otpUser.id },
+    });
+
     if (!stored) {
         return { success: false, error: 'No OTP found. Please request a new one.' };
     }
 
-    if (Date.now() > stored.expiresAt) {
-        otpStore.delete(normalizedEmail);
+    if (new Date() > stored.expiresAt) {
+        await db.emailOtp.delete({ where: { userId: otpUser.id } });
         return { success: false, error: 'OTP has expired. Please request a new one.' };
     }
 
-    if (stored.otp !== otp) {
+    const incomingHash = hashOtp(normalizedEmail, otp);
+    const matches = constantTimeEqualHex(incomingHash, stored.otpHash);
+
+    if (!matches) {
         return { success: false, error: 'Invalid OTP. Please try again.' };
     }
 
-    otpStore.delete(normalizedEmail);
+    await db.emailOtp.delete({ where: { userId: otpUser.id } });
     return { success: true, message: 'Email verified successfully!' };
 }
 
