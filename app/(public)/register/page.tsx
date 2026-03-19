@@ -53,7 +53,7 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { chi
             animate="center"
             exit="exit"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="flex flex-1 flex-col items-center justify-center w-full max-w-[560px] mx-auto px-6 py-8 md:px-8"
+            className="flex flex-1 flex-col items-center justify-center w-full max-w-[460px] mx-auto px-6 py-8 md:px-8"
         >
             {children}
         </motion.div>
@@ -342,9 +342,9 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-full max-w-[28rem] md:max-w-[960px] min-h-[600px] overflow-hidden rounded-[2rem] border border-slate-200/60 ring-1 ring-white/60 shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] flex"
+                className="relative z-10 w-full max-w-[28rem] md:max-w-[840px] min-h-[520px] overflow-hidden rounded-[2rem] border border-slate-200/60 ring-1 ring-white/60 shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] flex"
             >
-                <div className="hidden md:flex flex-col w-[34%] min-h-[600px] overflow-hidden relative"
+                <div className="hidden md:flex flex-col w-[34%] min-h-[520px] overflow-hidden relative"
                     style={{ background: "linear-gradient(165deg, #4f46e5 0%, #7c3aed 100%)" }}>
                     <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
                         <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[50%] bg-gradient-to-br from-indigo-400/30 to-transparent blur-3xl rotate-12" />
@@ -410,7 +410,7 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                <div className="flex-1 bg-white/90 backdrop-blur-sm flex flex-col relative overflow-hidden min-h-[600px]">
+                <div className="flex-1 bg-white/90 backdrop-blur-sm flex flex-col relative overflow-hidden min-h-[520px]">
                     {currentStep > 1 && !isSubmitting && currentStep < 11 && (
                         <button
                             onClick={goBack}

@@ -23,56 +23,57 @@ export function HeroSection() {
                 <div className="flex flex-col items-center gap-6 md:gap-8 lg:gap-10 relative z-10">
 
                     {/* Text Content */}
-                    <div className="order-2 w-full max-w-[1140px] space-y-5 md:space-y-6">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/70 shadow-sm backdrop-blur-md mx-auto lg:mx-0"
-                        >
-                            <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
-                            <span className="text-xs font-black tracking-widest uppercase text-indigo-600">Premium Influencer Network</span>
-                        </motion.div>
+                    <div className="order-2 w-full max-w-[1140px] pt-4 lg:pt-8">
 
-                        <div className="grid lg:grid-cols-12 gap-5 md:gap-6 lg:gap-10 items-stretch">
+                        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
                             <motion.div
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.7, ease: "easeOut" }}
-                                className="lg:col-span-7 lg:pt-2 space-y-4 md:space-y-5"
+                                className="lg:col-span-7 space-y-6 md:space-y-8"
                             >
-                                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12] sm:leading-[1.08] text-center lg:text-left">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50/70 border border-indigo-100/60 shadow-sm backdrop-blur-md"
+                                >
+                                    <span className="flex h-1.5 w-1.5 rounded-full bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+                                    <span className="text-[10px] sm:text-[11px] font-black tracking-[0.15em] uppercase text-indigo-600">Premium Influencer Network</span>
+                                </motion.div>
+
+                                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.05] sm:leading-[1.02] text-left">
                                     The Most Trusted <br />
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 drop-shadow-sm">Bridge Between</span> <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-fuchsia-500 drop-shadow-sm">Bridge Between</span> <br />
                                     Brands & Creators
                                 </h1>
-                                <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium text-center lg:text-left">
+                                <p className="text-base sm:text-lg text-slate-600 max-w-[540px] leading-relaxed font-medium text-left">
                                     Scale your impact with verified creators, secure escrow payments, and seamless collaborations. Join 100,000+ experts shaping the digital frontier.
                                 </p>
                             </motion.div>
 
                             <div className="lg:col-span-5">
-                                <div className="h-full flex flex-col justify-between gap-4 rounded-3xl border border-white/70 bg-white/65 backdrop-blur-xl shadow-[0_24px_60px_-28px_rgba(79,70,229,0.35)] p-5 sm:p-6 md:p-7">
+                                <div className="h-full flex flex-col justify-between gap-6 rounded-[2rem] border border-slate-100 bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] p-6 sm:p-8">
 
-                                <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                                    <span className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold tracking-wide border border-indigo-100">Verified Creators</span>
-                                    <span className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold tracking-wide border border-emerald-100">Escrow Secure</span>
-                                    <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold tracking-wide border border-blue-100">Fast Matching</span>
+                                <div className="flex flex-wrap justify-start gap-2.5">
+                                    <span className="px-3.5 py-1.5 rounded-full bg-blue-50/80 text-blue-600 text-[10px] font-bold tracking-wide">Verified Creators</span>
+                                    <span className="px-3.5 py-1.5 rounded-full bg-emerald-50/80 text-emerald-600 text-[10px] font-bold tracking-wide">Escrow Secure</span>
+                                    <span className="px-3.5 py-1.5 rounded-full bg-sky-50/80 text-sky-600 text-[10px] font-bold tracking-wide">Fast Matching</span>
                                 </div>
 
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.3 }}
-                                    className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3"
+                                    className="grid grid-cols-2 gap-3"
                                 >
-                                    <Button size="lg" className="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-violet-600 hover:from-indigo-700 hover:via-blue-700 hover:to-violet-700 text-white px-4 sm:px-5 h-11 sm:h-12 text-xs sm:text-sm font-black rounded-xl shadow-[0_18px_30px_-12px_rgba(79,70,229,0.55)] transition-all hover:scale-[1.02] active:scale-95 border-none uppercase tracking-wide" asChild>
+                                    <Button size="lg" className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-2 h-11 sm:h-12 text-[10px] sm:text-[11px] font-black rounded-xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 border-none uppercase tracking-wider" asChild>
                                         <Link href="/brand/register">
                                             Hire an Influencer
                                             <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                         </Link>
                                     </Button>
-                                    <Button size="lg" variant="outline" className="w-full border-slate-300 bg-white/90 text-slate-900 hover:bg-white px-4 sm:px-5 h-11 sm:h-12 text-xs sm:text-sm font-black rounded-xl hover:scale-[1.02] active:scale-95 transition-all border-2 uppercase tracking-wide shadow-[0_10px_22px_-16px_rgba(15,23,42,0.5)]" asChild>
+                                    <Button size="lg" variant="outline" className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-300 px-2 h-11 sm:h-12 text-[10px] sm:text-[11px] font-black rounded-xl hover:-translate-y-0.5 transition-all outline-none uppercase tracking-wider shadow-sm" asChild>
                                         <Link href="/register">
                                             Join as a Creator
                                         </Link>
@@ -83,25 +84,25 @@ export function HeroSection() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ duration: 0.5, delay: 0.5 }}
-                                    className="flex items-center justify-center lg:justify-start gap-3"
+                                    className="flex items-center justify-start gap-4 pt-1"
                                 >
-                                    <div className="flex -space-x-4">
+                                    <div className="flex -space-x-3">
                                         {[1, 2, 3, 4].map((i) => (
-                                            <div key={i} className="w-12 h-12 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-lg">
-                                                <Image src={`/images/${i === 1 ? 'elena' : i === 2 ? 'julian' : i === 3 ? 'marco' : 'sarah'}.png`} alt="User" width={48} height={48} className="object-cover" />
+                                            <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-sm relative z-10">
+                                                <Image src={`/images/${i === 1 ? 'elena' : i === 2 ? 'julian' : i === 3 ? 'marco' : 'sarah'}.png`} alt="User" width={40} height={40} className="object-cover" />
                                             </div>
                                         ))}
-                                        <div className="w-12 h-12 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-[10px] font-black text-white shadow-lg">
+                                        <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-[9px] font-black text-white shadow-sm relative z-20">
                                             5K+
                                         </div>
                                     </div>
-                                    <div className="h-10 w-px bg-slate-200" />
+                                    <div className="h-8 w-px bg-slate-200" />
                                     <div className="flex flex-col">
-                                        <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-widest">
-                                            <BadgeCheck className="w-5 h-5 text-indigo-600" />
+                                        <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-widest leading-none">
+                                            <BadgeCheck className="w-4 h-4 text-violet-600" />
                                             100% Certified
                                         </div>
-                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Verified Profiles</span>
+                                        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verified Profiles</span>
                                     </div>
                                 </motion.div>
                                 </div>
@@ -114,11 +115,11 @@ export function HeroSection() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="order-1 relative w-full max-w-[980px]"
+                        className="order-1 relative w-full mb-8 lg:mb-16 mt-4 lg:mt-0"
                     >
                         {/* 3D Looking Frame */}
-                        <div className="relative aspect-[16/10] sm:aspect-[16/9] lg:aspect-[16/8] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_60px_100px_-20px_rgba(0,0,0,0.1)] border border-slate-200/90 ring-1 ring-white/70 backdrop-blur-[100px] bg-white/40 p-2 z-10">
-                            <div className="relative w-full h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-100">
+                        <div className="relative aspect-[16/10] sm:aspect-[16/8] lg:aspect-[21/9] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 bg-white/60 p-2 sm:p-2.5 z-10 w-full max-w-[1240px] mx-auto">
+                            <div className="relative w-full h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-100 shadow-inner block">
                                 <video
                                     src={HERO_VIDEO_URL}
                                     autoPlay
@@ -126,56 +127,60 @@ export function HeroSection() {
                                     muted
                                     playsInline
                                     preload="metadata"
-                                    className="object-cover w-full h-full"
+                                    className="object-cover w-full h-full transform scale-[1.01]"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-black/10 pointer-events-none" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
                             </div>
                         </div>
 
-                        {/* Floating Metric Cards - Optimized for Mobile Grid */}
-                        <div className="mt-6 lg:mt-0 grid grid-cols-1 sm:grid-cols-3 gap-4 lg:block lg:gap-0">
-                            <motion.div
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.8, duration: 1 }}
-                                className="lg:absolute lg:-right-8 lg:top-[10%] z-20 bg-white/90 border border-slate-200 backdrop-blur-2xl p-4 sm:p-5 rounded-3xl shadow-2xl flex items-center gap-4 ring-1 ring-black/5"
-                            >
-                                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                                    <TrendingUp className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="text-slate-900 font-black text-lg sm:text-xl leading-none mb-1">8.4%</div>
-                                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Avg Engagement</div>
-                                </div>
-                            </motion.div>
+                        {/* Floating Metric Cards */}
+                        <div className="mt-6 lg:mt-0 grid grid-cols-3 gap-3 lg:block lg:gap-0">
 
+                            {/* Top-right: 8.4% Engagement */}
                             <motion.div
-                                initial={{ opacity: 0, x: -50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 1, duration: 1 }}
-                                className="lg:absolute lg:-left-12 lg:bottom-[15%] z-20 bg-white/90 border border-slate-200 backdrop-blur-2xl p-4 sm:p-5 rounded-3xl shadow-2xl flex items-center gap-4 ring-1 ring-black/5"
-                            >
-                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                                    <Users className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="text-slate-900 font-black text-lg sm:text-xl leading-none mb-1">1.2M+</div>
-                                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Total Followers</div>
-                                </div>
-                            </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 50 }}
+                                initial={{ opacity: 0, y: -16 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.2, duration: 1 }}
-                                className="lg:absolute lg:right-12 lg:-bottom-8 z-20 bg-white/90 border border-slate-200 backdrop-blur-2xl p-4 sm:p-5 rounded-3xl shadow-2xl flex items-center gap-4 ring-1 ring-black/5"
+                                transition={{ delay: 0.8, duration: 0.8 }}
+                                className="relative lg:absolute lg:right-4 lg:top-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
                             >
-                                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                                    <Banknote className="w-5 h-5" />
+                                <div className="w-7 h-7 rounded-[8px] bg-[#EEF0FF] flex items-center justify-center shrink-0">
+                                    <TrendingUp className="w-3.5 h-3.5 text-[#4F46E5] stroke-[2.5]" />
                                 </div>
                                 <div>
-                                    <div className="text-slate-900 font-black text-lg sm:text-xl leading-none mb-1">500+</div>
-                                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Active Brand Deals</div>
+                                    <div className="text-[11px] font-black text-slate-900 leading-none">8.4%</div>
+                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Avg Engagement</div>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom-left: 1.2M+ Followers */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -16 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1, duration: 0.8 }}
+                                className="relative lg:absolute lg:left-4 lg:bottom-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
+                            >
+                                <div className="w-7 h-7 rounded-[8px] bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                                    <Users className="w-3.5 h-3.5 text-[#3B82F6] stroke-[2.5]" />
+                                </div>
+                                <div>
+                                    <div className="text-[11px] font-black text-slate-900 leading-none">1.2M+</div>
+                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Total Followers</div>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom-right: 500+ Brand Deals */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.2, duration: 0.8 }}
+                                className="relative lg:absolute lg:right-4 lg:bottom-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
+                            >
+                                <div className="w-7 h-7 rounded-[8px] bg-[#ECFDF5] flex items-center justify-center shrink-0">
+                                    <Banknote className="w-3.5 h-3.5 text-[#10B981] stroke-[2.5]" />
+                                </div>
+                                <div>
+                                    <div className="text-[11px] font-black text-slate-900 leading-none">500+</div>
+                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Active Brand Deals</div>
                                 </div>
                             </motion.div>
                         </div>

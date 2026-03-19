@@ -39,7 +39,7 @@ const CardWrapper = ({ children, stepKey, direction }: { children: React.ReactNo
         animate="center"
         exit="exit"
         transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-        className="flex flex-col w-full max-w-[520px] mx-auto"
+        className="flex flex-col w-full max-w-[440px] mx-auto"
     >
         {children}
     </motion.div>
@@ -383,7 +383,7 @@ export default function BrandRegisterPage() {
             </div>
             {/* Split-panel card */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-xl md:max-w-[940px] relative z-10 rounded-[2rem] overflow-hidden flex shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] border border-slate-200/60 ring-1 ring-slate-200/50 min-h-[600px]">
+                className="w-full max-w-xl md:max-w-[840px] relative z-10 rounded-[2rem] overflow-hidden flex shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] border border-slate-200/60 ring-1 ring-slate-200/50 min-h-[520px]">
 
                 {/* LEFT: Premium Sidebar (Visible on Desktop) */}
                 <div className="hidden md:flex flex-col w-[35%] relative overflow-hidden overflow-y-auto"
