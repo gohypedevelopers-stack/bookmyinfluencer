@@ -136,51 +136,45 @@ export function HeroSection() {
                         {/* Floating Metric Cards */}
                         <div className="mt-6 lg:mt-0 grid grid-cols-3 gap-3 lg:block lg:gap-0">
 
-                            {/* Top-right: 8.4% Engagement */}
+                            {/* Top-right: 8.4% Engagement - overflows right edge */}
                             <motion.div
                                 initial={{ opacity: 0, y: -16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.8, duration: 0.8 }}
-                                className="relative lg:absolute lg:right-4 lg:top-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
+                                className="relative lg:absolute lg:-right-4 lg:top-8 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[140px]"
                             >
-                                <div className="w-7 h-7 rounded-[8px] bg-[#EEF0FF] flex items-center justify-center shrink-0">
-                                    <TrendingUp className="w-3.5 h-3.5 text-[#4F46E5] stroke-[2.5]" />
-                                </div>
+                                <TrendingUp className="w-5 h-5 text-indigo-500 stroke-[2] shrink-0" />
                                 <div>
-                                    <div className="text-[11px] font-black text-slate-900 leading-none">8.4%</div>
-                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Avg Engagement</div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">8.4%</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Avg Engagement</div>
                                 </div>
                             </motion.div>
 
-                            {/* Bottom-left: 1.2M+ Followers */}
+                            {/* Bottom-left: 1.2M+ Followers - overflows left edge */}
                             <motion.div
                                 initial={{ opacity: 0, x: -16 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 1, duration: 0.8 }}
-                                className="relative lg:absolute lg:left-4 lg:bottom-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
+                                className="relative lg:absolute lg:-left-4 lg:bottom-14 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px]"
                             >
-                                <div className="w-7 h-7 rounded-[8px] bg-[#EFF6FF] flex items-center justify-center shrink-0">
-                                    <Users className="w-3.5 h-3.5 text-[#3B82F6] stroke-[2.5]" />
-                                </div>
+                                <Users className="w-5 h-5 text-blue-500 stroke-[2] shrink-0" />
                                 <div>
-                                    <div className="text-[11px] font-black text-slate-900 leading-none">1.2M+</div>
-                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Total Followers</div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">1.2M+</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Total Followers</div>
                                 </div>
                             </motion.div>
 
-                            {/* Bottom-right: 500+ Brand Deals */}
+                            {/* Bottom-right: 500+ Brand Deals - overflows right edge */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.2, duration: 0.8 }}
-                                className="relative lg:absolute lg:right-4 lg:bottom-4 z-20 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-white/60 ring-1 ring-black/[0.04] hover:-translate-y-0.5 transition-transform"
+                                className="relative lg:absolute lg:-right-4 lg:-bottom-6 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px]"
                             >
-                                <div className="w-7 h-7 rounded-[8px] bg-[#ECFDF5] flex items-center justify-center shrink-0">
-                                    <Banknote className="w-3.5 h-3.5 text-[#10B981] stroke-[2.5]" />
-                                </div>
+                                <Banknote className="w-5 h-5 text-emerald-500 stroke-[2] shrink-0" />
                                 <div>
-                                    <div className="text-[11px] font-black text-slate-900 leading-none">500+</div>
-                                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5 whitespace-nowrap">Active Brand Deals</div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">500+</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Active Brand Deals</div>
                                 </div>
                             </motion.div>
                         </div>
