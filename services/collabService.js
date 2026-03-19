@@ -142,12 +142,23 @@ export async function topUpCollaborationRequests(campaignId) {
     const requestCountToCreate = Math.max(desiredPendingCount - pendingCount, 0);
 
     if (!requestCountToCreate) {
+        if (!campaign.matchingTriggeredAt) {
+            await db.brandCampaign.update({
+                where: { id: campaignId },
+                data: {
+                    matchingTriggeredAt: new Date(),
+                },
+            });
+        }
+
         return {
             createdCount: 0,
             pendingCount,
             acceptedCount,
         };
     }
+
+    const sentAt = new Date();
 
     const matchedInfluencers = await getMatchedInfluencers({
         category: campaign.categoryLabel || campaign.category,
@@ -158,14 +169,19 @@ export async function topUpCollaborationRequests(campaignId) {
     });
 
     if (!matchedInfluencers.length) {
+        await db.brandCampaign.update({
+            where: { id: campaignId },
+            data: {
+                matchingTriggeredAt: sentAt,
+            },
+        });
+
         return {
             createdCount: 0,
             pendingCount,
             acceptedCount,
         };
     }
-
-    const sentAt = new Date();
     const expiresAt = addHours(sentAt, REQUEST_EXPIRY_HOURS);
     let createdCount = 0;
 
@@ -272,7 +288,52 @@ export async function getBrandCampaignQueueDashboard(userId) {
         throw new Error(`Brand profile for user ${userId} not found`);
     }
 
-    const campaigns = brand.brandCampaigns.map(buildWorkflowSummaryFromCampaign);
+    const campaignIdsNeedingCoverage = brand.brandCampaigns
+        .filter((campaign) => String(campaign.status || "").toLowerCase() === "active")
+        .map((campaign) => {
+            const counts = buildCountSummary(campaign.requests);
+            const acceptedCount = counts[REQUEST_STATUS.ACCEPTED] || 0;
+            const pendingCount = counts[REQUEST_STATUS.PENDING] || 0;
+            const remainingAcceptedSlots = Math.max(campaign.targetAcceptedCount - acceptedCount, 0);
+            const desiredPendingCount = Math.min(campaign.activeRequestLimit, remainingAcceptedSlots);
+            return pendingCount < desiredPendingCount ? campaign.id : null;
+        })
+        .filter(Boolean);
+
+    if (campaignIdsNeedingCoverage.length > 0) {
+        for (const campaignId of campaignIdsNeedingCoverage) {
+            await topUpCollaborationRequests(campaignId);
+        }
+    }
+
+    const refreshedBrand =
+        campaignIdsNeedingCoverage.length > 0
+            ? await db.brandProfile.findUnique({
+                where: { userId },
+                select: {
+                    id: true,
+                    companyName: true,
+                    brandCampaigns: {
+                        include: {
+                            requests: {
+                                include: {
+                                    influencer: true,
+                                },
+                                orderBy: {
+                                    sentAt: "desc",
+                                },
+                            },
+                        },
+                        orderBy: {
+                            createdAt: "desc",
+                        },
+                    },
+                },
+            })
+            : brand;
+
+    const sourceBrand = refreshedBrand || brand;
+    const campaigns = sourceBrand.brandCampaigns.map(buildWorkflowSummaryFromCampaign);
     const totals = campaigns.reduce(
         (summary, campaign) => {
             summary.campaigns += 1;
@@ -297,8 +358,8 @@ export async function getBrandCampaignQueueDashboard(userId) {
 
     return {
         brand: {
-            id: brand.id,
-            companyName: brand.companyName,
+            id: sourceBrand.id,
+            companyName: sourceBrand.companyName,
         },
         totals,
         campaigns,

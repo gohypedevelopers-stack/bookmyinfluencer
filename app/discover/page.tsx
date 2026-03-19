@@ -553,6 +553,8 @@ export default function PublicMarketplacePage() {
                                                     width={80}
                                                     height={80}
                                                     className="object-contain"
+                                                    unoptimized={true}
+                                                    referrerPolicy="no-referrer"
                                                 />
                                             ) : (
                                                 <Building2 className="w-16 h-16 text-slate-400" />
