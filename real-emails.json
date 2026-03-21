@@ -1,0 +1,136 @@
+{
+  "creators": [
+    {
+      "id": "08d2fcf6-43e8-47a7-8398-d5a6113e90a6",
+      "email": "creator10.demo@bookmyinfluencer.com",
+      "currentName": "Priya Sharma"
+    },
+    {
+      "id": "622e023b-590d-49b7-89c3-9bdb81cbb153",
+      "email": "guptagourav298@gmail.com",
+      "currentName": "Sneha Patel"
+    },
+    {
+      "id": "27577aae-bb62-4348-bd9f-257911c05d70",
+      "email": "creator01.demo@bookmyinfluencer.com",
+      "currentName": "Rahul Mehta"
+    },
+    {
+      "id": "31d77cbc-9bcd-4af7-8e1f-4b8c7c72a6c3",
+      "email": "creator06.demo@bookmyinfluencer.com",
+      "currentName": "Aisha Khan"
+    },
+    {
+      "id": "39347323-ca51-4a78-a99d-c42e2983fedc",
+      "email": null,
+      "currentName": "Vikram Nair"
+    },
+    {
+      "id": "858df0f8-5811-4f89-95fe-2fac6f848b92",
+      "email": "creator07.demo@bookmyinfluencer.com",
+      "currentName": "Kavya Iyer"
+    },
+    {
+      "id": "93ec599d-ba68-4b48-ac8a-cd60619dce26",
+      "email": "creator04.demo@bookmyinfluencer.com",
+      "currentName": "Rohan Desai"
+    },
+    {
+      "id": "c8d5f3c8-f768-4266-b224-c08ca81a46c0",
+      "email": "creator08.demo@bookmyinfluencer.com",
+      "currentName": "Divya Bose"
+    },
+    {
+      "id": "cae0f669-5e2a-4285-8f8e-e3cf52e28040",
+      "email": "creator03.demo@bookmyinfluencer.com",
+      "currentName": "Karan Trivedi"
+    },
+    {
+      "id": "d687fb1f-97d2-4b7e-b191-cf8b0e38f2aa",
+      "email": "creator09.demo@bookmyinfluencer.com",
+      "currentName": "Nisha Choudhary"
+    },
+    {
+      "id": "d8366898-04df-4978-83d4-8059d1ff8358",
+      "email": "creator05.demo@bookmyinfluencer.com",
+      "currentName": "Aarav Gupta"
+    },
+    {
+      "id": "fec8549a-7986-4f46-978c-1f8d891a8294",
+      "email": "creator02.demo@bookmyinfluencer.com",
+      "currentName": "Meera Joshi"
+    },
+    {
+      "id": "70a560a0-4d39-40a8-92ee-2cb0808d4e89",
+      "email": "dheerajsorout16500@gmail.com",
+      "currentName": "Arjun Reddy"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "cmmk8dyn10004itpl5qxlj2fp",
+      "email": "removed+user-cmmk8dw1e0001itpljdba3h64@archived.local",
+      "currentName": "Yash Singhania"
+    },
+    {
+      "id": "cmmk90sqv00046dsjrcv8fi3l",
+      "email": "dheerajsorout16500@gmail.com",
+      "currentName": "Pooja Kapoor"
+    },
+    {
+      "id": "cmmm1djul0004r7znh79189e5",
+      "email": "guptagourav298@gmail.com",
+      "currentName": "Siddharth Rao"
+    },
+    {
+      "id": "cmmx5ayo60002vz67s9p3a8l1",
+      "email": "creator01.demo@bookmyinfluencer.com",
+      "currentName": "Tanya Malhotra"
+    },
+    {
+      "id": "cmmx5bacp0008vz67s4gn5c0i",
+      "email": "creator02.demo@bookmyinfluencer.com",
+      "currentName": "Akash Verma"
+    },
+    {
+      "id": "cmmx5bgik000evz67tvimuits",
+      "email": "creator03.demo@bookmyinfluencer.com",
+      "currentName": "Simran Kohli"
+    },
+    {
+      "id": "cmmx5bnxy000kvz67k1rwvccd",
+      "email": "creator04.demo@bookmyinfluencer.com",
+      "currentName": "Dev Anand"
+    },
+    {
+      "id": "cmmx5bu09000qvz67km53epma",
+      "email": "creator05.demo@bookmyinfluencer.com",
+      "currentName": "Riya Saxena"
+    },
+    {
+      "id": "cmmx5c0qt000wvz6782cc3xwd",
+      "email": "creator06.demo@bookmyinfluencer.com",
+      "currentName": "Vivek Pillai"
+    },
+    {
+      "id": "cmmx5c7p20012vz67iowush2c",
+      "email": "creator07.demo@bookmyinfluencer.com",
+      "currentName": "Anjali Tiwari"
+    },
+    {
+      "id": "cmmx5cdzm0018vz67awksyu05",
+      "email": "creator08.demo@bookmyinfluencer.com",
+      "currentName": "Nikhil Seth"
+    },
+    {
+      "id": "cmmx5ckc6001evz679zbh2wzv",
+      "email": "creator09.demo@bookmyinfluencer.com",
+      "currentName": "Ishaani Roy"
+    },
+    {
+      "id": "cmmx5crx8001kvz67imv9ef61",
+      "email": "creator10.demo@bookmyinfluencer.com",
+      "currentName": "Gautam Bhatt"
+    }
+  ]
+}

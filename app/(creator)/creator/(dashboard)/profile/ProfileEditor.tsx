@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import {
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ConnectSocialDialog } from "./ConnectSocialDialog"
 import { DisconnectButton } from "./DisconnectButton"
 import { updateCreatorProfileAction } from "./actions"
+import { ImageCropper } from "@/components/ui/image-cropper"
 
 interface ProfileEditorProps {
     creator: any // Using any to avoid type issues with new schema fields before full generation
@@ -59,21 +60,50 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
     const [newProfileFile, setNewProfileFile] = useState<File | null>(null)
     const [newBannerFile, setNewBannerFile] = useState<File | null>(null)
 
+    // Cropper State
+    const [cropModalOpen, setCropModalOpen] = useState(false)
+    const [cropType, setCropType] = useState<"profile" | "banner">("profile")
+    const [tempImageSrc, setTempImageSrc] = useState<string | null>(null)
+
+    const openCropper = useCallback((file: File, type: "profile" | "banner") => {
+        const reader = new FileReader()
+        reader.addEventListener("load", () => {
+            setTempImageSrc(reader.result as string)
+            setCropType(type)
+            setCropModalOpen(true)
+        })
+        reader.readAsDataURL(file)
+    }, [])
+
     const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            setNewProfileFile(file)
-            setProfileImage(URL.createObjectURL(file))
-        }
+        if (file) openCropper(file, "profile")
+        // Reset input so the same file can be re-selected if needed
+        e.target.value = ""
     }
 
     const handleBannerImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            setNewBannerFile(file)
-            setBannerImage(URL.createObjectURL(file))
-        }
+        if (file) openCropper(file, "banner")
+        e.target.value = ""
     }
+
+    const handleCropDone = useCallback((croppedFile: File, previewUrl: string) => {
+        if (cropType === "profile") {
+            setNewProfileFile(croppedFile)
+            setProfileImage(previewUrl)
+        } else {
+            setNewBannerFile(croppedFile)
+            setBannerImage(previewUrl)
+        }
+        setCropModalOpen(false)
+        setTempImageSrc(null)
+    }, [cropType])
+
+    const handleCropCancel = useCallback(() => {
+        setCropModalOpen(false)
+        setTempImageSrc(null)
+    }, [])
 
     // ... (rest of handlers unchanged)
 
@@ -148,6 +178,17 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
 
     return (
         <>
+            {/* Image Cropper Modal */}
+            {cropModalOpen && tempImageSrc && (
+                <ImageCropper
+                    imageSrc={tempImageSrc}
+                    aspectRatio={cropType === "profile" ? 1 : 3}
+                    title={cropType === "profile" ? "Crop Profile Photo" : "Crop Cover Image"}
+                    onCropComplete={handleCropDone}
+                    onCancel={handleCropCancel}
+                />
+            )}
+
             {/* Header */}
             <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
