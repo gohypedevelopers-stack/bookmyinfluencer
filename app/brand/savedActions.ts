@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-export async function toggleSavedInfluencer(influencerId: string) {
+export async function toggleSavedInfluencer(targetId: string) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || session.user.role !== 'BRAND') {
@@ -18,13 +18,46 @@ export async function toggleSavedInfluencer(influencerId: string) {
 
         if (!brand) return { success: false, error: 'Brand profile not found' };
 
+        // The ID passed from the frontend is usually the User ID or Creator ID.
+        // We must resolve it to an InfluencerProfile ID because SavedInfluencer requires it.
+        let actualInfluencerId = targetId;
+        const profileByDirectId = await db.influencerProfile.findUnique({ where: { id: targetId }});
+        
+        if (!profileByDirectId) {
+            // Try by userId
+            const profileByUserId = await db.influencerProfile.findUnique({ where: { userId: targetId }});
+            if (profileByUserId) {
+                actualInfluencerId = profileByUserId.id;
+            } else {
+                // If it's a Creator.id or Creator.userId, try to find the Creator
+                const creator = await db.creator.findFirst({
+                    where: { OR: [{ id: targetId }, { userId: targetId }] }
+                });
+                
+                if (creator) {
+                    // Create an empty InfluencerProfile for the user using Creator info so it can be saved in DB
+                    // We don't fetch metrics deeply here; default to 0. The UI fetches actual metrics dynamically.
+                    const newProfile = await db.influencerProfile.create({
+                        data: {
+                            userId: creator.userId,
+                            niche: creator.niche || 'General',
+                            followers: 0,
+                        }
+                    });
+                    actualInfluencerId = newProfile.id;
+                } else {
+                    return { success: false, error: 'Influencer not found in database' };
+                }
+            }
+        }
+
         // Check if already saved
         // @ts-ignore
         const existing = await db.savedInfluencer.findUnique({
             where: {
                 brandId_influencerId: {
                     brandId: brand.id,
-                    influencerId
+                    influencerId: actualInfluencerId
                 }
             }
         });
@@ -41,7 +74,7 @@ export async function toggleSavedInfluencer(influencerId: string) {
             await db.savedInfluencer.create({
                 data: {
                     brandId: brand.id,
-                    influencerId
+                    influencerId: actualInfluencerId
                 }
             });
         }
