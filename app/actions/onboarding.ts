@@ -14,9 +14,6 @@ export async function submitBrandOnboarding(data: {
     campaignGoals: string;
     minFollowers?: number;
     maxFollowers?: number;
-    minPricePerPost?: number;
-    maxPricePerPost?: number;
-    priceType?: string;
 }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -46,9 +43,6 @@ export async function submitBrandOnboarding(data: {
                     onboardingCompleted: true,
                     minFollowers: data.minFollowers ?? null,
                     maxFollowers: data.maxFollowers ?? null,
-                    minPricePerPost: data.minPricePerPost ?? null,
-                    maxPricePerPost: data.maxPricePerPost ?? null,
-                    priceType: data.priceType ?? "Per Post",
                 }
             });
         } else {
@@ -65,9 +59,6 @@ export async function submitBrandOnboarding(data: {
                     onboardingCompleted: true,
                     minFollowers: data.minFollowers ?? null,
                     maxFollowers: data.maxFollowers ?? null,
-                    minPricePerPost: data.minPricePerPost ?? null,
-                    maxPricePerPost: data.maxPricePerPost ?? null,
-                    priceType: data.priceType ?? "Per Post",
                 }
             });
         }
@@ -89,12 +80,6 @@ export async function submitCreatorOnboarding(data: {
     niche: string;
     followers: string;
     engagement: string;
-    minimumPrice: string;
-    rates: string;
-    priceStory?: string;
-    pricePost?: string;
-    priceCollab?: string;
-    priceType?: string;
 }) {
     const creatorId = await getAuthenticatedCreatorId();
     if (!creatorId) {
@@ -117,12 +102,12 @@ export async function submitCreatorOnboarding(data: {
                     niche: data.niche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
-                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
-                    price: (parseInt(data.pricePost || data.rates || '0', 10) || 0) as any,
-                    priceStory: (parseInt(data.priceStory || '0', 10) || null) as any,
-                    pricePost: (parseInt(data.pricePost || '0', 10) || null) as any,
-                    priceCollab: (parseInt(data.priceCollab || '0', 10) || null) as any,
-                    priceType: (data.priceType || 'Per Post') as any,
+                    pricing: JSON.stringify({}),
+                    price: 0 as any,
+                    priceStory: null as any,
+                    pricePost: null as any,
+                    priceCollab: null as any,
+                    priceType: 'Per Post' as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
@@ -140,12 +125,12 @@ export async function submitCreatorOnboarding(data: {
                     niche: data.niche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
-                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
-                    price: (parseInt(data.pricePost || data.rates || '0', 10) || 0) as any,
-                    priceStory: (parseInt(data.priceStory || '0', 10) || null) as any,
-                    pricePost: (parseInt(data.pricePost || '0', 10) || null) as any,
-                    priceCollab: (parseInt(data.priceCollab || '0', 10) || null) as any,
-                    priceType: (data.priceType || 'Per Post') as any,
+                    pricing: JSON.stringify({}),
+                    price: 0 as any,
+                    priceStory: null as any,
+                    pricePost: null as any,
+                    priceCollab: null as any,
+                    priceType: 'Per Post' as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,

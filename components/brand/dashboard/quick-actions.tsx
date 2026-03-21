@@ -29,13 +29,6 @@ export function QuickActions({ unreadMessageCount = 0 }: QuickActionsProps) {
             color: "text-blue-600",
             bg: "bg-blue-50"
         },
-        {
-            name: unreadMessageCount > 0 ? `Unread Messages (${unreadMessageCount})` : "Messages",
-            href: "/brand/chat",
-            icon: MessageSquare,
-            color: unreadMessageCount > 0 ? "text-red-600" : "text-blue-600",
-            bg: unreadMessageCount > 0 ? "bg-red-50" : "bg-blue-50"
-        }
     ]
 
     return (

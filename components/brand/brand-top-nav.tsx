@@ -89,7 +89,7 @@ export function BrandTopNav() {
     const getPageTitle = () => {
         if (pathname === "/brand") return "Dashboard"
         if (pathname?.includes("/brand/campaigns")) return "Campaigns"
-        if (pathname?.includes("/brand/chat")) return "Messages"
+
         if (pathname?.includes("/brand/discover")) return "Marketplace"
         if (pathname?.includes("/brand/analytics")) return "Analytics"
         if (pathname?.includes("/brand/wallet")) return "Wallet"

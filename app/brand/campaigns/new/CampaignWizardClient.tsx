@@ -36,12 +36,12 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
         description: initialData?.description || '', // Prevent null for controlled input
         requirements: initialData?.requirements || '', // Prevent null for controlled input
         budget: initialData?.budget?.toString() || '5000',
-        payment_type: initialData?.paymentType || 'FIXED',
+        payment_type: 'UPFRONT',
         startDate: initialData?.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         niche: initialData?.niche || '',
         location: initialData?.location || '',
-        minFollowers: initialData?.minFollowers?.toString() || '1000',
+        minFollowers: initialData?.minFollowers?.toString() || '10000',
         images: (typeof initialData?.images === 'string' ? JSON.parse(initialData.images) : initialData?.images) || [] as string[],
     });
 
@@ -88,7 +88,7 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
     // Redirect on success
     if (state?.success && typeof window !== 'undefined') {
         setTimeout(() => {
-            router.push('/brand/campaigns');
+            router.push(`/brand/campaigns/${state.campaignId}/match`);
         }, 1500);
     }
 
@@ -207,35 +207,9 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                 <p className="text-gray-500 text-sm">Set your budget and dates.</p>
                             </div>
                             <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">Model</label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {['FIXED', 'NEGOTIABLE', 'GIFTING'].map((type) => (
-                                            <label key={type} className="cursor-pointer group relative">
-                                                <input
-                                                    className="peer sr-only"
-                                                    name="payment_type"
-                                                    type="radio"
-                                                    value={type}
-                                                    checked={formData.payment_type === type}
-                                                    onChange={(e) => updateField('payment_type', e.target.value)}
-                                                />
-                                                <div className="h-full py-3 px-2 rounded-xl border border-gray-200 bg-white hover:border-teal-500/30 peer-checked:border-teal-500 peer-checked:bg-teal-50 text-center transition-all shadow-sm peer-checked:shadow-none">
-                                                    <div className="flex flex-col items-center gap-1.5">
-                                                        <span className={`material-symbols-outlined text-lg ${formData.payment_type === type ? 'text-teal-600' : 'text-gray-400'}`}>
-                                                            {type === 'FIXED' ? 'payments' : type === 'NEGOTIABLE' ? 'handshake' : 'card_giftcard'}
-                                                        </span>
-                                                        <span className={`text-[10px] font-bold uppercase ${formData.payment_type === type ? 'text-teal-700' : 'text-gray-500'}`}>
-                                                            {type}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Total Budget</label>
+                                    <p className="text-xs text-gray-500 mb-3">Your budget determines how many influencers we can match you with (₹1 per follower).</p>
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 font-medium group-focus-within:text-teal-500 transition-colors">₹</div>
                                         <input
@@ -364,8 +338,8 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                 type="submit"
                                 className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm px-6 py-2.5 rounded-full shadow-lg hover:shadow-teal-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isPending ? '...' : 'Launch'}
-                                <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                                {isPending ? 'Finding Matches...' : 'Find Matches'}
+                                <span className="material-symbols-outlined text-sm">groups</span>
                             </button>
                         )}
                     </div>

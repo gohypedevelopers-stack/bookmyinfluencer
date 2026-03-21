@@ -381,7 +381,7 @@ export async function updateCampaign(prevState: any, formData: FormData) {
                 "niche" = ${niche},
                 "location" = ${location},
                 "minFollowers" = ${minFollowers},
-                "images" = ${images},
+                "images" = ${JSON.stringify(images)},
                 "updatedAt" = ${new Date()}
             WHERE "id" = ${campaignId} AND "brandId" = (SELECT "id" FROM "BrandProfile" WHERE "userId" = ${session.user.id})
         `;
@@ -1969,5 +1969,77 @@ export async function deletePaymentMethod(methodId: string) {
     } catch (error) {
         console.error("Delete Payment Method Error", error);
         return { success: false, error: "Failed to delete payment method" };
+    }
+}
+
+// --- MATCHING API ---
+export async function getMatchedCreators(campaignId: string, rejectedIds: string[] = []) {
+    try {
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId }
+        });
+
+        if (!campaign) return { success: false, error: "Campaign not found" };
+
+        const budget = campaign.budget || 0;
+        
+        // Fetch all possible matching creators using the existing logic
+        const publicCreatorsResult = await getPublicCreators({
+            niche: campaign.niche || undefined,
+            location: campaign.location || undefined,
+            minFollowers: campaign.minFollowers || undefined,
+            maxFollowers: 500000 // Micro-influencer cap
+        });
+
+        if (!publicCreatorsResult.success || !publicCreatorsResult.data) {
+            return { success: false, error: "Failed to fetch creators for matching" };
+        }
+
+        let candidates = publicCreatorsResult.data.filter((c: any) => !rejectedIds.includes(c.id));
+
+        // Shuffle the candidates
+        candidates.sort(() => Math.random() - 0.5);
+
+        // Select candidates up to the budget (Cost = ₹1 per follower)
+        const selected = [];
+        let currentCost = 0;
+
+        for (const candidate of candidates) {
+            const cost = candidate.followersCount; // 1 follower = ₹1
+            if (currentCost + cost <= budget) {
+                selected.push(candidate);
+                currentCost += cost;
+            }
+        }
+
+        // If even the first one is too expensive, but budget > 0, we might return an empty list. 
+        // We can just return what we managed to fit.
+        
+        return { success: true, data: selected, totalFollowers: currentCost, budget };
+    } catch (error) {
+        console.error("Matching Error", error);
+        return { success: false, error: "Failed to match creators" };
+    }
+}
+
+// --- PAYMENT API ---
+export async function activateCampaignPayment(campaignId: string) {
+    try {
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId }
+        });
+
+        if (!campaign) return { success: false, error: "Campaign not found" };
+
+        // Mark as ACTIVE (funded)
+        await db.campaign.update({
+            where: { id: campaignId },
+            data: { status: 'ACTIVE' }
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Payment activation error", error);
+        return { success: false, error: "Failed to activate campaign payment" };
     }
 }

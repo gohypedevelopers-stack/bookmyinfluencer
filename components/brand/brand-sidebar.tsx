@@ -31,12 +31,7 @@ export function BrandSidebar() {
             icon: Megaphone,
             activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
         },
-        {
-            name: "Messages",
-            href: "/brand/chat",
-            icon: MessageSquare,
-            activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
-        },
+
         {
             name: "Marketplace",
             href: "/brand/discover",

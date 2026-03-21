@@ -343,7 +343,7 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                     <div className="flex flex-wrap gap-2">
                                         <div className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
                                             <DollarSign className="w-3.5 h-3.5 text-green-600" />
-                                            {campaign.budget ? `₹${campaign.budget.toLocaleString()}` : 'Negotiable'}
+                                            {`₹${Math.floor(followerCount * 0.1).toLocaleString()}`}
                                         </div>
                                         <div className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
                                             <Briefcase className="w-3.5 h-3.5 text-blue-600" />
@@ -462,11 +462,11 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                     <div className="flex gap-3 mt-auto">
                                         <Button
                                             variant="outline"
-                                            className="flex-1 border-gray-200 text-gray-700 h-10 font-bold rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-colors text-xs"
-                                            onClick={() => handleOpenChat(item)}
+                                            className="flex-1 border-gray-200 text-gray-400 h-10 font-bold rounded-xl bg-gray-50 cursor-default transition-colors text-xs"
+                                            disabled
                                         >
-                                            <ChatIcon className="w-3.5 h-3.5 mr-2" />
-                                            Team Chat
+                                            <Briefcase className="w-3.5 h-3.5 mr-2" />
+                                            Managed by PM
                                         </Button>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -532,7 +532,7 @@ export default function CreatorCampaignsClient({ candidates, activeCampaigns, is
                                         <div className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm">
                                             <DollarSign className="w-3.5 h-3.5 text-green-600" />
                                         </div>
-                                        {item.offer ? `₹${item.offer.amount.toLocaleString()}` : (item.campaign.budget ? `₹${item.campaign.budget.toLocaleString()}` : 'Negotiable')}
+                                        {`₹${Math.floor(followerCount * 0.1).toLocaleString()}`}
                                     </div>
                                     <div className="flex items-center gap-3 text-sm text-gray-700 font-medium bg-gray-50 p-3 rounded-xl border border-gray-100">
                                         <div className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm">
