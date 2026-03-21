@@ -337,7 +337,7 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                         </div>
                     )}
 
-                    {state?.error && <div className="p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 text-xs font-bold text-center">{state.error}</div>}
+                    {state?.error && <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200 text-sm font-semibold text-center animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm">{state.error}</div>}
                     {state?.success && <div className="p-3 bg-green-50 text-green-600 rounded-lg border border-green-100 text-xs font-bold text-center">Success! Redirecting...</div>}
 
                     {/* Navigation Footer */}

@@ -123,7 +123,7 @@ export default function InfluencerProfileClient({
                                 </div>
 
                                 {inviteStatus === 'error' && (
-                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+                                    <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200 text-sm font-semibold animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm">
                                         {inviteError}
                                     </div>
                                 )}

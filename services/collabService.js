@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { db } from "@/lib/db";
+import { db, DEFAULT_TX_OPTIONS } from "@/lib/db";
 import { getMatchedInfluencers, normalizeCategory } from "@/services/influencerMatcher";
 
 export const REQUEST_EXPIRY_HOURS = 24;
@@ -429,6 +429,7 @@ export async function expirePendingRequestsAndRefill() {
                 },
             }),
         ),
+        DEFAULT_TX_OPTIONS
     );
 
     const refilledCampaignIds = [...new Set(expiredRequests.map((request) => request.campaignId))];

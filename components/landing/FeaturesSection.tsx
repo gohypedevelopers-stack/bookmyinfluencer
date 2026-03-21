@@ -26,10 +26,10 @@ export function FeaturesSection() {
 
 
                     {/* Infinite Animated Carousel Container - Two Rows */}
-                    <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-16 bg-slate-100/80 rounded-[3rem] border border-slate-200 shadow-inner">
+                    <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-16 bg-sky-600 rounded-[3rem] border border-sky-500 shadow-2xl shadow-sky-300/50">
                         {/* Gradient masks */}
-                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-slate-100/80 to-transparent z-10 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-slate-100/80 to-transparent z-10 pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-sky-600 to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-sky-600 to-transparent z-10 pointer-events-none" />
 
                         {/* Top Row - Scrolls Left */}
                         <motion.div
@@ -47,14 +47,14 @@ export function FeaturesSection() {
                                     ].map((brand, i) => (
                                         <div
                                             key={`${setIndex}-r1-${brand.name}-${i}`}
-                                            className="opacity-60 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 group/logo"
+                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 group/logo"
                                         >
                                             <Image
                                                 src={brand.src}
                                                 alt={brand.name}
-                                                width={brand.width * 1.2}
-                                                height={brand.height * 1.2}
-                                                className="h-14 md:h-20 w-auto object-contain transition-all duration-300"
+                                                width={brand.width * 1.5}
+                                                height={brand.height * 1.5}
+                                                className="h-16 md:h-24 lg:h-32 w-auto object-contain transition-all duration-300"
                                             />
                                         </div>
                                     ))}
@@ -77,14 +77,14 @@ export function FeaturesSection() {
                                     ].map((brand, i) => (
                                         <div
                                             key={`${setIndex}-r2-${brand.name}-${i}`}
-                                            className="opacity-60 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4"
+                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4"
                                         >
                                             <Image
                                                 src={brand.src}
                                                 alt={brand.name}
-                                                width={brand.width * 1.2}
-                                                height={brand.height * 1.2}
-                                                className="h-12 md:h-16 w-auto object-contain transition-all duration-300"
+                                                width={brand.width * 1.5}
+                                                height={brand.height * 1.5}
+                                                className="h-14 md:h-20 lg:h-24 w-auto object-contain transition-all duration-300"
                                             />
                                         </div>
                                     ))}

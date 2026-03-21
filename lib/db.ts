@@ -36,6 +36,12 @@ const RETRYABLE_DB_ERROR_CODES = new Set([
 
 const MAX_DB_RETRY_ATTEMPTS = 3
 
+export const DEFAULT_TX_OPTIONS = {
+    maxWait: 10000, // 10s wait for connection
+    timeout: 20000, // 20s execution time
+}
+
+
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -60,6 +66,11 @@ function isRetryableDbError(error: unknown) {
 const prismaClientSingleton = () => {
     const client = new PrismaClient({
         log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+        datasources: {
+            db: {
+                url: process.env.DATABASE_URL,
+            },
+        },
     })
 
     return client.$extends({

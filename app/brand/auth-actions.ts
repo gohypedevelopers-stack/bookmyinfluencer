@@ -139,34 +139,34 @@ export async function sendEmailOtp(email: string) {
         return { success: false, error: 'Invalid email address.' };
     }
 
-    const existingAccount = await findExistingAccountByEmail(normalizedEmail);
-    if (existingAccount) {
-        return { success: false, error: getBrandAccountConflictMessage(existingAccount) };
+    try {
+        const otp = generateOtp();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        const otpHash = hashOtp(normalizedEmail, otp);
+
+        const otpUser = await db.otpUser.upsert({
+            where: { email: normalizedEmail },
+            update: {},
+            create: { email: normalizedEmail },
+            select: { id: true }
+        });
+
+        await db.emailOtp.upsert({
+            where: { userId: otpUser.id },
+            update: { otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
+            create: { userId: otpUser.id, otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
+        });
+
+        const emailResult = await sendOtpEmail(normalizedEmail, otp);
+        if (!emailResult.success) {
+            console.log(`[DEV] OTP for ${normalizedEmail}: ${otp}`);
+        }
+
+        return { success: true, message: 'OTP sent to your email.' };
+    } catch (err) {
+        console.error('[Brand OTP] sendEmailOtp failed:', err);
+        return { success: false, error: 'Failed to send OTP. Please try again.' };
     }
-
-    const otp = generateOtp();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    const otpHash = hashOtp(normalizedEmail, otp);
-
-    const otpUser = await db.otpUser.upsert({
-        where: { email: normalizedEmail },
-        update: {},
-        create: { email: normalizedEmail },
-        select: { id: true }
-    });
-
-    await db.emailOtp.upsert({
-        where: { userId: otpUser.id },
-        update: { otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
-        create: { userId: otpUser.id, otpHash, expiresAt, attempts: 0, lastSentAt: new Date() },
-    });
-
-    const emailResult = await sendOtpEmail(normalizedEmail, otp);
-    if (!emailResult.success) {
-        console.log(`[DEV] OTP for ${normalizedEmail}: ${otp}`);
-    }
-
-    return { success: true, message: 'OTP sent to your email.' };
 }
 
 export async function verifyEmailOtp(email: string, otp: string) {
@@ -182,7 +182,7 @@ export async function verifyEmailOtp(email: string, otp: string) {
     });
 
     if (!otpUser) {
-        return { success: false, error: 'No OTP found. Please request a new one.' };
+        return { success: false, error: 'Please click "Resend OTP" to get a new verification code.' };
     }
 
     const stored = await db.emailOtp.findUnique({

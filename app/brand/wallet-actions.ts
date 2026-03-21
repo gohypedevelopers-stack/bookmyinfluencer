@@ -1,6 +1,6 @@
 "use server"
 
-import { db } from "@/lib/db";
+import { db, DEFAULT_TX_OPTIONS } from "@/lib/db";
 import { razorpay } from "@/lib/razorpay";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -121,10 +121,11 @@ export async function verifyWalletRecharge(
                     balance: { increment: amount }
                 }
             });
-        });
+        }, DEFAULT_TX_OPTIONS);
 
         revalidatePath("/brand/wallet");
         return { success: true };
+
     } catch (error) {
         console.error("Verification Error:", error);
         return { success: false, error: "Payment verification failed" };
@@ -253,7 +254,7 @@ export async function fundContractFromWallet(contractId: string) {
 
     // Use a transaction
     try {
-        return await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx) => {
             // 1. Get Contract & Pending Transaction
             const contract = await tx.contract.findUnique({
                 where: { id: contractId },
@@ -366,16 +367,20 @@ export async function fundContractFromWallet(contractId: string) {
                 console.log(`[FUNDING_DEBUG] Notification sent to Influencer: ${contract.influencer.userId}`);
             }
 
-            revalidatePath(`/brand/wallet`);
-            revalidatePath(`/brand/campaigns`);
-            revalidatePath(`/brand/chat`);
             return {
                 success: true,
                 contractId,
                 newStatus: updatedContract.status,
                 newWalletBalance: updatedWallet.balance
             };
-        });
+        }, DEFAULT_TX_OPTIONS);
+
+        revalidatePath(`/brand/wallet`);
+        revalidatePath(`/brand/campaigns`);
+        revalidatePath(`/brand/chat`);
+        return result;
+
+
     } catch (error: any) {
         console.error("[FUNDING_DEBUG] TRANSACTION FAILED:", error.message);
         return { success: false, error: error.message || "Failed to fund contract" };
@@ -469,11 +474,12 @@ export async function manualPayout(
                     }
                 });
             }
-        });
+        }, DEFAULT_TX_OPTIONS);
 
         revalidatePath(`/manager/campaigns`);
         revalidatePath(`/admin/campaigns`);
         return { success: true };
+
     } catch (error: any) {
         console.error("Payout Error:", error);
         return { success: false, error: error.message };
@@ -488,7 +494,7 @@ export async function approveDeliverableAndLock(contractId: string) {
     }
 
     try {
-        return await db.$transaction(async (tx) => {
+        await db.$transaction(async (tx) => {
             const contract = await tx.contract.findUnique({
                 where: { id: contractId },
                 select: {
@@ -588,12 +594,14 @@ export async function approveDeliverableAndLock(contractId: string) {
                     }
                 });
             }
+        }, DEFAULT_TX_OPTIONS);
 
-            revalidatePath('/manager/campaigns');
-            revalidatePath('/admin/campaigns');
+        revalidatePath('/manager/campaigns');
+        revalidatePath('/admin/campaigns');
 
-            return { success: true };
-        });
+        return { success: true };
+
+
     } catch (error: any) {
         console.error("Approval Error:", error);
         return { success: false, error: error.message };
