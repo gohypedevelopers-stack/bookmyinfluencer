@@ -18,6 +18,14 @@ import LivePhotoCapture from "@/components/kyc/LivePhotoCapture";
 // Total steps
 const TOTAL_STEPS = 12;
 
+const popularLocations = ["Pan India", "Maharashtra", "Delhi", "Karnataka", "Telangana", "Gujarat", "Tamil Nadu", "West Bengal"];
+const indiaLocations = [
+    // States
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir",
+    // Major Cities
+    "Mumbai", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam", "Pimpri-Chinchwad", "Patna", "Vadodara", "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad", "Meerut", "Rajkot", "Kalyan-Dombivli", "Vasai-Virar", "Varanasi", "Srinagar", "Aurangabad", "Dhanbad", "Amritsar", "Navi Mumbai", "Allahabad", "Howrah", "Ranchi", "Gwalior", "Jabalpur", "Coimbatore", "Vijayawada", "Jodhpur", "Madurai", "Raipur", "Kota", "Guwahati", "Chandigarh", "Solapur", "Hubli-Dharwad", "Mysore", "Tiruchirappalli", "Bareilly", "Aligarh", "Tiruppur", "Gurgaon", "Moradabad", "Jalandhar", "Bhubaneswar", "Salem", "Warangal", "Mira-Bhayandar", "Jalgaon", "Guntur", "Thiruvananthapuram", "Bhiwandi", "Saharanpur", "Gorakhpur", "Bikaner", "Amravati", "Noida", "Jamshedpur", "Bhilai", "Cuttack", "Firozabad", "Kochi", "Nellore", "Bhavnagar", "Dehradun", "Durgapur", "Asansol", "Rourkela", "Nanded", "Kolhapur", "Ajmer", "Akola", "Gulbarga", "Jamnagar", "Ujjain", "Loni", "Siliguri", "Jhansi", "Ulhasnagar", "Jammu", "Sangli-Miraj & Kupwad", "Mangalore", "Erode", "Belgaum", "Ambattur", "Tirunelveli", "Malegaon", "Gaya", "Jalgaon", "Udaipur", "Maheshtala", "Davanagere", "Kozhikode", "Kurnool", "Rajpur Sonarpur", "Rajahmundry", "Bokaro", "South Dumdum", "Bellary", "Patiala", "Gopalpur", "Agartala", "Bhagalpur", "Muzaffarnagar", "Bhatpara", "Panihati", "Latur", "Dhule", "Tirupati", "Rohtak", "Korba", "Bhilwara", "Berhampur", "Muzaffarpur", "Ahmednagar", "Mathura", "Kollam", "Avadi", "Kadapa", "Kamarhati", "Sambalpur", "Bilaspur", "Shahjahanpur", "Satara", "Bijapur", "Rampur", "Shivamogga", "Chandrapur", "Junagadh", "Thrissur", "Alwar", "Bardhaman", "Kulti", "Kakinada", "Nizamabad", "Parbhani", "Tumkur", "Khammam", "Ozhukarai", "Bihar Sharif", "Panipat", "Darbhanga", "Bally", "Aizawl", "Dewas", "Ichalkaranji", "Karnal", "Bathinda", "Jalna", "Eluru", "Kirari Suleman Nagar", "Barasat", "Purnia", "Satna", "Mau", "Sonipat", "Farrukhabad", "Sagar", "Rourkela", "Durg", "Imphal", "Ratlam", "Hapur", "Arrah", "Karimnagar", "Anantapur", "Etawah", "Ambernath", "North Dumdum", "Bharatpur", "Begusarai", "New Delhi", "Gandhidham", "Baranagar", "Tiruvottiyur", "Puducherry", "Sikar", "Thoothukudi", "Rewa", "Mirzapur", "Raichur", "Pali", "Ramagundam", "Haridwar", "Vijayanagaram", "Katihar", "Nagercoil", "Sri Ganganagar", "Karawal Nagar"
+];
+
 // 1. slideVariants
 const slideVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 500 : -500, opacity: 0, scale: 0.95 }),
@@ -32,7 +40,7 @@ const platforms = [
     { value: 'youtube', label: 'YouTube' },
 ];
 
-const CardWrapper = ({ children, stepKey, direction, progressPercentage }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number }) => (
+const CardWrapper = ({ children, stepKey, direction, progressPercentage, currentStep, totalSteps }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number; currentStep?: number; totalSteps?: number }) => (
     <div className="relative z-10 flex h-full min-h-0 w-full flex-col text-slate-900">
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-100">
@@ -98,11 +106,11 @@ const ProceedButton = ({
     loading?: boolean;
 }) => (
     <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: disabled ? 1 : 1.02 }}
+        whileTap={{ scale: disabled ? 1 : 0.95 }}
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-4 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+        className={`w-full py-4 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-5 shadow-lg ${disabled ? "opacity-40 cursor-not-allowed shadow-none hover:shadow-none hover:scale-100 active:scale-100" : "shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]"}`} style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</>
@@ -131,18 +139,12 @@ export default function RegisterPage() {
         agreeToTerms: false,
     });
 
-    // Onboarding data
     const [onboardingData, setOnboardingData] = useState({
         platforms: [] as string[],
         niche: '',
+        location: '',
         followers: '',
         engagement: '',
-        minimumPrice: '',
-        rates: '',
-        priceStory: '',
-        pricePost: '',
-        priceCollab: '',
-        priceType: 'Per Post',
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -156,6 +158,8 @@ export default function RegisterPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCustomNiche, setIsCustomNiche] = useState(false);
     const [kycCompleted, setKycCompleted] = useState(false);
+    const [locationQuery, setLocationQuery] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     const progressPercentage = ((currentStep - 1) / (12 - 1)) * 100;
 
@@ -235,11 +239,9 @@ export default function RegisterPage() {
         // Onboarding data
         fd.append('platforms', JSON.stringify(onboardingData.platforms));
         fd.append('niche', onboardingData.niche);
+        fd.append('location', onboardingData.location);
         fd.append('followers', onboardingData.followers);
         fd.append('engagement', onboardingData.engagement);
-        fd.append('priceStory', onboardingData.priceStory);
-        fd.append('pricePost', onboardingData.pricePost);
-        fd.append('priceCollab', onboardingData.priceCollab);
 
         try {
             const res = await registerUserAction(fd);
@@ -277,9 +279,9 @@ export default function RegisterPage() {
             case 5: return true; // Welcome
             case 6: return onboardingData.platforms.length > 0;
             case 7: return !!onboardingData.niche;
-            case 8: return !!onboardingData.followers;
-            case 9: return true; // engagement optional
-            case 10: return !!onboardingData.rates;
+            case 8: return !!onboardingData.location; // Location
+            case 9: return !!onboardingData.followers; // Followers
+            case 10: return true; // engagement optional
             default: return true;
         }
     };
@@ -312,9 +314,9 @@ export default function RegisterPage() {
         if (currentStep === 5) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
         if (currentStep === 6) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
         if (currentStep === 7) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
-        if (currentStep === 8) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
-        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
-        if (currentStep === 10) return { icon: <IndianRupee className="w-8 h-8 text-white" />, tag: "Pricing", title: "Set your rates", desc: "Transparent pricing helps brands move faster when they find the right creator match." };
+        if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
+        if (currentStep === 9) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
+        if (currentStep === 10) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
         if (currentStep === 11) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Ready for discovery", desc: "Your creator profile is now ready to be seen by brands looking for the right voice and audience." };
     };
@@ -420,11 +422,18 @@ export default function RegisterPage() {
                         </button>
                     )}
 
+                    {/* Step Counter */}
+                    {currentStep < 11 && (
+                        <div className="absolute top-6 right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
+                            Step {currentStep} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 1}
+                        </div>
+                    )}
+
                     <AnimatePresence initial={false} custom={direction} mode="wait">
 
                     {/* ===== STEP 1: Enter your details ===== */}
                     {currentStep === 1 && (
-                        <CardWrapper stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-indigo-200/60" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg></div>
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create your account</h2>
@@ -500,7 +509,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 2: Social Handles ===== */}
                     {currentStep === 2 && (
-                        <CardWrapper stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Link your social profiles to get discovered.</p>
@@ -526,7 +535,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 3: Email Verification ===== */}
                     {currentStep === 3 && (
-                        <CardWrapper stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">We'll send an OTP to confirm your email.</p>
@@ -629,7 +638,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 4: Password ===== */}
                     {currentStep === 4 && (
-                        <CardWrapper stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Choose a strong password to protect your account.</p>
@@ -697,7 +706,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 5: Welcome (Onboarding Start) ===== */}
                     {currentStep === 5 && (
-                        <CardWrapper stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-20 h-20 rounded-2xl rotate-3 shadow-xl shadow-orange-200/60 flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)" }}>
                                     <Sparkles className="w-12 h-12 text-white" />
@@ -715,7 +724,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 6: Platforms Selection ===== */}
                     {currentStep === 6 && (
-                        <CardWrapper stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-4">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
@@ -761,7 +770,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 7: Niche ===== */}
                     {currentStep === 7 && (
-                        <CardWrapper stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
@@ -806,20 +815,25 @@ export default function RegisterPage() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 w-full pt-4">
-                                        <div className="relative">
-                                            <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
+                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 w-full pt-4">
+                                        <div className="relative group">
+                                            <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 w-6 h-6 transition-colors" />
                                             <input
                                                 type="text"
                                                 value={onboardingData.niche}
                                                 onChange={(e) => updateOnboarding("niche", e.target.value)}
-                                                className="w-full pl-14 pr-6 py-6 bg-white/10 border-2 border-white/20 rounded-2xl text-2xl text-white font-bold placeholder-white/30 focus:outline-none focus:border-white/50 transition-all shadow-inner"
-                                                placeholder="Enter your niche"
+                                                className="w-full pl-16 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-xl text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
+                                                placeholder="e.g. Sustainable Fashion"
                                                 autoFocus
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && onboardingData.niche) {
+                                                        goNext();
+                                                    }
+                                                }}
                                             />
                                         </div>
                                         <NextButton onClick={goNext} disabled={!onboardingData.niche} />
-                                        <button onClick={() => setIsCustomNiche(false)} className="w-full text-center text-sm text-slate-500 hover:text-white uppercase font-bold tracking-widest py-2">
+                                        <button onClick={() => setIsCustomNiche(false)} className="w-full text-center text-sm text-slate-500 hover:text-slate-800 uppercase font-bold tracking-widest py-2 transition-colors">
                                             ← Return to list
                                         </button>
                                     </motion.div>
@@ -828,9 +842,88 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 8: Followers ===== */}
+                    {/* ===== STEP 8: Location ===== */}
                     {currentStep === 8 && (
-                        <CardWrapper stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
+                            <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Where are you based?</h2>
+                                <div className="grid grid-cols-2 gap-2.5 w-full z-10 relative">
+                                    {popularLocations.map((loc) => (
+                                        <motion.button
+                                            key={loc}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => {
+                                                setLocationQuery("");
+                                                updateOnboarding("location", loc);
+                                                goNext();
+                                            }}
+                                            className={`p-3 rounded-xl border flex items-center justify-center gap-3 transition-all cursor-pointer
+                                                ${onboardingData.location === loc
+                                                    ? "bg-indigo-50 text-indigo-600 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
+                                                    : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 transition-all"
+                                                }`}
+                                        >
+                                            <span className="font-semibold">{loc}</span>
+                                        </motion.button>
+                                    ))}
+                                </div>
+                                <div className="w-full mt-2 relative border border-slate-200 rounded-xl bg-white shadow-sm overflow-visible z-20">
+                                    <input
+                                        type="text"
+                                        value={
+                                            popularLocations.includes(onboardingData.location) && locationQuery === ""
+                                                ? "" : locationQuery || onboardingData.location
+                                        }
+                                        onChange={(e) => {
+                                            setLocationQuery(e.target.value);
+                                            updateOnboarding("location", e.target.value);
+                                            setShowSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowSuggestions(true)}
+                                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                        onKeyDown={(e) => { 
+                                            if (e.key === 'Enter' && onboardingData.location) { 
+                                                setShowSuggestions(false); 
+                                                goNext(); 
+                                            } 
+                                        }}
+                                        placeholder="Or enter a specific state/city..."
+                                        className="w-full px-4 py-3 bg-transparent border-0 focus:outline-none focus:ring-0 text-slate-800 font-semibold text-lg pb-[14px]"
+                                    />
+                                    
+                                    {showSuggestions && locationQuery.length > 0 && (
+                                        <div className="absolute top-[102%] left-0 z-50 w-full mt-2 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 max-h-56 overflow-y-auto custom-scrollbar">
+                                            {indiaLocations.filter(loc => loc.toLowerCase().includes(locationQuery.toLowerCase())).slice(0, 10).map((loc, idx) => (
+                                                <button key={idx}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        setLocationQuery("");
+                                                        updateOnboarding("location", loc);
+                                                        setShowSuggestions(false);
+                                                    }}
+                                                    className="w-full text-left px-5 py-3.5 hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-medium border-b border-slate-100/50 last:border-0 transition-colors flex justify-between items-center"
+                                                >
+                                                    {loc}
+                                                    {onboardingData.location === loc && <Check size={16} className="text-violet-600" />}
+                                                </button>
+                                            ))}
+                                            {indiaLocations.filter(loc => loc.toLowerCase().includes(locationQuery.toLowerCase())).length === 0 && (
+                                                <div className="px-5 py-4 text-sm text-slate-500 text-center">
+                                                    Press enter to use "{locationQuery}" as custom location.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <NextButton onClick={goNext} disabled={!onboardingData.location} />
+                            </div>
+                        </CardWrapper>
+                    )}
+
+                    {/* ===== STEP 9: Followers ===== */}
+                    {currentStep === 9 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
                                 <div className="space-y-4">
@@ -858,9 +951,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 9: Engagement ===== */}
-                    {currentStep === 9 && (
-                        <CardWrapper stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 10: Engagement ===== */}
+                    {currentStep === 10 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
@@ -887,81 +980,9 @@ export default function RegisterPage() {
                     )}
 
 
-                    {/* ===== STEP 10: Pricing ===== */}
-                    {currentStep === 10 && (
-                        <CardWrapper stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
-                            <div className="w-full max-w-[520px] space-y-6 flex flex-col justify-center items-center">
-                                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-emerald-400 to-teal-500 rounded-2xl rotate-3 shadow-lg mb-2">
-                                    <Zap className="w-8 h-8 text-white" />
-                                </div>
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Minimum Price?</h2>
-                                <p className="text-slate-500 text-center max-w-xs mb-4">Setting a competitive minimum price boosts your visibility.</p>
-
-                                <AnimatePresence mode="wait">
-                                    {error && (
-                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                                            className="p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-sm font-medium w-full text-center">
-                                            {error}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                <div className="w-full space-y-3">
-                                    {/* Per Story Input */}
-                                    <div className="relative w-full">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide">
-                                            STORY
-                                        </div>
-                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 pointer-events-none" />
-                                        <input type="number" value={onboardingData.priceStory}
-                                            onChange={(e) => updateOnboarding("priceStory", e.target.value)}
-                                            placeholder="500"
-                                            className="w-full pl-32 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base font-bold placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900 appearance-none" />
-                                    </div>
-
-                                    {/* Per Post Input */}
-                                    <div className="relative w-full">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide">
-                                            POST
-                                        </div>
-                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 pointer-events-none" />
-                                        <input type="number" value={onboardingData.pricePost}
-                                            onChange={(e) => updateOnboarding("pricePost", e.target.value)}
-                                            placeholder="1000"
-                                            className="w-full pl-32 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base font-bold placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900 appearance-none" />
-                                    </div>
-
-                                    {/* Per Collab Input */}
-                                    <div className="relative w-full">
-                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg text-xs font-bold tracking-wide">
-                                            COLLAB
-                                        </div>
-                                        <IndianRupee className="absolute left-[90px] top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5 pointer-events-none" />
-                                        <input type="number" value={onboardingData.priceCollab}
-                                            onChange={(e) => updateOnboarding("priceCollab", e.target.value)}
-                                            placeholder="5000"
-                                            className="w-full pl-32 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base font-bold placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900 appearance-none" />
-                                    </div>
-                                </div>
-
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={handleFinalSubmit}
-                                    disabled={(!onboardingData.priceStory && !onboardingData.pricePost && !onboardingData.priceCollab) || isSubmitting}
-                                    className="w-full py-4 mt-6 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-200/60" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
-                                >
-                                    {isSubmitting ? (
-                                        <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving…</>
-                                    ) : "Complete Setup"}
-                                </motion.button>
-                            </div>
-                        </CardWrapper>
-                    )}
-
                     {/* ===== STEP 11: Live Photo KYC ===== */}
                     {currentStep === 11 && (
-                        <CardWrapper stepKey="step11" direction={direction} progressPercentage={90}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step11" direction={direction} progressPercentage={90}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col justify-center items-center relative z-10 text-white">
                                 <div className="text-center space-y-2 mb-2 w-full">
                                     <h2 className="text-3xl md:text-3xl font-bold text-slate-900 drop-shadow-sm">Identity Verification</h2>
@@ -989,7 +1010,7 @@ export default function RegisterPage() {
 
                     {/* ===== STEP 12: Final Success ===== */}
                     {currentStep === 12 && (
-                        <CardWrapper stepKey="step12" direction={direction} progressPercentage={100}>
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step12" direction={direction} progressPercentage={100}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-24 h-24 rounded-full flex items-center justify-center relative shadow-xl shadow-emerald-200/60" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}>

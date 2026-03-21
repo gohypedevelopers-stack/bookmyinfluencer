@@ -25,6 +25,7 @@ type CreatorProfileInput = {
   pricePost?: number | null
   priceCollab?: number | null
   priceType?: string | null
+  location?: string | null
   onboardingCompleted?: boolean
 }
 
@@ -132,6 +133,7 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
       where: { userId: user.id },
       update: {
         ...(profile.niche !== undefined ? { niche: profile.niche || "General" } : {}),
+        ...(profile.location !== undefined ? { location: profile.location } : {}),
         ...(profile.instagramUrl !== undefined
           ? { instagramHandle: profile.instagramUrl ? profile.instagramUrl.split("/").filter(Boolean).pop() ?? profile.instagramUrl : null }
           : {}),
@@ -151,6 +153,7 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
       create: {
         userId: user.id,
         niche: profile.niche || "General",
+        location: profile.location ?? null,
         instagramHandle: profile.instagramUrl ? profile.instagramUrl.split("/").filter(Boolean).pop() ?? profile.instagramUrl : null,
         youtubeHandle: profile.youtubeUrl ? profile.youtubeUrl.split("/").filter(Boolean).pop() ?? profile.youtubeUrl : null,
         platforms: profile.platforms ?? null,

@@ -50,11 +50,13 @@ export async function registerUserAction(formData: FormData) {
         const parsedPriceCollab = safeParseInt(formData.get("priceCollab"));
         const parsedRates = safeParseInt(rates);
         const fallbackPrice = parsedPricePost !== null ? parsedPricePost : parsedRates;
+        const location = formData.get("location") as string;
 
         await syncCreatorProfileByEmail(normalizedEmail, {
             fullName,
             phone: mobileNumber || null,
             niche: niche || null,
+            location: location || null,
             instagramUrl: instagramUrl || null,
             youtubeUrl: youtubeUrl || null,
             onboardingCompleted: true,

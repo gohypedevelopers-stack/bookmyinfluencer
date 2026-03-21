@@ -71,7 +71,7 @@ const NextButton = ({
     </button>
 );
 
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 13;
 
 // Follower tiers
 const followerTiers = [
@@ -99,6 +99,14 @@ const perCollabPriceTiersByFollowerTier: Record<string, PriceTier[]> = {
 
 const allPerCollabPriceTiers: PriceTier[] = Object.values(perCollabPriceTiersByFollowerTier).flat();
 
+const popularLocations = ["Pan India", "Maharashtra", "Delhi", "Karnataka", "Telangana", "Gujarat", "Tamil Nadu", "West Bengal"];
+const indiaLocations = [
+    // States
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir",
+    // Major Cities
+    "Mumbai", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam", "Pimpri-Chinchwad", "Patna", "Vadodara", "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad", "Meerut", "Rajkot", "Kalyan-Dombivli", "Vasai-Virar", "Varanasi", "Srinagar", "Aurangabad", "Dhanbad", "Amritsar", "Navi Mumbai", "Allahabad", "Howrah", "Ranchi", "Gwalior", "Jabalpur", "Coimbatore", "Vijayawada", "Jodhpur", "Madurai", "Raipur", "Kota", "Guwahati", "Chandigarh", "Solapur", "Hubli-Dharwad", "Mysore", "Tiruchirappalli", "Bareilly", "Aligarh", "Tiruppur", "Gurgaon", "Moradabad", "Jalandhar", "Bhubaneswar", "Salem", "Warangal", "Mira-Bhayandar", "Jalgaon", "Guntur", "Thiruvananthapuram", "Bhiwandi", "Saharanpur", "Gorakhpur", "Bikaner", "Amravati", "Noida", "Jamshedpur", "Bhilai", "Cuttack", "Firozabad", "Kochi", "Nellore", "Bhavnagar", "Dehradun", "Durgapur", "Asansol", "Rourkela", "Nanded", "Kolhapur", "Ajmer", "Akola", "Gulbarga", "Jamnagar", "Ujjain", "Loni", "Siliguri", "Jhansi", "Ulhasnagar", "Jammu", "Sangli-Miraj & Kupwad", "Mangalore", "Erode", "Belgaum", "Ambattur", "Tirunelveli", "Malegaon", "Gaya", "Jalgaon", "Udaipur", "Maheshtala", "Davanagere", "Kozhikode", "Kurnool", "Rajpur Sonarpur", "Rajahmundry", "Bokaro", "South Dumdum", "Bellary", "Patiala", "Gopalpur", "Agartala", "Bhagalpur", "Muzaffarnagar", "Bhatpara", "Panihati", "Latur", "Dhule", "Tirupati", "Rohtak", "Korba", "Bhilwara", "Berhampur", "Muzaffarpur", "Ahmednagar", "Mathura", "Kollam", "Avadi", "Kadapa", "Kamarhati", "Sambalpur", "Bilaspur", "Shahjahanpur", "Satara", "Bijapur", "Rampur", "Shivamogga", "Chandrapur", "Junagadh", "Thrissur", "Alwar", "Bardhaman", "Kulti", "Kakinada", "Nizamabad", "Parbhani", "Tumkur", "Khammam", "Ozhukarai", "Bihar Sharif", "Panipat", "Darbhanga", "Bally", "Aizawl", "Dewas", "Ichalkaranji", "Karnal", "Bathinda", "Jalna", "Eluru", "Kirari Suleman Nagar", "Barasat", "Purnia", "Satna", "Mau", "Sonipat", "Farrukhabad", "Sagar", "Rourkela", "Durg", "Imphal", "Ratlam", "Hapur", "Arrah", "Karimnagar", "Anantapur", "Etawah", "Ambernath", "North Dumdum", "Bharatpur", "Begusarai", "New Delhi", "Gandhidham", "Baranagar", "Tiruvottiyur", "Puducherry", "Sikar", "Thoothukudi", "Rewa", "Mirzapur", "Raichur", "Pali", "Ramagundam", "Haridwar", "Vijayanagaram", "Katihar", "Nagercoil", "Sri Ganganagar", "Karawal Nagar"
+];
+
 export default function BrandRegisterPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
@@ -124,6 +132,8 @@ export default function BrandRegisterPage() {
         brandName: '',
         campaignType: '',
         budget: '',
+        location: '',
+        niche: '',
         minFollowers: 10000,
         maxFollowers: 100000,
         minPricePerPost: 5000,
@@ -146,6 +156,9 @@ export default function BrandRegisterPage() {
     const [campaignWorkflow, setCampaignWorkflow] = useState<any>(null);
     const [workflowWarning, setWorkflowWarning] = useState('');
     const [timer, setTimer] = useState(0);
+
+    const [locationQuery, setLocationQuery] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     const progressPercentage = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
     const selectedFollowerTier =
@@ -250,6 +263,8 @@ export default function BrandRegisterPage() {
         fd.append('targetPlatforms', JSON.stringify(onboardingData.platforms));
         fd.append('preferredCreatorType', onboardingData.creatorType);
         fd.append('campaignGoals', onboardingData.campaignGoals);
+        fd.append('location', onboardingData.location);
+        fd.append('niche', onboardingData.niche);
         fd.append('minFollowers', String(onboardingData.minFollowers));
         fd.append('maxFollowers', String(onboardingData.maxFollowers));
         fd.append('minPricePerPost', String(onboardingData.minPricePerPost));
@@ -268,7 +283,7 @@ export default function BrandRegisterPage() {
             });
 
             setDirection(1);
-            setCurrentStep(11);
+            setCurrentStep(13);
         } else {
             setCampaignWorkflow(null);
             setWorkflowWarning('');
@@ -287,16 +302,18 @@ export default function BrandRegisterPage() {
             case 5: return !!onboardingData.brandName;
             case 6: return !!onboardingData.campaignType;
             case 7: return Number(onboardingData.budget) > 0;
-            case 8: return true;
-            case 9: return onboardingData.platforms.length > 0;
+            case 8: return !!onboardingData.location;
+            case 9: return !!onboardingData.niche;
             case 10: return true;
+            case 11: return onboardingData.platforms.length > 0;
+            case 12: return true;
             default: return true;
         }
     };
 
     const goNext = async () => {
         setError('');
-        if (currentStep === 10) {
+        if (currentStep === 12) {
             await handleFinalSubmit();
             return;
         }
@@ -329,9 +346,11 @@ export default function BrandRegisterPage() {
         if (currentStep === 5) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Profile", title: "Personal Branding", desc: "How should creators see you? Your public name is the first thing they'll notice." };
         if (currentStep === 6) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Campaigns", title: "Strategy First", desc: "Different goals require different creators. Let's define what success looks like for you." };
         if (currentStep === 7) return { icon: <DollarSign className="w-8 h-8 text-white" />, tag: "Planning", title: "Smart Budgeting", desc: "We match you with creators who provide the best ROI within your target range." };
-        if (currentStep === 8) return { icon: <Users className="w-8 h-8 text-white" />, tag: "Matchmaking", title: "Smart Reach", desc: "From high-engagement Micro creators to broad-reach Macro influencers, our team finds the right voice for you." };
-        if (currentStep === 9) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Reach", title: "Targeted Platforms", desc: "Reach your audience where they spend most of their time." };
-        if (currentStep === 10) return { icon: <Zap className="w-8 h-8 text-white" />, tag: "Finalizing", title: "Mission Control", desc: "Any specific objectives in mind? These details help creators understand your vision better." };
+        if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Target Market", desc: "Where should your creators be located?" };
+        if (currentStep === 9) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Niche", title: "Industry Focus", desc: "Help us understand your specific niche to match you perfectly." };
+        if (currentStep === 10) return { icon: <Users className="w-8 h-8 text-white" />, tag: "Matchmaking", title: "Smart Reach", desc: "From high-engagement Micro creators to broad-reach Macro influencers, our team finds the right voice for you." };
+        if (currentStep === 11) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Reach", title: "Targeted Platforms", desc: "Reach your audience where they spend most of their time." };
+        if (currentStep === 12) return { icon: <Zap className="w-8 h-8 text-white" />, tag: "Finalizing", title: "Mission Control", desc: "Any specific objectives in mind? These details help creators understand your vision better." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Blast Off!", desc: "Your brand is now part of the ecosystem. Get ready for explosive growth." };
     };
     const sidebar = sidebarContent();
@@ -869,9 +888,138 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                            {/* ===== STEP 8: Target Followers ===== */}
+                            {/* ===== STEP 8: Location ===== */}
                             {currentStep === 8 && (
                                 <CardWrapper stepKey="step8" direction={direction}>
+                                    <div className="space-y-6">
+                                        <div className="text-center mb-4">
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Where are creators based?</h2>
+                                            <p className="text-sm text-slate-400 mt-1">Select the target location.</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 pb-2 z-10 relative">
+                                            {popularLocations.map((loc) => (
+                                                <button key={loc}
+                                                    onClick={() => { updateOnboarding('location', loc); setLocationQuery(""); goNext(); }}
+                                                    className={`p-4 border-2 rounded-2xl flex items-center justify-between text-left transition-all group
+                                        ${onboardingData.location === loc
+                                                            ? 'border-violet-500 bg-violet-50'
+                                                            : 'border-slate-200 hover:border-violet-300 hover:bg-violet-50/20'
+                                                        }`}
+                                                >
+                                                    <span className={`font-semibold ${onboardingData.location === loc ? 'text-violet-700' : 'text-slate-700'}`}>{loc}</span>
+                                                    {onboardingData.location === loc && <div className="w-5 h-5 bg-violet-600 rounded-full flex items-center justify-center"><Check size={12} className="text-white" /></div>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-100 relative z-20">
+                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3 block ml-1">Or enter a specific state/city</label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                    <Globe className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        popularLocations.includes(onboardingData.location) && locationQuery === ""
+                                                            ? "" : locationQuery || onboardingData.location
+                                                    }
+                                                    onChange={(e) => {
+                                                        setLocationQuery(e.target.value);
+                                                        updateOnboarding('location', e.target.value);
+                                                        setShowSuggestions(true);
+                                                    }}
+                                                    onFocus={() => setShowSuggestions(true)}
+                                                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                                    onKeyDown={(e) => { 
+                                                        if (e.key === 'Enter' && onboardingData.location) { 
+                                                            setShowSuggestions(false); 
+                                                            goNext(); 
+                                                        } 
+                                                    }}
+                                                    className="w-full pl-11 pr-4 py-4 text-base font-medium border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 bg-white placeholder:text-slate-400 text-slate-800 transition-all"
+                                                    placeholder="e.g. Haryana, Mumbai"
+                                                />
+                                            </div>
+                                            {/* Dropdown UI */}
+                                            {showSuggestions && locationQuery.length > 0 && (
+                                                <div className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 max-h-56 overflow-y-auto custom-scrollbar">
+                                                    {indiaLocations.filter(loc => loc.toLowerCase().includes(locationQuery.toLowerCase())).slice(0, 10).map((loc, idx) => (
+                                                        <button key={idx}
+                                                            onMouseDown={(e) => {
+                                                                e.preventDefault();
+                                                                setLocationQuery("");
+                                                                updateOnboarding('location', loc);
+                                                                setShowSuggestions(false);
+                                                            }}
+                                                            className="w-full text-left px-5 py-3.5 hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-medium border-b border-slate-100/50 last:border-0 transition-colors flex justify-between items-center"
+                                                        >
+                                                            {loc}
+                                                            {onboardingData.location === loc && <Check size={16} className="text-violet-600" />}
+                                                        </button>
+                                                    ))}
+                                                    {indiaLocations.filter(loc => loc.toLowerCase().includes(locationQuery.toLowerCase())).length === 0 && (
+                                                        <div className="px-5 py-4 text-sm text-slate-500 text-center">
+                                                            Press enter to use "{locationQuery}" as custom location.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <NextButton label="Continue" onClick={goNext} disabled={!onboardingData.location} />
+                                    </div>
+                                </CardWrapper>
+                            )}
+
+                            {/* ===== STEP 9: Niche ===== */}
+                            {currentStep === 9 && (
+                                <CardWrapper stepKey="step9" direction={direction}>
+                                    <div className="space-y-6">
+                                        <div className="text-center mb-4">
+                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is the campaign niche?</h2>
+                                            <p className="text-sm text-slate-400 mt-1">Select the main category for this campaign.</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 pb-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {['Tech & Gadgets', 'Fashion & Style', 'Beauty & Makeup', 'Fitness & Health', 'Food & Culinary', 'Travel & Lifestyle', 'Finance & Crypto', 'Education', 'Gaming', 'Parenting'].map((cat) => (
+                                                <button key={cat}
+                                                    onClick={() => { updateOnboarding('niche', cat); goNext(); }}
+                                                    className={`p-3 border-2 rounded-xl flex items-center justify-between text-left transition-all group
+                                        ${onboardingData.niche === cat
+                                                            ? 'border-violet-500 bg-violet-50'
+                                                            : 'border-slate-200 hover:border-violet-300 hover:bg-violet-50/20'
+                                                        }`}
+                                                >
+                                                    <span className={`font-semibold text-sm ${onboardingData.niche === cat ? 'text-violet-700' : 'text-slate-700'}`}>{cat}</span>
+                                                    {onboardingData.niche === cat && <div className="w-4 h-4 bg-violet-600 rounded-full flex items-center justify-center"><Check size={10} className="text-white" /></div>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-100">
+                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3 block ml-1">Or enter a custom niche</label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                    <Target className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={
+                                                        ['Tech & Gadgets', 'Fashion & Style', 'Beauty & Makeup', 'Fitness & Health', 'Food & Culinary', 'Travel & Lifestyle', 'Finance & Crypto', 'Education', 'Gaming', 'Parenting'].includes(onboardingData.niche)
+                                                            ? "" : onboardingData.niche
+                                                    }
+                                                    onChange={(e) => updateOnboarding('niche', e.target.value)}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter' && onboardingData.niche) goNext(); }}
+                                                    className="w-full pl-11 pr-4 py-4 text-base font-medium border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 bg-white placeholder:text-slate-400 text-slate-800 transition-all"
+                                                    placeholder="e.g. Sustainable Fashion"
+                                                />
+                                            </div>
+                                        </div>
+                                        <NextButton label="Continue" onClick={goNext} disabled={!onboardingData.niche} />
+                                    </div>
+                                </CardWrapper>
+                            )}
+
+                            {/* ===== STEP 10: Target Followers ===== */}
+                            {currentStep === 10 && (
+                                <CardWrapper stepKey="step10" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Target creator size?</h2>
@@ -919,9 +1067,9 @@ export default function BrandRegisterPage() {
                             )}
 
 
-                            {/* ===== STEP 9: Platforms ===== */}
-                            {currentStep === 9 && (
-                                <CardWrapper stepKey="step9" direction={direction}>
+                            {/* ===== STEP 11: Platforms ===== */}
+                            {currentStep === 11 && (
+                                <CardWrapper stepKey="step11" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Target Platforms?</h2>
@@ -953,9 +1101,9 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                            {/* ===== STEP 10: Campaign Goals ===== */}
-                            {currentStep === 10 && (
-                                <CardWrapper stepKey="step10" direction={direction}>
+                            {/* ===== STEP 12: Campaign Goals ===== */}
+                            {currentStep === 12 && (
+                                <CardWrapper stepKey="step12" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Campaign Goals</h2>
@@ -971,9 +1119,9 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                            {/* ===== STEP 11: Success ===== */}
-                            {currentStep === 11 && (
-                                <CardWrapper stepKey="step11" direction={direction}>
+                            {/* ===== STEP 13: Success ===== */}
+                            {currentStep === 13 && (
+                                <CardWrapper stepKey="step13" direction={direction}>
                                     <div className="w-full space-y-6 py-6">
                                         <div className="flex flex-col items-center text-center space-y-3">
                                             <motion.div

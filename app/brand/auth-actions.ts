@@ -217,6 +217,8 @@ export async function registerBrand(formData: FormData) {
     const industry = formData.get('industry') as string;
 
     const brandName = formData.get('brandName') as string;
+    const location = formData.get('location') as string;
+    const niche = formData.get('niche') as string;
     const campaignType = formData.get('campaignType') as string;
     const campaignBudget = formData.get('campaignBudget');
     const targetPlatforms = formData.get('targetPlatforms') as string;
@@ -251,6 +253,8 @@ export async function registerBrand(formData: FormData) {
                         companyName: brandName || companyName,
                         website: website || null,
                         industry: industry || null,
+                        location: location || null,
+                        niche: niche || null,
                         onboardingCompleted: true,
                         campaignType: campaignType || null,
                         campaignBudget: typeof campaignBudget === 'string' ? campaignBudget : null,

@@ -38,6 +38,7 @@ model BrandProfile {
   companyName          String
   website              String?
   industry             String?
+  niche                String?
   description          String?
   location             String?
   paymentMethods       String?           @default("[]")
