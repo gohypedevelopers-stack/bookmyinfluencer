@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60; // Allow Vercel up to 60s for Apify fetch
 
 import { db } from "@/lib/db"
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"

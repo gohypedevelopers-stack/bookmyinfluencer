@@ -1,5 +1,7 @@
 'use server'
 
+export const maxDuration = 60; // Allow Vercel up to 60s for Apify tasks
+
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 import { db } from "@/lib/db"
 import { runApifyActor } from "@/lib/apify"

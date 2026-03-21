@@ -4,6 +4,9 @@ import { InfluencerProfile, User } from "@prisma/client";
 import { useState } from "react";
 import Link from "next/link";
 import { Session } from "next-auth";
+import { BookmarkCheck } from "lucide-react";
+import { toast } from "sonner";
+import { toggleSavedInfluencer } from "@/app/brand/savedActions";
 
 type FullProfile = InfluencerProfile & {
     user: User;
@@ -14,6 +17,7 @@ type FullProfile = InfluencerProfile & {
     pricePost?: number | null;
     priceCollab?: number | null;
     priceType?: string | null;
+    saved?: boolean;
 };
 
 const PRICE_LABELS: Record<string, { label: string, icon: string, color: string }> = {
@@ -40,6 +44,27 @@ export default function InfluencerProfileClient({
     profile: FullProfile;
     session: Session | null;
 }) {
+    const [isSaved, setIsSaved] = useState(profile.saved || false);
+
+    const handleToggleSave = async () => {
+        if (!session || (session.user as any)?.role !== 'BRAND') {
+            toast.error("Please login as a Brand to save profiles");
+            return;
+        }
+
+        const previousState = isSaved;
+        setIsSaved(!previousState);
+
+        try {
+            const res = await toggleSavedInfluencer(profile.id);
+            if (!res.success) throw new Error(res.error);
+            toast.success(res.isSaved ? "Saved to collection" : "Removed from collection");
+        } catch (error) {
+            toast.error("Failed to update save status");
+            setIsSaved(previousState);
+        }
+    };
+
     // Parsing pricing - it's stored as JSON string natively in InfluencerProfile
     let parsedPricing: Record<string, any> = {};
     try {
@@ -92,27 +117,26 @@ export default function InfluencerProfileClient({
                                         </div>
                                         <div className="flex gap-3 mt-2 md:mt-0 w-full md:w-auto">
                                             {(session?.user as any)?.role === 'BRAND' || (session?.user as any)?.role === 'ADMIN' ? (
-                                                <>
-                                                    <button className="flex-1 md:flex-none h-11 px-6 bg-teal-50 text-teal-600 hover:bg-teal-100 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">bookmark_border</span>
-                                                        Save
-                                                    </button>
-                                                    <Link href={`/brand/checkout/${profile.id}`} className="flex-1 md:flex-none h-11 px-6 bg-teal-600 text-white hover:bg-teal-700 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2">
-                                                        <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-                                                        Hire Now
-                                                    </Link>
-                                                </>
+                                                <button
+                                                    onClick={handleToggleSave}
+                                                    className={`flex-1 md:flex-none h-11 px-6 ${isSaved ? 'bg-teal-600 text-white hover:bg-teal-700' : 'bg-white border-2 border-teal-500/30 text-teal-700 hover:border-teal-500/70 hover:bg-teal-50'} rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm`}
+                                                >
+                                                    <span className={isSaved ? "" : "material-symbols-outlined text-[20px]"}>
+                                                        {isSaved ? <BookmarkCheck className="w-5 h-5 fill-current" /> : "bookmark_border"}
+                                                    </span>
+                                                    {isSaved ? "Saved" : "Save"}
+                                                </button>
                                             ) : session ? (
-                                                // Logged in but not a brand/admin (could be another influencer)
+                                                // Logged in but not a brand/admin
                                                 <button disabled className="flex-1 md:flex-none h-11 px-6 bg-gray-100 text-gray-400 rounded-xl font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
                                                     <span className="material-symbols-outlined text-[20px]">info</span>
                                                     Brand access only
                                                 </button>
                                             ) : (
                                                 // Guest
-                                                <Link href={`/login?returnUrl=/discover/${profile.id}`} className="flex-1 md:flex-none h-11 px-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2">
+                                                <Link href={`/login?returnUrl=/creators/${profile.id}`} className="flex-1 md:flex-none h-11 px-6 bg-gradient-to-r from-teal-600 to-teal-500 text-white hover:from-teal-700 hover:to-teal-600 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center gap-2">
                                                     <span className="material-symbols-outlined text-[20px]">login</span>
-                                                    Login to Hire
+                                                    Login to Save
                                                 </Link>
                                             )}
                                         </div>
