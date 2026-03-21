@@ -87,13 +87,7 @@ export default function InfluencerProfile() {
                             <span className="font-semibold text-xs text-gray-500">Back to Discovery</span>
                         </div>
                         <div className="ml-auto flex items-center gap-3">
-
-                            <button
-                                onClick={handleOpenInvite}
-                                className="px-5 py-2 bg-white border-2 border-teal-600 text-teal-700 rounded-lg font-bold hover:bg-teal-50 transition-all"
-                            >
-                                Request Collaboration
-                            </button>
+                            {/* Request Collaboration Button Removed */}
                         </div>
                     </div>
                 </div>

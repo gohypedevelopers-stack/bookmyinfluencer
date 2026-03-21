@@ -195,22 +195,8 @@ export default function InfluencerProfileClient({
                                                         </span>
                                                         {isSaved ? "Saved" : "Save"}
                                                     </button>
-                                                    <button onClick={handleOpenInvite}
-                                                        className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-500 via-teal-600 to-teal-500 bg-size-200 animate-gradient-x text-white hover:shadow-teal-500/40 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center gap-2 group"
-                                                    >
-                                                        <span className="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform duration-300">campaign</span>
-                                                        <span className="tracking-wide">Request Collaboration</span>
-                                                    </button>
                                                 </>
-                                            ) : (
-                                                <Link
-                                                    href={`/login?returnUrl=/brand/discover/${profile.id}&action=hire`}
-                                                    className="flex-1 md:flex-none h-12 px-8 bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:from-teal-700 hover:to-emerald-700 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-2 animate-pulse hover:animate-none"
-                                                >
-                                                    <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-                                                    Request Collaboration
-                                                </Link>
-                                            )}
+                                            ) : null}
                                         </div>
                                     </div>
                                     {/* Name & Bio */}

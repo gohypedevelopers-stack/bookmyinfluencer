@@ -25,6 +25,21 @@ export default async function BrandDashboardPage() {
     const stats = await getBrandStats();
     const { data: creators } = await getPublicCreators({ maxFollowers: 500000 });
 
+    const getFallbackBanner = (niche: string) => {
+        const n = (niche || '').toLowerCase();
+        if (n.includes('fashion') || n.includes('beauty') || n.includes('style')) return 'https://images.unsplash.com/photo-1490481651871-ab38ed250239?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('tech') || n.includes('gadget')) return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('travel')) return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('food') || n.includes('cook') || n.includes('culinary')) return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('fit') || n.includes('health') || n.includes('gym')) return 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('education') || n.includes('learning')) return 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('gaming')) return 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('finance') || n.includes('money')) return 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('parenting')) return 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('auto')) return 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80';
+        return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
+    };
+
     const recommendedInfluencers = creators ? creators.map((creator: any) => ({
         ...creator,
         stats: {
@@ -32,7 +47,7 @@ export default async function BrandDashboardPage() {
             engagement: creator.engagementRate || 0,
             match: Math.floor(Math.random() * 20) + 80,
         },
-        bannerImage: creator.bannerImage || null,
+        bannerImage: creator.bannerImage || getFallbackBanner(creator.niche),
     })) : [];
 
     const activities = await getBrandDashboardActivity();
