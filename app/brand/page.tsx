@@ -23,7 +23,7 @@ export default async function BrandDashboardPage() {
 
     const brandName = session.user.name || "Brand";
     const stats = await getBrandStats();
-    const { data: creators } = await getPublicCreators();
+    const { data: creators } = await getPublicCreators({ maxFollowers: 500000 });
 
     const recommendedInfluencers = creators ? creators.map((creator: any) => ({
         ...creator,

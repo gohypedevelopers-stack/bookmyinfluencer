@@ -41,7 +41,7 @@ function InfluencerDiscoveryInner() {
 
     // Read onboarding preferences from URL (followers in K)
     const urlMinFollowers = searchParams.get('minFollowers') ? Math.round(Number(searchParams.get('minFollowers')) / 1000) : 0;
-    const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 1000;
+    const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 500;
     const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
     const urlMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 5000;
 
@@ -64,8 +64,8 @@ function InfluencerDiscoveryInner() {
     const [selectedCity, setSelectedCity] = useState('Mumbai');
     const [selectedNiche, setSelectedNiche] = useState('All');
     const [priceRange, setPriceRange] = useState([urlMinPrice, Math.min(urlMaxPrice, 5000)]);
-    const [followersRange, setFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
-    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
+    const [followersRange, setFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 500)]);
+    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 500)]);
     const [showAllNiches, setShowAllNiches] = useState(false);
 
     // Debounce Followers Range
@@ -155,7 +155,7 @@ function InfluencerDiscoveryInner() {
         setSelectedCity('Mumbai');
         setSelectedNiche('All');
         setPriceRange([0, 5000]);
-        setFollowersRange([0, 1000]);
+        setFollowersRange([0, 500]);
         setSearchQuery('');
         // Fetch will trigger automatically due to effect on state change
     };
@@ -296,12 +296,12 @@ function InfluencerDiscoveryInner() {
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-3">
                                             Followers
-                                            <span className="ml-2 text-teal-600 text-xs">{followersRange[0]}k - {followersRange[1] === 1000 ? '1M+' : followersRange[1] + 'k'}</span>
+                                            <span className="ml-2 text-teal-600 text-xs">{followersRange[0]}k - {followersRange[1] === 500 ? '500k+' : followersRange[1] + 'k'}</span>
                                         </label>
                                         <div className="px-2">
                                             <Slider
                                                 min={0}
-                                                max={1000}
+                                                max={500}
                                                 step={10}
                                                 value={followersRange}
                                                 onValueChange={setFollowersRange}
@@ -310,7 +310,7 @@ function InfluencerDiscoveryInner() {
                                             />
                                             <div className="flex justify-between mt-2 text-xs text-gray-500">
                                                 <span>0k</span>
-                                                <span>1M+</span>
+                                                <span>500k+</span>
                                             </div>
                                         </div>
                                     </div>

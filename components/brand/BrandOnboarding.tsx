@@ -29,14 +29,6 @@ type OnboardingData = {
 // Follower tiers
 const followerTiers = [
     {
-        label: "Nano",
-        desc: "1K – 10K followers",
-        badge: "Most Authentic",
-        min: 1000,
-        max: 10000,
-        color: "from-emerald-400 to-teal-500"
-    },
-    {
         label: "Micro",
         desc: "10K – 100K followers",
         badge: "High Engagement",
@@ -51,14 +43,6 @@ const followerTiers = [
         min: 100000,
         max: 500000,
         color: "from-violet-400 to-purple-500"
-    },
-    {
-        label: "Mega",
-        desc: "500K+ followers",
-        badge: "Massive Impact",
-        min: 500000,
-        max: 10000000,
-        color: "from-orange-400 to-rose-500"
     },
 ]
 
@@ -231,7 +215,7 @@ export default function BrandOnboarding() {
                                     Welcome to <br /><span className="text-blue-600">Book My Influencers</span>
                                 </h1>
                                 <p className="text-lg text-gray-500 max-w-md">
-                                    Let's personalise your brand profile so we can match you with the perfect creators — in just a few steps.
+                                    Our internal project managers handle the entire execution, from matching to delivery. Let's personalize your brand profile first.
                                 </p>
                                 <button
                                     onClick={handleNext}
@@ -540,10 +524,8 @@ export default function BrandOnboarding() {
                                 <h2 className="text-3xl font-bold text-gray-900">Preferred Creators?</h2>
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Nano", desc: "1K–10K followers", range: "Most Authentic" },
                                         { label: "Micro", desc: "10K–100K followers", range: "High Engagement" },
-                                        { label: "Macro", desc: "100K–500K followers", range: "Broad Reach" },
-                                        { label: "Celebrity", desc: "500K+ followers", range: "Massive Impact" }
+                                        { label: "Macro", desc: "100K–500K followers", range: "Broad Reach" }
                                     ].map((option) => (
                                         <button
                                             key={option.label}
@@ -626,7 +608,7 @@ export default function BrandOnboarding() {
 
                                 <h1 className="text-4xl font-bold text-gray-900">You're All Set!</h1>
                                 <p className="text-gray-500 max-w-md text-base">
-                                    We've personalised your experience. Based on your preferences, here are creators ready to work with your brand.
+                                    We've personalised your experience. Our internal project managers will now handle the matching and execution for you.
                                 </p>
 
                                 {/* Preference summary chips */}

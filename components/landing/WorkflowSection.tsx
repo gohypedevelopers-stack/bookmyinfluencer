@@ -9,20 +9,20 @@ const stepsData = {
     brand: [
         {
             step: "1",
-            title: "Search & Filter",
-            desc: "Use advanced filters to find the perfect creator match based on niche, engagement rate, and location.",
+            title: "Design Campaign",
+            desc: "Define your goals and target audience. Our internal project managers will handle the search and vetting.",
             icon: "search"
         },
         {
             step: "2",
-            title: "Negotiate & Fund",
-            desc: "Agree on terms directly via our chat. Deposit funds safely into escrow to start the project.",
+            title: "Expert Execution",
+            desc: "Review your curated matches. We handle all negotiations, contracts, and execution for you.",
             icon: "chat"
         },
         {
             step: "3",
-            title: "Approve & Release",
-            desc: "Review the content. Once satisfied, release the payment to the creator instantly.",
+            title: "Approve & Scale",
+            desc: "Review high-quality results. Once satisfied, release payment. Scale with guaranteed results.",
             icon: "check_circle"
         }
     ],

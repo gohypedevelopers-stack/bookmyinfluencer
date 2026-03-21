@@ -14,7 +14,7 @@ const DUMMY_CREATORS = [
         fullName: "Aryan Sharma",
         profileImageUrl: "/images/elena.png",
         niche: "Lifestyle & Fitness",
-        metrics: [{ followersCount: 850000, engagementRate: 4.8 }],
+        metrics: [{ followersCount: 85000, engagementRate: 4.8 }],
         verificationStatus: 'APPROVED'
     },
     {
@@ -23,7 +23,7 @@ const DUMMY_CREATORS = [
         fullName: "Sanya Malhotra",
         profileImageUrl: "/images/julian.png",
         niche: "Fashion & Beauty",
-        metrics: [{ followersCount: 1250000, engagementRate: 5.2 }],
+        metrics: [{ followersCount: 425000, engagementRate: 5.2 }],
         verificationStatus: 'APPROVED'
     },
     {
@@ -50,7 +50,7 @@ const DUMMY_CREATORS = [
         fullName: "Kabir Das",
         profileImageUrl: "/images/marco.png",
         niche: "Comedy & Entertainment",
-        metrics: [{ followersCount: 2100000, engagementRate: 3.9 }],
+        metrics: [{ followersCount: 410000, engagementRate: 3.9 }],
         verificationStatus: 'APPROVED'
     }
 ];
@@ -62,6 +62,14 @@ export async function TalentSection() {
         dbCreators = await db.creator.findMany({
             where: {
                 verificationStatus: 'APPROVED',
+                metrics: {
+                    some: {
+                        followersCount: {
+                            gte: 10000,
+                            lte: 600000
+                        }
+                    }
+                }
             },
             include: {
                 user: true,

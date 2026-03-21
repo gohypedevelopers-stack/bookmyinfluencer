@@ -71,13 +71,12 @@ const NextButton = ({
     </button>
 );
 
-const TOTAL_STEPS = 12;
+const TOTAL_STEPS = 11;
 
 // Follower tiers
 const followerTiers = [
     { label: "Micro", desc: "10K – 100K followers", badge: "High Engagement", min: 10000, max: 100000, color: "from-blue-400 to-cyan-500" },
     { label: "Macro", desc: "100K – 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500" },
-    { label: "Mega", desc: "500K+ followers", badge: "Massive Impact", min: 500000, max: 10000000, color: "from-orange-400 to-rose-500" },
 ];
 
 type PriceTier = { label: string; badge: string; min: number; max: number };
@@ -95,12 +94,6 @@ const perCollabPriceTiersByFollowerTier: Record<string, PriceTier[]> = {
         { label: '₹2,00,000 – ₹5,00,000', badge: 'Performance', min: 200000, max: 500000 },
         { label: '₹5,00,000 – ₹10,00,000', badge: 'Scaled Reach', min: 500000, max: 1000000 },
         { label: '₹10,00,000+', badge: 'Premium', min: 1000000, max: 10000000 },
-    ],
-    Mega: [
-        { label: '₹3,00,000 – ₹10,00,000', badge: 'Mega Entry', min: 300000, max: 1000000 },
-        { label: '₹10,00,000 – ₹25,00,000', badge: 'National Push', min: 1000000, max: 2500000 },
-        { label: '₹25,00,000 – ₹50,00,000', badge: 'Flagship', min: 2500000, max: 5000000 },
-        { label: '₹50,00,000+', badge: 'Enterprise', min: 5000000, max: 10000000 },
     ],
 };
 
@@ -275,7 +268,7 @@ export default function BrandRegisterPage() {
             });
 
             setDirection(1);
-            setCurrentStep(12);
+            setCurrentStep(11);
         } else {
             setCampaignWorkflow(null);
             setWorkflowWarning('');
@@ -295,16 +288,15 @@ export default function BrandRegisterPage() {
             case 6: return !!onboardingData.campaignType;
             case 7: return Number(onboardingData.budget) > 0;
             case 8: return true;
-            case 9: return true;
-            case 10: return onboardingData.platforms.length > 0;
-            case 11: return true;
+            case 9: return onboardingData.platforms.length > 0;
+            case 10: return true;
             default: return true;
         }
     };
 
     const goNext = async () => {
         setError('');
-        if (currentStep === 11) {
+        if (currentStep === 10) {
             await handleFinalSubmit();
             return;
         }
@@ -330,17 +322,16 @@ export default function BrandRegisterPage() {
 
     // Step-specific sidebar content
     const sidebarContent = (): { icon: React.ReactNode; tag: string; title: string; desc: string } => {
-        if (currentStep === 1) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Scale your Impact", desc: "Start by introducing your brand. We'll help you find creators who align with your core identity." };
+        if (currentStep === 1) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Scale your Impact", desc: "Start by introducing your brand. Our internal project managers handle the entire execution, from matching to delivery." };
         if (currentStep === 2) return { icon: <ArrowRight className="w-8 h-8 text-white" />, tag: "Account Security", title: "Join the Club", desc: "Enter your work email so we can verify you and grant access to our elite creator network." };
         if (currentStep === 3) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Account Setup", title: "Protect your Account", desc: "Create a secure password to keep your campaigns and data safe." };
         if (currentStep === 4) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Onboarding", title: "Perfect Start", desc: "Your basic account is ready. Let's fine-tune your platform to match your specific needs." };
         if (currentStep === 5) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Profile", title: "Personal Branding", desc: "How should creators see you? Your public name is the first thing they'll notice." };
         if (currentStep === 6) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Campaigns", title: "Strategy First", desc: "Different goals require different creators. Let's define what success looks like for you." };
         if (currentStep === 7) return { icon: <DollarSign className="w-8 h-8 text-white" />, tag: "Planning", title: "Smart Budgeting", desc: "We match you with creators who provide the best ROI within your target range." };
-        if (currentStep === 8) return { icon: <Users className="w-8 h-8 text-white" />, tag: "Matchmaking", title: "Size Matters", desc: "From high-engagement Micro creators to massive Mega influencers, find the right reach for your brand." };
-        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "ROI Focus", title: "Collab Budgeting", desc: "Set per-collaboration pricing based on your selected creator size." };
-        if (currentStep === 10) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Reach", title: "Targeted Platforms", desc: "Reach your audience where they spend most of their time." };
-        if (currentStep === 11) return { icon: <Zap className="w-8 h-8 text-white" />, tag: "Finalizing", title: "Mission Control", desc: "Any specific objectives in mind? These details help creators understand your vision better." };
+        if (currentStep === 8) return { icon: <Users className="w-8 h-8 text-white" />, tag: "Matchmaking", title: "Smart Reach", desc: "From high-engagement Micro creators to broad-reach Macro influencers, our team finds the right voice for you." };
+        if (currentStep === 9) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Reach", title: "Targeted Platforms", desc: "Reach your audience where they spend most of their time." };
+        if (currentStep === 10) return { icon: <Zap className="w-8 h-8 text-white" />, tag: "Finalizing", title: "Mission Control", desc: "Any specific objectives in mind? These details help creators understand your vision better." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Blast Off!", desc: "Your brand is now part of the ecosystem. Get ready for explosive growth." };
     };
     const sidebar = sidebarContent();
@@ -468,14 +459,14 @@ export default function BrandRegisterPage() {
                     </div>
 
                     {/* Back Button */}
-                    {currentStep > 1 && currentStep < 12 && (
+                    {currentStep > 1 && currentStep < 11 && (
                         <button onClick={goBack} className="absolute top-5 left-5 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700 z-20">
                             <ChevronLeft size={20} />
                         </button>
                     )}
 
                     {/* Step Counter */}
-                    {currentStep < 12 && (
+                    {currentStep < 11 && (
                         <div className="absolute top-6 right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
                             Step {currentStep} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 1}
                         </div>
@@ -927,59 +918,10 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                            {/* ===== STEP 9: Per-Collaboration Pricing ===== */}
+
+                            {/* ===== STEP 9: Platforms ===== */}
                             {currentStep === 9 && (
                                 <CardWrapper stepKey="step9" direction={direction}>
-                                    <div className="space-y-6">
-                                        <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Per collaboration budget?</h2>
-                                            <p className="text-sm text-slate-400 mt-1">
-                                                Pricing for <span className="font-semibold text-slate-600">{selectedFollowerTier.label}</span> creators.
-                                            </p>
-                                        </div>
-
-                                        <div className="flex justify-center">
-                                            <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-                                                Pricing Type: Per Collaboration
-                                            </span>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {activePerCollabPriceTiers.map((tier) => {
-                                                const isSelected = onboardingData.minPricePerPost === tier.min && onboardingData.maxPricePerPost === tier.max;
-                                                return (
-                                                    <button key={tier.label}
-                                                        onClick={() => {
-                                                            updateOnboarding('priceType', 'Per Collab');
-                                                            updateOnboarding('minPricePerPost', tier.min);
-                                                            updateOnboarding('maxPricePerPost', tier.max);
-                                                            goNext();
-                                                        }}
-                                                        className={`w-full p-5 border-2 rounded-2xl text-left transition-all flex items-center justify-between group
-                                                    ${isSelected ? 'border-violet-500 bg-violet-50/60 shadow-lg shadow-violet-100/50' : 'border-slate-200 hover:border-violet-300 hover:bg-violet-50/20'}`}
-                                                    >
-                                                        <div>
-                                                            <div className="font-bold text-lg text-gray-900">{tier.label}</div>
-                                                            <div className="text-sm text-gray-500 mt-0.5">per collaboration</div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full group-hover:bg-indigo-100 group-hover:text-indigo-700 transition-colors">{tier.badge}</span>
-                                                            {isSelected && <Check className="text-blue-600" size={18} />}
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="flex justify-center pt-2">
-                                            <button onClick={goNext} className="text-violet-500 font-semibold hover:underline text-sm">Skip this step</button>
-                                        </div>
-                                    </div>
-                                </CardWrapper>
-                            )}
-
-                            {/* ===== STEP 10: Platforms ===== */}
-                            {currentStep === 10 && (
-                                <CardWrapper stepKey="step10" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Target Platforms?</h2>
@@ -1011,9 +953,9 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                            {/* ===== STEP 11: Campaign Goals ===== */}
-                            {currentStep === 11 && (
-                                <CardWrapper stepKey="step11" direction={direction}>
+                            {/* ===== STEP 10: Campaign Goals ===== */}
+                            {currentStep === 10 && (
+                                <CardWrapper stepKey="step10" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-2xl font-extrabold mb-1" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Campaign Goals</h2>
@@ -1029,9 +971,9 @@ export default function BrandRegisterPage() {
                                 </CardWrapper>
                             )}
 
-                                                        {/* ===== STEP 12: Success ===== */}
-                            {currentStep === 12 && (
-                                <CardWrapper stepKey="step12" direction={direction}>
+                            {/* ===== STEP 11: Success ===== */}
+                            {currentStep === 11 && (
+                                <CardWrapper stepKey="step11" direction={direction}>
                                     <div className="w-full space-y-6 py-6">
                                         <div className="flex flex-col items-center text-center space-y-3">
                                             <motion.div
@@ -1046,7 +988,7 @@ export default function BrandRegisterPage() {
                                             <div className="space-y-2">
                                                 <h1 className="text-3xl font-bold text-gray-900">Campaign Queue Started</h1>
                                                 <p className="text-gray-500 max-w-xl text-sm sm:text-base">
-                                                    Your brand profile is live and the first influencer requests have been generated from your registration filters.
+                                                    Your brand profile is live. Our team will now handle the influencer matching and execution for you.
                                                 </p>
                                             </div>
                                         </div>

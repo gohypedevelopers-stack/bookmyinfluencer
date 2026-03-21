@@ -159,8 +159,8 @@ export function HeroSection() {
                             >
                                 <Users className="w-5 h-5 text-blue-500 stroke-[2] shrink-0" />
                                 <div>
-                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">1.2M+</div>
-                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Total Followers</div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">500K+</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Max Followers</div>
                                 </div>
                             </motion.div>
 
