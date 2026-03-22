@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { inspectBrandLoginEmail } from "@/app/brand/auth-actions"
-import { CheckCircle2, Lock, ShieldCheck, Eye, EyeOff } from "lucide-react"
+import { CheckCircle2, Lock, ShieldCheck, Eye, EyeOff, Building2, Mail, LayoutDashboard, ArrowRight, Loader2, Zap, Sparkles } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 function BrandLoginForm() {
     const [email, setEmail] = useState("")
@@ -72,21 +73,35 @@ function BrandLoginForm() {
     }
 
     return (
-        <>
-            {successMessage && (
-                <div className="rounded-lg bg-green-50 p-3 text-sm font-medium text-green-700">
-                    {successMessage}
-                </div>
-            )}
-            <form className="space-y-8" onSubmit={handleLogin}>
-                <div className="space-y-4">
-                    <Label htmlFor="email">BUSINESS EMAIL</Label>
-                    <div className="relative">
-                        <Input
+        <div className="w-full">
+            <AnimatePresence mode="wait">
+                {successMessage && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                        className="mb-6 rounded-xl bg-emerald-50/80 border border-emerald-200 p-4 flex items-start gap-3 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur-sm">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        <p>{successMessage}</p>
+                    </motion.div>
+                )}
+                
+                {error && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                        className="mb-6 rounded-xl bg-rose-50/80 border border-rose-200 p-4 flex items-start gap-3 text-sm font-medium text-rose-800 shadow-sm backdrop-blur-sm">
+                        <Zap className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                        <p>{error}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <form className="space-y-5" onSubmit={handleLogin}>
+                <div className="space-y-1.5">
+                    <label htmlFor="email" className="text-xs font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Business Email</label>
+                    <div className="relative group">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-5 h-5" />
+                        <input
                             id="email"
                             type="email"
                             placeholder="name@company.com"
-                            className="h-12 bg-gray-50 border-gray-200"
+                            className="w-full pl-12 pr-4 py-3.5 text-sm border border-slate-200 rounded-2xl focus:border-violet-500 focus:ring-[6px] focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-medium shadow-sm"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -94,16 +109,20 @@ function BrandLoginForm() {
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <Label htmlFor="password">PASSWORD</Label>
-                        <span className="text-xs text-blue-600 font-bold cursor-pointer hover:underline">Forgot password?</span>
+                <div className="space-y-1.5">
+                    <div className="flex justify-between items-center px-1">
+                        <label htmlFor="password" className="text-xs font-black text-slate-400 uppercase tracking-[0.1em]">Password</label>
+                        <Link href="/forgot-password" className="text-xs font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors">
+                            Forgot password?
+                        </Link>
                     </div>
-                    <div className="relative">
-                        <Input
+                    <div className="relative group">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-5 h-5" />
+                        <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            className="h-12 bg-gray-50 border-gray-200 pr-10"
+                            placeholder="••••••••"
+                            className="w-full pl-12 pr-12 py-3.5 text-sm border border-slate-200 rounded-2xl focus:border-violet-500 focus:ring-[6px] focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-medium shadow-sm "
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -111,136 +130,178 @@ function BrandLoginForm() {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
                         >
                             {showPassword ? (
-                                <EyeOff className="w-5 h-5" />
+                                <EyeOff className="w-4.5 h-4.5" />
                             ) : (
-                                <Eye className="w-5 h-5" />
+                                <Eye className="w-4.5 h-4.5" />
                             )}
                         </button>
                     </div>
                 </div>
 
-                {error && (
-                    <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
-                        {error}
-                    </div>
-                )}
-
-                <Button disabled={isLoading} className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-200 mt-4">
-                    {isLoading ? "Signing in..." : "Sign In to Dashboard"}
-                </Button>
+                <div className="pt-2">
+                    <button 
+                        disabled={isLoading} 
+                        className="w-full group relative flex items-center justify-center gap-2 h-14 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                        {isLoading ? (
+                            <><Loader2 className="w-5 h-5 animate-spin" /> Authenticating...</>
+                        ) : (
+                            <>Sign In to Dashboard <ArrowRight className="w-4.5 h-4.5 ml-1 transition-transform group-hover:translate-x-1" /></>
+                        )}
+                    </button>
+                </div>
             </form>
-        </>
+            
+            <div className="mt-8 text-center space-y-4">
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-3 bg-white text-slate-400 font-medium leading-none">New to Bookmyinfluencer?</span>
+                    </div>
+                </div>
+                
+                <p className="text-slate-600 text-sm">
+                    Don't have a brand account?{" "}
+                    <Link href="/brand/register" className="font-extrabold text-violet-600 hover:text-violet-700 hover:underline transition-all">
+                        Create Account
+                    </Link>
+                </p>
+            </div>
+        </div>
     )
 }
 
 export default function BrandLoginPage() {
     return (
-        <div className="min-h-screen w-full flex">
-            <div className="hidden lg:flex lg:w-1/2 relative bg-blue-900 text-white flex-col justify-center p-16 overflow-hidden">
+        <div className="min-h-screen w-full flex bg-slate-50/50 relative overflow-hidden font-sans">
+            {/* Ambient Background Orbs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                <motion.div animate={{ y: [0, -20, 0], x: [0, 10, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[-10%] right-[-5%] w-[40rem] h-[40rem] bg-violet-200/40 rounded-full blur-[120px]" />
+                <motion.div animate={{ y: [0, 20, 0], x: [0, -15, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute bottom-[-10%] left-[-5%] w-[35rem] h-[35rem] bg-indigo-200/40 rounded-full blur-[100px]" />
+            </div>
+
+            {/* Left Side (Decorative) */}
+            <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-slate-900 border-r border-slate-800/50 z-10 shadow-2xl">
                 <div className="absolute inset-0 z-0">
                     <Image
                         src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2874&auto=format&fit=crop"
                         alt="Background"
                         fill
-                        className="object-cover opacity-20 mix-blend-overlay"
+                        className="object-cover opacity-30 mix-blend-luminosity scale-105"
                         priority
-                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        sizes="50vw"
                     />
-                    <div className="absolute inset-0 bg-blue-900/90 mix-blend-multiply" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/90 via-violet-900/80 to-slate-900/90 mix-blend-multiply" />
                 </div>
 
-                <div className="relative z-10 max-w-xl">
-                    <div className="flex items-center gap-3 mb-16">
-                        <div className="w-10 h-10 bg-white/10 backdrop-blur rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                            I
-                        </div>
-                        <span className="text-xl font-bold">InfluencerCRM</span>
+                <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-xl">
+                        <Building2 size={24} className="text-white" />
                     </div>
+                    <span className="text-2xl font-black text-white tracking-tight">Bookmyinfluencer</span>
+                </div>
 
-                    <h1 className="text-5xl font-extrabold leading-tight mb-8">
-                        Scale your brand with data-driven creator partnerships.
-                    </h1>
+                <div className="relative z-10 max-w-md mt-auto mb-auto">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6 shadow-lg">
+                            <Sparkles className="w-4 h-4 text-violet-300" />
+                            <span className="text-[11px] font-bold text-white uppercase tracking-widest">Brand Portal</span>
+                        </div>
+                        <h1 className="text-5xl font-black leading-[1.1] mb-6 text-white tracking-tight drop-shadow-md">
+                            Scale your brand with <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">data-driven</span> creators.
+                        </h1>
+                        <p className="text-slate-300 text-lg mb-10 leading-relaxed font-medium">
+                            Manage, track, and optimize high-performing influencer campaigns from a single unified dashboard.
+                        </p>
+                    </motion.div>
 
-                    <p className="text-blue-100 text-lg mb-12 leading-relaxed opacity-90">
-                        The ultimate platform for brands to manage, track, and optimize influencer campaigns at scale. Join 500+ top-tier brands today.
-                    </p>
-
-                    <div className="space-y-6">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="space-y-5">
                         {[
-                            "Real-time Campaign Analytics",
-                            "Automated Escrow Payments",
-                            "AI-Powered Influencer Discovery",
+                            { title: "Real-time Analytics", icon: LayoutDashboard },
+                            { title: "Automated Escrow", icon: Lock },
+                            { title: "AI-Powered Discovery", icon: Sparkles },
                         ].map((item, i) => (
-                            <div key={i} className="flex items-center gap-4">
-                                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0">
-                                    <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                            <div key={i} className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shrink-0">
+                                    <item.icon className="w-5 h-5 text-violet-300" />
                                 </div>
-                                <span className="font-medium text-lg">{item}</span>
+                                <span className="font-bold text-slate-100">{item.title}</span>
                             </div>
                         ))}
-                    </div>
+                    </motion.div>
+                </div>
 
-                    <div className="mt-20 text-sm text-white/40">
-                        2024 InfluencerCRM. All rights reserved.
-                    </div>
+                <div className="relative z-10 mt-auto text-sm text-slate-400 font-medium">
+                    &copy; 2024 Bookmyinfluencer. All rights reserved.
                 </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center p-8 bg-white">
-                <div className="w-full max-w-md space-y-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign In to Dashboard</h1>
-                        <p className="text-gray-600">
-                            Welcome back. Enter your credentials to access your account.
+            {/* Right Side (Form) */}
+            <div className="flex-1 flex flex-col pt-12 lg:pt-0 lg:justify-center items-center p-6 sm:p-12 relative z-10 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                
+                {/* Mobile Logo */}
+                <div className="flex lg:hidden items-center gap-3 mb-10 mt-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <Building2 size={20} className="text-white" />
+                    </div>
+                    <span className="text-2xl font-black text-slate-900 tracking-tight">Bookmyinfluencer</span>
+                </div>
+
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="w-full max-w-[400px] bg-white/90 backdrop-blur-xl p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white box-border"
+                >
+                    <div className="mb-10 text-center">
+                        <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner border border-violet-100 transform rotate-3">
+                            <Lock className="w-8 h-8 text-violet-600" />
+                        </div>
+                        <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Welcome Back</h2>
+                        <p className="text-slate-500 text-sm font-medium px-4">
+                            Sign in to your dashboard to manage your brand campaigns.
                         </p>
                     </div>
 
-                    <Suspense fallback={<div className="text-gray-500">Loading...</div>}>
+                    <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="w-8 h-8 text-violet-500 animate-spin" /></div>}>
                         <BrandLoginForm />
                     </Suspense>
 
-                    <div className="space-y-2 text-center pt-4">
-                        <p className="text-gray-600 text-sm">
-                            Don&apos;t have a brand account?{" "}
-                            <Link href="/brand/register" className="font-bold text-blue-600 hover:underline">
-                                Create Brand Account
-                            </Link>
-                        </p>
-                        <p className="text-gray-500 text-xs">
-                            If this email belongs to a creator account, use the general sign-in page instead.
-                        </p>
-                    </div>
-
-                    <div className="flex gap-4 pt-8">
-                        <div className="flex-1 p-4 border border-gray-100 rounded-lg flex items-center gap-3 bg-gray-50/50">
-                            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                                <Lock className="w-4 h-4 text-green-600" />
+                    <div className="flex gap-3 pt-10 mt-2">
+                        <div className="flex-1 p-3.5 border border-slate-100 rounded-2xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100/80 flex items-center justify-center shrink-0 border border-emerald-200/50">
+                                <Lock className="w-3.5 h-3.5 text-emerald-600" />
                             </div>
-                            <div>
-                                <div className="text-[10px] uppercase font-bold text-gray-400">SSL SECURE</div>
-                                <div className="text-xs font-bold text-gray-900">256-bit AES</div>
+                            <div className="min-w-0">
+                                <div className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Secure</div>
+                                <div className="text-xs font-bold text-slate-700 truncate">256-bit SSL</div>
                             </div>
                         </div>
-                        <div className="flex-1 p-4 border border-gray-100 rounded-lg flex items-center gap-3 bg-gray-50/50">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                        <div className="flex-1 p-3.5 border border-slate-100 rounded-2xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-violet-100/80 flex items-center justify-center shrink-0 border border-violet-200/50">
+                                <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
                             </div>
-                            <div>
-                                <div className="text-[10px] uppercase font-bold text-gray-400">ENCRYPTED</div>
-                                <div className="text-xs font-bold text-gray-900">Data Protected</div>
+                            <div className="min-w-0">
+                                <div className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Privacy</div>
+                                <div className="text-xs font-bold text-slate-700 truncate">Data Safe</div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-center gap-6 text-xs text-gray-400 pt-4">
-                        <Link href="#" className="hover:text-gray-600">Privacy Policy</Link>
-                        <Link href="#" className="hover:text-gray-600">Terms of Service</Link>
-                        <Link href="#" className="hover:text-gray-600">Help Center</Link>
+                    <div className="flex justify-center gap-6 text-[11px] font-bold text-slate-400 pt-8 mt-2 uppercase tracking-wide">
+                        <Link href="/privacy" className="hover:text-violet-600 transition-colors">Privacy</Link>
+                        <Link href="/terms" className="hover:text-violet-600 transition-colors">Terms</Link>
+                        <Link href="/contact" className="hover:text-violet-600 transition-colors">Support</Link>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     )
