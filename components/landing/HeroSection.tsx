@@ -65,15 +65,15 @@ export function HeroSection() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.3 }}
-                                    className="grid grid-cols-2 gap-3"
+                                    className="flex flex-col sm:flex-row w-full gap-3 sm:gap-4"
                                 >
-                                    <Button size="lg" className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-2 h-11 sm:h-12 text-[10px] sm:text-[11px] font-black rounded-xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 border-none uppercase tracking-wider" asChild>
+                                    <Button size="lg" className="w-full sm:flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-4 h-12 sm:h-12 text-xs sm:text-[11px] font-black rounded-xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 border-none uppercase tracking-wider" asChild>
                                         <Link href="/brand/register">
                                             Hire an Influencer
-                                            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                                            <ArrowRight className="ml-1.5 h-4 w-4" />
                                         </Link>
                                     </Button>
-                                    <Button size="lg" variant="outline" className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-300 px-2 h-11 sm:h-12 text-[10px] sm:text-[11px] font-black rounded-xl hover:-translate-y-0.5 transition-all outline-none uppercase tracking-wider shadow-sm" asChild>
+                                    <Button size="lg" variant="outline" className="w-full sm:flex-1 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-300 px-4 h-12 sm:h-12 text-xs sm:text-[11px] font-black rounded-xl hover:-translate-y-0.5 transition-all outline-none uppercase tracking-wider shadow-sm" asChild>
                                         <Link href="/register">
                                             Join as a Creator
                                         </Link>
@@ -134,14 +134,14 @@ export function HeroSection() {
                         </div>
 
                         {/* Floating Metric Cards */}
-                        <div className="mt-6 lg:mt-0 grid grid-cols-3 gap-3 lg:block lg:gap-0">
+                        <div className="mt-6 lg:mt-0 flex overflow-x-auto pb-4 gap-4 px-1 lg:block lg:gap-0 lg:overflow-visible lg:p-0 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
                             {/* Top-right: 8.4% Engagement - overflows right edge */}
                             <motion.div
                                 initial={{ opacity: 0, y: -16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.8, duration: 0.8 }}
-                                className="relative lg:absolute lg:-right-4 lg:top-8 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[140px]"
+                                className="relative lg:absolute lg:-right-4 lg:top-8 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
                             >
                                 <TrendingUp className="w-5 h-5 text-indigo-500 stroke-[2] shrink-0" />
                                 <div>
@@ -155,7 +155,7 @@ export function HeroSection() {
                                 initial={{ opacity: 0, x: -16 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 1, duration: 0.8 }}
-                                className="relative lg:absolute lg:-left-4 lg:bottom-14 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px]"
+                                className="relative lg:absolute lg:-left-4 lg:bottom-14 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
                             >
                                 <Users className="w-5 h-5 text-blue-500 stroke-[2] shrink-0" />
                                 <div>
@@ -169,7 +169,7 @@ export function HeroSection() {
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.2, duration: 0.8 }}
-                                className="relative lg:absolute lg:-right-4 lg:-bottom-6 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px]"
+                                className="relative lg:absolute lg:-right-4 lg:-bottom-6 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
                             >
                                 <Banknote className="w-5 h-5 text-emerald-500 stroke-[2] shrink-0" />
                                 <div>

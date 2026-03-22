@@ -60,8 +60,7 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage, current
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="flex flex-1 flex-col items-center justify-center w-full max-w-[460px] mx-auto px-6 py-8 md:px-8"
+            className="flex flex-1 flex-col items-center justify-center w-full max-w-[460px] mx-auto px-5 pt-16 pb-8 md:px-8 md:py-8"
         >
             {children}
         </motion.div>
@@ -424,7 +423,7 @@ export default function RegisterPage() {
 
                     {/* Step Counter */}
                     {currentStep < 11 && (
-                        <div className="absolute top-6 right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
+                        <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
                             Step {currentStep} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 1}
                         </div>
                     )}

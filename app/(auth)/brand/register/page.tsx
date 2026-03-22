@@ -486,13 +486,13 @@ export default function BrandRegisterPage() {
 
                     {/* Step Counter */}
                     {currentStep < 11 && (
-                        <div className="absolute top-6 right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
+                        <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
                             Step {currentStep} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 1}
                         </div>
                     )}
 
                     {/* Scrollable form area */}
-                    <div className="flex-1 flex flex-col justify-center px-6 py-8 md:px-8 overflow-y-auto">
+                    <div className="flex-1 flex flex-col justify-center px-5 pt-16 pb-8 md:px-8 md:py-8 overflow-y-auto">
                         <ErrorDisplay />
                         <AnimatePresence initial={false} custom={direction} mode="wait">
 
