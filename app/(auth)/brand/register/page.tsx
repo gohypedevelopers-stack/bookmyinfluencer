@@ -1122,179 +1122,234 @@ export default function BrandRegisterPage() {
                             {/* ===== STEP 13: Success ===== */}
                             {currentStep === 13 && (
                                 <CardWrapper stepKey="step13" direction={direction}>
-                                    <div className="w-full space-y-6 py-6">
-                                        <div className="flex flex-col items-center text-center space-y-3">
-                                            <motion.div
-                                                initial={{ scale: 0.5, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.1 }}
-                                                className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg"
-                                            >
-                                                <Check className="w-10 h-10 text-white" strokeWidth={3} />
-                                            </motion.div>
+                                    <div className="w-full space-y-8 py-6 px-1">
+                                        <div className="flex flex-col items-center text-center space-y-4">
+                                            <div className="relative">
+                                                <div className="absolute -inset-4 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
+                                                <motion.div
+                                                    initial={{ scale: 0.5, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.1 }}
+                                                    className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/30 transform rotate-3 hover:rotate-0 transition-transform relative z-10"
+                                                >
+                                                    <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                                                </motion.div>
+                                            </div>
 
-                                            <div className="space-y-2">
-                                                <h1 className="text-3xl font-bold text-gray-900">Campaign Queue Started</h1>
-                                                <p className="text-gray-500 max-w-xl text-sm sm:text-base">
-                                                    Your brand profile is live. Our team will now handle the influencer matching and execution for you.
+                                            <div className="space-y-2 mt-2">
+                                                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Campaign Queue Started</h1>
+                                                <p className="text-slate-500 max-w-sm text-sm mx-auto font-medium">
+                                                    Your brand profile is live. Our team will handle influencer matching and sequence execution.
                                                 </p>
                                             </div>
                                         </div>
 
                                         {workflowWarning && (
-                                            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
-                                                {workflowWarning}
+                                            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-5 py-4 text-sm font-semibold text-amber-700 flex items-start gap-3">
+                                                <Zap className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                                <p>{workflowWarning}</p>
                                             </div>
                                         )}
 
                                         {campaignWorkflow ? (
-                                            <div className="space-y-5">
+                                            <div className="space-y-6">
+                                                {/* Overview Cards Container */}
                                                 <div className="grid gap-4 sm:grid-cols-2">
-                                                    <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 text-left">
-                                                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Campaign Summary</div>
-                                                        <h2 className="mt-3 text-xl font-bold text-slate-900">{campaignWorkflow.campaign.title}</h2>
-                                                        <p className="mt-2 text-sm text-slate-500">{campaignWorkflow.campaign.summary || 'Initial collaboration campaign created from onboarding.'}</p>
-                                                        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-200">
-                                                                <div className="text-slate-400">Budget</div>
-                                                                <div className="mt-1 font-semibold text-slate-900">{campaignWorkflow.campaign.totalBudgetLabel}</div>
+                                                    
+                                                    {/* Campaign Summary Card */}
+                                                    <div className="rounded-3xl border border-slate-200/60 bg-white/50 backdrop-blur-xl p-6 shadow-sm relative overflow-hidden group hover:shadow-md hover:border-violet-200 transition-all">
+                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-violet-500/10 transition-colors" />
+                                                        <div className="flex items-center gap-2 mb-4">
+                                                            <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
+                                                                <Target className="w-4 h-4 text-violet-600" />
                                                             </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-200">
-                                                                <div className="text-slate-400">Category</div>
-                                                                <div className="mt-1 font-semibold text-slate-900 capitalize">{campaignWorkflow.campaign.categoryLabel}</div>
+                                                            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Campaign Summary</div>
+                                                        </div>
+                                                        <h2 className="text-xl font-black text-slate-900 mb-1 leading-tight">{campaignWorkflow.campaign.title}</h2>
+                                                        <p className="text-xs font-semibold text-slate-500 mb-5 line-clamp-2">{campaignWorkflow.campaign.summary || 'Initial collaboration system.'}</p>
+                                                        
+                                                        <div className="grid grid-cols-2 gap-2 text-sm relative z-10">
+                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Budget</div>
+                                                                <div className="font-extrabold text-slate-900 truncate">{campaignWorkflow.campaign.totalBudgetLabel}</div>
                                                             </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-200">
-                                                                <div className="text-slate-400">Follower Range</div>
-                                                                <div className="mt-1 font-semibold text-slate-900">{campaignWorkflow.campaign.followerRangeLabel}</div>
+                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Category</div>
+                                                                <div className="font-extrabold text-slate-900 capitalize truncate">{campaignWorkflow.campaign.categoryLabel}</div>
                                                             </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-200">
-                                                                <div className="text-slate-400">Last Match Run</div>
-                                                                <div className="mt-1 font-semibold text-slate-900">{formatSummaryDate(campaignWorkflow.campaign.matchingTriggeredAt)}</div>
+                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reach</div>
+                                                                <div className="font-extrabold text-slate-900 truncate">{campaignWorkflow.campaign.followerRangeLabel}</div>
+                                                            </div>
+                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
+                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Match Date</div>
+                                                                <div className="font-extrabold text-slate-900 truncate flex items-center">
+                                                                    {formatSummaryDate(campaignWorkflow.campaign.matchingTriggeredAt)}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="rounded-3xl border border-slate-200 bg-white p-5 text-left">
-                                                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Request Health</div>
-                                                        <div className="mt-4 grid grid-cols-2 gap-3">
-                                                            <div className="rounded-2xl bg-blue-50 p-3 border border-blue-100">
-                                                                <div className="text-xs text-blue-500">Pending</div>
-                                                                <div className="mt-1 text-2xl font-bold text-blue-700">{campaignWorkflow.counts.pending}</div>
+                                                    {/* Request Health Card */}
+                                                    <div className="rounded-3xl border border-slate-200/60 bg-slate-50/50 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-all">
+                                                        <div className="flex items-center gap-2 mb-5">
+                                                            <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
+                                                                <Zap className="w-4 h-4 text-blue-600" />
                                                             </div>
-                                                            <div className="rounded-2xl bg-emerald-50 p-3 border border-emerald-100">
-                                                                <div className="text-xs text-emerald-500">Accepted</div>
-                                                                <div className="mt-1 text-2xl font-bold text-emerald-700">{campaignWorkflow.counts.accepted}</div>
+                                                            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Request Health</div>
+                                                        </div>
+                                                        
+                                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                                            <div className="rounded-2xl bg-blue-50/80 p-3 border border-blue-100/50 shadow-sm relative overflow-hidden group">
+                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-blue-500/10 rounded-full blur-md" />
+                                                                <div className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Pending</div>
+                                                                <div className="text-3xl font-black text-blue-700 tracking-tight">{campaignWorkflow.counts.pending}</div>
                                                             </div>
-                                                            <div className="rounded-2xl bg-amber-50 p-3 border border-amber-100">
-                                                                <div className="text-xs text-amber-500">Expired</div>
-                                                                <div className="mt-1 text-2xl font-bold text-amber-700">{campaignWorkflow.counts.expired}</div>
+                                                            <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100/50 shadow-sm relative overflow-hidden group">
+                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-emerald-500/10 rounded-full blur-md" />
+                                                                <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-1">Accepted</div>
+                                                                <div className="text-3xl font-black text-emerald-700 tracking-tight">{campaignWorkflow.counts.accepted}</div>
                                                             </div>
-                                                            <div className="rounded-2xl bg-violet-50 p-3 border border-violet-100">
-                                                                <div className="text-xs text-violet-500">Slots Remaining</div>
-                                                                <div className="mt-1 text-2xl font-bold text-violet-700">{campaignWorkflow.counts.remainingAcceptedSlots}</div>
+                                                            <div className="rounded-2xl bg-amber-50/80 p-3 border border-amber-100/50 shadow-sm relative overflow-hidden group">
+                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-amber-500/10 rounded-full blur-md" />
+                                                                <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Expired</div>
+                                                                <div className="text-3xl font-black text-amber-700 tracking-tight">{campaignWorkflow.counts.expired}</div>
+                                                            </div>
+                                                            <div className="rounded-2xl bg-violet-50/80 p-3 border border-violet-100/50 shadow-sm relative overflow-hidden group">
+                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-violet-500/10 rounded-full blur-md" />
+                                                                <div className="text-[10px] font-bold text-violet-500 uppercase tracking-wider mb-1">Available</div>
+                                                                <div className="text-3xl font-black text-violet-700 tracking-tight">{campaignWorkflow.counts.remainingAcceptedSlots}</div>
                                                             </div>
                                                         </div>
-                                                        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                                                            The system keeps up to {campaignWorkflow.campaign.activeRequestLimit} active pending requests and refills the queue whenever requests expire or get rejected.
+                                                        <div className="rounded-2xl border border-slate-200/50 bg-white/60 px-4 py-3 text-xs font-semibold text-slate-500 shadow-sm">
+                                                            <span className="text-indigo-600 font-bold">Auto-pilot:</span> Maintaining up to {campaignWorkflow.campaign.activeRequestLimit} pending requests.
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="rounded-3xl border border-slate-200 bg-white p-5 text-left">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div>
-                                                            <h3 className="text-lg font-bold text-slate-900">Sent Requests</h3>
-                                                            <p className="text-sm text-slate-500">Newest requests first, with live request status.</p>
+                                                {/* Sent Requests Card */}
+                                                <div className="rounded-3xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">
+                                                    <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 bg-slate-50/50 flex-wrap gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                                                                <Megaphone className="w-5 h-5 text-orange-600" />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-lg font-black text-slate-900 leading-tight">Sent Requests</h3>
+                                                                <p className="text-xs font-semibold text-slate-500">Live tracker for newest matches.</p>
+                                                            </div>
                                                         </div>
-                                                        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                                                            {campaignWorkflow.counts.sent} total
+                                                        <div className="rounded-full bg-slate-200/60 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-inner">
+                                                            {campaignWorkflow.counts.sent} request{campaignWorkflow.counts.sent !== 1 ? 's' : ''}
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-4 space-y-3 max-h-72 overflow-y-auto pr-1">
-                                                        {campaignWorkflow.sentRequests.length > 0 ? campaignWorkflow.sentRequests.map((request: any) => (
-                                                            <div key={request.id} className="rounded-2xl border border-slate-200 p-4">
-                                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                                                    <div>
-                                                                        <div className="font-semibold text-slate-900">{request.influencer.displayName}</div>
-                                                                        <div className="mt-1 text-sm text-slate-500">
-                                                                            {request.influencer.followersLabel} followers | {request.influencer.engagementRate.toFixed(1)}% engagement
+                                                    <div className="flex-1 overflow-y-auto max-h-[300px] p-2 bg-white custom-scrollbar">
+                                                        {campaignWorkflow.sentRequests.length > 0 ? (
+                                                            <div className="space-y-2">
+                                                                {campaignWorkflow.sentRequests.map((request: any) => (
+                                                                    <div key={request.id} className="rounded-2xl border border-transparent hover:border-slate-100 bg-slate-50/50 hover:bg-slate-50 p-4 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                                        <div className="flex items-start gap-3">
+                                                                            <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center text-indigo-700 font-bold text-sm shrink-0">
+                                                                                {request.influencer.displayName.charAt(0).toUpperCase()}
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="font-bold text-slate-900 text-sm">{request.influencer.displayName}</div>
+                                                                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200/50 px-2 py-0.5 rounded-md">
+                                                                                        {request.influencer.followersLabel}
+                                                                                    </span>
+                                                                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50">
+                                                                                        {request.influencer.engagementRate.toFixed(1)}% ER
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-400">
-                                                                            {request.influencer.category}
+                                                                        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-200/60">
+                                                                            <span className={`inline-flex items-center justify-center rounded-lg border px-3 py-1 text-[10px] font-black uppercase tracking-wider w-full sm:w-auto text-center ${getStatusClasses(request.status)}`}>
+                                                                                {request.status}
+                                                                            </span>
+                                                                            <div className="text-[10px] font-semibold text-slate-400 capitalize whitespace-nowrap hidden sm:block">
+                                                                                Exp {formatSummaryDate(request.expiresAt)}
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex flex-col items-start sm:items-end gap-2">
-                                                                        <span className={"inline-flex rounded-full border px-3 py-1 text-xs font-semibold capitalize " + getStatusClasses(request.status)}>
-                                                                            {request.status}
-                                                                        </span>
-                                                                        <div className="text-xs text-slate-400">Sent {formatSummaryDate(request.sentAt)}</div>
-                                                                        <div className="text-xs text-slate-400">Expires {formatSummaryDate(request.expiresAt)}</div>
-                                                                    </div>
-                                                                </div>
+                                                                ))}
                                                             </div>
-                                                        )) : (
-                                                            <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-400">
-                                                                No collaboration requests have been queued yet.
+                                                        ) : (
+                                                            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                                                                <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center mb-4 rotate-3">
+                                                                    <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+                                                                </div>
+                                                                <p className="text-sm font-bold text-slate-600">Matching in progress</p>
+                                                                <p className="text-xs font-medium text-slate-400 mt-1 max-w-[200px] mx-auto">Requests will appear here once our system identifies perfect matches.</p>
                                                             </div>
                                                         )}
                                                     </div>
                                                 </div>
 
-                                                <div className="rounded-3xl border border-slate-200 bg-white p-5 text-left">
-                                                    <h3 className="text-lg font-bold text-slate-900">Accepted Influencers</h3>
-                                                    <p className="mt-1 text-sm text-slate-500">Accepted creators will appear here as they respond.</p>
-
-                                                    {campaignWorkflow.acceptedInfluencers.length > 0 ? (
-                                                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                                {/* Accepted Influencers Module (Only show if > 0) */}
+                                                {campaignWorkflow.acceptedInfluencers.length > 0 && (
+                                                    <div className="rounded-3xl border border-emerald-200/50 bg-emerald-50/30 p-5 lg:p-6 text-left relative overflow-hidden group">
+                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:bg-emerald-400/20 transition-colors" />
+                                                        <div className="flex items-center gap-2 mb-4 relative z-10">
+                                                            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                                                <Users className="w-4 h-4 text-emerald-600" />
+                                                            </div>
+                                                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">Hired Creators</h3>
+                                                        </div>
+                                                        
+                                                        <div className="grid gap-3 sm:grid-cols-2 relative z-10">
                                                             {campaignWorkflow.acceptedInfluencers.map((influencer: any) => (
-                                                                <div key={influencer.id} className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                                                                    <div className="font-semibold text-emerald-900">{influencer.displayName}</div>
-                                                                    <div className="mt-1 text-sm text-emerald-700">
-                                                                        {influencer.followersLabel} followers | {influencer.engagementRate.toFixed(1)}% engagement
+                                                                <div key={influencer.id} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
+                                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 border-2 border-white shadow-sm flex items-center justify-center text-emerald-700 font-bold shrink-0">
+                                                                        {influencer.displayName.charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-slate-900 text-sm">{influencer.displayName}</div>
+                                                                        <div className="text-xs font-semibold text-emerald-600 mt-0.5">
+                                                                            {influencer.followersLabel} • {influencer.engagementRate.toFixed(1)}% ER
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                    ) : (
-                                                        <div className="mt-4 rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-400">
-                                                            No accepted influencers yet. Pending requests will keep rotating automatically.
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-wrap justify-center gap-2 text-sm pt-2">
-                                                <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full font-medium border border-blue-100 flex items-center gap-1.5">
-                                                    <Users size={14} />
+                                            <div className="flex flex-wrap justify-center gap-2 text-sm pt-4 pb-2">
+                                                <span className="px-3.5 py-1.5 bg-indigo-50/80 backdrop-blur-sm text-indigo-700 rounded-xl font-bold border border-indigo-100/50 shadow-sm flex items-center gap-2">
+                                                    <Users size={14} className="text-indigo-500" />
                                                     {followerTiers.find(t => t.min === onboardingData.minFollowers)?.label ?? "Any"} creators
                                                 </span>
-                                                <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-medium border border-emerald-100 flex items-center gap-1.5">
-                                                    <DollarSign size={14} />
-                                                    {selectedPerCollabPriceTier?.label ?? "Any"} per collaboration
+                                                <span className="px-3.5 py-1.5 bg-emerald-50/80 backdrop-blur-sm text-emerald-700 rounded-xl font-bold border border-emerald-100/50 shadow-sm flex items-center gap-2">
+                                                    <DollarSign size={14} className="text-emerald-500" />
+                                                    {selectedPerCollabPriceTier?.label ?? "Any"} scope
                                                 </span>
                                                 {onboardingData.platforms.length > 0 && (
-                                                    <span className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full font-medium border border-purple-100 flex items-center gap-1.5">
-                                                        <TrendingUp size={14} />
+                                                    <span className="px-3.5 py-1.5 bg-pink-50/80 backdrop-blur-sm text-pink-700 rounded-xl font-bold border border-pink-100/50 shadow-sm flex items-center gap-2">
+                                                        <TrendingUp size={14} className="text-pink-500" />
                                                         {onboardingData.platforms.slice(0, 2).join(", ")}{onboardingData.platforms.length > 2 ? ' +' + (onboardingData.platforms.length - 2) : ''}
                                                     </span>
                                                 )}
                                             </div>
                                         )}
 
-                                        <div className="space-y-3 mt-2 w-full">
-                                            <div className="flex flex-col sm:flex-row gap-3 w-full">
-                                                <button
-                                                    onClick={async () => {
-                                                        const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-                                                        if (result?.ok) { router.push('/brand/campaign-queues'); }
-                                                        else { router.push('/brand/login'); }
-                                                    }}
-                                                    className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                                                >
-                                                    <Sparkles size={18} />
-                                                    Open Campaign Queue
-                                                </button>
+                                        <div className="flex flex-col gap-3 mt-6 pt-4 relative z-20">
+                                            <button
+                                                onClick={async () => {
+                                                    const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
+                                                    if (result?.ok) { router.push('/brand/campaign-queues'); }
+                                                    else { router.push('/brand/login'); }
+                                                }}
+                                                className="w-full py-4.5 bg-slate-900 text-white text-base font-black rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 flex items-center justify-center gap-2 group hover:-translate-y-0.5 active:translate-y-0"
+                                            >
+                                                <Sparkles size={18} className="text-amber-300 group-hover:scale-110 transition-transform" />
+                                                Go to Dashboard
+                                            </button>
+                                            
+                                            <div className="flex items-center justify-center gap-4">
                                                 <button
                                                     onClick={async () => {
                                                         const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
@@ -1314,21 +1369,11 @@ export default function BrandRegisterPage() {
                                                             router.push('/brand/login');
                                                         }
                                                     }}
-                                                    className="flex-1 py-4 bg-gray-100 text-gray-700 text-base font-semibold rounded-2xl hover:bg-gray-200 transition-all"
+                                                    className="py-3 px-6 text-slate-500 text-sm font-black text-center rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-all"
                                                 >
-                                                    Find Matching Creators
+                                                    Manual Creator Search
                                                 </button>
                                             </div>
-                                            <button
-                                                onClick={async () => {
-                                                    const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-                                                    if (result?.ok) { router.push('/brand'); }
-                                                    else { router.push('/brand/login'); }
-                                                }}
-                                                className="w-full text-sm font-semibold text-slate-500 transition hover:text-slate-700"
-                                            >
-                                                Skip to Dashboard
-                                            </button>
                                         </div>
                                     </div>
                                 </CardWrapper>
