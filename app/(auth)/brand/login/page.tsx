@@ -92,16 +92,16 @@ function BrandLoginForm() {
                 )}
             </AnimatePresence>
 
-            <form className="space-y-5" onSubmit={handleLogin}>
+            <form className="space-y-4" onSubmit={handleLogin}>
                 <div className="space-y-1.5">
-                    <label htmlFor="email" className="text-xs font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Business Email</label>
+                    <label htmlFor="email" className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Business Email</label>
                     <div className="relative group">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-5 h-5" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-[18px] h-[18px] z-10" />
                         <input
                             id="email"
                             type="email"
                             placeholder="name@company.com"
-                            className="w-full pl-12 pr-4 py-3.5 text-sm border border-slate-200 rounded-2xl focus:border-violet-500 focus:ring-[6px] focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-medium shadow-sm"
+                            className="w-full pl-11 pr-4 py-3 text-[14px] border-2 border-slate-100 rounded-xl focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-semibold shadow-sm"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -111,18 +111,18 @@ function BrandLoginForm() {
 
                 <div className="space-y-1.5">
                     <div className="flex justify-between items-center px-1">
-                        <label htmlFor="password" className="text-xs font-black text-slate-400 uppercase tracking-[0.1em]">Password</label>
-                        <Link href="/forgot-password" className="text-xs font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors">
+                        <label htmlFor="password" className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em]">Password</label>
+                        <Link href="/forgot-password" className="text-[12px] font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors">
                             Forgot password?
                         </Link>
                     </div>
                     <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-5 h-5" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors w-[18px] h-[18px] z-10" />
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
-                            className="w-full pl-12 pr-12 py-3.5 text-sm border border-slate-200 rounded-2xl focus:border-violet-500 focus:ring-[6px] focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-medium shadow-sm "
+                            className="w-full pl-11 pr-11 py-3 text-[14px] border-2 border-slate-100 rounded-xl focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 focus:outline-none transition-all bg-slate-50/50 hover:bg-slate-50 focus:bg-white text-slate-800 placeholder-slate-400 font-semibold shadow-sm "
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -130,7 +130,7 @@ function BrandLoginForm() {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100"
                         >
                             {showPassword ? (
                                 <EyeOff className="w-4.5 h-4.5" />
@@ -144,11 +144,11 @@ function BrandLoginForm() {
                 <div className="pt-2">
                     <button 
                         disabled={isLoading} 
-                        className="w-full group relative flex items-center justify-center gap-2 h-14 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 overflow-hidden"
+                        className="w-full group relative flex items-center justify-center gap-2 h-12 bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white font-black text-sm uppercase tracking-widest rounded-xl shadow-[0_6px_20px_-4px_rgba(124,58,237,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_12px_30px_-6px_rgba(124,58,237,0.7)] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         {isLoading ? (
-                            <><Loader2 className="w-5 h-5 animate-spin" /> Authenticating...</>
+                            <><Loader2 className="w-4.5 h-4.5 animate-spin" /> Authenticating...</>
                         ) : (
                             <>Sign In to Dashboard <ArrowRight className="w-4.5 h-4.5 ml-1 transition-transform group-hover:translate-x-1" /></>
                         )}
@@ -156,7 +156,7 @@ function BrandLoginForm() {
                 </div>
             </form>
             
-            <div className="mt-8 text-center space-y-4">
+            <div className="mt-5 text-center space-y-3">
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-slate-200"></div>
@@ -256,17 +256,17 @@ export default function BrandLoginPage() {
                 </div>
 
                 <motion.div 
-                    initial={{ opacity: 0, y: 30 }} 
+                    initial={{ opacity: 0, y: 15 }} 
                     animate={{ opacity: 1, y: 0 }} 
                     transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="w-full max-w-[400px] bg-white/90 backdrop-blur-xl p-6 sm:p-8 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white box-border"
+                    className="w-full max-w-[440px] bg-white/95 backdrop-blur-2xl p-6 sm:p-8 rounded-[2rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08),0_0_40px_rgba(124,58,237,0.03)] border border-white box-border"
                 >
-                    <div className="mb-10 text-center">
-                        <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-inner border border-violet-100 transform rotate-3">
-                            <Lock className="w-8 h-8 text-violet-600" />
+                    <div className="mb-7 text-center">
+                        <div className="w-14 h-14 bg-gradient-to-br from-violet-50 to-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-violet-100/50 transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                            <Lock className="w-6 h-6 text-violet-600" />
                         </div>
-                        <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Welcome Back</h2>
-                        <p className="text-slate-500 text-sm font-medium px-4">
+                        <h2 className="text-[1.75rem] leading-tight font-black text-slate-900 mb-1.5 tracking-tight">Welcome Back</h2>
+                        <p className="text-slate-500 text-sm font-medium px-2 leading-relaxed">
                             Sign in to your dashboard to manage your brand campaigns.
                         </p>
                     </div>
@@ -275,19 +275,19 @@ export default function BrandLoginPage() {
                         <BrandLoginForm />
                     </Suspense>
 
-                    <div className="flex gap-3 pt-10 mt-2">
-                        <div className="flex-1 p-3.5 border border-slate-100 rounded-2xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                    <div className="flex gap-4 pt-6 mt-2">
+                        <div className="flex-1 p-3 border border-slate-100 rounded-xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors shadow-sm">
                             <div className="w-8 h-8 rounded-full bg-emerald-100/80 flex items-center justify-center shrink-0 border border-emerald-200/50">
-                                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                                <Lock className="w-4 h-4 text-emerald-600" />
                             </div>
                             <div className="min-w-0">
                                 <div className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Secure</div>
                                 <div className="text-xs font-bold text-slate-700 truncate">256-bit SSL</div>
                             </div>
                         </div>
-                        <div className="flex-1 p-3.5 border border-slate-100 rounded-2xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                        <div className="flex-1 p-3 border border-slate-100 rounded-xl flex items-center gap-3 bg-slate-50/80 hover:bg-slate-50 transition-colors shadow-sm">
                             <div className="w-8 h-8 rounded-full bg-violet-100/80 flex items-center justify-center shrink-0 border border-violet-200/50">
-                                <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
+                                <ShieldCheck className="w-4 h-4 text-violet-600" />
                             </div>
                             <div className="min-w-0">
                                 <div className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Privacy</div>
@@ -296,7 +296,7 @@ export default function BrandLoginPage() {
                         </div>
                     </div>
 
-                    <div className="flex justify-center gap-6 text-[11px] font-bold text-slate-400 pt-8 mt-2 uppercase tracking-wide">
+                    <div className="flex justify-center gap-6 text-[10px] font-bold text-slate-400 pt-5 mt-1 uppercase tracking-wider">
                         <Link href="/privacy" className="hover:text-violet-600 transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-violet-600 transition-colors">Terms</Link>
                         <Link href="/contact" className="hover:text-violet-600 transition-colors">Support</Link>
