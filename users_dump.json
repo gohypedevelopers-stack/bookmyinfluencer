@@ -1,0 +1,114 @@
+{
+  "users": [
+    {
+      "email": "admin@bookmyinfluencers.com",
+      "name": "Super Admin",
+      "role": "ADMIN",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "brand@nike.com",
+      "name": "Nike Brand Manager",
+      "role": "BRAND",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "rishav@influencer.com",
+      "name": "Rishav",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "sarah@influencer.com",
+      "name": "Sarah Jenkins",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "mike@foodie.com",
+      "name": "Mike Chen",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "tech@gadget.com",
+      "name": "Tech Reviewer",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "yoga@jen.com",
+      "name": "Yoga With Jen",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "gamer@pro.com",
+      "name": "Gaming Pro",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$6WxP8upFipjQ.i.ntO/xm.b2b4RbbNOuDEKHxlZ1n8dHNPJODVRA2"
+    },
+    {
+      "email": "dheerajsorout16500@gmail.com",
+      "name": "Dheeraj Sorout",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$1/3dJ8/Al.QUCtayi8Lq2OR3WrM1uulRdX4PsUjUQ4R44V/nP4CWS"
+    },
+    {
+      "email": "gohypedevelopers@gmail.com",
+      "name": "Go Hype Media",
+      "role": "BRAND",
+      "passwordHash": "$2b$12$RsdIIjtSYEtLl7Llzl4DWe1LaFYVjt1rmsfxH/UfDsy/PGUarAti."
+    },
+    {
+      "email": "dheerajsorout02@gmail.com",
+      "name": "Monty Chaudhary",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$2YE.cuZRPERv3zztaWREU.0/419A8jhFUitcEKNny5Gg.7qN42XwS"
+    },
+    {
+      "email": "admin@bookmyinfluencer.com",
+      "name": "Admin User",
+      "role": "ADMIN",
+      "passwordHash": "$2b$10$d0ERcDLsf8GR7NvaokuOEeE2DjXR5Z2h9CgEgKj.bxfG5tdWs699u"
+    },
+    {
+      "email": "gohypemediatech@gmail.com",
+      "name": "Genpact Information technology company",
+      "role": "BRAND",
+      "passwordHash": "$2b$12$T31XKJvALJLWEe0wU3f/Oe6vZHLzSOY/L6ciYADIUJmQvoUivvUEG"
+    },
+    {
+      "email": "rishavrawat126@gmail.com",
+      "name": "Rishav Rawat",
+      "role": "INFLUENCER",
+      "passwordHash": "$2b$10$a66dHkVXx0CzneU7bJbSIeFt92Qj7RpoCR4cYtb6BrOaZxL3eOO4O"
+    },
+    {
+      "email": "manager@bookmyinfluencers.com",
+      "name": "Manager User",
+      "role": "MANAGER",
+      "passwordHash": "$2b$10$kyGv95xPKtARGFnGOogmDejR3Qj9ixknVD69H91Sbq6NriUaYXijG"
+    }
+  ],
+  "otpUsers": [
+    {
+      "id": "6ace22d5-f4e6-472f-bcd6-c60ce51345be",
+      "email": "dheerajsorout16500@gmail.com",
+      "verifiedAt": "2026-02-18T07:00:09.538Z",
+      "createdAt": "2026-02-18T06:57:03.679Z"
+    },
+    {
+      "id": "04498cc1-57a9-406a-bbea-888138f47974",
+      "email": "dheerajsorout02@gmail.com",
+      "verifiedAt": "2026-02-18T07:23:09.745Z",
+      "createdAt": "2026-02-18T07:22:29.263Z"
+    },
+    {
+      "id": "1594dc9d-6dd8-44b4-94e9-55174dc7a19a",
+      "email": "rishavrawat126@gmail.com",
+      "verifiedAt": "2026-02-23T06:28:35.142Z",
+      "createdAt": "2026-02-23T06:27:43.035Z"
+    }
+  ]
+}
