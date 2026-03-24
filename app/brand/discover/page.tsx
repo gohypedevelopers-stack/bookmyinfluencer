@@ -22,6 +22,12 @@ interface Influencer {
     verified: boolean;
     tags: string[];
     priceRange: string;
+    price: number;
+    pricePost: number;
+    priceStory: number;
+    priceCollab: number;
+    priceType: string;
+    isApproved: boolean;
     thumbnail: string;
     profileImage: string;
     bannerImage: string | null;
@@ -31,11 +37,12 @@ interface Influencer {
 function InfluencerDiscoveryInner() {
     const searchParams = useSearchParams();
     const fromOnboarding = searchParams.get('fromOnboarding') === '1';
+    const initialQuery = searchParams.get('q') || '';
 
     // Read onboarding preferences from URL (followers in K)
     const urlMinFollowers = searchParams.get('minFollowers') ? Math.round(Number(searchParams.get('minFollowers')) / 1000) : 0;
-    const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 1000;
-    const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 50;
+    const urlMaxFollowers = searchParams.get('maxFollowers') ? Math.round(Number(searchParams.get('maxFollowers')) / 1000) : 500;
+    const urlMinPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
     const urlMaxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 5000;
 
     const [showOnboardingBanner, setShowOnboardingBanner] = useState(fromOnboarding);
@@ -45,7 +52,7 @@ function InfluencerDiscoveryInner() {
     const [allInfluencers, setAllInfluencers] = useState<Influencer[]>([]);
     const [filteredInfluencers, setFilteredInfluencers] = useState<Influencer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(initialQuery);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -57,8 +64,8 @@ function InfluencerDiscoveryInner() {
     const [selectedCity, setSelectedCity] = useState('Mumbai');
     const [selectedNiche, setSelectedNiche] = useState('All');
     const [priceRange, setPriceRange] = useState([urlMinPrice, Math.min(urlMaxPrice, 5000)]);
-    const [followersRange, setFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
-    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 1000)]);
+    const [followersRange, setFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 500)]);
+    const [debouncedFollowersRange, setDebouncedFollowersRange] = useState([urlMinFollowers, Math.min(urlMaxFollowers, 500)]);
     const [showAllNiches, setShowAllNiches] = useState(false);
 
     // Debounce Followers Range
@@ -124,20 +131,11 @@ function InfluencerDiscoveryInner() {
         }
 
         // Price
-        // Assuming priceRangeStr format "₹100-500" or similar in `inf.priceRange`
-        // We'll try to parse it. If logic is complex, might need robust parsing.
-        // For now, let's assume we filter if we can parse.
-        // If Price filter is critical, we need standardized price field.
-        // Checking `Influencer` interface: priceRange: string.
         results = results.filter(inf => {
-            if (!inf.priceRange) return true;
-            const prices = inf.priceRange.replace(/[^0-9-]/g, '').split('-').map(Number);
-            const minPrice = prices[0] || 0;
-            const maxPrice = prices[1] || minPrice;
-
-            // Check overlap
+            const price = inf.price || 0;
             const [filterMin, filterMax] = priceRange;
-            return Math.max(minPrice, filterMin) <= Math.min(maxPrice, filterMax);
+            if (filterMax === 5000) return price >= filterMin;
+            return price >= filterMin && price <= filterMax;
         });
 
         // Pagination
@@ -156,8 +154,8 @@ function InfluencerDiscoveryInner() {
         setSelectedLocation('India');
         setSelectedCity('Mumbai');
         setSelectedNiche('All');
-        setPriceRange([50, 5000]);
-        setFollowersRange([0, 1000]);
+        setPriceRange([0, 5000]);
+        setFollowersRange([0, 500]);
         setSearchQuery('');
         // Fetch will trigger automatically due to effect on state change
     };
@@ -298,12 +296,12 @@ function InfluencerDiscoveryInner() {
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-3">
                                             Followers
-                                            <span className="ml-2 text-teal-600 text-xs">{followersRange[0]}k - {followersRange[1] === 1000 ? '1M+' : followersRange[1] + 'k'}</span>
+                                            <span className="ml-2 text-teal-600 text-xs">{followersRange[0]}k - {followersRange[1] === 500 ? '500k+' : followersRange[1] + 'k'}</span>
                                         </label>
                                         <div className="px-2">
                                             <Slider
                                                 min={0}
-                                                max={1000}
+                                                max={500}
                                                 step={10}
                                                 value={followersRange}
                                                 onValueChange={setFollowersRange}
@@ -312,7 +310,7 @@ function InfluencerDiscoveryInner() {
                                             />
                                             <div className="flex justify-between mt-2 text-xs text-gray-500">
                                                 <span>0k</span>
-                                                <span>1M+</span>
+                                                <span>500k+</span>
                                             </div>
                                         </div>
                                     </div>
@@ -325,7 +323,7 @@ function InfluencerDiscoveryInner() {
                                         </label>
                                         <div className="px-2">
                                             <Slider
-                                                min={50}
+                                                min={0}
                                                 max={5000}
                                                 step={50}
                                                 value={priceRange}
@@ -334,7 +332,7 @@ function InfluencerDiscoveryInner() {
                                                 className="py-4"
                                             />
                                             <div className="flex justify-between mt-2 text-xs text-gray-500">
-                                                <span>₹50</span>
+                                                <span>₹0</span>
                                                 <span>₹5k+</span>
                                             </div>
                                         </div>
@@ -376,16 +374,16 @@ function InfluencerDiscoveryInner() {
                                 {filteredInfluencers.length > 0 ? filteredInfluencers.map((influencer) => (
                                     <div key={influencer.id} className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300">
                                         {/* Banner */}
-                                        <div className={`relative h-32 overflow-hidden`}>
+                                        <div className="relative h-36 overflow-hidden">
                                             {(influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:'))) ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img
                                                     src={influencer.bannerImage}
                                                     alt={influencer.name + ' banner'}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover object-top"
                                                 />
                                             ) : (
-                                                <div className={`w-full h-full bg-gradient-to-r from-teal-400 to-blue-500`} />
+                                                <div className="w-full h-full bg-gradient-to-br from-teal-400 via-blue-400 to-indigo-500" />
                                             )}
 
                                             {/* Top Right Actions */}
@@ -474,11 +472,24 @@ function InfluencerDiscoveryInner() {
                                                 )}
                                             </div>
 
-                                            {/* Footer */}
+                                            {/* Footer - multi-rate pricing */}
                                             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                                                <div>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Starting From</p>
-                                                    <div className="font-bold text-gray-900 text-sm bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md inline-block">{influencer.priceRange}</div>
+                                                <div className="flex gap-2">
+                                                    {[
+                                                        { label: 'Story', val: influencer.priceStory },
+                                                        { label: 'Post', val: influencer.pricePost },
+                                                        { label: 'Collab', val: influencer.priceCollab },
+                                                    ].map(({ label, val }) => (
+                                                        <div key={label} className="text-center">
+                                                            <p className="text-[9px] text-gray-400 uppercase font-bold mb-0.5">{label}</p>
+                                                            <div className="font-bold text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-md">
+                                                                {val > 0
+                                                                    ? ('*'.repeat(val.toString().length))
+                                                                    : <span className="text-gray-400">—</span>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                                 <Link
                                                     href={`/brand/discover/${influencer.id}`}

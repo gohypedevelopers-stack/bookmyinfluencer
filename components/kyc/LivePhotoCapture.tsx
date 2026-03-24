@@ -127,9 +127,9 @@ export default function LivePhotoCapture({ onUploadSuccess, userId }: LivePhotoC
             } else {
                 throw new Error(data.error || 'Upload failed');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Upload error:', err);
-            toast.error('Failed to upload selfie. Please try again.');
+            toast.error(err.message || 'Failed to upload selfie. Please try again.');
         } finally {
             setLoading(false);
         }

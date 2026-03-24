@@ -18,8 +18,6 @@ type OnboardingData = {
     budget: string
     minFollowers: number
     maxFollowers: number
-    minPricePerPost: number
-    maxPricePerPost: number
     platforms: string[]
     creatorType: string
     campaignGoals: string
@@ -27,14 +25,6 @@ type OnboardingData = {
 
 // Follower tiers
 const followerTiers = [
-    {
-        label: "Nano",
-        desc: "1K – 10K followers",
-        badge: "Most Authentic",
-        min: 1000,
-        max: 10000,
-        color: "from-emerald-400 to-teal-500"
-    },
     {
         label: "Micro",
         desc: "10K – 100K followers",
@@ -51,23 +41,9 @@ const followerTiers = [
         max: 500000,
         color: "from-violet-400 to-purple-500"
     },
-    {
-        label: "Mega",
-        desc: "500K+ followers",
-        badge: "Massive Impact",
-        min: 500000,
-        max: 10000000,
-        color: "from-orange-400 to-rose-500"
-    },
 ]
 
-// Price tiers
-const priceTiers = [
-    { label: "₹500 – ₹2,000", badge: "Budget Friendly", min: 500, max: 2000 },
-    { label: "₹2,000 – ₹10,000", badge: "Standard", min: 2000, max: 10000 },
-    { label: "₹10,000 – ₹50,000", badge: "Premium", min: 10000, max: 50000 },
-    { label: "₹50,000+", badge: "Elite", min: 50000, max: 1000000 },
-]
+// Removed priceTiers as pricing is now internal
 
 const steps = [
     { id: 1, title: "Welcome" },
@@ -75,11 +51,10 @@ const steps = [
     { id: 3, title: "Campaign Type" },
     { id: 4, title: "Budget" },
     { id: 5, title: "Target Followers" },
-    { id: 6, title: "Price per Post" },
-    { id: 7, title: "Platforms" },
-    { id: 8, title: "Creator Type" },
-    { id: 9, title: "Goals" },
-    { id: 10, title: "Success" }
+    { id: 6, title: "Platforms" },
+    { id: 7, title: "Creator Type" },
+    { id: 8, title: "Goals" },
+    { id: 9, title: "Success" }
 ]
 
 const TOTAL_VISIBLE_STEPS = steps.length - 1 // exclude success screen from count
@@ -97,14 +72,12 @@ export default function BrandOnboarding() {
         budget: "",
         minFollowers: 10000,
         maxFollowers: 100000,
-        minPricePerPost: 2000,
-        maxPricePerPost: 10000,
         platforms: [],
         creatorType: "",
         campaignGoals: ""
     })
 
-    const SUBMIT_STEP = 9 // step 9 (Goals) triggers submission before step 10 (Success)
+    const SUBMIT_STEP = 8 // step 8 (Goals) triggers submission before step 9 (Success)
 
     const handleNext = async () => {
         if (currentStep === SUBMIT_STEP) {
@@ -150,9 +123,7 @@ export default function BrandOnboarding() {
         const params = new URLSearchParams({
             fromOnboarding: "1",
             minFollowers: String(formData.minFollowers),
-            maxFollowers: String(formData.maxFollowers),
-            minPrice: String(formData.minPricePerPost),
-            maxPrice: String(formData.maxPricePerPost),
+            maxFollowers: String(formData.maxFollowers)
         })
         router.push(`/brand/discover?${params.toString()}`)
     }
@@ -191,7 +162,7 @@ export default function BrandOnboarding() {
 
             <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 md:p-12 relative overflow-hidden min-h-[580px] flex flex-col">
                 {/* Back Button */}
-                {currentStep > 1 && currentStep < 10 && (
+                {currentStep > 1 && currentStep < 9 && (
                     <button
                         onClick={handleBack}
                         className="absolute top-8 left-8 p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
@@ -201,7 +172,7 @@ export default function BrandOnboarding() {
                 )}
 
                 {/* Step Indicator */}
-                {currentStep < 10 && (
+                {currentStep < 9 && (
                     <div className="absolute top-8 right-8 text-xs font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                         {currentStep} / {TOTAL_VISIBLE_STEPS}
                     </div>
@@ -229,7 +200,7 @@ export default function BrandOnboarding() {
                                     Welcome to <br /><span className="text-blue-600">Book My Influencers</span>
                                 </h1>
                                 <p className="text-lg text-gray-500 max-w-md">
-                                    Let's personalise your brand profile so we can match you with the perfect creators — in just a few steps.
+                                    Our internal project managers handle the entire execution, from matching to delivery. Let's personalize your brand profile first.
                                 </p>
                                 <button
                                     onClick={handleNext}
@@ -422,58 +393,10 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 6: PRICE PER POST (NEW) ── */}
+                        {/* ── STEP 6: PLATFORMS ── */}
                         {currentStep === 6 && (
                             <motion.div
                                 key="step6"
-                                custom={direction}
-                                variants={slideVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-                                className="space-y-6"
-                            >
-                                <div>
-                                    <h2 className="text-3xl font-bold text-gray-900">Budget per post?</h2>
-                                    <p className="text-gray-500 mt-2">How much are you willing to pay a creator per collaboration?</p>
-                                </div>
-                                <div className="space-y-3">
-                                    {priceTiers.map((tier) => {
-                                        const isSelected = formData.minPricePerPost === tier.min && formData.maxPricePerPost === tier.max
-                                        return (
-                                            <button
-                                                key={tier.label}
-                                                onClick={() => {
-                                                    updateData("minPricePerPost", tier.min)
-                                                    updateData("maxPricePerPost", tier.max)
-                                                    handleNext()
-                                                }}
-                                                className={`w-full p-5 border-2 rounded-2xl text-left transition-all flex items-center justify-between group
-                          ${isSelected ? "border-blue-600 bg-blue-50" : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"}`}
-                                            >
-                                                <div>
-                                                    <div className="font-bold text-lg text-gray-900">{tier.label}</div>
-                                                    <div className="text-sm text-gray-500 mt-0.5">per post / collaboration</div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">{tier.badge}</span>
-                                                    {isSelected && <Check className="text-blue-600" size={18} />}
-                                                </div>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                                <div className="flex justify-end">
-                                    <button onClick={handleNext} className="text-blue-600 font-semibold hover:underline text-sm">Skip</button>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* ── STEP 7: PLATFORMS ── */}
-                        {currentStep === 7 && (
-                            <motion.div
-                                key="step7"
                                 custom={direction}
                                 variants={slideVariants}
                                 initial="enter"
@@ -513,10 +436,10 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 8: CREATOR TYPE ── */}
-                        {currentStep === 8 && (
+                        {/* ── STEP 7: CREATOR TYPE ── */}
+                        {currentStep === 7 && (
                             <motion.div
-                                key="step8"
+                                key="step7"
                                 custom={direction}
                                 variants={slideVariants}
                                 initial="enter"
@@ -528,10 +451,8 @@ export default function BrandOnboarding() {
                                 <h2 className="text-3xl font-bold text-gray-900">Preferred Creators?</h2>
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Nano", desc: "1K–10K followers", range: "Most Authentic" },
                                         { label: "Micro", desc: "10K–100K followers", range: "High Engagement" },
-                                        { label: "Macro", desc: "100K–500K followers", range: "Broad Reach" },
-                                        { label: "Celebrity", desc: "500K+ followers", range: "Massive Impact" }
+                                        { label: "Macro", desc: "100K–500K followers", range: "Broad Reach" }
                                     ].map((option) => (
                                         <button
                                             key={option.label}
@@ -556,10 +477,10 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 9: GOALS ── */}
-                        {currentStep === 9 && (
+                        {/* ── STEP 8: GOALS ── */}
+                        {currentStep === 8 && (
                             <motion.div
-                                key="step9"
+                                key="step8"
                                 custom={direction}
                                 variants={slideVariants}
                                 initial="enter"
@@ -591,10 +512,10 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 10: SUCCESS ── */}
-                        {currentStep === 10 && (
+                                {/* ── STEP 9: SUCCESS ── */}
+                        {currentStep === 9 && (
                             <motion.div
-                                key="step10"
+                                key="step9"
                                 custom={direction}
                                 variants={slideVariants}
                                 initial="enter"
@@ -614,7 +535,7 @@ export default function BrandOnboarding() {
 
                                 <h1 className="text-4xl font-bold text-gray-900">You're All Set!</h1>
                                 <p className="text-gray-500 max-w-md text-base">
-                                    We've personalised your experience. Based on your preferences, here are creators ready to work with your brand.
+                                    We've personalised your experience. Our internal project managers will now handle the matching and execution for you.
                                 </p>
 
                                 {/* Preference summary chips */}
@@ -622,10 +543,6 @@ export default function BrandOnboarding() {
                                     <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full font-medium border border-blue-100 flex items-center gap-1.5">
                                         <Users size={14} />
                                         {followerTiers.find(t => t.min === formData.minFollowers)?.label ?? "Any"} creators
-                                    </span>
-                                    <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-medium border border-emerald-100 flex items-center gap-1.5">
-                                        <DollarSign size={14} />
-                                        {priceTiers.find(t => t.min === formData.minPricePerPost)?.label ?? "Any"} per post
                                     </span>
                                     {formData.platforms.length > 0 && (
                                         <span className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full font-medium border border-purple-100 flex items-center gap-1.5">

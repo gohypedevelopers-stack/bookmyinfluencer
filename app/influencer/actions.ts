@@ -27,7 +27,13 @@ export async function getInfluencerCampaigns() {
             include: {
                 campaign: {
                     include: {
-                        brand: true
+                        brand: {
+                            include: {
+                                user: {
+                                    select: { image: true }
+                                }
+                            }
+                        }
                     }
                 },
                 offer: true,

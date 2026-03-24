@@ -79,7 +79,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
+
   /* Influencer Marketplace Custom Colors */
   --teal-primary: 14 184 166;
   --teal-dark: 13 148 136;
@@ -131,11 +131,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html,
   body {
     width: 100%;
     overflow-x: hidden;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -143,9 +145,17 @@
 
 /* Card flip border shimmer animation */
 @keyframes borderShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .bg-size-200 {
@@ -160,10 +170,42 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
+}
+
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.333333%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 25s linear infinite;
+  width: max-content;
+}
+
+@keyframes infinite-scroll-reverse {
+  0% {
+    transform: translateX(-33.333333%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-infinite-scroll-reverse {
+  animation: infinite-scroll-reverse 25s linear infinite;
+  width: max-content;
 }

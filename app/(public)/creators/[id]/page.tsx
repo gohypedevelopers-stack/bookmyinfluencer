@@ -48,8 +48,27 @@ export default async function CreatorPublicProfilePage({
         if (legacyProfile) {
             const profile = {
                 ...legacyProfile,
-                kycStatus: legacyProfile.kyc?.status || 'PENDING'
+                kycStatus: legacyProfile.kyc?.status || 'PENDING',
+                saved: false
             };
+
+            // Check saved status
+            if ((session?.user as any)?.role === 'BRAND' && session?.user?.id) {
+                const brand = await db.brandProfile.findUnique({ where: { userId: session.user.id } });
+                if (brand) {
+                    // @ts-ignore
+                    const isSaved = await db.savedInfluencer.findUnique({
+                        where: {
+                            brandId_influencerId: {
+                                brandId: brand.id,
+                                influencerId: legacyProfile.id
+                            }
+                        }
+                    });
+                    profile.saved = !!isSaved;
+                }
+            }
+
             return <InfluencerProfileClient profile={profile as any} session={session} />;
         }
 
@@ -86,10 +105,16 @@ export default async function CreatorPublicProfilePage({
         followers: followers,
         engagementRate: latestMetric?.engagementRate || null,
         pricing: creator.pricing || null,
+        price: creator.price || null,
+        priceStory: creator.priceStory || null,
+        pricePost: creator.pricePost || null,
+        priceCollab: creator.priceCollab || null,
+        priceType: creator.priceType || "Per Post",
         bannerImage: creator.backgroundImageUrl || null,
         createdAt: creator.user.createdAt,
         updatedAt: creator.user.createdAt,
         kycStatus: creator.verificationStatus,
+        saved: false,
         user: {
             id: creator.userId,
             name: creator.displayName || creator.fullName || "Creator",
@@ -104,6 +129,25 @@ export default async function CreatorPublicProfilePage({
             lastSeenAt: null
         }
     } as any;
+
+    if ((session?.user as any)?.role === 'BRAND' && session?.user?.id) {
+        const brand = await db.brandProfile.findUnique({ where: { userId: session.user.id } });
+        if (brand) {
+            const prof = await db.influencerProfile.findUnique({ where: { userId: creator.userId } });
+            if (prof) {
+                // @ts-ignore
+                const isSaved = await db.savedInfluencer.findUnique({
+                    where: {
+                        brandId_influencerId: {
+                            brandId: brand.id,
+                            influencerId: prof.id
+                        }
+                    }
+                });
+                profile.saved = !!isSaved;
+            }
+        }
+    }
 
     return <InfluencerProfileClient profile={profile} session={session} />;
 }

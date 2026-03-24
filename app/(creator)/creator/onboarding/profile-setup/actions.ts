@@ -10,6 +10,7 @@ export async function saveProfileSetup(data: {
     followerRange: string
     engagementRate: string
     collaborationRate: string
+    priceType: string
 }) {
     const userId = await getAuthenticatedCreatorId()
     if (!userId) throw new Error('Unauthorized')

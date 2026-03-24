@@ -256,10 +256,6 @@ export default function CreatorOnboarding() {
                                     {[
                                         { id: "Instagram", icon: Instagram, color: "group-hover:text-pink-400" },
                                         { id: "YouTube", icon: Youtube, color: "group-hover:text-red-500" },
-                                        { id: "TikTok", label: "TikTok", color: "group-hover:text-cyan-400" }, // Custom
-                                        { id: "Twitter (X)", icon: Twitter, color: "group-hover:text-blue-400" },
-                                        { id: "LinkedIn", icon: Linkedin, color: "group-hover:text-blue-600" },
-                                        { id: "Facebook", icon: Facebook, color: "group-hover:text-blue-500" },
                                     ].map((p) => (
                                         <motion.button
                                             key={p.id}
@@ -411,17 +407,24 @@ export default function CreatorOnboarding() {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={handleNext}
-                                        disabled={!formData.engagement}
-                                        className="w-full py-5 bg-white text-purple-600 font-bold rounded-2xl hover:bg-gray-100 disabled:opacity-50 transition-all shadow-lg"
+                                        disabled={isSubmitting}
+                                        className="w-full py-5 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-green-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                                     >
-                                        Continue
+                                        {isSubmitting ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                Saving…
+                                            </>
+                                        ) : "Complete Setup"}
                                     </motion.button>
-                                    <button
-                                        onClick={handleNext}
-                                        className="text-white/60 hover:text-white font-medium py-2 transition-colors"
-                                    >
-                                        Skip for now
-                                    </button>
+                                    {!isSubmitting && (
+                                        <button
+                                            onClick={handleNext}
+                                            className="text-white/60 hover:text-white font-medium py-2 transition-colors"
+                                        >
+                                            Skip for now
+                                        </button>
+                                    )}
                                 </div>
                             </motion.div>
                         )}

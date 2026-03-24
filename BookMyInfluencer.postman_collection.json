@@ -1,0 +1,201 @@
+{
+    "info": {
+        "name": "BookMyInfluencer API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000/api",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "1. Request OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\\n    \"email\": \"test@example.com\"\\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/request-otp",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "request-otp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Verify OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\\n    \"email\": \"test@example.com\",\\n    \"otp\": \"123123\"\\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/verify-otp",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "verify-otp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Who Am I",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/whoami",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "whoami"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Me",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "me"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Creator Onboarding",
+            "item": [
+                {
+                    "name": "1. Create Creator Profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\\n    \"fullName\": \"Jane Doe\",\\n    \"phone\": \"+1234567890\",\\n    \"niche\": \"Lifestyle\",\\n    \"instagram\": \"janedoe\",\\n    \"youtube\": \"janedoe_yt\",\\n    \"portfolioUrl\": \"\",\\n    \"country\": \"US\"\\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/creator/create",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "creator",
+                                "create"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Complete Onboarding",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\\n    \"userId\": \"your-user-id-here\"\\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/creator/complete-onboarding",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "creator",
+                                "complete-onboarding"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Public",
+            "item": [
+                {
+                    "name": "Public Creators",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/public/creators",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "public",
+                                "creators"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Public Brands",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/public/brands",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "public",
+                                "brands"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

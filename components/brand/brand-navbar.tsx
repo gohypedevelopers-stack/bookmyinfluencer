@@ -46,11 +46,7 @@ export function BrandNavbar() {
             href: "/brand/campaigns",
             icon: Megaphone,
         },
-        {
-            name: "Messages",
-            href: "/brand/chat",
-            icon: MessageSquare,
-        },
+
         {
             name: "Marketplace",
             href: "/brand/discover",

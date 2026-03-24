@@ -169,7 +169,19 @@ export async function sendMessage(threadId: string, senderId: string, content: s
             const recipientId = participants.find(p => p !== senderId);
 
             if (recipientId) {
+                // Push real-time message event
                 await pusherServer.trigger(recipientId, 'message:new', message);
+
+                // Also create a Notification record so it shows in the bell menu
+                const senderName = message.sender?.name || 'Someone';
+                const preview = content ? (content.length > 60 ? content.slice(0, 57) + '...' : content) : (attachmentType ? `Sent a ${attachmentType}` : 'Sent a message');
+                await createNotification(
+                    recipientId,
+                    `New message from ${senderName}`,
+                    preview,
+                    'MESSAGE',
+                    '/brand/messages'
+                );
             }
         }
 
@@ -369,7 +381,7 @@ export async function updateCampaign(prevState: any, formData: FormData) {
                 "niche" = ${niche},
                 "location" = ${location},
                 "minFollowers" = ${minFollowers},
-                "images" = ${images},
+                "images" = ${JSON.stringify(images)},
                 "updatedAt" = ${new Date()}
             WHERE "id" = ${campaignId} AND "brandId" = (SELECT "id" FROM "BrandProfile" WHERE "userId" = ${session.user.id})
         `;
@@ -399,9 +411,22 @@ export async function getPublicCreators(filter?: {
         const creatorWhere: any = {};
         const influencerWhere: any = {};
 
+        // Helper to match niche (handles composite like "Fashion & Health")
+        const getNicheFilters = (nicheStr: string) => {
+            return nicheStr
+                .split(/[&,]/)
+                .map(s => s.trim())
+                .filter(Boolean);
+        };
+
         if (filter?.niche && filter.niche !== 'All') {
-            creatorWhere.niche = { contains: filter.niche, mode: 'insensitive' };
-            // InfluencerProfile has niche as string array, handle differently
+            const niches = getNicheFilters(filter.niche);
+            if (niches.length > 0) {
+                creatorWhere.OR = niches.map(n => ({
+                    niche: { contains: n, mode: 'insensitive' }
+                }));
+                // For influencerProfile, niche is often CSV, but we'll apply it in the combined filter too
+            }
         }
 
         // Fetch from Creator table (OTP auth system)
@@ -411,11 +436,12 @@ export async function getPublicCreators(filter?: {
                 id: true, userId: true, fullName: true, displayName: true,
                 niche: true, pricing: true, instagramUrl: true,
                 profileImageUrl: true, backgroundImageUrl: true, autoProfileImageUrl: true,
-                verificationStatus: true,
+                verificationStatus: true, price: true, priceType: true,
+                priceStory: true, pricePost: true, priceCollab: true,
                 user: { select: { email: true } },
                 metrics: { select: { followersCount: true, engagementRate: true, viewsCount: true }, orderBy: { date: 'desc' }, take: 1 },
                 selfReportedMetrics: { select: { followersCount: true }, take: 1 }
-            },
+            } as any,
             take: 30
         });
 
@@ -423,11 +449,29 @@ export async function getPublicCreators(filter?: {
             where: influencerWhere,
             select: {
                 id: true, userId: true, followers: true, engagementRate: true,
-                niche: true, platforms: true, bio: true,
+                niche: true, platforms: true, bio: true, price: true, priceType: true,
+                priceStory: true, pricePost: true, priceCollab: true,
                 user: { select: { id: true, name: true, image: true } }
-            },
+            } as any,
             take: 30
         });
+
+        // Check for logged in brand to get saved status
+        const session = await getServerSession(authOptions);
+        let savedInfluencerIds = new Set<string>();
+        if (session && session.user.role === 'BRAND') {
+            const brand = await db.brandProfile.findUnique({
+                where: { userId: session.user.id }
+            });
+            if (brand && (db as any).savedInfluencer) {
+                // @ts-ignore
+                const saved = await db.savedInfluencer.findMany({
+                    where: { brandId: brand.id },
+                    select: { influencerId: true }
+                });
+                savedInfluencerIds = new Set(saved.map((s: any) => s.influencerId));
+            }
+        }
 
         // Map Creator data to UI format
         const mappedCreators = creators.map((c: any) => {
@@ -458,10 +502,16 @@ export async function getPublicCreators(filter?: {
                 verified: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 tags: c.niche ? c.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
                 priceRange: formatPriceRange(c.pricing),
+                price: c.price || 0,
+                priceStory: c.priceStory || 0,
+                pricePost: c.pricePost || 0,
+                priceCollab: c.priceCollab || 0,
+                priceType: c.priceType || 'Per Post',
+                isApproved: c.verificationStatus === 'APPROVED' || c.verificationStatus === 'VERIFIED',
                 thumbnail: c.backgroundImageUrl || c.profileImageUrl || c.autoProfileImageUrl || "",
                 profileImage: c.profileImageUrl || c.autoProfileImageUrl || "",
                 bannerImage: c.backgroundImageUrl || null,
-                saved: false
+                saved: savedInfluencerIds.has(c.userId)
             };
         });
 
@@ -492,21 +542,29 @@ export async function getPublicCreators(filter?: {
                 verified: inf.kycStatus === 'APPROVED',
                 tags: nicheArray.slice(0, 3),
                 priceRange: formatPriceRange(inf.pricing),
+                price: inf.price || 0,
+                priceStory: inf.priceStory || 0,
+                pricePost: inf.pricePost || 0,
+                priceCollab: inf.priceCollab || 0,
+                priceType: inf.priceType || 'Per Post',
+                isApproved: true, // Legacy profiles assumed approved for now or add logic
                 thumbnail: inf.user?.image || "",
                 profileImage: inf.user?.image || "",
                 bannerImage: null, // InfluencerProfile doesn't have a banner image field yet
-                saved: false
+                saved: savedInfluencerIds.has(inf.userId)
             };
         });
 
         // Combine all creators
         let allCreators = [...mappedCreators, ...mappedInfluencers];
 
-        // Apply niche filter for influencers (since array field needs different handling)
+        // Apply niche filter broadly (covers cases where one model's niche field differs)
         if (filter?.niche && filter.niche !== 'All') {
-            allCreators = allCreators.filter((c: any) =>
-                c.niche.toLowerCase().includes(filter.niche!.toLowerCase())
-            );
+            const niches = getNicheFilters(filter.niche).map(n => n.toLowerCase());
+            allCreators = allCreators.filter((c: any) => {
+                const creatorNiche = c.niche.toLowerCase();
+                return niches.some(n => creatorNiche.includes(n));
+            });
         }
 
         // Apply followers range filter
@@ -554,8 +612,14 @@ export async function getPublicCreatorById(id: string) {
                 bannerImage: creator.backgroundImageUrl,
                 instagramUrl: creator.instagramUrl,
                 youtubeUrl: creator.youtubeUrl,
-                pricing: safeJsonParse(creator.pricing as string),
-                verificationStatus: creator.verificationStatus,
+                pricing: safeJsonParse((creator as any).pricing as string),
+                price: (creator as any).price || 0,
+                priceStory: (creator as any).priceStory || 0,
+                pricePost: (creator as any).pricePost || 0,
+                priceCollab: (creator as any).priceCollab || 0,
+                priceType: (creator as any).priceType || 'Per Post',
+                verificationStatus: (creator as any).verificationStatus,
+                isApproved: (creator as any).verificationStatus === 'APPROVED' || (creator as any).verificationStatus === 'VERIFIED',
                 stats: {
                     followers: primaryMetric?.followersCount || selfMetric?.followersCount || 0,
                     engagementRate: (primaryMetric?.engagementRate || 0),
@@ -586,8 +650,14 @@ export async function getPublicCreatorById(id: string) {
                     bannerImage: null,
                     instagramUrl: profile.instagramHandle ? `https://instagram.com/${profile.instagramHandle}` : null,
                     youtubeUrl: null,
-                    pricing: safeJsonParse(profile.pricing as string),
+                    pricing: safeJsonParse((profile as any).pricing as string),
+                    price: (profile as any).price || 0,
+                    priceStory: (profile as any).priceStory || 0,
+                    pricePost: (profile as any).pricePost || 0,
+                    priceCollab: (profile as any).priceCollab || 0,
+                    priceType: (profile as any).priceType || 'Per Post',
                     verificationStatus: 'APPROVED',
+                    isApproved: true,
                     stats: {
                         followers: profile.followers || 0,
                         engagementRate: (profile.engagementRate || 0),
@@ -1899,5 +1969,77 @@ export async function deletePaymentMethod(methodId: string) {
     } catch (error) {
         console.error("Delete Payment Method Error", error);
         return { success: false, error: "Failed to delete payment method" };
+    }
+}
+
+// --- MATCHING API ---
+export async function getMatchedCreators(campaignId: string, rejectedIds: string[] = []) {
+    try {
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId }
+        });
+
+        if (!campaign) return { success: false, error: "Campaign not found" };
+
+        const budget = campaign.budget || 0;
+        
+        // Fetch all possible matching creators using the existing logic
+        const publicCreatorsResult = await getPublicCreators({
+            niche: campaign.niche || undefined,
+            location: campaign.location || undefined,
+            minFollowers: campaign.minFollowers || undefined,
+            maxFollowers: 500000 // Micro-influencer cap
+        });
+
+        if (!publicCreatorsResult.success || !publicCreatorsResult.data) {
+            return { success: false, error: "Failed to fetch creators for matching" };
+        }
+
+        let candidates = publicCreatorsResult.data.filter((c: any) => !rejectedIds.includes(c.id));
+
+        // Shuffle the candidates
+        candidates.sort(() => Math.random() - 0.5);
+
+        // Select candidates up to the budget (Cost = ₹1 per follower)
+        const selected = [];
+        let currentCost = 0;
+
+        for (const candidate of candidates) {
+            const cost = candidate.followersCount; // 1 follower = ₹1
+            if (currentCost + cost <= budget) {
+                selected.push(candidate);
+                currentCost += cost;
+            }
+        }
+
+        // If even the first one is too expensive, but budget > 0, we might return an empty list. 
+        // We can just return what we managed to fit.
+        
+        return { success: true, data: selected, totalFollowers: currentCost, budget };
+    } catch (error) {
+        console.error("Matching Error", error);
+        return { success: false, error: "Failed to match creators" };
+    }
+}
+
+// --- PAYMENT API ---
+export async function activateCampaignPayment(campaignId: string) {
+    try {
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId }
+        });
+
+        if (!campaign) return { success: false, error: "Campaign not found" };
+
+        // Mark as ACTIVE (funded)
+        await db.campaign.update({
+            where: { id: campaignId },
+            data: { status: 'ACTIVE' }
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Payment activation error", error);
+        return { success: false, error: "Failed to activate campaign payment" };
     }
 }

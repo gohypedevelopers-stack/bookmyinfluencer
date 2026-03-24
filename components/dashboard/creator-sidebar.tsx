@@ -46,11 +46,7 @@ export function CreatorSidebar() {
             href: "/creator/earnings",
             icon: Wallet,
         },
-        {
-            name: "Messages",
-            href: "/creator/messages",
-            icon: MessageSquare,
-        }
+
     ]
 
     return (

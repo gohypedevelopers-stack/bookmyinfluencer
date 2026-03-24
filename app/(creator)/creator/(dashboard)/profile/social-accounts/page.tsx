@@ -24,7 +24,6 @@ import { SyncAllButton, LiveSyncToggle, UpdateMediaKitButton } from "./SocialAcc
 const PlatformIcon = ({ provider, className }: { provider: string, className?: string }) => {
     if (provider === 'instagram') return <Instagram className={className} />
     if (provider === 'youtube') return <Youtube className={className} />
-    if (provider === 'tiktok') return <Video className={className} />
     if (provider === 'twitch') return <Twitch className={className} />
     return <Users className={className} />
 }
@@ -68,7 +67,6 @@ export default async function SocialAccountsPage() {
 
     const hasInstagram = creator.socialAccounts.some(acc => acc.provider === 'instagram');
     const hasYoutube = creator.socialAccounts.some(acc => acc.provider === 'youtube');
-    const hasTiktok = creator.socialAccounts.some(acc => acc.provider === 'tiktok');
     const hasTwitch = creator.socialAccounts.some(acc => acc.provider === 'twitch');
 
     return (
@@ -110,9 +108,6 @@ export default async function SocialAccountsPage() {
                             } else if (isYoutube) {
                                 if (creator.youtubeUrl) defaultUrl = creator.youtubeUrl;
                                 lastFetch = creator.lastYoutubeFetchAt;
-                            } else if (account.provider === 'tiktok') {
-                                if ((creator as any).tiktokUrl) defaultUrl = (creator as any).tiktokUrl;
-                                lastFetch = (creator as any).lastTiktokFetchAt;
                             } else if (account.provider === 'twitch') {
                                 if ((creator as any).twitchUrl) defaultUrl = (creator as any).twitchUrl;
                                 lastFetch = (creator as any).lastTwitchFetchAt;
@@ -123,9 +118,8 @@ export default async function SocialAccountsPage() {
                                     <div className="flex justify-between items-start mb-6">
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm ${isInstagram ? 'bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600' :
                                             isYoutube ? 'bg-red-600' :
-                                                account.provider === 'tiktok' ? 'bg-pink-600' :
-                                                    account.provider === 'twitch' ? 'bg-purple-500' :
-                                                        'bg-gray-800'
+                                                account.provider === 'twitch' ? 'bg-purple-500' :
+                                                    'bg-gray-800'
                                             }`}>
                                             <PlatformIcon provider={account.provider} className="w-7 h-7" />
                                         </div>
@@ -235,16 +229,7 @@ export default async function SocialAccountsPage() {
                                 </ConnectSocialDialog>
                             )}
 
-                            {!hasTiktok && (
-                                <ConnectSocialDialog provider="tiktok">
-                                    <div className="border border-dashed border-gray-200 hover:border-pink-300 hover:bg-pink-50/50 rounded-2xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all group">
-                                        <div className="w-10 h-10 bg-gray-100 group-hover:bg-white rounded-full flex items-center justify-center text-pink-600 transition-colors">
-                                            <Video className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-sm font-bold text-gray-600 group-hover:text-gray-900">TikTok</span>
-                                    </div>
-                                </ConnectSocialDialog>
-                            )}
+
 
                             {!hasTwitch && (
                                 <ConnectSocialDialog provider="twitch">
@@ -258,7 +243,7 @@ export default async function SocialAccountsPage() {
                             )}
                         </div>
 
-                        {hasInstagram && hasYoutube && hasTiktok && hasTwitch && (
+                        {hasInstagram && hasYoutube && hasTwitch && (
                             <div className="py-8 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-100">
                                 All available platforms are connected!
                             </div>

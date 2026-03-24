@@ -111,13 +111,18 @@ export async function submitCreatorOnboarding(data: {
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
                     pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
+                    price: 0 as any,
+                    priceStory: null as any,
+                    pricePost: null as any,
+                    priceCollab: null as any,
+                    priceType: 'Per Post' as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
                             engagement: data.engagement,
                         }
                     }),
-                }
+                } as any
             });
         } else {
             // Create new creator record
@@ -129,13 +134,18 @@ export async function submitCreatorOnboarding(data: {
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
                     pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
+                    price: 0 as any,
+                    priceStory: null as any,
+                    pricePost: null as any,
+                    priceCollab: null as any,
+                    priceType: 'Per Post' as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
                             engagement: data.engagement,
                         }
                     }),
-                }
+                } as any
             });
         }
 

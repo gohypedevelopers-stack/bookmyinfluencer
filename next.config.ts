@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,6 +32,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logos-world.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
       },
     ],
     formats: ['image/avif', 'image/webp'],

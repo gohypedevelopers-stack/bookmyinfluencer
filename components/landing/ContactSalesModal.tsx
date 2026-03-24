@@ -49,6 +49,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
                     />
 
+
                     {/* Modal Container */}
                     <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
@@ -56,91 +57,91 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden pointer-events-auto relative"
+                            className="bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden pointer-events-auto relative"
                         >
-                            {/* Decorative Elements */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                            {/* Premium Decorative Elements - Refined for Light Mode */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2" />
 
                             {/* Header */}
-                            <div className="relative px-8 pt-8 pb-4 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">
-                                        {step === "form" ? "Contact Our Sales Team" : "Message Sent!"}
+                            <div className="relative px-10 pt-10 pb-6 flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                                        {step === "form" ? "Contact Sales" : "Message Sent!"}
                                     </h2>
-                                    <p className="text-gray-500 mt-1 text-sm">
+                                    <p className="text-slate-600 font-medium">
                                         {step === "form"
-                                            ? "We'll help you find the perfect plan for your needs."
-                                            : "Thanks for reaching out. We'll be in touch shortly."}
+                                            ? "Expert guidance for your brand's growth."
+                                            : "We'll be in touch with you shortly."}
                                     </p>
                                 </div>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                                    className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-all"
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-6 h-6" />
                                 </button>
                             </div>
 
                             {/* Content */}
-                            <div className="relative px-8 pb-8">
+                            <div className="relative px-10 pb-10">
                                 <AnimatePresence mode="wait">
                                     {step === "form" ? (
                                         <motion.form
                                             key="form"
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
+                                            initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+                                            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                                            exit={{ opacity: 0, x: 20, filter: "blur(10px)" }}
                                             onSubmit={handleSubmit}
-                                            className="space-y-4"
+                                            className="space-y-6"
                                         >
-                                            <div className="space-y-4">
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-1.5">
-                                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Name</label>
+                                            <div className="space-y-5">
+                                                <div className="grid grid-cols-2 gap-5">
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Full Name</label>
                                                         <input
                                                             required
                                                             type="text"
                                                             value={formData.name}
                                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 text-sm"
+                                                            className="w-full bg-slate-50 border border-slate-200 px-5 py-3.5 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 outline-none transition-all font-medium"
                                                             placeholder="John Doe"
                                                         />
                                                     </div>
-                                                    <div className="space-y-1.5">
-                                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Company</label>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Company</label>
                                                         <input
                                                             required
                                                             type="text"
                                                             value={formData.company}
                                                             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 text-sm"
+                                                            className="w-full bg-slate-50 border border-slate-200 px-5 py-3.5 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 outline-none transition-all font-medium"
                                                             placeholder="Acme Inc."
                                                         />
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Email</label>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Work Email</label>
                                                     <input
                                                         required
                                                         type="email"
                                                         value={formData.email}
                                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 text-sm"
+                                                        className="w-full bg-slate-50 border border-slate-200 px-5 py-3.5 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 outline-none transition-all font-medium"
                                                         placeholder="john@example.com"
                                                     />
                                                 </div>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Message</label>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Message</label>
                                                     <textarea
                                                         required
                                                         rows={3}
                                                         value={formData.message}
                                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 text-sm resize-none"
-                                                        placeholder="Tell us about your needs..."
+                                                        className="w-full bg-slate-50 border border-slate-200 px-5 py-3.5 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 outline-none transition-all font-medium resize-none"
+                                                        placeholder="How can we help you achieve your goals?"
                                                     />
                                                 </div>
                                             </div>
@@ -149,17 +150,17 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                                 <button
                                                     type="submit"
                                                     disabled={isLoading}
-                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                                    className="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group uppercase tracking-widest text-xs"
                                                 >
                                                     {isLoading ? (
                                                         <>
                                                             <Loader2 className="w-5 h-5 animate-spin" />
-                                                            Sending...
+                                                            Processing...
                                                         </>
                                                     ) : (
                                                         <>
-                                                            Send Request
-                                                            <ArrowRight className="w-4 h-4" />
+                                                            Consult Now
+                                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                                         </>
                                                     )}
                                                 </button>
@@ -168,22 +169,22 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                     ) : (
                                         <motion.div
                                             key="success"
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="py-8 text-center"
+                                            initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+                                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                            className="py-10 text-center"
                                         >
-                                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                                                <CheckCircle className="w-10 h-10" />
+                                            <div className="w-24 h-24 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-indigo-600 shadow-xl shadow-indigo-50">
+                                                <CheckCircle className="w-12 h-12" />
                                             </div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2">Request Received!</h3>
-                                            <p className="text-gray-500 mb-8 max-w-[280px] mx-auto">
-                                                Our team will analyze your requirements and get back to you within 24 hours.
+                                            <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Request Received</h3>
+                                            <p className="text-slate-600 mb-10 max-w-[320px] mx-auto font-medium text-lg leading-relaxed">
+                                                Our executive team will analyze your requirements and reach out within 24 hours.
                                             </p>
                                             <button
                                                 onClick={resetForm}
-                                                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 rounded-xl transition-all"
+                                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-black uppercase tracking-widest text-xs py-4 rounded-2xl transition-all border border-slate-200"
                                             >
-                                                Close
+                                                Return to Site
                                             </button>
                                         </motion.div>
                                     )}

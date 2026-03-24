@@ -11,7 +11,7 @@ export function CreatorTopNav() {
     const getPageTitle = () => {
         if (pathname?.includes("/dashboard")) return "Dashboard"
         if (pathname?.includes("/campaigns")) return "Campaigns"
-        if (pathname?.includes("/messages")) return "Messages"
+
         if (pathname?.includes("/analytics")) return "Analytics"
         if (pathname?.includes("/earnings")) return "Earnings"
         if (pathname?.includes("/profile")) return "Profile"

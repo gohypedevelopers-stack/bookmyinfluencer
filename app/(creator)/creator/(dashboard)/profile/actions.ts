@@ -8,7 +8,7 @@ import { runApifyActor } from "@/lib/apify";
 import { normalizeYoutubeMetrics, parseYoutubeChannel } from "@/lib/metrics-util";
 
 // Generic function to update any social profile (Instagram, YouTube, etc.)
-export async function updateSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch", url: string, followersCount: number = 0) {
+export async function updateSocialProfile(provider: "instagram" | "youtube" | "twitch", url: string, followersCount: number = 0) {
     try {
         const userId = await getAuthenticatedCreatorId()
         if (!userId) {
@@ -131,11 +131,6 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
                 if (username.startsWith("@")) username = username.substring(1);
                 providerId = username;
             }
-        } else if (provider === "tiktok") {
-            if (!url.includes("tiktok.com/")) return { error: "Invalid TikTok URL" }
-            username = url.split("tiktok.com/")[1]?.split("/")[0] || "tiktok_user"
-            if (username.startsWith("@")) username = username.substring(1);
-            providerId = username
         } else if (provider === "twitch") {
             if (!url.includes("twitch.tv/")) return { error: "Invalid Twitch URL" }
             username = url.split("twitch.tv/")[1]?.split("/")[0] || "twitch_user"
@@ -203,12 +198,6 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
                 if (username) updateData.autoDisplayName = username.substring(0, 100);
                 if (finalEncodedData) updateData.rawSocialData = JSON.stringify(finalEncodedData);
             }
-        } else if (provider === "tiktok") {
-            updateData.tiktokUrl = url;
-            if (socialType === "OAUTH") {
-                updateData.lastTiktokFetchAt = new Date();
-                if (finalEncodedData) updateData.rawSocialData = JSON.stringify(finalEncodedData);
-            }
         } else if (provider === "twitch") {
             (updateData as any).twitchUrl = url;
             if (socialType === "OAUTH") {
@@ -242,7 +231,7 @@ export async function updateSocialProfile(provider: "instagram" | "youtube" | "t
     }
 }
 
-export async function disconnectSocialProfile(provider: "instagram" | "youtube" | "tiktok" | "twitch") {
+export async function disconnectSocialProfile(provider: "instagram" | "youtube" | "twitch") {
     try {
         const userId = await getAuthenticatedCreatorId()
         if (!userId) return { error: "Unauthorized" }
@@ -271,7 +260,7 @@ export async function disconnectSocialProfile(provider: "instagram" | "youtube" 
         const updateData: any = {}
         if (provider === "instagram") updateData.instagramUrl = null
         if (provider === "youtube") updateData.youtubeUrl = null
-        if (provider === "tiktok") updateData.tiktokUrl = null
+
 
         await db.creator.update({
             where: { id: creator.id },
@@ -323,7 +312,7 @@ export async function syncAllSocialData() {
             let url = "";
             if (account.provider === "instagram") url = creator.instagramUrl || "";
             if (account.provider === "youtube") url = creator.youtubeUrl || "";
-            if (account.provider === "tiktok") url = (creator as any).tiktokUrl || "";
+
             if (account.provider === "twitch") url = (creator as any).twitchUrl || "";
 
             if (url) {

@@ -3,106 +3,185 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { BadgeCheck, Banknote } from "lucide-react"
+import { ArrowRight, BadgeCheck, Banknote, TrendingUp, Users } from "lucide-react"
 import { Container } from "@/components/container"
 import { motion } from "framer-motion"
 
+const HERO_VIDEO_URL = "/videos/hero-video-1.mp4"
+
 export function HeroSection() {
     return (
-        <section className="w-full bg-white py-20 lg:py-32 overflow-hidden">
-            <Container>
-                <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+        <section className="w-full bg-transparent pt-4 md:pt-6 lg:pt-8 pb-8 md:pb-12 lg:pb-14 relative overflow-hidden transition-colors duration-500">
+            {/* Background Mesh Gradients - Softer for Light Mode */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-blue-400/10 rounded-full blur-[160px]" />
+                <div className="absolute top-[20%] -right-[15%] w-[50%] h-[50%] bg-indigo-400/10 rounded-full blur-[140px]" />
+                <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-blue-600/5 rounded-full blur-[160px]" />
+            </div>
+
+            <Container className="relative">
+                <div className="flex flex-col items-center gap-6 md:gap-8 lg:gap-10 relative z-10">
 
                     {/* Text Content */}
-                    <div className="flex-1 space-y-8 text-center sm:text-left lg:text-left lg:max-w-[520px]">
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="text-4xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]"
-                        >
-                            The Most Trusted <br />
-                            Bridge Between <br />
-                            <span className="text-blue-600">Brands</span> & <span className="text-blue-600">Creators</span>
-                        </motion.h1>
+                    <div className="order-2 w-full max-w-[1140px] pt-4 lg:pt-8">
 
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                            className="text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
-                        >
-                            Secure connections, verified metrics, and escrow-protected payments for the modern creator economy. Stop guessing, start partnering.
-                        </motion.p>
+                        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.7, ease: "easeOut" }}
+                                className="lg:col-span-7 space-y-6 md:space-y-8"
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50/70 border border-indigo-100/60 shadow-sm backdrop-blur-md"
+                                >
+                                    <span className="flex h-1.5 w-1.5 rounded-full bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+                                    <span className="text-[10px] sm:text-[11px] font-black tracking-[0.15em] uppercase text-indigo-600">Premium Influencer Network</span>
+                                </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
-                        >
-                            <Button size="lg" className="bg-slate-800 hover:bg-slate-700 text-white px-8 h-12 text-base rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95" asChild>
-                                <Link href="/discover">
-                                    Hire an Influencer
-                                </Link>
-                            </Button>
-                            <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 h-12 text-base rounded-full hover:scale-105 active:scale-95 transition-all" asChild>
-                                <Link href="/login">
-                                    Join as a Creator
-                                </Link>
-                            </Button>
-                        </motion.div>
+                                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.05] sm:leading-[1.02] text-left">
+                                    The Most Trusted <br />
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-fuchsia-500 drop-shadow-sm">Bridge Between</span> <br />
+                                    Brands & Creators
+                                </h1>
+                                <p className="text-base sm:text-lg text-slate-600 max-w-[540px] leading-relaxed font-medium text-left">
+                                    Scale your impact with verified creators, secure escrow payments, and seamless collaborations. Join 100,000+ experts shaping the digital frontier.
+                                </p>
+                            </motion.div>
 
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
-                            className="flex items-center justify-center lg:justify-start gap-2 text-sm text-slate-500 font-medium"
-                        >
-                            <BadgeCheck className="w-5 h-5 text-green-500" />
-                            <span>No credit card required for creators</span>
-                        </motion.div>
+                            <div className="lg:col-span-5">
+                                <div className="h-full flex flex-col justify-between gap-6 rounded-[2rem] border border-slate-100 bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] p-6 sm:p-8">
+
+                                <div className="flex flex-wrap justify-start gap-2.5">
+                                    <span className="px-3.5 py-1.5 rounded-full bg-blue-50/80 text-blue-600 text-[10px] font-bold tracking-wide">Verified Creators</span>
+                                    <span className="px-3.5 py-1.5 rounded-full bg-emerald-50/80 text-emerald-600 text-[10px] font-bold tracking-wide">Escrow Secure</span>
+                                    <span className="px-3.5 py-1.5 rounded-full bg-sky-50/80 text-sky-600 text-[10px] font-bold tracking-wide">Fast Matching</span>
+                                </div>
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.3 }}
+                                    className="flex flex-col sm:flex-row w-full gap-3 sm:gap-4"
+                                >
+                                    <Button size="lg" className="w-full sm:flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-4 h-12 sm:h-12 text-xs sm:text-[11px] font-black rounded-xl shadow-[0_8px_20px_-6px_rgba(124,58,237,0.5)] transition-all hover:-translate-y-0.5 border-none uppercase tracking-wider" asChild>
+                                        <Link href="/brand/register">
+                                            Hire an Influencer
+                                            <ArrowRight className="ml-1.5 h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                    <Button size="lg" variant="outline" className="w-full sm:flex-1 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:border-slate-300 px-4 h-12 sm:h-12 text-xs sm:text-[11px] font-black rounded-xl hover:-translate-y-0.5 transition-all outline-none uppercase tracking-wider shadow-sm" asChild>
+                                        <Link href="/register">
+                                            Join as a Creator
+                                        </Link>
+                                    </Button>
+                                </motion.div>
+
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5, delay: 0.5 }}
+                                    className="flex items-center justify-start gap-4 pt-1"
+                                >
+                                    <div className="flex -space-x-3">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-sm relative z-10">
+                                                <Image src={`/images/${i === 1 ? 'elena' : i === 2 ? 'julian' : i === 3 ? 'marco' : 'sarah'}.png`} alt="User" width={40} height={40} className="object-cover" />
+                                            </div>
+                                        ))}
+                                        <div className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-[9px] font-black text-white shadow-sm relative z-20">
+                                            5K+
+                                        </div>
+                                    </div>
+                                    <div className="h-8 w-px bg-slate-200" />
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-widest leading-none">
+                                            <BadgeCheck className="w-4 h-4 text-violet-600" />
+                                            100% Certified
+                                        </div>
+                                        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verified Profiles</span>
+                                    </div>
+                                </motion.div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Image Content */}
+                    {/* Video Slider & Floating Metrics */}
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.7, ease: "easeOut" }}
-                        className="flex-1 relative w-full max-w-xl lg:max-w-[600px]"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="order-1 relative w-full mb-8 lg:mb-16 mt-4 lg:mt-0"
                     >
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                            {/* Main Image */}
-                            <div className="aspect-[4/3] bg-slate-100 relative">
-                                <Image
-                                    src="/images/hero.svg"
-                                    alt="Content Creator working"
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                    className="object-cover"
-                                    priority
+                        {/* 3D Looking Frame */}
+                        <div className="relative aspect-[16/10] sm:aspect-[16/8] lg:aspect-[21/9] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 bg-white/60 p-2 sm:p-2.5 z-10 w-full max-w-[1240px] mx-auto">
+                            <div className="relative w-full h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-100 shadow-inner block">
+                                <video
+                                    src={HERO_VIDEO_URL}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    preload="metadata"
+                                    className="object-cover w-full h-full transform scale-[1.01]"
                                 />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
                             </div>
                         </div>
 
-                        {/* Floating Card */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
-                            className="absolute -bottom-6 left-4 bg-white p-4 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-4 border border-slate-100 sm:left-6"
-                        >
-                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                <Banknote className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Total Payouts</p>
-                                <p className="text-xl font-bold text-slate-900">₹12.4M+</p>
-                            </div>
-                        </motion.div>
+                        {/* Floating Metric Cards */}
+                        <div className="mt-6 lg:mt-0 flex overflow-x-auto pb-4 gap-4 px-1 lg:block lg:gap-0 lg:overflow-visible lg:p-0 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-                        {/* Background Decoration */}
-                        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-50/50 rounded-full blur-3xl" />
+                            {/* Top-right: 8.4% Engagement - overflows right edge */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.8, duration: 0.8 }}
+                                className="relative lg:absolute lg:-right-4 lg:top-8 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
+                            >
+                                <TrendingUp className="w-5 h-5 text-indigo-500 stroke-[2] shrink-0" />
+                                <div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">8.4%</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Avg Engagement</div>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom-left: 1.2M+ Followers - overflows left edge */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -16 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1, duration: 0.8 }}
+                                className="relative lg:absolute lg:-left-4 lg:bottom-14 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
+                            >
+                                <Users className="w-5 h-5 text-blue-500 stroke-[2] shrink-0" />
+                                <div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">500K+</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Max Followers</div>
+                                </div>
+                            </motion.div>
+
+                            {/* Bottom-right: 500+ Brand Deals - overflows right edge */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.2, duration: 0.8 }}
+                                className="relative lg:absolute lg:-right-4 lg:-bottom-6 z-20 flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white shadow-[0_8px_32px_-8px_rgba(0,0,0,0.14)] border border-slate-100 hover:-translate-y-0.5 transition-transform min-w-[150px] snap-center shrink-0"
+                            >
+                                <Banknote className="w-5 h-5 text-emerald-500 stroke-[2] shrink-0" />
+                                <div>
+                                    <div className="text-[1.15rem] font-black text-slate-900 leading-none tracking-tight">500+</div>
+                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1 whitespace-nowrap">Active Brand Deals</div>
+                                </div>
+                            </motion.div>
+                        </div>
+
+                        {/* Outer Glows - Softer for Light Mode */}
+                        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-indigo-600/5 rounded-full blur-[100px] opacity-40 animate-pulse pointer-events-none" />
+                        <div className="absolute -inset-10 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 rounded-[80px] blur-3xl opacity-20 pointer-events-none" />
                     </motion.div>
                 </div>
             </Container>

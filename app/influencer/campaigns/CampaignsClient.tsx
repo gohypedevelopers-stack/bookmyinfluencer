@@ -126,8 +126,8 @@ export default function CampaignsClient({ campaigns }: Props) {
                                         </Button>
                                     </>
                                 ) : (
-                                    <Button variant="outline" className="flex-1 md:flex-none">
-                                        <MessageSquare className="w-4 h-4 mr-2" /> Chat
+                                    <Button variant="outline" className="flex-1 md:flex-none cursor-default" disabled>
+                                        <Briefcase className="w-4 h-4 mr-2" /> Managed by PM
                                     </Button>
                                 )}
                             </div>

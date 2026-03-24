@@ -1,12 +1,13 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "windows"]
-  engineType    = "binary"
+  binaryTargets = ["native", "windows", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+  engineType    = "library"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -20,76 +21,91 @@ model User {
   updatedAt         DateTime             @updatedAt
   lastSeenAt        DateTime?
   auditLogs         AuditLog[]
-  blocksReceived    Block[]              @relation("BlocksReceived")
   blocksInitiated   Block[]              @relation("BlocksInitiated")
+  blocksReceived    Block[]              @relation("BlocksReceived")
   brandProfile      BrandProfile?
   managedCampaigns  CampaignAssignment[]
   influencerProfile InfluencerProfile?
   sentMessages      Message[]            @relation("SentMessages")
   notifications     Notification[]
-  reportsReceived   Report[]             @relation("ReportsReceived")
   reportsInitiated  Report[]             @relation("ReportsInitiated")
+  reportsReceived   Report[]             @relation("ReportsReceived")
 }
 
 model BrandProfile {
-  id             String       @id @default(cuid())
-  userId         String       @unique
-  companyName    String
-  website        String?
-  industry       String?
-  description    String?
-  location       String?
-  paymentMethods String?      @default("[]")
-  walletBalance  Float        @default(0)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  brandWallet    BrandWallet?
-  campaigns      Campaign[]
-  contracts      Contract[]
-  
-  // Onboarding Data
-  onboardingCompleted  Boolean @default(false)
-  campaignType         String? // Store as JSON string
+  id                   String            @id @default(cuid())
+  userId               String            @unique
+  companyName          String
+  website              String?
+  industry             String?
+  niche                String?
+  description          String?
+  location             String?
+  paymentMethods       String?           @default("[]")
+  walletBalance        Float             @default(0)
+  onboardingCompleted  Boolean           @default(false)
+  campaignType         String?
   campaignBudget       String?
-  targetPlatforms      String? // Store as JSON string
+  targetPlatforms      String?
   preferredCreatorType String?
   campaignGoals        String?
+  minFollowers         Int?
+  maxFollowers         Int?
+  minPricePerPost      Float?
+  maxPricePerPost      Float?
+  priceType            String?           @default("Per Post")
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandWallet          BrandWallet?
+  campaigns            Campaign[]
+  brandCampaigns       BrandCampaign[]
+  contracts            Contract[]
+  savedInfluencers     SavedInfluencer[]
+}
 
-  // Creator Matching Preferences
-  minFollowers      Int?
-  maxFollowers      Int?
-  minPricePerPost   Float?
-  maxPricePerPost   Float?
+model SavedInfluencer {
+  id           String            @id @default(cuid())
+  brandId      String
+  influencerId String
+  createdAt    DateTime          @default(now())
+  influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  brand        BrandProfile      @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, influencerId])
 }
 
 model InfluencerProfile {
-  id              String              @id @default(cuid())
-  userId          String              @unique
-  niche           String
-  location        String?
-  bio             String?
-  instagramHandle String?
-  youtubeHandle   String?
-  tiktokHandle    String?
-  followers       Int                 @default(0)
-  engagementRate  Float               @default(0)
-  socialData      String?
-  pricing         String?
-  applications    CampaignCandidate[]
-  contracts       Contract[]
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kyc             KYCSubmission?
-  payoutRecords   PayoutRecord[]
-  payouts         PayoutRequest[]
-
-  // Onboarding Data
-  onboardingCompleted Boolean @default(false)
-  platforms           String? // Store as JSON string
+  id                  String              @id @default(cuid())
+  userId              String              @unique
+  niche               String
+  location            String?
+  bio                 String?
+  instagramHandle     String?
+  youtubeHandle       String?
+  tiktokHandle        String?
+  followers           Int                 @default(0)
+  engagementRate      Float               @default(0)
+  socialData          String?
+  pricing             String?
+  price               Int?
+  priceStory          Int?
+  pricePost           Int?
+  priceCollab         Int?
+  priceType           String?             @default("Per Post")
+  onboardingCompleted Boolean             @default(false)
+  platforms           String?
+  applications        CampaignCandidate[]
+  contracts           Contract[]
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kyc                 KYCSubmission?
+  payoutRecords       PayoutRecord[]
+  payouts             PayoutRequest[]
+  savedInfluencers    SavedInfluencer[]
 }
 
 model KYCSubmission {
   id                String            @id @default(cuid())
   profileId         String            @unique
-  status            String         @default("NOT_SUBMITTED")
+  status            String            @default("NOT_SUBMITTED")
   documentType      String?
   documentUrl       String?
   documentBackUrl   String?
@@ -113,7 +129,7 @@ model Campaign {
   description  String?
   requirements String?
   budget       Float?
-  status       String      @default("DRAFT")
+  status       String              @default("DRAFT")
   startDate    DateTime?
   endDate      DateTime?
   createdAt    DateTime            @default(now())
@@ -130,16 +146,86 @@ model Campaign {
   transactions WalletTransaction[]
 }
 
+model BrandCampaign {
+  id                  String                 @id @default(cuid())
+  brandId             String
+  title               String?
+  summary             String?
+  totalBudget         Float
+  category            String
+  categoryLabel       String?
+  minFollowers        Int
+  maxFollowers        Int
+  status              String                 @default("active")
+  targetAcceptedCount Int                    @default(20)
+  activeRequestLimit  Int                    @default(20)
+  matchingTriggeredAt DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  brand               BrandProfile           @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  requests            CollaborationRequest[]
+
+  @@index([brandId, status])
+  @@index([category, minFollowers, maxFollowers])
+}
+
+model Influencer {
+  id             String                 @id @default(cuid())
+  sourceKey      String                 @unique
+  sourceType     String
+  sourceUserId   String?
+  email          String?
+  displayName    String
+  category       String?
+  rawCategory    String?
+  followersCount Int                    @default(0)
+  engagementRate Float                  @default(0)
+  priceStory     Int?
+  pricePost      Int?
+  priceCollab    Int?
+  platforms      String?
+  profileImageUrl String?
+  active         Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  requests       CollaborationRequest[]
+
+  @@index([category, followersCount])
+  @@index([active, engagementRate, followersCount])
+}
+
+model CollaborationRequest {
+  id              String        @id @default(cuid())
+  campaignId      String
+  influencerId    String
+  status          String        @default("pending")
+  sentAt          DateTime      @default(now())
+  expiresAt       DateTime
+  respondedAt     DateTime?
+  acceptedAt      DateTime?
+  expiredAt       DateTime?
+  archivedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  campaign        BrandCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer      Influencer    @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, influencerId])
+  @@index([status, expiresAt])
+  @@index([campaignId, status])
+}
+
 model CampaignCandidate {
   id           String            @id @default(cuid())
   campaignId   String
   influencerId String
-  status       String   @default("CONTACTED")
+  status       String            @default("CONTACTED")
   notes        String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
-  campaign     Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   influencer   InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  campaign     Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   chatThread   ChatThread?
   contract     Contract?
   offer        Offer?
@@ -153,7 +239,7 @@ model Offer {
   amount                  Float
   currency                String            @default("INR")
   deliverablesDescription String
-  status                  String       @default("PENDING")
+  status                  String            @default("PENDING")
   history                 String?
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
@@ -168,47 +254,47 @@ model Contract {
   totalAmount  Float
   platformFee  Float
   taxAmount    Float               @default(0)
-  status       String      @default("DRAFT")
+  status       String              @default("DRAFT")
   startDate    DateTime?
   endDate      DateTime?
   terms        String?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  brand        BrandProfile        @relation(fields: [brandId], references: [id])
-  candidate    CampaignCandidate?  @relation(fields: [candidateId], references: [id])
   influencer   InfluencerProfile   @relation(fields: [influencerId], references: [id])
+  candidate    CampaignCandidate?  @relation(fields: [candidateId], references: [id])
+  brand        BrandProfile        @relation(fields: [brandId], references: [id])
   deliverables Deliverable[]
   disputes     Dispute[]
   transactions EscrowTransaction[]
 }
 
 model Deliverable {
-  id              String            @id @default(cuid())
+  id              String    @id @default(cuid())
   contractId      String
   title           String
   description     String?
   dueDate         DateTime?
-  status          String @default("PENDING")
+  status          String    @default("PENDING")
   submissionUrl   String?
   submissionNotes String?
   submittedAt     DateTime?
   approvedAt      DateTime?
   feedback        String?
-  contract        Contract          @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract        Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 model EscrowTransaction {
-  id                String                  @id @default(cuid())
+  id                String   @id @default(cuid())
   contractId        String
   amount            Float
-  currency          String                  @default("INR")
+  currency          String   @default("INR")
   type              String
-  status            String @default("PENDING")
+  status            String   @default("PENDING")
   paymentGatewayRef String?
   invoiceUrl        String?
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
-  contract          Contract                @relation(fields: [contractId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  contract          Contract @relation(fields: [contractId], references: [id])
 }
 
 model PayoutRequest {
@@ -216,7 +302,7 @@ model PayoutRequest {
   influencerId  String
   amount        Float
   currency      String            @default("INR")
-  status        String      @default("REQUESTED")
+  status        String            @default("REQUESTED")
   bankReference String?
   adminNotes    String?
   requestedAt   DateTime          @default(now())
@@ -236,32 +322,32 @@ model ChatThread {
 }
 
 model Message {
-  id             String        @id @default(cuid())
+  id             String     @id @default(cuid())
   threadId       String
   senderId       String
   content        String?
-  read           Boolean       @default(false)
-  createdAt      DateTime      @default(now())
+  read           Boolean    @default(false)
+  createdAt      DateTime   @default(now())
   attachmentType String?
   attachmentUrl  String?
   deliveredAt    DateTime?
   seenAt         DateTime?
-  status         String @default("SENT")
-  sender         User          @relation("SentMessages", fields: [senderId], references: [id])
-  thread         ChatThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  status         String     @default("SENT")
+  thread         ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender         User       @relation("SentMessages", fields: [senderId], references: [id])
 }
 
 model Dispute {
-  id          String        @id @default(cuid())
+  id          String   @id @default(cuid())
   contractId  String
   raiserId    String
   reason      String
   description String
-  status      String @default("OPEN")
+  status      String   @default("OPEN")
   resolution  String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  contract    Contract      @relation(fields: [contractId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  contract    Contract @relation(fields: [contractId], references: [id])
 }
 
 model Block {
@@ -269,8 +355,8 @@ model Block {
   blockerId String
   blockedId String
   createdAt DateTime @default(now())
-  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
   blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id])
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
 
   @@unique([blockerId, blockedId])
 }
@@ -282,8 +368,8 @@ model Report {
   reason     String
   status     String   @default("PENDING")
   createdAt  DateTime @default(now())
-  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
   reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id])
+  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
 }
 
 model Notification {
@@ -350,6 +436,11 @@ model Creator {
   bio                  String?
   autoBio              String?                     @map("auto_bio")
   pricing              String?
+  price                Int?                        @map("price")
+  priceStory           Int?                        @map("price_story")
+  pricePost            Int?                        @map("price_post")
+  priceCollab          Int?                        @map("price_collab")
+  priceType            String?                     @default("Per Post") @map("price_type")
   mediaKit             String?                     @map("media_kit")
   rawSocialData        String?                     @map("raw_social_data")
   lastYoutubeFetchAt   DateTime?                   @map("last_youtube_fetch_at")
@@ -358,22 +449,20 @@ model Creator {
   backgroundImageUrl   String?                     @map("background_image_url")
   paymentHistory       String?                     @map("payment_history")
   payoutMethods        String?                     @map("payout_methods")
-  verificationStatus   String                   @default("NOT_SUBMITTED") @map("verification_status")
+  verificationStatus   String                      @default("NOT_SUBMITTED") @map("verification_status")
   isLiveSyncEnabled    Boolean                     @default(true) @map("is_live_sync_enabled")
   lastTiktokFetchAt    DateTime?                   @map("last_tiktok_fetch_at")
   lastTwitchFetchAt    DateTime?                   @map("last_twitch_fetch_at")
   notificationSettings String?                     @map("notification_settings")
   tiktokUrl            String?                     @map("tiktok_url")
   twitchUrl            String?                     @map("twitch_url")
+  onboardingCompleted  Boolean                     @default(false)
+  platforms            String?
   kycSubmission        CreatorKYCSubmission?
   metrics              CreatorMetric[]
   selfReportedMetrics  CreatorSelfReportedMetric[]
   socialAccounts       CreatorSocialAccount[]
   user                 OtpUser                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Onboarding Data
-  onboardingCompleted Boolean @default(false)
-  platforms           String? // Store as JSON string
 
   @@map("creators")
 }
@@ -430,24 +519,24 @@ model CreatorMetric {
 }
 
 model CreatorKYCSubmission {
-  id                 String          @id @default(uuid())
-  creatorId          String          @unique @map("creator_id")
-  status             String       @default("PENDING")
-  instagramFollowers Int?            @map("instagram_followers")
-  youtubeSubscribers Int?            @map("youtube_subscribers")
-  totalPosts         Int?            @map("total_posts")
-  engagementRate     Float?          @map("engagement_rate")
-  adminNotes         String?         @map("admin_notes")
-  reviewedBy         String?         @map("reviewed_by")
-  reviewedAt         DateTime?       @map("reviewed_at")
-  submittedAt        DateTime        @default(now()) @map("submitted_at")
-  updatedAt          DateTime        @updatedAt @map("updated_at")
-  livenessPrompt     String? @map("liveness_prompt")
-  livenessResult     String? @map("liveness_result")
-  selfieCapturedAt   DateTime?       @map("selfie_captured_at")
-  selfieImageKey     String?         @map("selfie_image_key")
-  verifiedByAdminAt  DateTime?       @map("verified_by_admin_at")
-  creator            Creator         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  id                 String    @id @default(uuid())
+  creatorId          String    @unique @map("creator_id")
+  status             String    @default("PENDING")
+  instagramFollowers Int?      @map("instagram_followers")
+  youtubeSubscribers Int?      @map("youtube_subscribers")
+  totalPosts         Int?      @map("total_posts")
+  engagementRate     Float?    @map("engagement_rate")
+  adminNotes         String?   @map("admin_notes")
+  reviewedBy         String?   @map("reviewed_by")
+  reviewedAt         DateTime? @map("reviewed_at")
+  submittedAt        DateTime  @default(now()) @map("submitted_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  livenessPrompt     String?   @map("liveness_prompt")
+  livenessResult     String?   @map("liveness_result")
+  selfieCapturedAt   DateTime? @map("selfie_captured_at")
+  selfieImageKey     String?   @map("selfie_image_key")
+  verifiedByAdminAt  DateTime? @map("verified_by_admin_at")
+  creator            Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@map("creator_kyc_submissions")
 }
@@ -471,8 +560,8 @@ model WalletTransaction {
   reference  String?
   status     String      @default("SUCCESS")
   createdAt  DateTime    @default(now())
-  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
   wallet     BrandWallet @relation(fields: [walletId], references: [id])
+  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
 }
 
 model RazorpayPayment {
@@ -492,8 +581,8 @@ model CampaignAssignment {
   campaignId String   @unique
   managerId  String
   assignedAt DateTime @default(now())
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
   manager    User     @relation(fields: [managerId], references: [id])
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
 }
 
 model PayoutRecord {
@@ -505,8 +594,6 @@ model PayoutRecord {
   utr         String
   processedBy String?
   paidAt      DateTime          @default(now())
-  campaign    Campaign          @relation(fields: [campaignId], references: [id])
   creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
+  campaign    Campaign          @relation(fields: [campaignId], references: [id])
 }
-
-

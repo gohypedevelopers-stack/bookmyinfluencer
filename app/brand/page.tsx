@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Layers3, Plus } from "lucide-react";
 import Link from "next/link";
 import { BrandStats } from "@/components/brand/dashboard/brand-stats";
 import { RecommendedInfluencers } from "@/components/brand/dashboard/recommended-influencers";
@@ -10,8 +10,11 @@ import { QuickActions } from "@/components/brand/dashboard/quick-actions";
 import { TopCollections } from "@/components/brand/dashboard/top-collections";
 import { RecentActivity } from "@/components/brand/dashboard/recent-activity";
 import { getPublicCreators, getBrandStats, getBrandDashboardActivity, getBrandNotifications } from "@/app/brand/actions";
+import { ensureRequestExpiryJobStarted } from "@/jobs/requestExpiryJob";
 
 export default async function BrandDashboardPage() {
+    ensureRequestExpiryJobStarted();
+
     const session = await getServerSession(authOptions);
 
     if (!session) {
@@ -19,90 +22,94 @@ export default async function BrandDashboardPage() {
     }
 
     const brandName = session.user.name || "Brand";
-
-    // --- DATA FETCHING ---
-
-    // 1. Stats
     const stats = await getBrandStats();
+    const { data: creators } = await getPublicCreators({ maxFollowers: 500000 });
 
-    // 2. Recommended Influencers
-    const { data: creators } = await getPublicCreators();
+    const getFallbackBanner = (niche: string) => {
+        const n = (niche || '').toLowerCase();
+        if (n.includes('fashion') || n.includes('beauty') || n.includes('style')) return 'https://images.unsplash.com/photo-1490481651871-ab38ed250239?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('tech') || n.includes('gadget')) return 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('travel')) return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('food') || n.includes('cook') || n.includes('culinary')) return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('fit') || n.includes('health') || n.includes('gym')) return 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('education') || n.includes('learning')) return 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('gaming')) return 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('finance') || n.includes('money')) return 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('parenting')) return 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80';
+        if (n.includes('auto')) return 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80';
+        return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
+    };
 
-    // Enrich with match stats (Mock logic for match %, but real data for rest)
-    const recommendedInfluencers = creators ? creators.map((c: any) => ({
-        ...c,
+    const recommendedInfluencers = creators ? creators.map((creator: any) => ({
+        ...creator,
         stats: {
-            followers: c.followersCount || 0,
-            engagement: c.engagementRate || 0,
-            match: Math.floor(Math.random() * 20) + 80 // Mock Match Score for now
+            followers: creator.followersCount || 0,
+            engagement: creator.engagementRate || 0,
+            match: Math.floor(Math.random() * 20) + 80,
         },
-        bannerImage: c.bannerImage || null
+        bannerImage: creator.bannerImage || getFallbackBanner(creator.niche),
     })) : [];
 
-    // 3. Activity
     const activities = await getBrandDashboardActivity();
-
-    // 4. Unread Messages
     const { unreadMessageCount } = await getBrandNotifications();
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-7xl mx-auto">
-
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Home Overview</h1>
-                        <p className="text-gray-500">Welcome back, {brandName}. Here's what's happening with your influencer campaigns today.</p>
+                        <h1 className="mb-2 text-3xl font-bold text-gray-900">Brand Home Overview</h1>
+                        <p className="text-gray-500">Welcome back, {brandName}. Here&apos;s what&apos;s happening with your influencer campaigns today.</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                        <Link href="/brand/campaign-queues">
+                            <Button variant="outline" className="rounded-2xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50">
+                                <Layers3 className="mr-2 h-4 w-4" />
+                                Campaign Queues
+                            </Button>
+                        </Link>
+                        <Link href="/brand/campaigns/new">
+                            <Button className="rounded-2xl bg-blue-600 font-semibold text-white hover:bg-blue-700">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create New Campaign
+                            </Button>
+                        </Link>
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8">
-
-                    {/* Left Main Column */}
-                    <div className="flex-1 min-w-0">
-
-                        {/* Stats Row */}
+                <div className="flex flex-col gap-8 lg:flex-row">
+                    <div className="min-w-0 flex-1">
                         <BrandStats stats={stats} />
-
-                        {/* Recommended Influencers */}
                         <RecommendedInfluencers influencers={recommendedInfluencers} />
-
-                        {/* Recent Activity */}
                         <RecentActivity activities={activities} />
-
                     </div>
 
-                    {/* Right Sidebar Column */}
-                    <div className="w-full lg:w-80 space-y-6 shrink-0">
-                        {/* CTA Card */}
-                        <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg overflow-hidden relative">
+                    <div className="w-full shrink-0 space-y-6 lg:w-80">
+                        <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 text-white shadow-lg">
                             <div className="relative z-10">
-                                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mb-4 text-xl font-bold">
-                                    <Plus className="w-6 h-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Ready to grow?</h3>
-                                <p className="text-blue-100 mb-6 text-sm">Launch a new campaign and start reaching millions of customers today.</p>
-                                <Link href="/brand/campaigns/new">
-                                    <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 border-none font-bold">
-                                        Create New Campaign
+                                <Link href="/brand/campaign-queues">
+                                    <div className="mb-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-500 transition-colors hover:bg-blue-400">
+                                        <Layers3 className="h-5 w-5 text-white" />
+                                    </div>
+                                </Link>
+                                <h3 className="mb-2 text-xl font-bold">Queue visibility</h3>
+                                <p className="mb-6 text-sm text-blue-100">Track onboarding-generated campaign queues, rolling requests, and accepted influencers from one dashboard.</p>
+                                <Link href="/brand/campaign-queues">
+                                    <Button className="w-full border-none bg-white font-bold text-blue-600 hover:bg-blue-50">
+                                        Open Queue Dashboard
                                     </Button>
                                 </Link>
                             </div>
-                            {/* Decorative circles */}
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/30 rounded-full blur-2xl"></div>
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
+                            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blue-500/30 blur-2xl"></div>
+                            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-blue-400/20 blur-2xl"></div>
                         </div>
 
-                        {/* Quick Actions */}
                         <QuickActions unreadMessageCount={unreadMessageCount} />
-
-                        {/* Top Collections */}
                         <TopCollections />
                     </div>
-
                 </div>
             </div>
         </div>
-    )
+    );
 }

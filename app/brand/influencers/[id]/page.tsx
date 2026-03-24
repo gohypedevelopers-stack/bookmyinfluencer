@@ -87,13 +87,7 @@ export default function InfluencerProfile() {
                             <span className="font-semibold text-xs text-gray-500">Back to Discovery</span>
                         </div>
                         <div className="ml-auto flex items-center gap-3">
-
-                            <button
-                                onClick={handleOpenInvite}
-                                className="px-5 py-2 bg-white border-2 border-teal-600 text-teal-700 rounded-lg font-bold hover:bg-teal-50 transition-all"
-                            >
-                                Request Collaboration
-                            </button>
+                            {/* Request Collaboration Button Removed */}
                         </div>
                     </div>
                 </div>
@@ -245,206 +239,204 @@ export default function InfluencerProfile() {
                         </div>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex items-center gap-6 mt-8 border-b border-gray-200">
+                </div>
+            </div>
+
+            {/* Sticky Tab Bar */}
+            <div className="sticky top-16 z-20 bg-white border-b border-gray-200 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex items-center gap-1 overflow-x-auto">
                         {[
                             { id: 'overview', label: 'Performance Overview' },
                             { id: 'portfolio', label: 'Service Pricing' },
-                            { id: 'pricing', label: 'Previous Work' }
+                            { id: 'pricing', label: 'Previous Work' },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`pb-3 font-medium transition-colors relative ${activeTab === tab.id
+                                className={`px-5 py-3.5 font-semibold text-sm whitespace-nowrap transition-colors relative ${activeTab === tab.id
                                     ? 'text-teal-600'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                    : 'text-gray-500 hover:text-gray-800'
                                     }`}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-600 to-teal-500" />
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-600 rounded-t-full" />
                                 )}
                             </button>
                         ))}
-                        <div className="ml-auto">
-                            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <option>Last 30 Days</option>
-                                <option>Last 90 Days</option>
-                                <option>Last Year</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
-
-                {/* Content */}
+            </div>      {/* Content */}
+            <div className="max-w-7xl mx-auto px-6">
                 <div className="grid lg:grid-cols-3 gap-6 mt-6 pb-12">
                     {/* Main Column */}
+                    {/* === MAIN COLUMN === */}
                     <div className="lg:col-span-2 space-y-6">
-                        {activeTab === 'overview' && (
-                            <>
-                                {/* Performance Metrics */}
-                                <div className="bg-white rounded-xl shadow-md p-6">
-                                    <h3 className="font-bold text-gray-900 mb-6 text-lg">Performance Overview</h3>
-
-                                    <div className="grid sm:grid-cols-3 gap-6">
-                                        <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-5">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Heart className="w-5 h-5 text-pink-600" />
-                                                <span className="text-sm font-semibold text-pink-900">Avg Engagement</span>
+                        {/* Performance Overview — always visible */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="font-bold text-gray-900 text-lg">Performance Overview</h3>
+                                <select className="text-xs font-semibold text-teal-600 border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option>Last 30 Days</option>
+                                    <option>Last 90 Days</option>
+                                    <option>Last Year</option>
+                                </select>
+                            </div>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                                    <div className="absolute -right-4 -top-4 bg-gray-50 w-20 h-20 rounded-full group-hover:bg-pink-50 transition-colors" />
+                                    <div className="relative">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="p-1.5 bg-pink-100 text-pink-600 rounded-lg">
+                                                <Heart className="w-4 h-4" />
                                             </div>
-                                            <div className="text-3xl font-bold text-pink-600">5.8%</div>
-                                            <div className="text-xs text-pink-700 mt-1 flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" />
-                                                <span>0.3% vs last month</span>
-                                            </div>
+                                            <span className="text-sm font-medium text-gray-500">Avg Engagement</span>
                                         </div>
-
-                                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Users className="w-5 h-5 text-blue-600" />
-                                                <span className="text-sm font-semibold text-blue-900">Audience Reach</span>
-                                            </div>
-                                            <div className="text-3xl font-bold text-blue-600">1.2M</div>
-                                            <div className="text-xs text-blue-700 mt-1 flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" />
-                                                <span>12% growth</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <MapPin className="w-5 h-5 text-purple-600" />
-                                                <span className="text-sm font-semibold text-purple-900">Top Audience Locations</span>
-                                            </div>
-                                            <div className="text-lg font-bold text-purple-600 space-y-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm">USA</span>
-                                                    <span className="text-xs">42%</span>
-                                                </div>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm">UK</span>
-                                                    <span className="text-xs">28%</span>
-                                                </div>
-                                            </div>
+                                        <p className="text-3xl font-extrabold text-gray-900 tracking-tight">5.8%</p>
+                                        <div className="flex items-center gap-1 mt-2 text-green-600 text-xs font-bold bg-green-50 w-fit px-2 py-0.5 rounded-full">
+                                            <TrendingUp className="w-3 h-3" />
+                                            <span>0.3% vs last month</span>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Audience Demographics */}
-                                <div className="bg-white rounded-xl shadow-md p-6">
-                                    <h3 className="font-bold text-gray-900 mb-4">Audience Demographics</h3>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600">Female</span>
-                                                <span className="font-semibold">72%</span>
+                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                                    <div className="absolute -right-4 -top-4 bg-gray-50 w-20 h-20 rounded-full group-hover:bg-blue-50 transition-colors" />
+                                    <div className="relative">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+                                                <Users className="w-4 h-4" />
                                             </div>
-                                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-pink-500 to-pink-600 w-[72%]" />
-                                            </div>
+                                            <span className="text-sm font-medium text-gray-500">Audience Reach</span>
                                         </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600">Age 18-24</span>
-                                                <span className="font-semibold">45%</span>
-                                            </div>
-                                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 w-[45%]" />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600">Age 25-34</span>
-                                                <span className="font-semibold">38%</span>
-                                            </div>
-                                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-gradient-to-r from-purple-500 to-purple-600 w-[38%]" />
-                                            </div>
+                                        <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                                            {creator.stats?.followers > 0
+                                                ? (creator.stats.followers >= 1_000_000
+                                                    ? (creator.stats.followers / 1_000_000).toFixed(1) + 'M'
+                                                    : (creator.stats.followers / 1_000).toFixed(1) + 'k')
+                                                : '—'}
+                                        </p>
+                                        <div className="flex items-center gap-1 mt-2 text-green-600 text-xs font-bold bg-green-50 w-fit px-2 py-0.5 rounded-full">
+                                            <TrendingUp className="w-3 h-3" />
+                                            <span>12% growth</span>
                                         </div>
                                     </div>
                                 </div>
-                            </>
-                        )}
+                            </div>
+                        </div>
 
-                        {activeTab === 'portfolio' && (
-                            <div className="bg-white rounded-xl shadow-md p-6">
-                                <h3 className="font-bold text-gray-900 mb-6 text-lg">Service Packages</h3>
-
-                                <div className="space-y-4">
-                                    {creator.pricing && Array.isArray(creator.pricing) && creator.pricing.length > 0 ? (
-                                        creator.pricing.map((item: any, idx: number) => (
-                                            <div key={idx} className="flex items-start justify-between p-5 border-2 border-gray-200 rounded-xl hover:border-teal-500 transition-colors">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Instagram className="w-5 h-5 text-pink-500" />
-                                                        <h4 className="font-bold text-gray-900">{item.title}</h4>
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 mb-2">{item.description || "No description provided."}</p>
-                                                    <ul className="space-y-1">
-                                                        {/* Feature list placeholder or parsed content */}
-                                                        <li className="text-sm text-gray-600 flex items-center gap-2">
-                                                            <CheckCircle2 className="w-4 h-4 text-teal-500" />
-                                                            {item.deliveryTime || "Standard Delivery"}
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-bold text-gray-900">₹{item.price}</div>
-                                                    <button className="mt-2 text-xs bg-gray-900 text-white px-3 py-1 rounded-md hover:bg-gray-700">
-                                                        Book
-                                                    </button>
-                                                </div>
+                        {/* Recent Collaborations */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between mb-5">
+                                <h3 className="font-bold text-gray-900 text-lg">Recent Collaborations</h3>
+                                <button className="text-teal-600 text-sm font-bold hover:underline">View All</button>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                {[
+                                    { src: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=400', label: 'Zara Fall' },
+                                    { src: 'https://images.unsplash.com/photo-1493655161922-ef98929de9d8?auto=format&fit=crop&q=80&w=400', label: 'Brand Collab' },
+                                    { src: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&q=80&w=400', label: 'H&M Summer' },
+                                    { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400', label: 'Nike Launch' },
+                                ].map((item) => (
+                                    <div key={item.label} className="group relative aspect-[4/5] rounded-xl overflow-hidden cursor-pointer shadow-sm">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={item.src}
+                                            alt={item.label}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                            <div className="text-white">
+                                                <p className="font-bold text-sm">{item.label}</p>
+                                                <p className="text-[10px] uppercase tracking-wider opacity-80">Campaign</p>
                                             </div>
-                                        ))
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Audience Demographics */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h3 className="font-bold text-gray-900 mb-5">Audience Demographics</h3>
+                            <div className="space-y-4">
+                                {[
+                                    { label: 'Female', pct: 72, color: 'from-pink-400 to-pink-600' },
+                                    { label: 'Age 18-24', pct: 45, color: 'from-blue-400 to-blue-600' },
+                                    { label: 'Age 25-34', pct: 38, color: 'from-purple-400 to-purple-600' },
+                                ].map((d) => (
+                                    <div key={d.label}>
+                                        <div className="flex justify-between text-sm mb-1.5">
+                                            <span className="text-gray-600">{d.label}</span>
+                                            <span className="font-semibold text-gray-900">{d.pct}%</span>
+                                        </div>
+                                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className={`h-full bg-gradient-to-r ${d.color} rounded-full`} style={{ width: `${d.pct}%` }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* === SIDEBAR: Service Pricing (always visible) === */}
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-gray-900 text-lg px-1">Service Pricing</h3>
+                        {[
+                            {
+                                label: 'Story Rate',
+                                icon: '📷',
+                                val: creator.priceStory || 0,
+                                unit: 'story',
+                                badge: null as string | null,
+                            },
+                            {
+                                label: 'Post Rate',
+                                icon: '🖼️',
+                                val: creator.pricePost || creator.price || 0,
+                                unit: 'post',
+                                badge: 'Primary Rate' as string | null,
+                            },
+                            {
+                                label: 'Collab Rate',
+                                icon: '🤝',
+                                val: creator.priceCollab || 0,
+                                unit: 'collab',
+                                badge: 'Best Value' as string | null,
+                            },
+                        ].map((tier) => (
+                            <div key={tier.label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all hover:border-teal-400/40 relative overflow-hidden">
+                                {tier.badge && (
+                                    <div className={`absolute top-0 right-0 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl ${tier.badge === 'Primary Rate' ? 'bg-teal-600' : 'bg-emerald-600'}`}>
+                                        {tier.badge}
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className="text-xl">{tier.icon}</span>
+                                    <h4 className="text-base font-bold text-gray-900">{tier.label}</h4>
+                                </div>
+                                <div className="mb-4">
+                                    {tier.val > 0 ? (
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-2xl font-extrabold text-teal-600 tracking-widest">
+                                                ₹{'*'.repeat(String(tier.val).length)}
+                                            </span>
+                                            <span className="text-gray-400 text-sm">/ {tier.unit}</span>
+                                        </div>
                                     ) : (
-                                        <div className="text-center py-10 text-gray-500">
-                                            No explicit pricing packages listed. Contact for rates.
-                                        </div>
+                                        <span className="text-gray-400 font-medium text-sm">Not set</span>
                                     )}
                                 </div>
+                                <button
+                                    onClick={handleOpenInvite}
+                                    className="w-full py-2 rounded-lg border-2 border-gray-100 text-gray-700 font-bold text-sm hover:border-teal-500 hover:text-teal-600 transition-colors"
+                                >
+                                    Add to Campaign
+                                </button>
                             </div>
-                        )}
+                        ))}
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="space-y-6">
-                        {/* Quick Stats */}
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="font-bold text-gray-900 mb-4">Quick Stats</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-gray-600 text-sm">Profile Views</span>
-                                    <span className="font-bold text-gray-900">12.5k</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-gray-600 text-sm flex items-center gap-1">
-                                        <TrendingUp className="w-4 h-4 text-green-500" />
-                                        Engagement
-                                    </span>
-                                    <span className="font-bold text-green-600">4.2%</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-gray-600 text-sm">Followers</span>
-                                    <span className="font-bold text-gray-900">85.2k</span>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        {/* Suggested */}
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="font-bold text-gray-900 mb-4">Suggested</h3>
-                            <ul className="space-y-3">
-                                {['Update Media Kit', 'New Campaign Match', 'Campaign Invite'].map((item, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 text-sm">
-                                        <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                                        <span className="text-gray-700">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

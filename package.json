@@ -10,8 +10,12 @@
     "postinstall": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
     "db:seed:local": "tsx prisma/seed.ts",
     "count-rows": "tsx scripts/count-rows.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.988.0",
@@ -49,6 +53,7 @@
     "react": "19.2.3",
     "react-confetti": "^6.4.0",
     "react-dom": "19.2.3",
+    "react-easy-crop": "^5.5.6",
     "recharts": "^3.7.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",

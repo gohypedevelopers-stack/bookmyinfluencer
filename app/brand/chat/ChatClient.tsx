@@ -105,8 +105,9 @@ interface Thread {
         id: string;
         status: string;
         totalAmount: number;
-        transactions: any[]; // Or define strict type
+        transactions: any[];
     } | null;
+    candidateStatus?: string | null;
 }
 
 interface ChatClientProps {
@@ -132,6 +133,13 @@ export default function ChatClient({
     const [isFunding, setIsFunding] = useState(false);
     const [justUnlockedContractIds, setJustUnlockedContractIds] = useState<Set<string>>(new Set());
     const [debugActionLog, setDebugActionLog] = useState<string[]>([]);
+
+    // New: Offer Form State
+    const [isSetTermsOpen, setIsSetTermsOpen] = useState(false);
+    const [offerAmount, setOfferAmount] = useState<string>('');
+    const [offerDeliverables, setOfferDeliverables] = useState<string>('');
+    const [isCreatingOffer, setIsCreatingOffer] = useState(false);
+
     const searchParams = useSearchParams();
     const isDebugMode = searchParams.get('debug') === '1' || process.env.NODE_ENV !== 'production';
 
@@ -180,7 +188,16 @@ export default function ChatClient({
 
     // Derived State
     const activeThread = threads.find(t => t.id === activeThreadId);
+
+    // Chat is ONLY locked (unable to message) if it's a campaign thread that hasn't been "Accepted" by the brand yet
+    // OR if the contract is completed/disputed.
+    // If it's in IN_NEGOTIATION or HIRED, communication should be open.
     const isLocked = activeThread?.candidateId &&
+        ['CONTACTED', 'REJECTED'].includes(activeThread.candidateStatus || '') &&
+        !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contract?.status || '');
+
+    // Show persistent payment/action CTA for campaign threads until active
+    const showPaymentBanner = activeThread?.candidateId &&
         !['ACTIVE', 'COMPLETED', 'DISPUTED'].includes(activeThread.contract?.status || '') &&
         !(activeThread.contract?.id && justUnlockedContractIds.has(activeThread.contract.id));
 
@@ -926,49 +943,122 @@ export default function ChatClient({
                     </div>
 
                     {/* Payment CTA Section - ALWAYS ABOVE INPUT */}
-                    {isLocked && (() => {
+                    {showPaymentBanner && (() => {
                         const contract = activeThread?.contract;
                         const offer = activeThread?.offer;
 
-                        // If no contract AND no offer, we can't show price but maybe still show lock? 
-                        // But usually if it's a campaign thread, there is an offer.
-
                         const total = contract?.totalAmount || offer?.amount || 0;
-                        const pendingTx = contract?.transactions?.find((t: any) => t.type === 'ESCROW_FUNDING' && t.status === 'PENDING');
-                        const advanceAmount = pendingTx ? pendingTx.amount : (total / 2);
+                        const pendingTx = contract?.transactions?.find((t: any) => (t.type === 'ESCROW_FUNDING' || t.type === 'DEPOSIT') && t.status === 'PENDING');
+                        const advanceAmount = pendingTx ? pendingTx.amount : (total > 0 ? total / 2 : 0);
 
                         return (
-                            <div className="p-4 bg-yellow-50 border-y border-yellow-200 text-yellow-900 shadow-sm z-10 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-2">
-                                <div className="text-sm">
-                                    <p className="font-extrabold text-yellow-900 mb-1 flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-yellow-600">lock</span>
-                                        Campaign chat is currently locked.
-                                    </p>
-                                    <p className="text-yellow-800 mb-2">To begin collaboration, please pay the advance for this campaign.</p>
-                                    <div className="flex gap-4 p-2 bg-white/50 rounded-lg border border-yellow-100">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase font-bold text-yellow-600/70">Advance</span>
-                                            <span className="font-bold">₹{(advanceAmount || 0).toLocaleString()}</span>
+                            <div className="p-4 bg-yellow-50 border-y border-yellow-200 text-yellow-900 shadow-sm z-10 flex flex-col items-center justify-between gap-4 animate-in slide-in-from-bottom-2">
+                                {isSetTermsOpen ? (
+                                    <div className="w-full space-y-4 p-2">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <h4 className="font-bold text-lg">Set Campaign Terms</h4>
+                                            <Button variant="ghost" size="sm" onClick={() => setIsSetTermsOpen(false)}>Cancel</Button>
                                         </div>
-                                        <div className="w-px h-8 bg-yellow-200"></div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase font-bold text-yellow-600/70">Wallet</span>
-                                            <span className="font-bold">₹{walletBalance.toLocaleString()}</span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="amount" className="font-bold">Total Budget (₹)</Label>
+                                                <Input
+                                                    id="amount"
+                                                    type="number"
+                                                    placeholder="Enter amount (e.g. 10000)"
+                                                    value={offerAmount}
+                                                    onChange={(e) => setOfferAmount(e.target.value)}
+                                                    className="bg-white border-yellow-300 focus:ring-yellow-500"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="deliverables" className="font-bold">Deliverables</Label>
+                                                <Textarea
+                                                    id="deliverables"
+                                                    placeholder="Describe what they need to do..."
+                                                    value={offerDeliverables}
+                                                    onChange={(e) => setOfferDeliverables(e.target.value)}
+                                                    className="bg-white border-yellow-300 focus:ring-yellow-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <Button
+                                            onClick={async () => {
+                                                const amt = parseFloat(offerAmount);
+                                                if (isNaN(amt) || amt <= 0) {
+                                                    toast.error("Please enter a valid amount");
+                                                    return;
+                                                }
+                                                if (!offerDeliverables.trim()) {
+                                                    toast.error("Please enter deliverables description");
+                                                    return;
+                                                }
+                                                setIsCreatingOffer(true);
+                                                try {
+                                                    await handleCreateOffer(amt, offerDeliverables);
+                                                    setIsSetTermsOpen(false);
+                                                } finally {
+                                                    setIsCreatingOffer(false);
+                                                }
+                                            }}
+                                            disabled={isCreatingOffer}
+                                            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold"
+                                        >
+                                            {isCreatingOffer ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                            {activeThread?.offer ? 'Update Terms' : 'Send Offer & Continue'}
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4">
+                                        <div className="text-sm">
+                                            <p className="font-extrabold text-yellow-900 mb-1 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-yellow-600">lock_clock</span>
+                                                Campaign Partnership Pending
+                                            </p>
+                                            <p className="text-yellow-800 mb-2">
+                                                {total > 0
+                                                    ? "Please pay the advance to formally start the campaign."
+                                                    : "Please set the commercial terms to proceed with payments."}
+                                            </p>
+                                            <div className="flex gap-4 p-2 bg-white/50 rounded-lg border border-yellow-100">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] uppercase font-bold text-yellow-600/70">Advance</span>
+                                                    <span className="font-bold">₹{advanceAmount.toLocaleString()}</span>
+                                                </div>
+                                                <div className="w-px h-8 bg-yellow-200"></div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] uppercase font-bold text-yellow-600/70">Wallet</span>
+                                                    <span className="font-bold">₹{walletBalance.toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setOfferAmount(offer?.amount?.toString() || '');
+                                                    setOfferDeliverables(offer?.deliverablesDescription || '');
+                                                    setIsSetTermsOpen(true);
+                                                }}
+                                                className="border-yellow-600 text-yellow-700 hover:bg-yellow-100 font-bold px-6 py-2 h-auto rounded-lg"
+                                            >
+                                                {total > 0 ? 'Modify Terms' : 'Set Terms & Price'}
+                                            </Button>
+                                            <Button
+                                                onClick={handleFundAdvance}
+                                                disabled={isFunding || total === 0}
+                                                className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-md shadow-yellow-200 shrink-0 font-bold px-6 py-2 h-auto rounded-lg transition-all active:scale-95 disabled:opacity-50"
+                                            >
+                                                {isFunding ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        Processing...
+                                                    </span>
+                                                ) : 'Pay Advance'}
+                                            </Button>
                                         </div>
                                     </div>
-                                </div>
-                                <Button
-                                    onClick={handleFundAdvance}
-                                    disabled={isFunding}
-                                    className="bg-yellow-600 hover:bg-yellow-700 text-white shadow-md shadow-yellow-200 shrink-0 font-bold px-6 py-2 h-auto rounded-lg transition-all active:scale-95"
-                                >
-                                    {isFunding ? (
-                                        <span className="flex items-center gap-2">
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Processing...
-                                        </span>
-                                    ) : 'Pay Advance & Start Chat'}
-                                </Button>
+                                )}
                             </div>
                         );
                     })()}
