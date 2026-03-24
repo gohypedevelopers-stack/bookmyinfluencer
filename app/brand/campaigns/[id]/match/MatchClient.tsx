@@ -1,130 +1,178 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getMatchedCreators } from '@/app/brand/actions';
-import { useRouter } from 'next/navigation';
-import { Check, X, RefreshCw, IndianRupee, MapPin, Users, TrendingUp } from 'lucide-react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Check, RefreshCw, ShieldAlert, TrendingUp, Users } from 'lucide-react';
+import { decideCampaignMatch, getCampaignMatchState } from '@/app/brand/campaigns/flow-actions';
 
-export default function MatchClient({ campaignId, budget }: { campaignId: string, budget: number }) {
+type MatchClientProps = {
+    campaignId: string;
+    budget: number;
+    paymentStatus: string;
+};
+
+export default function MatchClient({ campaignId, budget, paymentStatus }: MatchClientProps) {
     const router = useRouter();
-    const [creators, setCreators] = useState<any[]>([]);
+    const [state, setState] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [rejectedIds, setRejectedIds] = useState<string[]>([]);
-    const [totalCost, setTotalCost] = useState(0);
+    const [isPending, startTransition] = useTransition();
 
-    useEffect(() => {
-        fetchMatches();
-    }, []);
+    const paid = paymentStatus === 'PAID';
 
-    const fetchMatches = async (currentRejected: string[] = []) => {
+    const loadState = async () => {
         setLoading(true);
-        const res = await getMatchedCreators(campaignId, currentRejected);
-        if (res.success && res.data) {
-            setCreators(res.data);
-            setTotalCost(res.totalFollowers || 0);
-        }
+        const response = await getCampaignMatchState(campaignId);
+        if (response.success) setState(response);
         setLoading(false);
     };
 
-    const handleReject = async (creatorId: string) => {
-        const newRejected = [...rejectedIds, creatorId];
-        setRejectedIds(newRejected);
-        // Remove locally immediately for snappy UI
-        setCreators(prev => prev.filter(c => c.id !== creatorId));
-        // Fetch replacement
-        fetchMatches(newRejected);
+    useEffect(() => {
+        loadState();
+    }, []);
+
+    const pendingMatches = useMemo(
+        () => (state?.matches || []).filter((match: any) => match.brandDecision === 'PENDING'),
+        [state]
+    );
+    const acceptedMatches = useMemo(
+        () => (state?.matches || []).filter((match: any) => match.brandDecision === 'ACCEPTED'),
+        [state]
+    );
+
+    const handleDecision = (candidateId: string, decision: 'ACCEPT' | 'REJECT') => {
+        startTransition(async () => {
+            await decideCampaignMatch(campaignId, candidateId, decision);
+            await loadState();
+        });
     };
 
-    const handleProceedToPayment = () => {
-        router.push(`/brand/campaigns/${campaignId}/payment`);
-    };
+    if (loading) {
+        return (
+            <div className="py-24 flex flex-col items-center text-gray-500">
+                <RefreshCw className="w-8 h-8 animate-spin mb-3 text-teal-600" />
+                Loading matched influencers...
+            </div>
+        );
+    }
 
     return (
-        <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 pb-32">
-            <div className="mb-6 flex items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 pb-28">
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Your AI Matches</h2>
-                    <p className="text-gray-500 text-sm mt-1">Found creators adding up to ~{totalCost.toLocaleString()} followers.</p>
+                    <h2 className="text-lg font-bold text-gray-900">Selection Summary</h2>
+                    <p className="text-sm text-gray-500">
+                        Accepted: {state?.summary?.acceptedCount || 0} | Pending: {state?.summary?.pendingCount || 0} | Rejected: {state?.summary?.rejectedCount || 0}
+                    </p>
                 </div>
                 <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide">Total Allocation</p>
-                    <p className="text-2xl font-black text-gray-900">₹{budget.toLocaleString()}</p>
+                    <p className="text-xs font-semibold uppercase text-gray-400">Budget</p>
+                    <p className="text-2xl font-black text-gray-900">â‚¹{Number(budget).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">Remaining: â‚¹{Number(state?.summary?.remainingBudget || 0).toLocaleString()}</p>
                 </div>
             </div>
 
-            {loading && creators.length === 0 ? (
-                <div className="py-24 flex flex-col items-center justify-center text-gray-400">
-                    <RefreshCw className="w-10 h-10 animate-spin mb-4 text-teal-500" />
-                    <p className="font-medium animate-pulse">Finding the perfect creators...</p>
-                </div>
-            ) : creators.length === 0 ? (
-                <div className="py-24 text-center">
-                    <p className="text-gray-500 font-medium">No more creators match your criteria.</p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {creators.map((creator) => (
-                        <div key={creator.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex gap-6 items-center hover:shadow-md transition-all">
-                            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0">
-                                {creator.profileImage ? (
-                                    <Image src={creator.profileImage} alt={creator.name} width={80} height={80} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                        <Users className="w-8 h-8 opacity-50" />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                                    {creator.name}
-                                    {creator.verified && <Check className="w-4 h-4 text-white bg-blue-500 rounded-full p-0.5" />}
-                                </h3>
-                                <p className="text-sm text-gray-500 font-medium">{creator.niche}</p>
-                                <div className="flex items-center gap-4 mt-2">
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-50 px-2.5 py-1 rounded-md">
-                                        <Users className="w-3.5 h-3.5" />
-                                        {creator.followers}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-50 px-2.5 py-1 rounded-md">
-                                        <TrendingUp className="w-3.5 h-3.5" />
-                                        {creator.engagementRate || 'N/A'} ER
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md">
-                                        <IndianRupee className="w-3.5 h-3.5" />
-                                        {creator.followersCount.toLocaleString()} Value
-                                    </div>
+            {acceptedMatches.length > 0 && (
+                <div className="mb-6">
+                    <h3 className="text-sm font-bold uppercase text-teal-700 mb-3">Accepted Influencers</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {acceptedMatches.map((match: any) => (
+                            <div key={match.id} className="bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white">
+                                    {match.image ? (
+                                        <Image src={match.image} alt={match.name} width={48} height={48} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-teal-700 font-bold">{match.name?.[0] || 'C'}</div>
+                                    )}
                                 </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-gray-900 truncate">{match.name}</p>
+                                    <p className="text-xs text-gray-600 truncate">{match.niche || 'General'} â€¢ {match.location || 'Any location'}</p>
+                                </div>
+                                <Check className="w-5 h-5 text-teal-600" />
                             </div>
-                            <div className="flex flex-col gap-2 shrink-0">
-                                <button
-                                    onClick={() => handleReject(creator.id)}
-                                    className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors text-sm font-bold flex items-center gap-2 justify-center"
-                                >
-                                    <RefreshCw className="w-4 h-4" /> Replace
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {/* Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div>
+                <h3 className="text-sm font-bold uppercase text-gray-500 mb-3">Pending Recommendations</h3>
+                {pendingMatches.length === 0 ? (
+                    <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-500">
+                        No pending matches left. Accept creators or shuffle by rejecting existing recommendations.
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {pendingMatches.map((match: any) => (
+                            <div key={match.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center gap-4">
+                                <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100">
+                                    {match.image ? (
+                                        <Image src={match.image} alt={match.name} width={56} height={56} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">{match.name?.[0] || 'C'}</div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-gray-900 truncate">{match.name}</h4>
+                                    <p className="text-sm text-gray-500 truncate">{match.niche || 'General'} â€¢ {match.location || 'Any location'}</p>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-600">
+                                            <Users className="w-3.5 h-3.5" />
+                                            {Number(match.followerCount || 0).toLocaleString()} followers
+                                        </span>
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-600">
+                                            <TrendingUp className="w-3.5 h-3.5" />
+                                            {Number(match.engagementRate || 0).toFixed(1)}% ER
+                                        </span>
+                                        {match.fakeEngagementFlag && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-700">
+                                                <ShieldAlert className="w-3.5 h-3.5" />
+                                                Quality flag
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleDecision(match.id, 'REJECT')}
+                                        disabled={isPending || paid}
+                                        className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        Reject + Shuffle
+                                    </button>
+                                    <button
+                                        onClick={() => handleDecision(match.id, 'ACCEPT')}
+                                        disabled={isPending || paid}
+                                        className="px-4 py-2 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 disabled:opacity-50"
+                                    >
+                                        Accept
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-sm text-gray-500 font-medium">Next steps</p>
-                        <p className="font-bold text-gray-900 text-lg">Pay upfront to activate PM</p>
+                        <p className="text-xs font-semibold uppercase text-gray-400">Next step</p>
+                        <p className="font-semibold text-gray-900">
+                            {paid ? 'Campaign already paid and active' : 'Confirm upfront payment to activate manager-led execution'}
+                        </p>
                     </div>
                     <button
-                        onClick={handleProceedToPayment}
-                        disabled={creators.length === 0 || loading}
-                        className="px-8 py-3.5 bg-gray-900 text-white font-bold rounded-2xl shadow-xl shadow-gray-900/20 hover:scale-105 active:scale-95 transition-all text-sm disabled:opacity-50 flex items-center gap-2"
+                        onClick={() => router.push(`/brand/campaigns/${campaignId}/payment`)}
+                        disabled={!acceptedMatches.length || paid}
+                        className="px-6 py-3 rounded-xl bg-gray-900 text-white font-bold disabled:opacity-40"
                     >
-                        Proceed to Payment <span className="material-symbols-outlined text-lg">payment</span>
+                        {paid ? 'Already Paid' : 'Proceed to Payment'}
                     </button>
                 </div>
             </div>
         </main>
     );
 }
+

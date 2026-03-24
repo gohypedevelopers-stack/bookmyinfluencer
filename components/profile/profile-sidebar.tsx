@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import {
     User,
     Share2,
-    CreditCard,
     Shield,
     Bell,
     LogOut
@@ -27,11 +26,6 @@ export function CreatorProfileSidebar() {
             name: "Social Accounts",
             href: "/creator/profile/social-accounts",
             icon: Share2
-        },
-        {
-            name: "Pricing & Payouts",
-            href: "/creator/profile/pricing",
-            icon: CreditCard
         },
         {
             name: "Security",
@@ -113,3 +107,4 @@ export function CreatorProfileSidebar() {
         </aside>
     )
 }
+

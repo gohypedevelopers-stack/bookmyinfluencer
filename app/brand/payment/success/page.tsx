@@ -83,11 +83,11 @@ export default function PaymentSuccessPage() {
 
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
-                                        <div className="font-bold">₹</div>
+                                        <div className="font-bold">â‚¹</div>
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-gray-500">Total Amount</p>
-                                        <p className="font-bold text-gray-900 text-xl">₹{data?.amount?.toLocaleString() || "0.00"}</p>
+                                        <p className="font-bold text-gray-900 text-xl">â‚¹{data?.amount?.toLocaleString() || "0.00"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -107,7 +107,7 @@ export default function PaymentSuccessPage() {
                                     </div>
                                     <div>
                                         <p className="font-bold text-gray-900 text-sm">Influencer Notification</p>
-                                        <p className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full inline-block mt-1">Active • Notification Sent</p>
+                                        <p className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full inline-block mt-1">Active â€¢ Notification Sent</p>
                                     </div>
                                 </div>
 
@@ -142,10 +142,10 @@ export default function PaymentSuccessPage() {
                                 <ChevronRight className="w-5 h-5 ml-1" />
                             </Button>
                         </Link>
-                        <Link href="/brand/messages" className="flex-1">
+                        <Link href="/brand/campaigns" className="flex-1">
                             <Button variant="outline" className="w-full h-14 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-gray-900 rounded-2xl font-bold text-lg transition-all">
                                 <MessageSquare className="w-5 h-5 mr-2 text-gray-400" />
-                                Open Trio-Chat
+                                View Campaigns
                             </Button>
                         </Link>
                     </div>
@@ -189,4 +189,5 @@ export default function PaymentSuccessPage() {
         </div>
     );
 }
+
 

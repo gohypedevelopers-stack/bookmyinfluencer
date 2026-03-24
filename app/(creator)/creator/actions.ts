@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
 
 // Helper to get the actual Creator ID (Resolved to a User table ID)
 // Helper to get the actual Creator ID (Resolved to a User table ID)
@@ -390,20 +389,16 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
     if (!userId) return { success: false, error: "Unauthorized" };
 
     try {
-        // Verify the candidate exists and belongs to this creator
         const candidate = await db.campaignCandidate.findUnique({
             where: { id: candidateId },
             include: {
                 campaign: {
                     include: {
-                        brand: {
-                            include: { user: true }
-                        }
+                        brand: { include: { user: true } },
+                        assignment: { select: { managerId: true } }
                     }
                 },
-                influencer: {
-                    include: { user: true }
-                }
+                influencer: { include: { user: true } }
             }
         });
 
@@ -411,8 +406,6 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
             return { success: false, error: "Invitation not found" };
         }
 
-        // Check ownership - verify this invitation belongs to the current user
-        // The influencer.userId might be from different auth systems, so we check multiple ways
         const session = await getServerSession(authOptions);
         const isOwner = candidate.influencer.userId === userId ||
             candidate.influencer.user?.email === session?.user?.email;
@@ -422,78 +415,101 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
         }
 
         if (action === 'ACCEPT') {
-            // 1. Update candidate status to IN_NEGOTIATION
             await db.campaignCandidate.update({
                 where: { id: candidateId },
-                data: { status: 'IN_NEGOTIATION' }
-            });
-
-            // 2. Create or get chat thread
-            let thread = await db.chatThread.findUnique({
-                where: { candidateId }
-            });
-
-            if (!thread) {
-                const brandUserId = candidate.campaign.brand.userId;
-                thread = await db.chatThread.create({
-                    data: {
-                        candidate: {
-                            connect: { id: candidateId }
-                        },
-                        participants: `${brandUserId},${userId}`
-                    }
-                });
-            }
-
-            // 3. Send initial message from creator
-            await db.message.create({
                 data: {
-                    threadId: thread.id,
-                    senderId: userId,
-                    content: `Hi! I'm excited about this collaboration opportunity. Let's discuss the details!`
+                    creatorDecision: 'ACCEPTED',
+                    status: 'HIRED',
+                    managerReviewStatus: 'PENDING',
                 }
             });
 
-            // 4. Notify brand
+            const notificationsPool = [];
+
+            if (candidate.campaign.assignment?.managerId) {
+                notificationsPool.push(
+                    db.notification.create({
+                        data: {
+                            userId: candidate.campaign.assignment.managerId,
+                            type: 'CAMPAIGN_UPDATE',
+                            title: 'Creator accepted campaign',
+                            message: `${candidate.influencer.user?.name || 'Creator'} accepted "${candidate.campaign.title}".`,
+                            link: `/manager/campaigns/${candidate.campaign.id}`
+                        }
+                    })
+                );
+            }
+
             if (candidate.campaign.brand.userId) {
-                await db.notification.create({
-                    data: {
-                        userId: candidate.campaign.brand.userId,
-                        type: 'MESSAGE',
-                        title: 'Collaboration accepted ✅',
-                        message: `Your request was accepted. Pay the advance to start chat.`,
-                        link: `/brand/chat?threadId=${thread.id}`
-                    }
-                });
+                notificationsPool.push(
+                    db.notification.create({
+                        data: {
+                            userId: candidate.campaign.brand.userId,
+                            type: 'CAMPAIGN_UPDATE',
+                            title: 'Creator confirmed',
+                            message: `${candidate.influencer.user?.name || 'Creator'} accepted your campaign invitation.`,
+                            link: `/brand/campaigns/${candidate.campaign.id}`
+                        }
+                    })
+                );
+            }
+
+            if (notificationsPool.length > 0) {
+                await Promise.all(notificationsPool);
             }
 
             revalidatePath('/creator/campaigns');
-            revalidatePath('/creator/messages');
-            return { success: true, threadId: thread.id };
-
-        } else {
-            // DECLINE
-            await db.campaignCandidate.update({
-                where: { id: candidateId },
-                data: { status: 'REJECTED' }
-            });
-
-            // Notify brand
-            if (candidate.campaign.brand.userId) {
-                await db.notification.create({
-                    data: {
-                        userId: candidate.campaign.brand.userId,
-                        type: 'SYSTEM',
-                        title: 'Invitation Declined',
-                        message: `${candidate.influencer.user?.name || 'A creator'} has declined your invitation for ${candidate.campaign.title}.`,
-                        link: `/brand/campaigns`
-                    }
-                });
-            }
-
-            revalidatePath('/creator/campaigns');
+            revalidatePath('/manager/campaigns');
+            revalidatePath('/brand/campaigns');
             return { success: true };
         }
+
+        await db.campaignCandidate.update({
+            where: { id: candidateId },
+            data: {
+                creatorDecision: 'DECLINED',
+                status: 'REJECTED'
+            }
+        });
+
+        const notificationsPool = [];
+
+        if (candidate.campaign.assignment?.managerId) {
+            notificationsPool.push(
+                db.notification.create({
+                    data: {
+                        userId: candidate.campaign.assignment.managerId,
+                        type: 'CAMPAIGN_UPDATE',
+                        title: 'Creator declined campaign',
+                        message: `${candidate.influencer.user?.name || 'Creator'} declined "${candidate.campaign.title}".`,
+                        link: `/manager/campaigns/${candidate.campaign.id}`
+                    }
+                })
+            );
+        }
+
+        if (candidate.campaign.brand.userId) {
+            notificationsPool.push(
+                db.notification.create({
+                    data: {
+                        userId: candidate.campaign.brand.userId,
+                        type: 'CAMPAIGN_UPDATE',
+                        title: 'Invitation declined',
+                        message: `${candidate.influencer.user?.name || 'A creator'} declined your invitation.`,
+                        link: `/brand/campaigns/${candidate.campaign.id}/match`
+                    }
+                })
+            );
+        }
+
+        if (notificationsPool.length > 0) {
+            await Promise.all(notificationsPool);
+        }
+
+        revalidatePath('/creator/campaigns');
+        revalidatePath('/manager/campaigns');
+        revalidatePath('/brand/campaigns');
+        return { success: true };
 
     } catch (error) {
         console.error("Failed to respond to invitation:", error);
@@ -651,7 +667,7 @@ export async function getCreatorEarnings() {
                     id: record.id,
                     brand: record.campaign.brand.companyName || "Brand",
                     date: record.paidAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-                    amount: `+₹${record.amount.toFixed(2)}`,
+                    amount: `+â‚¹${record.amount.toFixed(2)}`,
                     status: 'Paid', // Explicitly PAID
                     originalDate: record.paidAt,
                     method: record.method,
@@ -979,74 +995,43 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
     if (!userId) return { success: false, error: "Unauthorized" };
 
     try {
-        const candidateResult = await db.campaignCandidate.findUnique({
+        const candidate = await db.campaignCandidate.findUnique({
             where: { id: candidateId },
             include: {
                 campaign: { include: { brand: true, assignment: { select: { managerId: true } } } },
-                contract: {
-                    include: { deliverables: true }
-                },
                 influencer: { include: { user: { select: { name: true } } } }
             }
         });
 
-        if (!candidateResult) {
-            return { success: false, error: "Contract not found" };
+        if (!candidate) {
+            return { success: false, error: "Campaign invitation not found" };
         }
 
-        type CandidateWithRelations = Prisma.CampaignCandidateGetPayload<{
-            include: {
-                campaign: { include: { brand: { select: { userId: true } }, assignment: { select: { managerId: true } } } };
-                contract: { include: { deliverables: true } };
-                influencer: { include: { user: { select: { name: true } } } };
-            }
-        }>;
-
-        const candidate = candidateResult as unknown as CandidateWithRelations;
-
-        if (!candidate.contract) {
-            return { success: false, error: "Contract not found" };
+        if (candidate.creatorDecision !== 'ACCEPTED') {
+            return { success: false, error: "Please accept the invitation before submitting content" };
         }
 
-        // Find the pending deliverable
-        const deliverable = candidate.contract.deliverables.find(d => d.status === 'PENDING')
-            || candidate.contract.deliverables[0];
-
-        if (!deliverable) {
-            return { success: false, error: "No pending deliverables found" };
-        }
-
-        // Update Deliverable
-        await db.deliverable.update({
-            where: { id: deliverable.id },
+        await db.campaignCandidate.update({
+            where: { id: candidateId },
             data: {
-                status: 'SUBMITTED',
-                submissionUrl: url,
-                submissionNotes: notes,
-                submittedAt: new Date()
+                contentSubmissionUrl: url.trim(),
+                contentSubmittedAt: new Date(),
+                managerReviewStatus: 'SUBMITTED',
+                managerReviewNotes: notes?.trim() || null,
+                status: 'CONTENT_REVIEW'
             }
         });
 
-        // Update Candidate Status if needed (e.g. to CONTENT_REVIEW)
-        if (candidate.status !== 'CONTENT_REVIEW') {
-            await db.campaignCandidate.update({
-                where: { id: candidateId },
-                data: { status: 'CONTENT_REVIEW' }
-            });
-        }
-
-        // Create Audit Log
         await db.auditLog.create({
             data: {
                 userId: userId,
-                action: "DELIVERABLE_SUBMITTED",
-                entity: "Deliverable",
-                entityId: deliverable.id,
+                action: "CONTENT_LINK_SUBMITTED",
+                entity: "CampaignCandidate",
+                entityId: candidate.id,
                 details: `Submitted content for ${candidate.campaign.title}`
             }
         });
 
-        // 5. Notify Manager & Brand
         const notificationsPool = [];
 
         if (candidate.campaign.assignment?.managerId) {
@@ -1054,21 +1039,9 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
                 data: {
                     userId: candidate.campaign.assignment.managerId,
                     type: "DELIVERABLE",
-                    title: "Deliverable Submitted",
+                    title: "Content submitted for review",
                     message: `${candidate.influencer.user?.name || "Creator"} submitted content for ${candidate.campaign.title}. Review required.`,
                     link: `/manager/campaigns/${candidate.campaignId}`
-                }
-            }));
-        }
-
-        if (candidate.campaign.brand?.userId) {
-            notificationsPool.push(db.notification.create({
-                data: {
-                    userId: candidate.campaign.brand.userId,
-                    type: "DELIVERABLE",
-                    title: "Deliverable Submitted",
-                    message: `Deliverable submitted. Review required.`,
-                    link: `/brand/chat?threadId=${candidate.contract.id}`
                 }
             }));
         }
@@ -1078,6 +1051,7 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
         }
 
         revalidatePath('/creator/campaigns');
+        revalidatePath('/manager/campaigns');
         return { success: true };
 
     } catch (error) {
@@ -1085,3 +1059,5 @@ export async function submitDeliverable(candidateId: string, url: string, notes?
         return { success: false, error: "Submission failed" };
     }
 }
+
+

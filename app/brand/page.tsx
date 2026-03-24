@@ -7,7 +7,6 @@ import Link from "next/link";
 import { BrandStats } from "@/components/brand/dashboard/brand-stats";
 import { RecommendedInfluencers } from "@/components/brand/dashboard/recommended-influencers";
 import { QuickActions } from "@/components/brand/dashboard/quick-actions";
-import { TopCollections } from "@/components/brand/dashboard/top-collections";
 import { RecentActivity } from "@/components/brand/dashboard/recent-activity";
 import { getPublicCreators, getBrandStats, getBrandDashboardActivity, getBrandNotifications } from "@/app/brand/actions";
 import { ensureRequestExpiryJobStarted } from "@/jobs/requestExpiryJob";
@@ -63,10 +62,10 @@ export default async function BrandDashboardPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                        <Link href="/brand/campaign-queues">
+                        <Link href="/brand/campaigns">
                             <Button variant="outline" className="rounded-2xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50">
                                 <Layers3 className="mr-2 h-4 w-4" />
-                                Campaign Queues
+                                Campaign Pipeline
                             </Button>
                         </Link>
                         <Link href="/brand/campaigns/new">
@@ -88,16 +87,16 @@ export default async function BrandDashboardPage() {
                     <div className="w-full shrink-0 space-y-6 lg:w-80">
                         <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 text-white shadow-lg">
                             <div className="relative z-10">
-                                <Link href="/brand/campaign-queues">
+                                <Link href="/brand/campaigns">
                                     <div className="mb-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-500 transition-colors hover:bg-blue-400">
                                         <Layers3 className="h-5 w-5 text-white" />
                                     </div>
                                 </Link>
-                                <h3 className="mb-2 text-xl font-bold">Queue visibility</h3>
-                                <p className="mb-6 text-sm text-blue-100">Track onboarding-generated campaign queues, rolling requests, and accepted influencers from one dashboard.</p>
-                                <Link href="/brand/campaign-queues">
+                                <h3 className="mb-2 text-xl font-bold">Campaign visibility</h3>
+                                <p className="mb-6 text-sm text-blue-100">Track paid campaign progress from setup to manager review in one place.</p>
+                                <Link href="/brand/campaigns">
                                     <Button className="w-full border-none bg-white font-bold text-blue-600 hover:bg-blue-50">
-                                        Open Queue Dashboard
+                                        Open Campaigns
                                     </Button>
                                 </Link>
                             </div>
@@ -106,10 +105,10 @@ export default async function BrandDashboardPage() {
                         </div>
 
                         <QuickActions unreadMessageCount={unreadMessageCount} />
-                        <TopCollections />
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+

@@ -14,8 +14,6 @@ export async function submitBrandOnboarding(data: {
     campaignGoals: string;
     minFollowers?: number;
     maxFollowers?: number;
-    minPricePerPost?: number;
-    maxPricePerPost?: number;
 }) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -32,7 +30,7 @@ export async function submitBrandOnboarding(data: {
         });
 
         if (existing) {
-            // Update existing profile — preserves all old data not included here
+            // Update existing profile â€” preserves all old data not included here
             await db.brandProfile.update({
                 where: { userId },
                 data: {
@@ -45,8 +43,8 @@ export async function submitBrandOnboarding(data: {
                     onboardingCompleted: true,
                     minFollowers: data.minFollowers ?? null,
                     maxFollowers: data.maxFollowers ?? null,
-                    minPricePerPost: data.minPricePerPost ?? null,
-                    maxPricePerPost: data.maxPricePerPost ?? null,
+                    minPricePerPost: null,
+                    maxPricePerPost: null,
                 }
             });
         } else {
@@ -63,8 +61,8 @@ export async function submitBrandOnboarding(data: {
                     onboardingCompleted: true,
                     minFollowers: data.minFollowers ?? null,
                     maxFollowers: data.maxFollowers ?? null,
-                    minPricePerPost: data.minPricePerPost ?? null,
-                    maxPricePerPost: data.maxPricePerPost ?? null,
+                    minPricePerPost: null,
+                    maxPricePerPost: null,
                 }
             });
         }
@@ -86,8 +84,6 @@ export async function submitCreatorOnboarding(data: {
     niche: string;
     followers: string;
     engagement: string;
-    minimumPrice: string;
-    rates: string;
 }) {
     const creatorId = await getAuthenticatedCreatorId();
     if (!creatorId) {
@@ -102,7 +98,7 @@ export async function submitCreatorOnboarding(data: {
         });
 
         if (existing) {
-            // Update existing creator — preserves all old data not included here
+            // Update existing creator â€” preserves all old data not included here
             await db.creator.update({
                 where: { userId: creatorId },
                 data: {
@@ -110,12 +106,12 @@ export async function submitCreatorOnboarding(data: {
                     niche: data.niche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
-                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
-                    price: 0 as any,
+                    pricing: null as any,
+                    price: null as any,
                     priceStory: null as any,
                     pricePost: null as any,
                     priceCollab: null as any,
-                    priceType: 'Per Post' as any,
+                    priceType: null as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
@@ -133,12 +129,12 @@ export async function submitCreatorOnboarding(data: {
                     niche: data.niche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
-                    pricing: JSON.stringify({ minimumPrice: data.minimumPrice, rates: data.rates }),
-                    price: 0 as any,
+                    pricing: null as any,
+                    price: null as any,
                     priceStory: null as any,
                     pricePost: null as any,
                     priceCollab: null as any,
-                    priceType: 'Per Post' as any,
+                    priceType: null as any,
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
@@ -158,3 +154,4 @@ export async function submitCreatorOnboarding(data: {
         return { error: `Creator save failed: ${msg.substring(0, 300)}` };
     }
 }
+

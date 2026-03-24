@@ -1,11 +1,8 @@
 import {
-    LayoutDashboard,
-    Clock,
-    CheckCircle,
     User,
     Calendar
 } from "lucide-react";
-import { getManagerCampaigns, getManagerStats } from "../actions";
+import { getManagerCampaigns } from "../actions";
 
 export default async function ManagerCampaignsPage() {
     const campaignsResult = await getManagerCampaigns();
@@ -30,7 +27,7 @@ export default async function ManagerCampaignsPage() {
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-lg">
                             <User className="w-4 h-4" />
-                            {campaign.candidates.length} Candidate(s)
+                            {campaign._count?.candidates || 0} Candidate(s)
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-lg">
                             <Calendar className="w-4 h-4" />
@@ -57,3 +54,4 @@ export default async function ManagerCampaignsPage() {
         </div>
     );
 }
+

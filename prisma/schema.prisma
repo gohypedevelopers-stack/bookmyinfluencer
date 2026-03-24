@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "windows", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
-  engineType    = "library"
+  engineType    = "binary"
 }
 
 datasource db {
@@ -129,6 +129,12 @@ model Campaign {
   description  String?
   requirements String?
   budget       Float?
+  influencerType String?           @default("MICRO")
+  platform     String?
+  engagementMin Float?             @default(5)
+  engagementMax Float?             @default(10)
+  paymentStatus String             @default("PENDING")
+  paidAt       DateTime?
   status       String              @default("DRAFT")
   startDate    DateTime?
   endDate      DateTime?
@@ -144,6 +150,8 @@ model Campaign {
   candidates   CampaignCandidate[]
   payouts      PayoutRecord[]
   transactions WalletTransaction[]
+
+  @@index([brandId, paymentStatus, status])
 }
 
 model BrandCampaign {
@@ -221,6 +229,20 @@ model CampaignCandidate {
   campaignId   String
   influencerId String
   status       String            @default("CONTACTED")
+  brandDecision String           @default("PENDING")
+  creatorDecision String         @default("PENDING")
+  shuffleCount Int               @default(0)
+  matchScore   Float             @default(0)
+  qualityScore Float             @default(0)
+  fakeEngagementFlag Boolean     @default(false)
+  estimatedBrandCharge Float     @default(0)
+  estimatedCreatorPayout Float   @default(0)
+  managerReviewStatus String     @default("PENDING")
+  managerReviewNotes String?
+  contentSubmissionUrl String?
+  contentSubmittedAt DateTime?
+  managerReviewedAt DateTime?
+  readyForBrandReviewAt DateTime?
   notes        String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -231,6 +253,9 @@ model CampaignCandidate {
   offer        Offer?
 
   @@unique([campaignId, influencerId])
+  @@index([campaignId, brandDecision])
+  @@index([campaignId, managerReviewStatus])
+  @@index([influencerId, creatorDecision])
 }
 
 model Offer {
@@ -597,3 +622,4 @@ model PayoutRecord {
   creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
   campaign    Campaign          @relation(fields: [campaignId], references: [id])
 }
+

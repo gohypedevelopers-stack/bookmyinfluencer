@@ -75,8 +75,8 @@ const TOTAL_STEPS = 13;
 
 // Follower tiers
 const followerTiers = [
-    { label: "Micro", desc: "10K – 100K followers", badge: "High Engagement", min: 10000, max: 100000, color: "from-blue-400 to-cyan-500" },
-    { label: "Macro", desc: "100K – 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500" },
+    { label: "Micro", desc: "10K â€“ 100K followers", badge: "High Engagement", min: 10000, max: 100000, color: "from-blue-400 to-cyan-500" },
+    { label: "Macro", desc: "100K â€“ 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500" },
 ];
 
 type PriceTier = { label: string; badge: string; min: number; max: number };
@@ -84,16 +84,16 @@ type PriceTier = { label: string; badge: string; min: number; max: number };
 // Per-collaboration pricing aligned to selected target creator size
 const perCollabPriceTiersByFollowerTier: Record<string, PriceTier[]> = {
     Micro: [
-        { label: '₹5,000 – ₹25,000', badge: 'Micro Starter', min: 5000, max: 25000 },
-        { label: '₹25,000 – ₹75,000', badge: 'Growth', min: 25000, max: 75000 },
-        { label: '₹75,000 – ₹1,50,000', badge: 'High Impact', min: 75000, max: 150000 },
-        { label: '₹1,50,000+', badge: 'Premium', min: 150000, max: 10000000 },
+        { label: 'â‚¹5,000 â€“ â‚¹25,000', badge: 'Micro Starter', min: 5000, max: 25000 },
+        { label: 'â‚¹25,000 â€“ â‚¹75,000', badge: 'Growth', min: 25000, max: 75000 },
+        { label: 'â‚¹75,000 â€“ â‚¹1,50,000', badge: 'High Impact', min: 75000, max: 150000 },
+        { label: 'â‚¹1,50,000+', badge: 'Premium', min: 150000, max: 10000000 },
     ],
     Macro: [
-        { label: '₹50,000 – ₹2,00,000', badge: 'Macro Starter', min: 50000, max: 200000 },
-        { label: '₹2,00,000 – ₹5,00,000', badge: 'Performance', min: 200000, max: 500000 },
-        { label: '₹5,00,000 – ₹10,00,000', badge: 'Scaled Reach', min: 500000, max: 1000000 },
-        { label: '₹10,00,000+', badge: 'Premium', min: 1000000, max: 10000000 },
+        { label: 'â‚¹50,000 â€“ â‚¹2,00,000', badge: 'Macro Starter', min: 50000, max: 200000 },
+        { label: 'â‚¹2,00,000 â€“ â‚¹5,00,000', badge: 'Performance', min: 200000, max: 500000 },
+        { label: 'â‚¹5,00,000 â€“ â‚¹10,00,000', badge: 'Scaled Reach', min: 500000, max: 1000000 },
+        { label: 'â‚¹10,00,000+', badge: 'Premium', min: 1000000, max: 10000000 },
     ],
 };
 
@@ -736,7 +736,7 @@ export default function BrandRegisterPage() {
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
                                                     className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-[6px] focus:ring-indigo-500/5 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
-                                                    placeholder="••••••••" required />
+                                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
                                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -750,7 +750,7 @@ export default function BrandRegisterPage() {
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
                                                 <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
                                                     className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-[6px] focus:ring-indigo-500/5 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
-                                                    placeholder="••••••••" required />
+                                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
                                                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -865,7 +865,7 @@ export default function BrandRegisterPage() {
                                         <div className="space-y-3">
                                             <label className="text-sm font-semibold text-slate-600">Enter pricing budget</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold">₹</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold">â‚¹</span>
                                                 <input
                                                     type="number"
                                                     min={1}
@@ -1308,7 +1308,7 @@ export default function BrandRegisterPage() {
                                                                     <div>
                                                                         <div className="font-bold text-slate-900 text-sm">{influencer.displayName}</div>
                                                                         <div className="text-xs font-semibold text-emerald-600 mt-0.5">
-                                                                            {influencer.followersLabel} • {influencer.engagementRate.toFixed(1)}% ER
+                                                                            {influencer.followersLabel} â€¢ {influencer.engagementRate.toFixed(1)}% ER
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1340,7 +1340,7 @@ export default function BrandRegisterPage() {
                                             <button
                                                 onClick={async () => {
                                                     const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-                                                    if (result?.ok) { router.push('/brand/campaign-queues'); }
+                                                    if (result?.ok) { router.push('/brand/campaigns/new'); }
                                                     else { router.push('/brand/login'); }
                                                 }}
                                                 className="w-full py-4.5 bg-slate-900 text-white text-base font-black rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 flex items-center justify-center gap-2 group hover:-translate-y-0.5 active:translate-y-0"
@@ -1354,24 +1354,14 @@ export default function BrandRegisterPage() {
                                                     onClick={async () => {
                                                         const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
                                                         if (result?.ok) {
-                                                            const params = new URLSearchParams({
-                                                                fromOnboarding: '1',
-                                                                minFollowers: String(onboardingData.minFollowers),
-                                                                maxFollowers: String(onboardingData.maxFollowers),
-                                                                minPrice: String(onboardingData.minPricePerPost),
-                                                                maxPrice: String(onboardingData.maxPricePerPost),
-                                                            });
-                                                            if (campaignWorkflow?.campaign?.id) {
-                                                                params.set('brandCampaignId', campaignWorkflow.campaign.id);
-                                                            }
-                                                            router.push('/brand/discover?' + params.toString());
+                                                            router.push('/brand/campaigns');
                                                         } else {
                                                             router.push('/brand/login');
                                                         }
                                                     }}
                                                     className="py-3 px-6 text-slate-500 text-sm font-black text-center rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-all"
                                                 >
-                                                    Manual Creator Search
+                                                    Open Campaigns
                                                 </button>
                                             </div>
                                         </div>
@@ -1391,3 +1381,4 @@ export default function BrandRegisterPage() {
         </div>
     );
 }
+

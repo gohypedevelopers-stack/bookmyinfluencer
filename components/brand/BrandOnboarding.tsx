@@ -26,16 +26,16 @@ type OnboardingData = {
 // Follower tiers
 const followerTiers = [
     {
-        label: "Micro",
-        desc: "10K – 100K followers",
+        label: "Micro Core",
+        desc: "10K â€“ 100K followers",
         badge: "High Engagement",
         min: 10000,
         max: 100000,
         color: "from-blue-400 to-cyan-500"
     },
     {
-        label: "Macro",
-        desc: "100K – 500K followers",
+        label: "Micro Scale",
+        desc: "100K â€“ 500K followers",
         badge: "Broad Reach",
         min: 100000,
         max: 500000,
@@ -120,12 +120,7 @@ export default function BrandOnboarding() {
     }
 
     const handleGoToDashboard = () => {
-        const params = new URLSearchParams({
-            fromOnboarding: "1",
-            minFollowers: String(formData.minFollowers),
-            maxFollowers: String(formData.maxFollowers)
-        })
-        router.push(`/brand/discover?${params.toString()}`)
+        router.push("/brand/campaigns/new")
     }
 
     // Animation variants
@@ -181,7 +176,7 @@ export default function BrandOnboarding() {
                 <div className="flex-1 flex flex-col justify-center">
                     <AnimatePresence initial={false} custom={direction} mode="wait">
 
-                        {/* ── STEP 1: WELCOME ── */}
+                        {/* â”€â”€ STEP 1: WELCOME â”€â”€ */}
                         {currentStep === 1 && (
                             <motion.div
                                 key="step1"
@@ -211,7 +206,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 2: BRAND NAME ── */}
+                        {/* â”€â”€ STEP 2: BRAND NAME â”€â”€ */}
                         {currentStep === 2 && (
                             <motion.div
                                 key="step2"
@@ -246,7 +241,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 3: CAMPAIGN TYPE ── */}
+                        {/* â”€â”€ STEP 3: CAMPAIGN TYPE â”€â”€ */}
                         {currentStep === 3 && (
                             <motion.div
                                 key="step3"
@@ -290,7 +285,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 4: BUDGET ── */}
+                        {/* â”€â”€ STEP 4: BUDGET â”€â”€ */}
                         {currentStep === 4 && (
                             <motion.div
                                 key="step4"
@@ -304,7 +299,7 @@ export default function BrandOnboarding() {
                             >
                                 <h2 className="text-3xl font-bold text-gray-900">Total campaign budget?</h2>
                                 <div className="space-y-3">
-                                    {["Under ₹10,000", "₹10,000 – ₹50,000", "₹50,000 – ₹2,00,000", "₹2,00,000+"].map((option) => (
+                                    {["Under â‚¹10,000", "â‚¹10,000 â€“ â‚¹50,000", "â‚¹50,000 â€“ â‚¹2,00,000", "â‚¹2,00,000+"].map((option) => (
                                         <button
                                             key={option}
                                             onClick={() => {
@@ -323,7 +318,7 @@ export default function BrandOnboarding() {
                                     ))}
                                 </div>
                                 <div className="relative">
-                                    <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 font-medium">₹</span>
+                                    <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 font-medium">â‚¹</span>
                                     <input
                                         type="text"
                                         placeholder="Enter custom amount"
@@ -337,7 +332,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 5: TARGET FOLLOWER RANGE (NEW) ── */}
+                        {/* â”€â”€ STEP 5: TARGET FOLLOWER RANGE (NEW) â”€â”€ */}
                         {currentStep === 5 && (
                             <motion.div
                                 key="step5"
@@ -393,7 +388,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 6: PLATFORMS ── */}
+                        {/* â”€â”€ STEP 6: PLATFORMS â”€â”€ */}
                         {currentStep === 6 && (
                             <motion.div
                                 key="step6"
@@ -436,7 +431,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 7: CREATOR TYPE ── */}
+                        {/* â”€â”€ STEP 7: CREATOR TYPE â”€â”€ */}
                         {currentStep === 7 && (
                             <motion.div
                                 key="step7"
@@ -451,8 +446,8 @@ export default function BrandOnboarding() {
                                 <h2 className="text-3xl font-bold text-gray-900">Preferred Creators?</h2>
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Micro", desc: "10K–100K followers", range: "High Engagement" },
-                                        { label: "Macro", desc: "100K–500K followers", range: "Broad Reach" }
+                                        { label: "Micro Core", desc: "10Kâ€“100K followers", range: "High Engagement" },
+                                        { label: "Micro Scale", desc: "100Kâ€“500K followers", range: "Broad Reach" }
                                     ].map((option) => (
                                         <button
                                             key={option.label}
@@ -477,7 +472,7 @@ export default function BrandOnboarding() {
                             </motion.div>
                         )}
 
-                        {/* ── STEP 8: GOALS ── */}
+                        {/* â”€â”€ STEP 8: GOALS â”€â”€ */}
                         {currentStep === 8 && (
                             <motion.div
                                 key="step8"
@@ -505,14 +500,14 @@ export default function BrandOnboarding() {
                                     {isSubmitting ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            Saving…
+                                            Savingâ€¦
                                         </>
                                     ) : "Finish Setup"}
                                 </button>
                             </motion.div>
                         )}
 
-                                {/* ── STEP 9: SUCCESS ── */}
+                                {/* â”€â”€ STEP 9: SUCCESS â”€â”€ */}
                         {currentStep === 9 && (
                             <motion.div
                                 key="step9"
@@ -558,7 +553,7 @@ export default function BrandOnboarding() {
                                         className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                                     >
                                         <Sparkles size={18} />
-                                        Find Matching Creators
+                                        Create Campaign
                                     </button>
                                     <button
                                         onClick={() => router.push("/brand")}
@@ -576,3 +571,5 @@ export default function BrandOnboarding() {
         </div>
     )
 }
+
+

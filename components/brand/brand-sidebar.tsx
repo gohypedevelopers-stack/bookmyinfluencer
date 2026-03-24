@@ -8,10 +8,7 @@ import {
     BarChart3,
     LayoutDashboard,
     Megaphone,
-    Wallet,
-    MessageSquare,
     Settings,
-    ShoppingBag
 } from "lucide-react"
 
 export function BrandSidebar() {
@@ -31,23 +28,10 @@ export function BrandSidebar() {
             icon: Megaphone,
             activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
         },
-
-        {
-            name: "Marketplace",
-            href: "/brand/discover",
-            icon: ShoppingBag,
-            activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
-        },
         {
             name: "Analytics",
             href: "/brand/analytics",
             icon: BarChart3,
-            activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
-        },
-        {
-            name: "Wallet",
-            href: "/brand/wallet",
-            icon: Wallet,
             activeColor: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200"
         }
     ]
@@ -116,3 +100,4 @@ export function BrandSidebar() {
         </aside>
     )
 }
+

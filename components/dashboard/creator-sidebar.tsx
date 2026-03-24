@@ -10,10 +10,7 @@ import {
     LayoutDashboard,
     Megaphone,
     Wallet,
-    MessageSquare,
     Settings,
-    LogOut,
-    Sparkles
 } from "lucide-react"
 
 export function CreatorSidebar() {
@@ -145,3 +142,4 @@ export function CreatorSidebar() {
         </motion.aside>
     )
 }
+

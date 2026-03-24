@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { CreatorProfileSidebar } from "@/components/profile/profile-sidebar"
 
 export default function ProfileLayout({
@@ -15,3 +14,4 @@ export default function ProfileLayout({
         </div>
     )
 }
+

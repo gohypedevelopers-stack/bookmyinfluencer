@@ -5,20 +5,10 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription
+    DialogDescription,
+    DialogTitle
 } from "@/components/ui/dialog";
-import {
-    X,
-    DollarSign,
-    Briefcase,
-    Globe,
-    MapPin,
-    Users,
-    CheckCircle2,
-    XCircle
-} from "lucide-react";
+import { Briefcase, CheckCircle2, Globe, MapPin, ShieldCheck, Users, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { respondToInvitation } from '@/app/(creator)/creator/actions';
 import { useRouter } from 'next/navigation';
@@ -26,232 +16,110 @@ import { useRouter } from 'next/navigation';
 interface InvitationDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    invitation: any; // CampaignCandidate with campaign included
+    invitation: any;
 }
 
 export default function InvitationDetailsModal({ isOpen, onClose, invitation }: InvitationDetailsModalProps) {
-    const [isAccepting, setIsAccepting] = useState(false);
-    const [isDeclining, setIsDeclining] = useState(false);
     const router = useRouter();
+    const [busy, setBusy] = useState<null | 'ACCEPT' | 'DECLINE'>(null);
 
     if (!invitation) return null;
 
     const campaign = invitation.campaign;
     const brand = campaign.brand;
-    const offerAmount = invitation.offer?.amount || campaign.budget;
 
-    async function handleAccept() {
-        setIsAccepting(true);
-        try {
-            const result = await respondToInvitation(invitation.id, 'ACCEPT');
-
-            if (result.success) {
-                toast.success("Invitation Accepted!", {
-                    description: "You can now start chatting with the brand in your Messages."
-                });
-                onClose();
-                // Refresh the page to show updated status
-                router.refresh();
-                // Optionally redirect to messages
-                // router.push('/creator/messages');
-            } else {
-                toast.error("Error", {
-                    description: result.error || "Failed to accept invitation"
-                });
-            }
-        } catch (error) {
-            toast.error("Error", {
-                description: "Something went wrong. Please try again."
-            });
-        } finally {
-            setIsAccepting(false);
+    const handleAction = async (action: 'ACCEPT' | 'DECLINE') => {
+        setBusy(action);
+        const result = await respondToInvitation(invitation.id, action);
+        if (result.success) {
+            toast.success(action === 'ACCEPT' ? 'Invitation accepted' : 'Invitation declined');
+            onClose();
+            router.refresh();
+        } else {
+            toast.error(result.error || 'Unable to update invitation');
         }
-    }
-
-    async function handleDecline() {
-        setIsDeclining(true);
-        try {
-            const result = await respondToInvitation(invitation.id, 'DECLINE');
-
-            if (result.success) {
-                toast.success("Invitation Declined", {
-                    description: "The brand has been notified."
-                });
-                onClose();
-                router.refresh();
-            } else {
-                toast.error("Error", {
-                    description: result.error || "Failed to decline invitation"
-                });
-            }
-        } catch (error) {
-            toast.error("Error", {
-                description: "Something went wrong. Please try again."
-            });
-        } finally {
-            setIsDeclining(false);
-        }
-    }
+        setBusy(null);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 rounded-3xl border-0 [&>button]:hidden">
-                <DialogTitle className="sr-only">
-                    Invitation from {brand.companyName}: {campaign.title}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                    Review and respond to the collaboration invitation from {brand.companyName}.
-                </DialogDescription>
-                <div className="relative">
-                    {/* Header Image/Gradient */}
-                    <div className="h-32 w-full relative overflow-hidden bg-gray-900">
-                        {campaign.images && campaign.images.length > 0 ? (
-                            <img
-                                src={campaign.images[0]}
-                                alt="Campaign Cover"
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-                        )}
-                        <div className="absolute inset-0 bg-black/10"></div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-4 top-4 text-white hover:bg-white/20 rounded-full z-10"
-                            onClick={onClose}
-                        >
-                            <X className="w-5 h-5" />
-                        </Button>
+            <DialogContent className="max-w-2xl p-0 rounded-3xl border-0 overflow-hidden [&>button]:hidden">
+                <DialogTitle className="sr-only">{campaign.title}</DialogTitle>
+                <DialogDescription className="sr-only">Review this campaign invitation.</DialogDescription>
+
+                <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
+                    <Button variant="ghost" size="icon" className="absolute right-4 top-4 text-white hover:bg-white/20 rounded-full" onClick={onClose}>
+                        <X className="w-5 h-5" />
+                    </Button>
+                </div>
+
+                <div className="px-8 pb-8 -mt-10">
+                    <div className="w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-md flex items-center justify-center font-bold text-lg mb-4">
+                        {brand.companyName?.slice(0, 2).toUpperCase()}
                     </div>
 
-                    {/* Brand Info */}
-                    <div className="px-8 -mt-10 relative flex justify-between items-end mb-6">
-                        <div className="flex gap-5 items-end">
-                            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-gray-900 shadow-lg border-4 border-white overflow-hidden">
-                                {brand.user?.image ? (
-                                    <img src={brand.user.image} alt={brand.companyName} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="font-bold text-2xl">{brand.companyName.substring(0, 2).toUpperCase()}</span>
-                                )}
-                            </div>
-                            <div className="pb-1">
-                                <h2 className="text-2xl font-bold text-gray-900 leading-tight">{brand.companyName}</h2>
-                                {brand.website && (
-                                    <a href={brand.website} target="_blank" rel="noreferrer" className="text-sm text-indigo-600 font-medium hover:underline flex items-center gap-1">
-                                        <Globe className="w-3.5 h-3.5" />
-                                        Visit Website
-                                    </a>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                    <div className="space-y-4">
+                        <h2 className="text-2xl font-bold text-gray-900">{campaign.title}</h2>
+                        <p className="text-sm text-gray-600">
+                            Invitation from <span className="font-semibold">{brand.companyName}</span>. Communication and execution are handled by the internal project manager.
+                        </p>
 
-                    <div className="px-8 pb-8 space-y-6">
-                        {/* Invitation Notice */}
-                        <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex items-center gap-3">
-                            <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                                <p className="font-bold text-indigo-900 text-sm">You've Been Invited!</p>
-                                <p className="text-xs text-indigo-700">{brand.companyName} wants to collaborate with you on this campaign.</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h3>
-                            <div className="flex flex-wrap gap-3">
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">
-                                    <DollarSign className="w-4 h-4 text-green-600" />
-                                    {offerAmount ? `Offer: ₹${offerAmount.toLocaleString()}` : 'Budget: Negotiable'}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">
-                                    <Briefcase className="w-4 h-4 text-blue-600" />
-                                    {campaign.paymentType || 'Fixed'}
-                                </div>
-                                {campaign.location && (
-                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">
-                                        <MapPin className="w-4 h-4 text-red-500" />
-                                        {campaign.location}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Campaign Description</h4>
-                                <p className="text-gray-700 leading-relaxed text-[15px]">
-                                    {campaign.description || 'No description provided.'}
-                                </p>
-                            </div>
-
-                            {campaign.requirements && (
-                                <div>
-                                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Requirements</h4>
-                                    <div className="bg-gray-50 p-4 rounded-xl text-gray-700 text-sm whitespace-pre-wrap border border-gray-100">
-                                        {campaign.requirements}
-                                    </div>
-                                </div>
+                        <div className="flex flex-wrap gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
+                                <Briefcase className="w-4 h-4 text-blue-600" />
+                                Upfront payment confirmed
+                            </span>
+                            {campaign.location && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
+                                    <MapPin className="w-4 h-4 text-rose-500" />
+                                    {campaign.location}
+                                </span>
                             )}
+                            {campaign.platform && (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
+                                    <Globe className="w-4 h-4 text-indigo-500" />
+                                    {campaign.platform}
+                                </span>
+                            )}
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
+                                <Users className="w-4 h-4 text-emerald-600" />
+                                {campaign.niche || 'General niche'}
+                            </span>
                         </div>
 
-                        {campaign.minFollowers && (
-                            <div className="bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100">
-                                <h4 className="text-sm font-bold text-indigo-900 mb-4 flex items-center gap-2">
-                                    <Users className="w-4 h-4" />
-                                    Influencer Criteria
-                                </h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-xs text-indigo-400 font-bold uppercase mb-0.5">Min Followers</p>
-                                        <p className="text-gray-900 font-semibold">{campaign.minFollowers?.toLocaleString() || 'Any'}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-indigo-400 font-bold uppercase mb-0.5">Niche</p>
-                                        <p className="text-gray-900 font-semibold">{campaign.niche || 'Open'}</p>
-                                    </div>
-                                </div>
+                        {campaign.description && (
+                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap">
+                                {campaign.description}
                             </div>
                         )}
 
-                        {/* Action Buttons */}
-                        <div className="pt-4 flex gap-3">
+                        {campaign.requirements && (
+                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-sm text-indigo-900 whitespace-pre-wrap">
+                                <p className="font-semibold mb-1">Deliverable notes</p>
+                                {campaign.requirements}
+                            </div>
+                        )}
+
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-800 flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4" />
+                            Accept to start creation. You will submit only the content link for manager review.
+                        </div>
+
+                        <div className="pt-2 flex gap-3">
                             <Button
-                                onClick={handleDecline}
-                                disabled={isAccepting || isDeclining}
                                 variant="outline"
-                                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold rounded-xl h-12 disabled:opacity-50"
+                                className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
+                                onClick={() => handleAction('DECLINE')}
+                                disabled={busy !== null}
                             >
-                                {isDeclining ? (
-                                    <>
-                                        <XCircle className="w-4 h-4 mr-2 animate-spin" />
-                                        Declining...
-                                    </>
-                                ) : (
-                                    <>
-                                        <XCircle className="w-4 h-4 mr-2" />
-                                        Decline
-                                    </>
-                                )}
+                                {busy === 'DECLINE' ? 'Declining...' : <><XCircle className="w-4 h-4 mr-2" />Decline</>}
                             </Button>
                             <Button
-                                onClick={handleAccept}
-                                disabled={isAccepting || isDeclining}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl h-12 shadow-lg shadow-green-200 disabled:opacity-50"
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                onClick={() => handleAction('ACCEPT')}
+                                disabled={busy !== null}
                             >
-                                {isAccepting ? (
-                                    <>
-                                        <CheckCircle2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Accepting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                                        Accept Invitation
-                                    </>
-                                )}
+                                {busy === 'ACCEPT' ? 'Accepting...' : <><CheckCircle2 className="w-4 h-4 mr-2" />Accept</>}
                             </Button>
                         </div>
                     </div>
@@ -260,3 +128,4 @@ export default function InvitationDetailsModal({ isOpen, onClose, invitation }: 
         </Dialog>
     );
 }
+

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ShieldCheck, IndianRupee } from 'lucide-react';
-import { activateCampaignPayment } from '@/app/brand/actions'; // We will create this action
+import { activateCampaignPayment } from '@/app/brand/campaigns/flow-actions';
 
 export default function PaymentClient({ campaignId, amount }: { campaignId: string, amount: number }) {
     const router = useRouter();
@@ -14,7 +14,7 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
         setLoading(true);
         // Simulate payment gateway delay
         await new Promise(r => setTimeout(r, 2000));
-        
+
         // Finalize in DB
         const res = await activateCampaignPayment(campaignId);
         
@@ -88,3 +88,4 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
         </div>
     );
 }
+

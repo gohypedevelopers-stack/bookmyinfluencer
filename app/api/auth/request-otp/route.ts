@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
+import { Prisma } from "@prisma/client"
 
 import { db } from "@/lib/db"
 import { hashOtp, generateOtp } from "@/lib/otp"
@@ -96,12 +97,15 @@ export async function POST(req: Request) {
         provider: "gmail",
         message: "Code sent successfully",
       })
-    } catch (emailError: any) {
+    } catch (emailError: unknown) {
+      const errorMessage = emailError instanceof Error ? emailError.message : String(emailError)
+      const errorStack = emailError instanceof Error ? emailError.stack : undefined
+
       console.error("[OTP] send failed (caught)", {
         userId: user.id,
         email,
-        error: emailError.message,
-        stack: emailError.stack,
+        error: errorMessage,
+        stack: errorStack,
       })
       // Return 500 so client knows it failed
       return NextResponse.json(
@@ -109,7 +113,22 @@ export async function POST(req: Request) {
         { status: 500 }
       )
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (
+      (error instanceof Prisma.PrismaClientKnownRequestError &&
+        (error.code === "P1000" || error.code === "P1001" || error.code === "P1002" || error.code === "P1017")) ||
+      error instanceof Prisma.PrismaClientInitializationError
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "DATABASE_UNAVAILABLE",
+          message: "Database connection failed. Check DATABASE_URL/DIRECT_URL credentials and restart the server.",
+        },
+        { status: 503 }
+      )
+    }
+
     console.error("[OTP] unexpected error", error)
     return NextResponse.json(
       { ok: false, error: "INTERNAL_ERROR", message: "Something went wrong" },

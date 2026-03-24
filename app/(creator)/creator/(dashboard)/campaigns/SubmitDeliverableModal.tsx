@@ -37,9 +37,7 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
 
     if (!candidate) return null;
 
-    // Find pending deliverable or default to first one
-    const deliverable = candidate.contract?.deliverables?.find((d: any) => d.status === 'PENDING')
-        || candidate.contract?.deliverables?.[0];
+    const hasSubmission = Boolean(candidate?.contentSubmissionUrl);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -91,22 +89,20 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
                 </div>
 
                 <div className="p-6">
-                    {deliverable ? (
-                        <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-6">
-                            <div className="flex items-center gap-2 mb-2">
-                                <FileText className="w-4 h-4 text-indigo-600" />
-                                <h3 className="font-bold text-gray-900 text-sm">Required Deliverable</h3>
-                            </div>
-                            <p className="text-sm text-gray-600">{deliverable.title}</p>
-                            {deliverable.description && (
-                                <p className="text-xs text-gray-500 mt-1">{deliverable.description}</p>
-                            )}
+                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-6">
+                        <div className="flex items-center gap-2 mb-2">
+                            <FileText className="w-4 h-4 text-indigo-600" />
+                            <h3 className="font-bold text-gray-900 text-sm">Manager Submission</h3>
                         </div>
-                    ) : (
-                        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-sm text-amber-800">
-                            No active deliverables found for this contract, but you can still submit a general update.
-                        </div>
-                    )}
+                        <p className="text-sm text-gray-600">
+                            Share the final content URL for manager review. Direct brand messaging is disabled in this workflow.
+                        </p>
+                        {hasSubmission && (
+                            <p className="text-xs text-indigo-600 mt-2">
+                                Existing submission will be replaced by this new link.
+                            </p>
+                        )}
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
@@ -164,3 +160,4 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
         </Dialog>
     );
 }
+

@@ -4,20 +4,14 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useState } from "react"
-import { toggleSavedInfluencer } from "@/app/brand/savedActions";
-import { toast } from "sonner";
 
 interface Influencer {
     id: string
     name: string
-    dbId?: string
-    handle: string
     niche: string
     profileImage: string
-    bannerImage?: string | null
-    saved?: boolean
     stats: {
         followers: string | number
         engagement: string | number
@@ -29,49 +23,12 @@ interface RecommendedInfluencersProps {
     influencers: Influencer[]
 }
 
-export function RecommendedInfluencers({ influencers: initialInfluencers }: RecommendedInfluencersProps) {
-    const [influencers, setInfluencers] = useState(initialInfluencers)
+export function RecommendedInfluencers({ influencers }: RecommendedInfluencersProps) {
     const [startIndex, setStartIndex] = useState(0)
     const itemsPerPage = 3
 
     const canGoBack = startIndex > 0
     const canGoForward = startIndex + itemsPerPage < influencers.length
-
-    const handlePrev = () => {
-        if (canGoBack) setStartIndex(prev => Math.max(0, prev - itemsPerPage))
-    }
-
-    const handleNext = () => {
-        if (canGoForward) setStartIndex(prev => Math.min(influencers.length - itemsPerPage, prev + itemsPerPage))
-    }
-
-    const handleToggleSave = async (id: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const infIndex = influencers.findIndex(i => i.id === id);
-        if (infIndex === -1) return;
-
-        const inf = influencers[infIndex];
-        const originalSaved = inf.saved || false;
-
-        // Optimistically update
-        const newInfluencers = [...influencers];
-        newInfluencers[infIndex] = { ...inf, saved: !originalSaved };
-        setInfluencers(newInfluencers);
-
-        try {
-            const res = await toggleSavedInfluencer(id);
-            if (!res.success) throw new Error(res.error);
-            toast.success(res.isSaved ? "Saved to collection" : "Removed from collection");
-        } catch (error) {
-            // Revert on failure
-            toast.error("Failed to toggle save status");
-            const reverted = [...newInfluencers];
-            reverted[infIndex] = { ...inf, saved: originalSaved };
-            setInfluencers(reverted);
-        }
-    };
 
     const visibleInfluencers = influencers.slice(startIndex, startIndex + itemsPerPage)
 
@@ -79,28 +36,14 @@ export function RecommendedInfluencers({ influencers: initialInfluencers }: Reco
         <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-gray-900">Recommended for You</h2>
-                    <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">
-                        Niche Match
-                    </span>
+                    <h2 className="text-xl font-bold text-gray-900">Micro Influencer Signals</h2>
+                    <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">Read-only</span>
                 </div>
                 <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-8 w-8 rounded-full ${!canGoBack ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={handlePrev}
-                        disabled={!canGoBack}
-                    >
+                    <Button variant="outline" size="icon" className={`h-8 w-8 rounded-full ${!canGoBack ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => canGoBack && setStartIndex((prev) => Math.max(0, prev - itemsPerPage))} disabled={!canGoBack}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className={`h-8 w-8 rounded-full ${!canGoForward ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={handleNext}
-                        disabled={!canGoForward}
-                    >
+                    <Button variant="outline" size="icon" className={`h-8 w-8 rounded-full ${!canGoForward ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => canGoForward && setStartIndex((prev) => Math.min(influencers.length - itemsPerPage, prev + itemsPerPage))} disabled={!canGoForward}>
                         <ArrowRight className="h-4 w-4" />
                     </Button>
                 </div>
@@ -108,32 +51,9 @@ export function RecommendedInfluencers({ influencers: initialInfluencers }: Reco
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {visibleInfluencers.map((influencer) => (
-                    <Card key={influencer.id} className="overflow-hidden border-gray-100 shadow-sm hover:shadow-md transition-shadow relative">
-                        <div className="h-32 relative overflow-hidden">
-                            {influencer.bannerImage && (influencer.bannerImage.startsWith('/') || influencer.bannerImage.startsWith('http') || influencer.bannerImage.startsWith('data:')) ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={influencer.bannerImage}
-                                    alt="Cover"
-                                    className="w-full h-full object-cover object-top"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-teal-400 via-blue-400 to-indigo-500" />
-                            )}
-                            {/* Bookmark Button */}
-                            <button
-                                onClick={(e) => handleToggleSave(influencer.id, e)}
-                                className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm z-10"
-                            >
-                                {influencer.saved ? (
-                                    <BookmarkCheck className="w-4 h-4 text-teal-600 fill-current" />
-                                ) : (
-                                    <Bookmark className="w-4 h-4 text-gray-600" />
-                                )}
-                            </button>
-                        </div>
-                        <div className="px-6 pb-6 mt-[-34px] relative">
-                            <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white mb-3">
+                    <Card key={influencer.id} className="p-5 border-gray-100 shadow-sm">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100">
                                 <Image
                                     src={influencer.profileImage && influencer.profileImage.length > 0 ? influencer.profileImage : "/images/elena.png"}
                                     alt={influencer.name}
@@ -141,50 +61,40 @@ export function RecommendedInfluencers({ influencers: initialInfluencers }: Reco
                                     className="object-cover"
                                 />
                             </div>
-                            <h3 className="font-bold text-gray-900">{influencer.name}</h3>
-                            <p className="text-sm text-gray-500 mb-3">{influencer.handle}</p>
-
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {influencer.niche.split(',').slice(0, 2).map((tag, i) => (
-                                    <span key={i} className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded uppercase">
-                                        {tag.trim()}
-                                    </span>
-                                ))}
+                            <div>
+                                <h3 className="font-bold text-gray-900 text-sm">{influencer.name}</h3>
+                                <p className="text-xs text-gray-500">{influencer.niche || "General"}</p>
                             </div>
-
-                            <div className="flex justify-between items-center py-3 border-t border-b border-gray-50 mb-4">
-                                <div className="text-center">
-                                    <p className="text-xs text-gray-400 uppercase font-bold">Followers</p>
-                                    <p className="font-bold text-gray-900">{typeof influencer.stats.followers === 'number' ?
-                                        Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(influencer.stats.followers) :
-                                        influencer.stats.followers}
-                                    </p>
-                                </div>
-                                <div className="text-center border-l border-gray-100 pl-4">
-                                    <p className="text-xs text-gray-400 uppercase font-bold">Engage</p>
-                                    <p className="font-bold text-green-600">{influencer.stats.engagement}%</p>
-                                </div>
-                                <div className="text-center border-l border-gray-100 pl-4">
-                                    <p className="text-xs text-gray-400 uppercase font-bold">Match</p>
-                                    <p className="font-bold text-blue-600">{influencer.stats.match}%</p>
-                                </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center bg-gray-50 rounded-lg p-2">
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase">Followers</p>
+                                <p className="font-bold text-xs text-gray-900">{typeof influencer.stats.followers === 'number' ? Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(influencer.stats.followers) : influencer.stats.followers}</p>
                             </div>
-
-                            <Link href={`/brand/influencers/${influencer.id}`} className="w-full">
-                                <Button className="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-none">
-                                    View Profile
-                                </Button>
-                            </Link>
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase">Eng</p>
+                                <p className="font-bold text-xs text-green-600">{influencer.stats.engagement}%</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase">Match</p>
+                                <p className="font-bold text-xs text-blue-600">{influencer.stats.match}%</p>
+                            </div>
                         </div>
                     </Card>
                 ))}
 
                 {visibleInfluencers.length === 0 && (
                     <div className="col-span-3 text-center py-12 text-gray-500">
-                        No influencers found. <Link href="/brand/discover" className="text-blue-600 font-medium">Browse Marketplace</Link>
+                        No micro creators available right now.
+                        <div className="mt-3">
+                            <Link href="/brand/campaigns/new">
+                                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Create Campaign</Button>
+                            </Link>
+                        </div>
                     </div>
                 )}
             </div>
         </div>
     )
 }
+

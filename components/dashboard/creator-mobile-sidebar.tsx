@@ -11,10 +11,7 @@ import {
     LayoutDashboard,
     Megaphone,
     Wallet,
-    MessageSquare,
     Settings,
-    LogOut,
-    Sparkles,
     Menu,
     X
 } from "lucide-react"
@@ -49,11 +46,6 @@ export function CreatorMobileSidebar() {
             name: "Earnings",
             href: "/creator/earnings",
             icon: Wallet,
-        },
-        {
-            name: "Messages",
-            href: "/creator/messages",
-            icon: MessageSquare,
         }
     ]
 
@@ -166,3 +158,4 @@ export function CreatorMobileSidebar() {
         </div>
     )
 }
+

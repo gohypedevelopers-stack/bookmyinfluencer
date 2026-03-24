@@ -9,8 +9,7 @@ export async function saveProfileSetup(data: {
     niche: string
     followerRange: string
     engagementRate: string
-    collaborationRate: string
-    priceType: string
+    executionReady: string
 }) {
     const userId = await getAuthenticatedCreatorId()
     if (!userId) throw new Error('Unauthorized')
@@ -24,8 +23,6 @@ export async function saveProfileSetup(data: {
         update: {
             fullName: data.fullName || undefined,
             niche: data.niche || undefined,
-            // Store extra profile setup data as JSON in pricing field temporarily
-            // until schema has dedicated fields
         },
         create: {
             userId,
@@ -36,3 +33,4 @@ export async function saveProfileSetup(data: {
 
     return { success: true }
 }
+

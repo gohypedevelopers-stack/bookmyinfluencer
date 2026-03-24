@@ -8,10 +8,7 @@ import {
     BarChart3,
     LayoutDashboard,
     Megaphone,
-    ShoppingBag,
-    MessageSquare,
     Settings,
-    Search
 } from "lucide-react"
 
 export function BrandSidebar() {
@@ -32,21 +29,9 @@ export function BrandSidebar() {
             activeColor: "bg-blue-50 text-blue-600"
         },
         {
-            name: "Marketplace",
-            href: "/brand/discover",
-            icon: ShoppingBag,
-            activeColor: "bg-blue-50 text-blue-600"
-        },
-        {
             name: "Analytics",
             href: "/brand/analytics", // Placeholder path
             icon: BarChart3,
-            activeColor: "bg-blue-50 text-blue-600"
-        },
-        {
-            name: "Messages",
-            href: "/brand/chat",
-            icon: MessageSquare,
             activeColor: "bg-blue-50 text-blue-600"
         }
     ]
@@ -115,3 +100,4 @@ export function BrandSidebar() {
         </aside>
     )
 }
+

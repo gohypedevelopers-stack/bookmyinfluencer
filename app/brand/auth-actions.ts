@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { UserRole } from "@/lib/enums";
 import { hash } from "bcryptjs";
+import { Prisma } from "@prisma/client";
 
 import { sendOtpEmail } from "@/lib/email";
 import { createBrandCampaignWorkflow } from "@/services/collabService";
@@ -30,6 +31,19 @@ function safeParseFloat(value: FormDataEntryValue | null) {
     const normalized = value.replace(/[^0-9.]/g, '');
     const parsed = parseFloat(normalized);
     return Number.isNaN(parsed) ? null : parsed;
+}
+
+function isDatabaseConnectionError(error: unknown) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error.code === "P1000" || error.code === "P1001" || error.code === "P1002" || error.code === "P1017";
+    }
+
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+        return true;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    return /can't reach database server|connection|timed out|econnreset|socket hang up/i.test(message);
 }
 
 async function findExistingAccountByEmail(email: string) {
@@ -165,6 +179,12 @@ export async function sendEmailOtp(email: string) {
         return { success: true, message: 'OTP sent to your email.' };
     } catch (err) {
         console.error('[Brand OTP] sendEmailOtp failed:', err);
+        if (isDatabaseConnectionError(err)) {
+            return {
+                success: false,
+                error: 'Database connection failed. Check DATABASE_URL/DIRECT_URL credentials and restart the server.',
+            };
+        }
         return { success: false, error: 'Failed to send OTP. Please try again.' };
     }
 }

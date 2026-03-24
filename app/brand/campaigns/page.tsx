@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function CampaignsPage() {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || (session.user.role !== 'BRAND' && session.user.role !== 'ADMIN' && session.user.role !== 'INFLUENCER')) {
+    if (!session || !session.user || (session.user.role !== 'BRAND' && session.user.role !== 'ADMIN')) {
         redirect('/login');
     }
 
@@ -26,7 +26,7 @@ export default async function CampaignsPage() {
     ` as any[];
 
     const campaigns = campaignsRaw.map(c => {
-        // Raw SQL returns `images` as a JSON string from Postgres — parse it into a real array
+        // Raw SQL returns `images` as a JSON string from Postgres â€” parse it into a real array
         let images: string[] = [];
         if (c.images) {
             if (Array.isArray(c.images)) {
@@ -52,3 +52,4 @@ export default async function CampaignsPage() {
 
     return <CampaignListClient campaigns={campaigns} />;
 }
+

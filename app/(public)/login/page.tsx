@@ -61,7 +61,7 @@ export default function LoginPage() {
                         router.push('/creator/onboarding');
                     }
                 } else if (session?.user?.role === 'BRAND') {
-                    router.push('/brand/discover');
+                    router.push('/brand/campaigns');
                 } else if (session?.user?.role === 'MANAGER') {
                     router.push('/manager');
                 } else {
@@ -129,7 +129,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="relative z-10 flex items-center gap-4 text-sm text-blue-200/60 font-medium">
-                    <p>© 2026 BookMyInfluencer</p>
+                    <p>Â© 2026 BookMyInfluencer</p>
                     <div className="h-1 w-1 rounded-full bg-blue-200/40" />
                     <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
                     <Link href="#" className="hover:text-white transition-colors">Terms</Link>
@@ -205,7 +205,7 @@ export default function LoginPage() {
                                         value={formData.password}
                                         onChange={handleInputChange}
                                         className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                                        placeholder="••••••••"
+                                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                                         required
                                     />
                                     <button
@@ -262,3 +262,4 @@ export default function LoginPage() {
         </div>
     );
 }
+

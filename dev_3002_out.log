@@ -1,0 +1,46 @@
+▲ Next.js 16.1.4 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.0.10:3002
+- Environments: .env
+- Experiments (use with caution):
+  · serverActions
+
+✓ Starting...
+Creating turbopack project { dir: 'C:\\Users\\User\\Desktop\\Bookmyinfluencers', testMode: true }
+✓ Ready in 3.6s
+○ Compiling / ...
+ GET /brand/register 200 in 5.7s (compile: 3.2s, proxy.ts: 757ms, render: 1704ms)
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany()` invocation in
+C:\Users\User\Desktop\Bookmyinfluencers\.next\dev\server\chunks\ssr\[root-of-the-server]__1200bf49._.js:511:148
+
+  508 // Fetch top 12 verified creators for the carousel
+  509 let dbCreators = [];
+  510 try {
+→ 511     dbCreators = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany(
+Can't reach database server at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany()` invocation in
+C:\Users\User\Desktop\Bookmyinfluencers\.next\dev\server\chunks\ssr\[root-of-the-server]__1200bf49._.js:511:148
+
+  508 // Fetch top 12 verified creators for the carousel
+  509 let dbCreators = [];
+  510 try {
+→ 511     dbCreators = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany(
+Can't reach database server at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany()` invocation in
+C:\Users\User\Desktop\Bookmyinfluencers\.next\dev\server\chunks\ssr\[root-of-the-server]__1200bf49._.js:511:148
+
+  508 // Fetch top 12 verified creators for the carousel
+  509 let dbCreators = [];
+  510 try {
+→ 511     dbCreators = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["db"].creator.findMany(
+Can't reach database server at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-restless-bush-a1kk8dfq-pooler.ap-southeast-1.aws.neon.tech:5432`.
+ GET / 200 in 15.3s (compile: 8.4s, render: 6.9s)

@@ -7,7 +7,6 @@ import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
 export async function completeOnboarding(payload?: {
     niche: string
     platforms: string[]
-    pricing: any
 }) {
     try {
         const userId = await getAuthenticatedCreatorId()
@@ -38,7 +37,12 @@ export async function completeOnboarding(payload?: {
         // Prepare update data - ONLY update status if needed
         const updateData: any = {
             niche: payload?.niche,
-            pricing: JSON.stringify(payload?.pricing),
+            pricing: null,
+            price: null,
+            priceStory: null,
+            pricePost: null,
+            priceCollab: null,
+            priceType: null,
         };
 
         if (shouldResetStatus) {
@@ -64,7 +68,7 @@ export async function completeOnboarding(payload?: {
             create: {
                 userId,
                 niche: payload?.niche,
-                pricing: JSON.stringify(payload?.pricing),
+                pricing: null,
                 verificationStatus: 'PENDING',
                 kycSubmission: {
                     create: {
@@ -84,3 +88,4 @@ export async function completeOnboarding(payload?: {
         throw error
     }
 }
+

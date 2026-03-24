@@ -22,12 +22,12 @@ function safeJsonParse(jsonString: string | null | undefined, fallback: any = []
 }
 
 function formatPriceRange(pricing: string | null | undefined): string {
-    if (!pricing) return '₹100-₹500';
+    if (!pricing) return 'â‚¹100-â‚¹500';
     try {
         const data = safeJsonParse(pricing, null);
         if (!data) {
-            if (pricing.includes('₹')) return pricing;
-            return '₹100-₹500';
+            if (pricing.includes('â‚¹')) return pricing;
+            return 'â‚¹100-â‚¹500';
         }
 
         const prices: number[] = [];
@@ -36,14 +36,14 @@ function formatPriceRange(pricing: string | null | undefined): string {
             const num = parseInt(val as string, 10);
             if (!isNaN(num) && num > 0) prices.push(num);
         }
-        if (prices.length === 0) return '₹100-₹500';
+        if (prices.length === 0) return 'â‚¹100-â‚¹500';
         const min = Math.min(...prices);
         const max = Math.max(...prices);
-        if (min === max) return `₹${min}`;
-        return `₹${min}-₹${max}`;
+        if (min === max) return `â‚¹${min}`;
+        return `â‚¹${min}-â‚¹${max}`;
     } catch {
-        if (pricing && pricing.includes('₹')) return pricing;
-        return '₹100-₹500';
+        if (pricing && pricing.includes('â‚¹')) return pricing;
+        return 'â‚¹100-â‚¹500';
     }
 }
 
@@ -124,7 +124,7 @@ export async function fundEscrowTransaction(contractId: string) {
             await createNotification(
                 contract.influencer.userId,
                 "Escrow Funded",
-                `Escrow of ₹${transaction.amount} has been funded for your contract.`,
+                `Escrow of â‚¹${transaction.amount} has been funded for your contract.`,
                 "ESCROW",
                 "/influencer/earnings"
             );
@@ -806,23 +806,30 @@ export async function getBrandStats() {
 
         if (!brand) return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
 
-        // Use aggregate SUM — DB computes server-side, minimal transfer
-        const [releasedSum, fundedSum, completedCampaigns] = await Promise.all([
-            db.escrowTransaction.aggregate({
-                where: { contract: { brandId: brand.id }, status: EscrowTransactionStatus.RELEASED },
-                _sum: { amount: true }
-            }),
-            db.escrowTransaction.aggregate({
-                where: { contract: { brandId: brand.id }, status: EscrowTransactionStatus.FUNDED },
-                _sum: { amount: true }
+        const [campaigns, completedCampaigns] = await Promise.all([
+            db.campaign.findMany({
+                where: { brandId: brand.id },
+                select: {
+                    status: true,
+                    paymentStatus: true,
+                    candidates: {
+                        where: { brandDecision: "ACCEPTED" },
+                        select: { estimatedBrandCharge: true }
+                    }
+                }
             }),
             db.campaign.count({
                 where: { brandId: brand.id, status: CampaignStatus.COMPLETED }
             })
         ]);
 
-        const activeEscrow = fundedSum._sum.amount || 0;
-        const totalSpent = (releasedSum._sum.amount || 0) + activeEscrow;
+        const totalSpent = campaigns
+            .filter((campaign) => campaign.paymentStatus === "PAID")
+            .reduce((sum, campaign) => sum + campaign.candidates.reduce((inner, candidate) => inner + (candidate.estimatedBrandCharge || 0), 0), 0);
+
+        const activeEscrow = campaigns
+            .filter((campaign) => campaign.status === "ACTIVE")
+            .reduce((sum, campaign) => sum + campaign.candidates.reduce((inner, candidate) => inner + (candidate.estimatedBrandCharge || 0), 0), 0);
 
         return { totalSpent, activeEscrow, completedCampaigns };
 
@@ -851,7 +858,7 @@ export async function getBrandDashboardActivity() {
             subtitle: n.message,
             time: formatTimeAgo(n.createdAt),
             actionLabel: "View",
-            actionLink: n.link || '#'
+            actionLink: n.link?.includes("/brand/chat") ? "/brand/campaigns" : (n.link || '#')
         }));
 
     } catch (error) {
@@ -875,33 +882,15 @@ export async function getBrandNotifications() {
     if (!session || session.user.role !== 'BRAND') return { notifications: [], unreadMessageCount: 0 };
 
     try {
-        const [notifications, threads] = await Promise.all([
-            db.notification.findMany({
-                where: {
-                    userId: session.user.id,
-                    read: false
-                },
-                orderBy: { createdAt: 'desc' }
-            }),
-            db.chatThread.findMany({
-                where: {
-                    participants: { contains: session.user.id }
-                },
-                include: {
-                    messages: {
-                        where: {
-                            senderId: { not: session.user.id },
-                            read: false
-                        },
-                        select: { id: true }
-                    }
-                }
-            })
-        ]);
+        const notifications = await db.notification.findMany({
+            where: {
+                userId: session.user.id,
+                read: false
+            },
+            orderBy: { createdAt: 'desc' }
+        });
 
-        const unreadMessageCount = threads.reduce((acc, thread) => acc + thread.messages.length, 0);
-
-        return { notifications, unreadMessageCount };
+        return { notifications, unreadMessageCount: 0 };
     } catch (error) {
         console.error("Failed to fetch notifications", error);
         return { notifications: [], unreadMessageCount: 0 };
@@ -1356,7 +1345,7 @@ export async function createOffer(candidateId: string, amount: number, deliverab
             await createNotification(
                 candidate.influencer.userId,
                 "New Offer Received",
-                `You have received an offer of ₹${amount} for ${candidate.campaign.title}.`,
+                `You have received an offer of â‚¹${amount} for ${candidate.campaign.title}.`,
                 "OFFER",
                 `/influencer/messages` // Should redirect to specific thread but general link for now
             );
@@ -1850,7 +1839,7 @@ export async function getBrandWallet() {
                     influencer: "Campaign Payment",
                     campaign: contract.id.substring(0, 8),
                     date: tx.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                    amount: `₹${tx.amount.toLocaleString()}`,
+                    amount: `â‚¹${tx.amount.toLocaleString()}`,
                     status: tx.status,
                     type: "Debit"
                 });
@@ -1863,7 +1852,7 @@ export async function getBrandWallet() {
                 influencer: "Initial Deposit",
                 campaign: "Wallet Setup",
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                amount: `₹${brand.walletBalance.toLocaleString()}`,
+                amount: `â‚¹${brand.walletBalance.toLocaleString()}`,
                 status: "Completed",
                 type: "Credit"
             });
@@ -2000,12 +1989,12 @@ export async function getMatchedCreators(campaignId: string, rejectedIds: string
         // Shuffle the candidates
         candidates.sort(() => Math.random() - 0.5);
 
-        // Select candidates up to the budget (Cost = ₹1 per follower)
+        // Select candidates up to the budget (Cost = â‚¹1 per follower)
         const selected = [];
         let currentCost = 0;
 
         for (const candidate of candidates) {
-            const cost = candidate.followersCount; // 1 follower = ₹1
+            const cost = candidate.followersCount; // 1 follower = â‚¹1
             if (currentCost + cost <= budget) {
                 selected.push(candidate);
                 currentCost += cost;
@@ -2043,3 +2032,5 @@ export async function activateCampaignPayment(campaignId: string) {
         return { success: false, error: "Failed to activate campaign payment" };
     }
 }
+
+

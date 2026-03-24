@@ -51,10 +51,10 @@ export default function BrandProfilePage() {
                 <Building2 className="w-16 h-16 text-gray-300 mb-4" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Brand not found</h2>
                 <p className="text-gray-500 mb-6 font-medium">The brand profile you're looking for doesn't exist or has been removed.</p>
-                <Link href="/creator/messages">
+                <Link href="/creator/campaigns">
                     <button className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold hover:bg-teal-700 transition-all flex items-center gap-2">
                         <ArrowLeft className="w-4 h-4" />
-                        Back to Messages
+                        Back to Campaigns
                     </button>
                 </Link>
             </div>
@@ -66,9 +66,9 @@ export default function BrandProfilePage() {
             {/* Header */}
             <header className="bg-white border-b border-gray-100 sticky top-0 z-30 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/creator/messages" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+                    <Link href="/creator/campaigns" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
                         <ArrowLeft className="w-5 h-5 text-teal-600" />
-                        <span className="font-bold">Back to Chat</span>
+                        <span className="font-bold">Back to Campaigns</span>
                     </Link>
                     <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Brand Profile</div>
                 </div>
@@ -153,7 +153,7 @@ export default function BrandProfilePage() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-lg font-black text-teal-600">₹{campaign.budget?.toLocaleString() || 'N/A'}</span>
+                                                    <span className="text-lg font-black text-teal-600">â‚¹{campaign.budget?.toLocaleString() || 'N/A'}</span>
                                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Est. Budget</p>
                                                 </div>
                                             </div>
@@ -230,3 +230,4 @@ export default function BrandProfilePage() {
         </div>
     );
 }
+

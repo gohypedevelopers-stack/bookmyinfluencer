@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -9,10 +8,7 @@ import {
     BarChart3,
     LayoutDashboard,
     Megaphone,
-    Wallet,
-    MessageSquare,
     Settings,
-    ShoppingBag,
     LogOut,
     User
 } from "lucide-react"
@@ -46,21 +42,10 @@ export function BrandNavbar() {
             href: "/brand/campaigns",
             icon: Megaphone,
         },
-
-        {
-            name: "Marketplace",
-            href: "/brand/discover",
-            icon: ShoppingBag,
-        },
         {
             name: "Analytics",
             href: "/brand/analytics",
             icon: BarChart3,
-        },
-        {
-            name: "Wallet",
-            href: "/brand/wallet",
-            icon: Wallet,
         }
     ]
 
@@ -150,3 +135,4 @@ export function BrandNavbar() {
         </nav>
     )
 }
+
