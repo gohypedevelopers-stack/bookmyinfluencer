@@ -5,9 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -145,7 +144,7 @@ model Campaign {
   minFollowers Int?                @default(0)
   niche        String?
   paymentType  String?             @default("FIXED")
-  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  brand        BrandProfile        @relation(fields: [brandId], references: [id], onDelete: Cascade)
   assignment   CampaignAssignment?
   candidates   CampaignCandidate[]
   payouts      PayoutRecord[]
@@ -285,9 +284,9 @@ model Contract {
   terms        String?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
-  influencer   InfluencerProfile   @relation(fields: [influencerId], references: [id])
-  candidate    CampaignCandidate?  @relation(fields: [candidateId], references: [id])
-  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  influencer   InfluencerProfile   @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  candidate    CampaignCandidate?  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  brand        BrandProfile        @relation(fields: [brandId], references: [id], onDelete: Cascade)
   deliverables Deliverable[]
   disputes     Dispute[]
   transactions EscrowTransaction[]
@@ -319,7 +318,7 @@ model EscrowTransaction {
   invoiceUrl        String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  contract          Contract @relation(fields: [contractId], references: [id])
+  contract          Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 model PayoutRequest {
@@ -332,7 +331,7 @@ model PayoutRequest {
   adminNotes    String?
   requestedAt   DateTime          @default(now())
   processedAt   DateTime?
-  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id])
+  influencer    InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
 }
 
 model ChatThread {
@@ -342,7 +341,7 @@ model ChatThread {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   initiatedBy  String?
-  candidate    CampaignCandidate? @relation(fields: [candidateId], references: [id])
+  candidate    CampaignCandidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   messages     Message[]
 }
 
@@ -359,7 +358,7 @@ model Message {
   seenAt         DateTime?
   status         String     @default("SENT")
   thread         ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  sender         User       @relation("SentMessages", fields: [senderId], references: [id])
+  sender         User       @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 }
 
 model Dispute {
@@ -372,7 +371,7 @@ model Dispute {
   resolution  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  contract    Contract @relation(fields: [contractId], references: [id])
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 model Block {
@@ -380,8 +379,8 @@ model Block {
   blockerId String
   blockedId String
   createdAt DateTime @default(now())
-  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id])
-  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
+  blocker   User     @relation("BlocksInitiated", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
 
   @@unique([blockerId, blockedId])
 }
@@ -393,8 +392,8 @@ model Report {
   reason     String
   status     String   @default("PENDING")
   createdAt  DateTime @default(now())
-  reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id])
-  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id])
+  reporter   User     @relation("ReportsInitiated", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported   User     @relation("ReportsReceived", fields: [reportedId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
@@ -417,7 +416,7 @@ model AuditLog {
   entityId  String
   details   String?
   createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model OtpUser {
@@ -572,7 +571,7 @@ model BrandWallet {
   balance      Float               @default(0)
   currency     String              @default("INR")
   updatedAt    DateTime            @updatedAt
-  brand        BrandProfile        @relation(fields: [brandId], references: [id])
+  brand        BrandProfile        @relation(fields: [brandId], references: [id], onDelete: Cascade)
   transactions WalletTransaction[]
 }
 
@@ -585,8 +584,8 @@ model WalletTransaction {
   reference  String?
   status     String      @default("SUCCESS")
   createdAt  DateTime    @default(now())
-  wallet     BrandWallet @relation(fields: [walletId], references: [id])
-  campaign   Campaign?   @relation(fields: [campaignId], references: [id])
+  wallet     BrandWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  campaign   Campaign?   @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 }
 
 model RazorpayPayment {
@@ -606,8 +605,8 @@ model CampaignAssignment {
   campaignId String   @unique
   managerId  String
   assignedAt DateTime @default(now())
-  manager    User     @relation(fields: [managerId], references: [id])
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  manager    User     @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 }
 
 model PayoutRecord {
@@ -619,7 +618,7 @@ model PayoutRecord {
   utr         String
   processedBy String?
   paidAt      DateTime          @default(now())
-  creator     InfluencerProfile @relation(fields: [creatorId], references: [id])
-  campaign    Campaign          @relation(fields: [campaignId], references: [id])
+  creator     InfluencerProfile @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  campaign    Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 }
 

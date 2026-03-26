@@ -115,6 +115,12 @@ export default function CreatorCampaignsClient({ candidates, followerCount }: Cr
                                 <p><span className="font-semibold">Manager:</span> {candidate.campaign.assignment?.manager?.name || 'Assigned internally'}</p>
                             </div>
 
+                            {candidate.chatThread?.messages?.[0]?.content && (
+                                <div className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg p-2">
+                                    Latest manager update: {candidate.chatThread.messages[0].content}
+                                </div>
+                            )}
+
                             {candidate.managerReviewStatus === 'CHANGES_REQUESTED' && (
                                 <div className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-lg p-2">
                                     <ShieldCheck className="w-3.5 h-3.5 inline mr-1" />

@@ -73,10 +73,34 @@ const NextButton = ({
 
 const TOTAL_STEPS = 13;
 
+type FollowerRangeOption = { label: string; min: number; max: number };
+type FollowerTier = {
+    label: "Micro" | "Macro";
+    desc: string;
+    badge: string;
+    min: number;
+    max: number;
+    color: string;
+    rangeOptions: FollowerRangeOption[];
+};
+
+const microFollowerRanges: FollowerRangeOption[] = Array.from({ length: 10 }, (_, idx) => {
+    const min = idx * 10000;
+    const max = (idx + 1) * 10000;
+    return { label: `${idx * 10}-${(idx + 1) * 10}K`, min, max };
+});
+
+const macroFollowerRanges: FollowerRangeOption[] = [
+    { label: "100-200K", min: 100000, max: 200000 },
+    { label: "200-300K", min: 200000, max: 300000 },
+    { label: "300-400K", min: 300000, max: 400000 },
+    { label: "400-500K", min: 400000, max: 500000 },
+];
+
 // Follower tiers
-const followerTiers = [
-    { label: "Micro", desc: "10K â€“ 100K followers", badge: "High Engagement", min: 10000, max: 100000, color: "from-blue-400 to-cyan-500" },
-    { label: "Macro", desc: "100K â€“ 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500" },
+const followerTiers: FollowerTier[] = [
+    { label: "Micro", desc: "0K - 100K followers", badge: "High Engagement", min: 0, max: 100000, color: "from-blue-400 to-cyan-500", rangeOptions: microFollowerRanges },
+    { label: "Macro", desc: "100K - 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500", rangeOptions: macroFollowerRanges },
 ];
 
 type PriceTier = { label: string; badge: string; min: number; max: number };
@@ -134,8 +158,8 @@ export default function BrandRegisterPage() {
         budget: '',
         location: '',
         niche: '',
-        minFollowers: 10000,
-        maxFollowers: 100000,
+        minFollowers: microFollowerRanges[0].min,
+        maxFollowers: microFollowerRanges[0].max,
         minPricePerPost: 5000,
         maxPricePerPost: 25000,
         platforms: [] as string[],
@@ -154,6 +178,7 @@ export default function BrandRegisterPage() {
     const [otpLoading, setOtpLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [campaignWorkflow, setCampaignWorkflow] = useState<any>(null);
+    const [autoCampaignId, setAutoCampaignId] = useState<string | null>(null);
     const [workflowWarning, setWorkflowWarning] = useState('');
     const [timer, setTimer] = useState(0);
 
@@ -162,8 +187,10 @@ export default function BrandRegisterPage() {
 
     const progressPercentage = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
     const selectedFollowerTier =
-        followerTiers.find((tier) => onboardingData.minFollowers === tier.min && onboardingData.maxFollowers === tier.max)
+        followerTiers.find((tier) => onboardingData.minFollowers >= tier.min && onboardingData.maxFollowers <= tier.max)
         ?? followerTiers[0];
+    const selectedFollowerRange =
+        selectedFollowerTier.rangeOptions.find((range) => onboardingData.minFollowers === range.min && onboardingData.maxFollowers === range.max);
     const activePerCollabPriceTiers =
         perCollabPriceTiersByFollowerTier[selectedFollowerTier.label]
         ?? perCollabPriceTiersByFollowerTier.Micro;
@@ -274,6 +301,7 @@ export default function BrandRegisterPage() {
         const res = await registerBrand(fd);
         if (res.success) {
             setCampaignWorkflow(res.workflowSummary ?? null);
+            setAutoCampaignId(res.campaignId ?? null);
             setWorkflowWarning(res.workflowError || '');
 
             await signIn('credentials', {
@@ -286,6 +314,7 @@ export default function BrandRegisterPage() {
             setCurrentStep(13);
         } else {
             setCampaignWorkflow(null);
+            setAutoCampaignId(null);
             setWorkflowWarning('');
             setError(res.error || 'Registration failed.');
         }
@@ -304,7 +333,7 @@ export default function BrandRegisterPage() {
             case 7: return Number(onboardingData.budget) > 0;
             case 8: return !!onboardingData.location;
             case 9: return !!onboardingData.niche;
-            case 10: return true;
+            case 10: return !!selectedFollowerRange;
             case 11: return onboardingData.platforms.length > 0;
             case 12: return true;
             default: return true;
@@ -1023,16 +1052,17 @@ export default function BrandRegisterPage() {
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
                                             <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Target creator size?</h2>
-                                            <p className="text-sm text-slate-400 mt-1">Select the follower range that fits your campaign.</p>
+                                            <p className="text-sm text-slate-400 mt-1">Pick a creator tier, then choose the exact follower slab.</p>
                                         </div>
                                         <div className="grid grid-cols-1 gap-3">
                                             {followerTiers.map((tier) => {
-                                                const isSelected = onboardingData.minFollowers === tier.min && onboardingData.maxFollowers === tier.max;
+                                                const isSelected = selectedFollowerTier.label === tier.label;
                                                 return (
                                                     <button key={tier.label}
                                                         onClick={() => {
-                                                            updateOnboarding('minFollowers', tier.min);
-                                                            updateOnboarding('maxFollowers', tier.max);
+                                                            const defaultRange = tier.rangeOptions[0];
+                                                            updateOnboarding('minFollowers', defaultRange.min);
+                                                            updateOnboarding('maxFollowers', defaultRange.max);
                                                             updateOnboarding('priceType', 'Per Collab');
 
                                                             const defaultPriceTier = perCollabPriceTiersByFollowerTier[tier.label]?.[0];
@@ -1061,7 +1091,39 @@ export default function BrandRegisterPage() {
                                                 );
                                             })}
                                         </div>
-                                        <NextButton label="Continue" onClick={goNext} disabled={false} />
+                                        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                                    {selectedFollowerTier.label} ranges
+                                                </p>
+                                                {selectedFollowerRange ? (
+                                                    <span className="text-[11px] font-bold px-2 py-1 rounded-lg bg-violet-100 text-violet-700 border border-violet-200">
+                                                        Selected: {selectedFollowerRange.label}
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                {selectedFollowerTier.rangeOptions.map((range) => {
+                                                    const isActive = selectedFollowerRange?.min === range.min && selectedFollowerRange?.max === range.max;
+                                                    return (
+                                                        <button
+                                                            key={`${selectedFollowerTier.label}-${range.label}`}
+                                                            onClick={() => {
+                                                                updateOnboarding('minFollowers', range.min);
+                                                                updateOnboarding('maxFollowers', range.max);
+                                                            }}
+                                                            className={`px-3 py-2.5 rounded-xl text-sm font-bold border transition-all ${isActive
+                                                                ? 'border-violet-500 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-md'
+                                                                : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:text-violet-700 hover:shadow-sm'
+                                                                }`}
+                                                        >
+                                                            {range.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                        <NextButton label="Continue" onClick={goNext} disabled={!canProceed()} />
                                     </div>
                                 </CardWrapper>
                             )}
@@ -1321,7 +1383,7 @@ export default function BrandRegisterPage() {
                                             <div className="flex flex-wrap justify-center gap-2 text-sm pt-4 pb-2">
                                                 <span className="px-3.5 py-1.5 bg-indigo-50/80 backdrop-blur-sm text-indigo-700 rounded-xl font-bold border border-indigo-100/50 shadow-sm flex items-center gap-2">
                                                     <Users size={14} className="text-indigo-500" />
-                                                    {followerTiers.find(t => t.min === onboardingData.minFollowers)?.label ?? "Any"} creators
+                                                    {selectedFollowerTier.label} · {selectedFollowerRange?.label ?? "Any"} creators
                                                 </span>
                                                 <span className="px-3.5 py-1.5 bg-emerald-50/80 backdrop-blur-sm text-emerald-700 rounded-xl font-bold border border-emerald-100/50 shadow-sm flex items-center gap-2">
                                                     <DollarSign size={14} className="text-emerald-500" />
@@ -1340,7 +1402,7 @@ export default function BrandRegisterPage() {
                                             <button
                                                 onClick={async () => {
                                                     const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-                                                    if (result?.ok) { router.push('/brand/campaigns/new'); }
+                                                    if (result?.ok) { router.push(autoCampaignId ? `/brand/campaigns/${autoCampaignId}/match` : '/brand/campaigns/new'); }
                                                     else { router.push('/brand/login'); }
                                                 }}
                                                 className="w-full py-4.5 bg-slate-900 text-white text-base font-black rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 flex items-center justify-center gap-2 group hover:-translate-y-0.5 active:translate-y-0"

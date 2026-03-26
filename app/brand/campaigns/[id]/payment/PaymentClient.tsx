@@ -21,7 +21,7 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
         if (res.success) {
             setSuccess(true);
             setTimeout(() => {
-                router.push('/brand/campaigns');
+                router.push(`/brand/campaigns/${campaignId}`);
             }, 2500);
         } else {
             alert('Payment failed. Please try again.');
@@ -37,7 +37,7 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-gray-900">Payment Successful!</h2>
-                    <p className="text-gray-500 mt-2">Your campaign is now fully funded and ready for execution by our Project Managers.</p>
+                    <p className="text-gray-500 mt-2">Your campaign is now funded. Manager-led execution and campaign chat are now active.</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm font-semibold text-gray-700">
                     Redirecting to Dashboard...

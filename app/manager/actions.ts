@@ -104,6 +104,17 @@ export async function getManagerCampaignDetails(id: string) {
                                 user: { select: { id: true, name: true, email: true, image: true } },
                             },
                         },
+                        chatThread: {
+                            include: {
+                                messages: {
+                                    include: {
+                                        sender: { select: { id: true, name: true } },
+                                    },
+                                    orderBy: { createdAt: "desc" },
+                                    take: 5,
+                                },
+                            },
+                        },
                     },
                     orderBy: [{ managerReviewStatus: "asc" }, { updatedAt: "desc" }],
                 },
@@ -119,8 +130,195 @@ export async function getManagerCampaignDetails(id: string) {
             orderBy: { createdAt: "desc" },
             take: 20,
         });
+        let brandConversation = {
+            threadId: null as string | null,
+            messages: [] as Array<{
+                id: string;
+                senderId: string;
+                senderName: string;
+                content: string;
+                createdAt: string;
+            }>,
+        };
 
-        return { success: true, data: { campaign, auditLogs } };
+        const brandThread = await db.chatThread.findFirst({
+            where: {
+                initiatedBy: `campaign:${id}:brand-manager`,
+            },
+            include: {
+                messages: {
+                    include: {
+                        sender: { select: { id: true, name: true } },
+                    },
+                    orderBy: { createdAt: "asc" },
+                    take: 150,
+                },
+            },
+        });
+
+        if (brandThread) {
+            brandConversation = {
+                threadId: brandThread.id,
+                messages: brandThread.messages.map((message) => ({
+                    id: message.id,
+                    senderId: message.senderId,
+                    senderName: message.sender.name || "User",
+                    content: message.content || "",
+                    createdAt: message.createdAt.toISOString(),
+                })),
+            };
+        }
+
+        return { success: true, data: { campaign, auditLogs, brandConversation } };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendManagerBrandMessage(campaignId: string, content: string) {
+    try {
+        const session = await requireManagerSession();
+        const trimmed = String(content || "").trim();
+        if (!trimmed) {
+            return { success: false, error: "Message is required." };
+        }
+
+        const campaign = await db.campaign.findUnique({
+            where: { id: campaignId },
+            select: {
+                id: true,
+                title: true,
+                assignment: { select: { managerId: true } },
+                brand: { select: { userId: true } },
+            },
+        });
+
+        if (!campaign) {
+            return { success: false, error: "Campaign not found." };
+        }
+
+        if (session.user.role !== "ADMIN" && campaign.assignment?.managerId !== session.user.id) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        if (!campaign.assignment?.managerId || !campaign.brand.userId) {
+            return { success: false, error: "Manager or brand is missing." };
+        }
+
+        const threadKey = `campaign:${campaignId}:brand-manager`;
+        let thread = await db.chatThread.findFirst({
+            where: {
+                initiatedBy: threadKey,
+            },
+            select: { id: true },
+        });
+
+        if (!thread) {
+            thread = await db.chatThread.create({
+                data: {
+                    participants: `${campaign.brand.userId},${campaign.assignment.managerId}`,
+                    initiatedBy: threadKey,
+                },
+                select: { id: true },
+            });
+        }
+
+        await db.message.create({
+            data: {
+                threadId: thread.id,
+                senderId: session.user.id,
+                content: trimmed,
+                status: "SENT",
+            },
+        });
+
+        await db.notification.create({
+            data: {
+                userId: campaign.brand.userId,
+                type: "MESSAGE",
+                title: "Project manager message",
+                message: `New update on ${campaign.title}.`,
+                link: `/brand/campaigns/${campaignId}`,
+            },
+        });
+
+        revalidatePath(`/manager/campaigns/${campaignId}`);
+        revalidatePath(`/brand/campaigns/${campaignId}`);
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendManagerCreatorMessage(candidateId: string, content: string) {
+    try {
+        const session = await requireManagerSession();
+        const trimmed = String(content || "").trim();
+        if (!trimmed) return { success: false, error: "Message is required." };
+
+        const candidate = await db.campaignCandidate.findUnique({
+            where: { id: candidateId },
+            include: {
+                campaign: {
+                    include: {
+                        assignment: true,
+                        brand: { select: { companyName: true } },
+                    },
+                },
+                influencer: {
+                    select: {
+                        userId: true,
+                    },
+                },
+            },
+        });
+
+        if (!candidate) return { success: false, error: "Candidate not found." };
+        if (session.user.role !== "ADMIN" && candidate.campaign.assignment?.managerId !== session.user.id) {
+            return { success: false, error: "Unauthorized" };
+        }
+        if (!candidate.influencer.userId) {
+            return { success: false, error: "Creator user is missing." };
+        }
+
+        let thread = await db.chatThread.findUnique({
+            where: { candidateId: candidate.id },
+            select: { id: true },
+        });
+
+        if (!thread) {
+            thread = await db.chatThread.create({
+                data: {
+                    candidateId: candidate.id,
+                    participants: `${candidate.campaign.assignment?.managerId || session.user.id},${candidate.influencer.userId}`,
+                    initiatedBy: `candidate:${candidate.id}:manager-creator`,
+                },
+                select: { id: true },
+            });
+        }
+
+        await db.message.create({
+            data: {
+                threadId: thread.id,
+                senderId: session.user.id,
+                content: trimmed,
+                status: "SENT",
+            },
+        });
+
+        await db.notification.create({
+            data: {
+                userId: candidate.influencer.userId,
+                type: "MESSAGE",
+                title: "Project manager update",
+                message: `${candidate.campaign.brand.companyName} campaign has a new manager update.`,
+                link: "/creator/campaigns",
+            },
+        });
+
+        revalidatePath(`/manager/campaigns/${candidate.campaignId}`);
+        revalidatePath("/creator/campaigns");
+        return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };
     }

@@ -38,28 +38,43 @@ export function NotificationPopover() {
     const [unreadMessageCount, setUnreadMessageCount] = useState(0)
     const [markingAll, setMarkingAll] = useState(false)
     const channelRef = useRef<any>(null)
+    const isFetchingRef = useRef(false)
+    const lastFetchAtRef = useRef(0)
     const router = useRouter()
 
     const totalUnread = notifications.filter(n => !n.read).length + unreadMessageCount
 
-    async function fetchNotifications() {
-        setIsLoading(true)
-        const res = await getBrandNotifications()
-        if (Array.isArray(res)) {
-            setNotifications(res as Notification[])
-        } else {
-            setNotifications(res.notifications as Notification[])
-            setUnreadMessageCount(res.unreadMessageCount || 0)
+    async function fetchNotifications(force = false) {
+        const now = Date.now()
+        if (!force && (isFetchingRef.current || now - lastFetchAtRef.current < 5000)) {
+            return
         }
-        setIsLoading(false)
+
+        isFetchingRef.current = true
+        setIsLoading(true)
+        try {
+            const res = await getBrandNotifications()
+            if (Array.isArray(res)) {
+                setNotifications(res as Notification[])
+            } else {
+                setNotifications((res.notifications || []) as Notification[])
+                setUnreadMessageCount(res.unreadMessageCount || 0)
+            }
+        } catch {
+            // Keep existing state on intermittent fetch errors.
+        } finally {
+            lastFetchAtRef.current = Date.now()
+            isFetchingRef.current = false
+            setIsLoading(false)
+        }
     }
 
     // Get user ID and subscribe to Pusher for real-time notifications
     useEffect(() => {
-        fetchNotifications()
+        fetchNotifications(true)
 
-        // Poll every 30s as fallback
-        const interval = setInterval(fetchNotifications, 30000)
+        // Poll every 60s as fallback
+        const interval = setInterval(() => fetchNotifications(), 60000)
 
         // Subscribe to Pusher for real-time push
         let channel: any = null
@@ -128,7 +143,7 @@ export function NotificationPopover() {
     return (
         <Popover open={isOpen} onOpenChange={(open) => {
             setIsOpen(open)
-            if (open) fetchNotifications()
+            if (open) fetchNotifications(true)
         }}>
             <PopoverTrigger asChild>
                 <button className="w-10 h-10 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors relative">

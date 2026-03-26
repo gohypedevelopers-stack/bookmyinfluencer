@@ -12,6 +12,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:seed:local": "tsx prisma/seed.ts",
+    "db:seed:test-creators": "node scripts/seed-test-creators-sqlite.js",
+    "db:seed:test-creators:prisma": "tsx scripts/seed-test-creators-fullflow.ts",
     "count-rows": "tsx scripts/count-rows.ts"
   },
   "prisma": {

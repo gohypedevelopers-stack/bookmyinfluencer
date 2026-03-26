@@ -47,6 +47,17 @@ export default async function CreatorCampaignsPage() {
                                 assignment: { include: { manager: true } },
                             },
                         },
+                        chatThread: {
+                            include: {
+                                messages: {
+                                    include: {
+                                        sender: { select: { id: true, name: true } },
+                                    },
+                                    orderBy: { createdAt: "desc" },
+                                    take: 5,
+                                },
+                            },
+                        },
                     },
                     orderBy: { updatedAt: "desc" },
                 });

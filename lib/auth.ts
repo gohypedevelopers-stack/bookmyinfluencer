@@ -168,7 +168,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
 export const authOptions: NextAuthOptions = {
     secret: getNextAuthSecret(),
-    debug: process.env.NODE_ENV === "development",
+    debug: process.env.NEXTAUTH_DEBUG === "true",
     session: {
         strategy: "jwt",
     },

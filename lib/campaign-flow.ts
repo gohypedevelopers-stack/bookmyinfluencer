@@ -4,6 +4,7 @@ export const MICRO_FOLLOWER_MIN = 10_000;
 export const MICRO_FOLLOWER_MAX = 500_000;
 export const DEFAULT_ENGAGEMENT_MIN = 5;
 export const DEFAULT_ENGAGEMENT_MAX = 10;
+export const FOLLOWER_RANGE_PREFIX = "RANGE_";
 
 export function calculateInternalPricing(followers: number) {
     const safeFollowers = Math.max(0, Math.floor(followers || 0));
@@ -28,10 +29,51 @@ function formatArray(values: string[]) {
     return values.filter(Boolean).join(", ");
 }
 
-function desiredMatchCount(totalBudget: number) {
-    if (!totalBudget || totalBudget < MICRO_FOLLOWER_MIN) return 0;
-    const maxByBudget = Math.floor(totalBudget / MICRO_FOLLOWER_MIN);
-    return clamp(maxByBudget, 1, 8);
+function desiredMatchCount(totalBudget: number, targetFollowersPerCreator: number) {
+    const safeBudget = Math.max(0, Math.floor(totalBudget || 0));
+    const safeTargetFollowers = Math.max(1_000, Math.floor(targetFollowersPerCreator || MICRO_FOLLOWER_MIN));
+    if (!safeBudget || safeBudget < safeTargetFollowers) return 0;
+    const maxByBudget = Math.floor(safeBudget / safeTargetFollowers);
+    return clamp(maxByBudget, 1, 50);
+}
+
+export function parseFollowerRangeWindow(influencerType?: string | null, minFollowers?: number | null) {
+    const typeValue = String(influencerType || "").trim();
+    const rangeMatch = typeValue.match(/^RANGE_(\d+)_(\d+)$/i);
+    if (rangeMatch) {
+        const parsedMin = Number(rangeMatch[1] || 0);
+        const parsedMax = Number(rangeMatch[2] || 0);
+        const safeMin = Math.max(0, Math.min(parsedMin, parsedMax));
+        const safeMax = Math.max(safeMin, Math.max(parsedMin, parsedMax));
+        return {
+            min: safeMin,
+            max: safeMax,
+            targetFollowers: safeMax > 0 ? safeMax : Math.max(1_000, safeMin),
+        };
+    }
+
+    if (typeValue.toUpperCase() === "MACRO") {
+        return {
+            min: 100_000,
+            max: 500_000,
+            targetFollowers: 200_000,
+        };
+    }
+
+    if (typeValue.toUpperCase() === "MICRO") {
+        return {
+            min: 10_000,
+            max: 100_000,
+            targetFollowers: 10_000,
+        };
+    }
+
+    const fallbackFollowers = Math.max(1_000, Math.floor(Number(minFollowers || MICRO_FOLLOWER_MIN)));
+    return {
+        min: fallbackFollowers,
+        max: Math.max(fallbackFollowers, MICRO_FOLLOWER_MAX),
+        targetFollowers: fallbackFollowers,
+    };
 }
 
 function evaluateQuality({
@@ -129,21 +171,22 @@ async function getCampaignForBrand(campaignId: string, brandUserId: string) {
 async function buildRankedPool(campaign: NonNullable<CampaignWithCandidates>) {
     const engagementMin = campaign.engagementMin ?? DEFAULT_ENGAGEMENT_MIN;
     const engagementMax = campaign.engagementMax ?? DEFAULT_ENGAGEMENT_MAX;
+    const followerRange = parseFollowerRangeWindow(campaign.influencerType, campaign.minFollowers);
 
     const baseProfiles = await db.influencerProfile.findMany({
         where: {
             followers: {
-                gte: MICRO_FOLLOWER_MIN,
-                lte: MICRO_FOLLOWER_MAX,
+                gte: followerRange.min,
+                lte: followerRange.max,
             },
             ...(campaign.niche
-                ? { niche: { contains: campaign.niche, mode: "insensitive" } }
+                ? { niche: { contains: campaign.niche } }
                 : {}),
             ...(campaign.location
-                ? { location: { contains: campaign.location, mode: "insensitive" } }
+                ? { location: { contains: campaign.location } }
                 : {}),
             ...(campaign.platform
-                ? { platforms: { contains: campaign.platform, mode: "insensitive" } }
+                ? { platforms: { contains: campaign.platform } }
                 : {}),
             engagementRate: {
                 gte: Math.max(0, engagementMin - 2),
@@ -217,7 +260,8 @@ export async function ensureCampaignSuggestions(campaignId: string, brandUserId:
         throw new Error("Campaign not found");
     }
 
-    const targetCount = desiredMatchCount(campaign.budget || 0);
+    const followerRange = parseFollowerRangeWindow(campaign.influencerType, campaign.minFollowers);
+    const targetCount = desiredMatchCount(campaign.budget || 0, followerRange.targetFollowers);
     if (targetCount <= 0) return;
 
     const activeCandidates = campaign.candidates.filter((candidate) =>

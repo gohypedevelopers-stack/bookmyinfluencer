@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { refillPaidCampaignInvitations } from "@/app/brand/campaigns/flow-actions";
 
 // Helper to get the actual Creator ID (Resolved to a User table ID)
 // Helper to get the actual Creator ID (Resolved to a User table ID)
@@ -504,6 +505,10 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
 
         if (notificationsPool.length > 0) {
             await Promise.all(notificationsPool);
+        }
+
+        if (candidate.campaign.paymentStatus === "PAID") {
+            await refillPaidCampaignInvitations(candidate.campaign.id);
         }
 
         revalidatePath('/creator/campaigns');

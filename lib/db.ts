@@ -41,7 +41,6 @@ export const DEFAULT_TX_OPTIONS = {
     timeout: 20000, // 20s execution time
 }
 
-
 function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -64,11 +63,30 @@ function isRetryableDbError(error: unknown) {
 }
 
 const prismaClientSingleton = () => {
+    const dbUrl = process.env.DATABASE_URL
+    const isDev = process.env.NODE_ENV === "development"
+    const globalRuntimeState = globalThis as unknown as {
+        prisma_init_logged?: boolean
+        prisma_missing_url_warned?: boolean
+    }
+
+    if (isDev && process.env.PRISMA_DEBUG_INIT === "true" && !globalRuntimeState.prisma_init_logged) {
+        console.log("[PRISMA] Initializing client")
+        console.log("[PRISMA] DATABASE_URL:", dbUrl || "NOT DEFINED")
+        console.log("[PRISMA] NODE_ENV:", process.env.NODE_ENV)
+        globalRuntimeState.prisma_init_logged = true
+    }
+
+    if (isDev && !dbUrl && !globalRuntimeState.prisma_missing_url_warned) {
+        console.warn("[PRISMA] DATABASE_URL is missing. Connection will likely fail.")
+        globalRuntimeState.prisma_missing_url_warned = true
+    }
+
     const client = new PrismaClient({
-        log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+        log: isDev ? ["warn", "error"] : ["error"],
         datasources: {
             db: {
-                url: process.env.DATABASE_URL,
+                url: dbUrl,
             },
         },
     })

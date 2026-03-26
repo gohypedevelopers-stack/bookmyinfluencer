@@ -41,6 +41,20 @@ function formatFollowers(value) {
     return `${amount}`;
 }
 
+function getDynamicCampaignTargets(campaign) {
+    const totalBudget = Math.max(0, Number(campaign?.totalBudget || 0));
+    const minFollowers = Math.max(0, Number(campaign?.minFollowers || 0));
+    const maxFollowers = Math.max(minFollowers, Number(campaign?.maxFollowers || 0));
+    const followersPerCreator = Math.max(maxFollowers, 1);
+    const targetAcceptedCount = Math.max(Math.floor(totalBudget / followersPerCreator), 0);
+
+    return {
+        targetAcceptedCount,
+        activeRequestLimit: targetAcceptedCount,
+        followersPerCreator,
+    };
+}
+
 function buildCountSummary(requests) {
     return requests.reduce(
         (summary, request) => {
@@ -135,11 +149,25 @@ export async function topUpCollaborationRequests(campaignId) {
         throw new Error(`Brand campaign ${campaignId} not found`);
     }
 
+    const targets = getDynamicCampaignTargets(campaign);
     const acceptedCount = campaign.requests.filter((request) => request.status === REQUEST_STATUS.ACCEPTED).length;
     const pendingCount = campaign.requests.filter((request) => request.status === REQUEST_STATUS.PENDING).length;
-    const remainingAcceptedSlots = Math.max(campaign.targetAcceptedCount - acceptedCount, 0);
-    const desiredPendingCount = Math.min(campaign.activeRequestLimit, remainingAcceptedSlots);
+    const remainingAcceptedSlots = Math.max(targets.targetAcceptedCount - acceptedCount, 0);
+    const desiredPendingCount = Math.min(targets.activeRequestLimit, remainingAcceptedSlots);
     const requestCountToCreate = Math.max(desiredPendingCount - pendingCount, 0);
+
+    if (
+        campaign.targetAcceptedCount !== targets.targetAcceptedCount ||
+        campaign.activeRequestLimit !== targets.activeRequestLimit
+    ) {
+        await db.brandCampaign.update({
+            where: { id: campaignId },
+            data: {
+                targetAcceptedCount: targets.targetAcceptedCount,
+                activeRequestLimit: targets.activeRequestLimit,
+            },
+        });
+    }
 
     if (!requestCountToCreate) {
         if (!campaign.matchingTriggeredAt) {
@@ -220,6 +248,7 @@ export async function topUpCollaborationRequests(campaignId) {
 
 function buildWorkflowSummaryFromCampaign(campaign) {
     const counts = buildCountSummary(campaign.requests);
+    const targets = getDynamicCampaignTargets(campaign);
 
     return {
         campaign: {
@@ -234,15 +263,15 @@ function buildWorkflowSummaryFromCampaign(campaign) {
             maxFollowers: campaign.maxFollowers,
             followerRangeLabel: `${formatFollowers(campaign.minFollowers)} - ${formatFollowers(campaign.maxFollowers)}`,
             status: campaign.status,
-            targetAcceptedCount: campaign.targetAcceptedCount,
-            activeRequestLimit: campaign.activeRequestLimit,
+            targetAcceptedCount: targets.targetAcceptedCount,
+            activeRequestLimit: targets.activeRequestLimit,
             createdAt: serializeDate(campaign.createdAt),
             matchingTriggeredAt: serializeDate(campaign.matchingTriggeredAt),
         },
         counts: {
             ...counts,
             sent: campaign.requests.length,
-            remainingAcceptedSlots: Math.max(campaign.targetAcceptedCount - counts[REQUEST_STATUS.ACCEPTED], 0),
+            remainingAcceptedSlots: Math.max(targets.targetAcceptedCount - counts[REQUEST_STATUS.ACCEPTED], 0),
         },
         sentRequests: campaign.requests.map(mapRequest),
         acceptedInfluencers: campaign.requests
@@ -291,11 +320,12 @@ export async function getBrandCampaignQueueDashboard(userId) {
     const campaignIdsNeedingCoverage = brand.brandCampaigns
         .filter((campaign) => String(campaign.status || "").toLowerCase() === "active")
         .map((campaign) => {
+            const targets = getDynamicCampaignTargets(campaign);
             const counts = buildCountSummary(campaign.requests);
             const acceptedCount = counts[REQUEST_STATUS.ACCEPTED] || 0;
             const pendingCount = counts[REQUEST_STATUS.PENDING] || 0;
-            const remainingAcceptedSlots = Math.max(campaign.targetAcceptedCount - acceptedCount, 0);
-            const desiredPendingCount = Math.min(campaign.activeRequestLimit, remainingAcceptedSlots);
+            const remainingAcceptedSlots = Math.max(targets.targetAcceptedCount - acceptedCount, 0);
+            const desiredPendingCount = Math.min(targets.activeRequestLimit, remainingAcceptedSlots);
             return pendingCount < desiredPendingCount ? campaign.id : null;
         })
         .filter(Boolean);
@@ -376,17 +406,27 @@ export async function createBrandCampaignWorkflow({
     title,
 }) {
     const normalizedCategory = normalizeCategory(category);
+    const normalizedMinFollowers = Math.max(0, Number(minFollowers || 0));
+    const normalizedMaxFollowers = Math.max(Number(maxFollowers || 0), normalizedMinFollowers);
+    const normalizedBudget = Number(totalBudget || 0);
+    const targets = getDynamicCampaignTargets({
+        totalBudget: normalizedBudget,
+        minFollowers: normalizedMinFollowers,
+        maxFollowers: normalizedMaxFollowers,
+    });
 
     const campaign = await db.brandCampaign.create({
         data: {
             brandId,
             title: title || "Brand Campaign",
             summary: summary || null,
-            totalBudget: Number(totalBudget || 0),
+            totalBudget: normalizedBudget,
             category: normalizedCategory,
             categoryLabel: category || normalizedCategory,
-            minFollowers: Math.max(0, Number(minFollowers || 0)),
-            maxFollowers: Math.max(Number(maxFollowers || 0), Number(minFollowers || 0)),
+            minFollowers: normalizedMinFollowers,
+            maxFollowers: normalizedMaxFollowers,
+            targetAcceptedCount: targets.targetAcceptedCount,
+            activeRequestLimit: targets.activeRequestLimit,
             status: "active",
         },
     });

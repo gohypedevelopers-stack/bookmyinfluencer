@@ -4,7 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCampaignAnalytics } from "@/app/brand/actions";
+import { getBrandManagerConversation } from "@/app/brand/campaigns/flow-actions";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import BrandManagerChatCard from "./BrandManagerChatCard";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -37,7 +39,10 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
     }
 
     // Fetch Analytics Data
-    const analytics = await getCampaignAnalytics(id);
+    const [analytics, managerConversation] = await Promise.all([
+        getCampaignAnalytics(id),
+        getBrandManagerConversation(id),
+    ]);
 
     // Default empty data structure if fetch fails
     const analyticsData = analytics.success ? analytics.data : {
@@ -70,6 +75,15 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
                     data={analyticsData as any}
                     campaignTitle={campaign.title}
                 />
+                <div className="mt-8">
+                    <BrandManagerChatCard
+                        campaignId={campaign.id}
+                        currentUserId={session.user.id}
+                        managerName={(managerConversation.success ? managerConversation.managerName : "Project Manager") || "Project Manager"}
+                        locked={managerConversation.success ? Boolean(managerConversation.locked) : true}
+                        initialMessages={managerConversation.success ? (managerConversation.messages as any[]) : []}
+                    />
+                </div>
             </div>
         </div>
     );

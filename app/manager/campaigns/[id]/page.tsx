@@ -17,6 +17,7 @@ export default async function ManagerCampaignDetailsPage({ params }: { params: P
         <ManagerCampaignDetailsClient
             campaign={result.data.campaign}
             auditLogs={result.data.auditLogs}
+            brandConversation={result.data.brandConversation}
         />
     );
 }

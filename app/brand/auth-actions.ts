@@ -7,6 +7,7 @@ import { Prisma } from "@prisma/client";
 
 import { sendOtpEmail } from "@/lib/email";
 import { createBrandCampaignWorkflow } from "@/services/collabService";
+import { FOLLOWER_RANGE_PREFIX, ensureCampaignSuggestions } from "@/lib/campaign-flow";
 import { ensureRequestExpiryJobStarted } from "@/jobs/requestExpiryJob";
 import { hashOtp, constantTimeEqualHex } from "@/lib/otp";
 
@@ -298,16 +299,21 @@ export async function registerBrand(formData: FormData) {
 
         let workflowSummary = null;
         let brandCampaignId: string | null = null;
+        let campaignId: string | null = null;
         let workflowError: string | null = null;
 
         if (user.brandProfile) {
+            const parsedBudget = safeParseFloat(campaignBudget) ?? 0;
+            const parsedMinFollowers = Math.max(0, safeParseInt(minFollowers) ?? 10_000);
+            const parsedMaxFollowers = Math.max(parsedMinFollowers, safeParseInt(maxFollowers) ?? 20_000);
+
             try {
                 workflowSummary = await createBrandCampaignWorkflow({
                     brandId: user.brandProfile.id,
-                    totalBudget: safeParseFloat(campaignBudget) ?? 0,
-                    category: industry || 'general',
-                    minFollowers: safeParseInt(minFollowers) ?? 0,
-                    maxFollowers: safeParseInt(maxFollowers) ?? 0,
+                    totalBudget: parsedBudget,
+                    category: niche || industry || 'general',
+                    minFollowers: parsedMinFollowers,
+                    maxFollowers: parsedMaxFollowers,
                     summary: campaignGoals || campaignType || 'Initial brand campaign created from onboarding.',
                     title: `${brandName || companyName} ${campaignType || 'Campaign'}`.trim(),
                 });
@@ -316,12 +322,42 @@ export async function registerBrand(formData: FormData) {
                 console.error('Brand campaign workflow setup failed:', campaignError);
                 workflowError = 'Brand account was created, but influencer matching could not be initialized yet.';
             }
+
+            try {
+                if (parsedBudget >= parsedMaxFollowers) {
+                    const campaign = await db.campaign.create({
+                        data: {
+                            brandId: user.brandProfile.id,
+                            title: `${brandName || companyName} ${campaignType || 'Campaign'}`.trim() || 'New Campaign',
+                            description: campaignGoals || null,
+                            requirements: campaignGoals || null,
+                            budget: parsedBudget,
+                            niche: niche || null,
+                            location: location || null,
+                            platform: targetPlatforms || null,
+                            influencerType: `${FOLLOWER_RANGE_PREFIX}${parsedMinFollowers}_${parsedMaxFollowers}`,
+                            minFollowers: parsedMaxFollowers,
+                            engagementMin: 5,
+                            engagementMax: 10,
+                            paymentType: 'UPFRONT',
+                            paymentStatus: 'PENDING',
+                            status: 'DRAFT',
+                            images: '[]',
+                        },
+                    });
+                    await ensureCampaignSuggestions(campaign.id, user.id);
+                    campaignId = campaign.id;
+                }
+            } catch (autoCampaignError) {
+                console.error('Campaign bootstrap failed:', autoCampaignError);
+            }
         }
 
         return {
             success: true,
             userId: user.id,
             brandCampaignId,
+            campaignId,
             workflowSummary,
             workflowError,
         };

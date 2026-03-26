@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -40,12 +40,19 @@ export default function CreatorDashboardPage() {
   const [platform, setPlatform] = useState<string>("instagram") // instagram, youtube
   const [availablePlatforms, setAvailablePlatforms] = useState<string[]>(["instagram"])
   const [dateRange, setDateRange] = useState<number>(30) // 7, 30, 90
+  const fetchStateRef = useRef<{ key: string; inFlight: boolean }>({ key: "", inFlight: false })
 
   useEffect(() => {
     fetchDashboardData()
   }, [platform, dateRange])
 
   async function fetchDashboardData() {
+    const key = `${platform}:${dateRange}`
+    if (fetchStateRef.current.inFlight && fetchStateRef.current.key === key) {
+      return
+    }
+
+    fetchStateRef.current = { key, inFlight: true }
     setLoading(true)
     try {
       const data = await getCreatorDashboardData(platform, dateRange)
@@ -63,6 +70,7 @@ export default function CreatorDashboardPage() {
     } catch (error) {
       toast.error("Failed to fetch dashboard data")
     } finally {
+      fetchStateRef.current.inFlight = false
       setLoading(false)
     }
   }

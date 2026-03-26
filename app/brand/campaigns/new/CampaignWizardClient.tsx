@@ -10,6 +10,49 @@ type WizardProps = {
     campaignId?: string;
 };
 
+type FollowerBand = {
+    label: string;
+    min: number;
+    max: number;
+};
+
+const followerBands: FollowerBand[] = [
+    { label: '0-10K', min: 0, max: 10_000 },
+    { label: '10-20K', min: 10_000, max: 20_000 },
+    { label: '20-30K', min: 20_000, max: 30_000 },
+    { label: '30-40K', min: 30_000, max: 40_000 },
+    { label: '40-50K', min: 40_000, max: 50_000 },
+    { label: '50-60K', min: 50_000, max: 60_000 },
+    { label: '60-70K', min: 60_000, max: 70_000 },
+    { label: '70-80K', min: 70_000, max: 80_000 },
+    { label: '80-90K', min: 80_000, max: 90_000 },
+    { label: '90-100K', min: 90_000, max: 100_000 },
+    { label: '100-200K', min: 100_000, max: 200_000 },
+    { label: '200-300K', min: 200_000, max: 300_000 },
+    { label: '300-400K', min: 300_000, max: 400_000 },
+    { label: '400-500K', min: 400_000, max: 500_000 },
+];
+
+function parseFollowerBandFromCampaign(initialData?: any): FollowerBand {
+    const typeValue = String(initialData?.influencerType || '');
+    const match = typeValue.match(/^RANGE_(\d+)_(\d+)$/i);
+    if (match) {
+        const min = Number(match[1]);
+        const max = Number(match[2]);
+        const existing = followerBands.find((band) => band.min === min && band.max === max);
+        if (existing) return existing;
+        return {
+            label: `${Math.floor(min / 1000)}-${Math.floor(max / 1000)}K`,
+            min,
+            max,
+        };
+    }
+
+    const fallbackByMin = Number(initialData?.minFollowers || 10_000);
+    const existingByMax = followerBands.find((band) => band.max === fallbackByMin);
+    return existingByMax || followerBands[1];
+}
+
 export default function CampaignWizardClient({ brandId, initialData, campaignId }: WizardProps) {
     const router = useRouter();
     const action = initialData ? updateCampaignFlow : createCampaignFlow;
@@ -18,15 +61,18 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
     const [state, formAction, isPending] = useActionState(action, null);
     const [step, setStep] = useState(1);
 
+    const initialBand = parseFollowerBandFromCampaign(initialData);
+
     const [formData, setFormData] = useState({
         title: initialData?.title || '',
         description: initialData?.description || '',
         requirements: initialData?.requirements || '',
-        budget: String(initialData?.budget || 50000),
-        influencerType: 'MICRO',
+        budget: String(initialData?.budget || 200000),
         platform: initialData?.platform || 'Instagram',
         location: initialData?.location || 'India',
         niche: initialData?.niche || '',
+        followerMin: String(initialBand.min),
+        followerMax: String(initialBand.max),
         engagementMin: String(initialData?.engagementMin ?? 5),
         engagementMax: String(initialData?.engagementMax ?? 10),
         startDate: initialData?.startDate
@@ -37,9 +83,25 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
             : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
 
+    const selectedBand = useMemo(
+        () => followerBands.find((band) => band.min === Number(formData.followerMin) && band.max === Number(formData.followerMax)) || initialBand,
+        [formData.followerMin, formData.followerMax, initialBand]
+    );
+
+    const estimatedCreators = useMemo(() => {
+        const budget = Number(formData.budget || 0);
+        const followerTarget = Number(formData.followerMax || 0);
+        if (!budget || !followerTarget) return 0;
+        return Math.floor(budget / followerTarget);
+    }, [formData.budget, formData.followerMax]);
+
     const canProceed = useMemo(() => {
         if (step === 1) return formData.title.trim().length > 2;
-        if (step === 2) return Number(formData.budget) >= 10000 && !!formData.platform && !!formData.location;
+        if (step === 2) {
+            const budget = Number(formData.budget || 0);
+            const followerTarget = Number(formData.followerMax || 0);
+            return budget >= followerTarget && !!formData.platform && !!formData.location;
+        }
         return true;
     }, [formData, step]);
 
@@ -53,6 +115,13 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
 
     const updateField = (name: keyof typeof formData, value: string) =>
         setFormData((prev) => ({ ...prev, [name]: value }));
+
+    const updateFollowerBand = (value: string) => {
+        const [min, max] = value.split('_').map((item) => Number(item));
+        if (Number.isFinite(min) && Number.isFinite(max)) {
+            setFormData((prev) => ({ ...prev, followerMin: String(min), followerMax: String(max) }));
+        }
+    };
 
     return (
         <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8 pb-32">
@@ -118,27 +187,36 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                         <div className="space-y-5">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900">Match Filters</h2>
-                                <p className="text-sm text-gray-500">Only micro influencers (10K-500K) are matched. Pricing is calculated internally.</p>
+                                <p className="text-sm text-gray-500">System uses Rs.1 per follower logic. Budget is split by selected follower band to calculate creator count.</p>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Target Follower Band</label>
+                                <select
+                                    value={`${selectedBand.min}_${selectedBand.max}`}
+                                    onChange={(e) => updateFollowerBand(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
+                                >
+                                    {followerBands.map((band) => (
+                                        <option key={`${band.min}_${band.max}`} value={`${band.min}_${band.max}`}>
+                                            {band.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Total Campaign Budget</label>
                                 <input
                                     type="number"
-                                    min={10000}
+                                    min={Number(formData.followerMax || 0)}
                                     value={formData.budget}
                                     onChange={(e) => updateField('budget', e.target.value)}
                                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
                                 />
+                                <p className="text-xs mt-1 text-indigo-600 font-semibold">
+                                    Estimated creators from budget: {estimatedCreators > 0 ? estimatedCreators : 0} (Budget / {selectedBand.max.toLocaleString()})
+                                </p>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Influencer Type</label>
-                                    <input
-                                        value="Micro (10K-500K)"
-                                        disabled
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-600"
-                                    />
-                                </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Platform</label>
                                     <select
@@ -150,8 +228,6 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                         <option>YouTube</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Location</label>
                                     <input
@@ -161,6 +237,8 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                         placeholder="India, Mumbai, Delhi NCR"
                                     />
                                 </div>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Niche</label>
                                     <input
@@ -168,6 +246,14 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                         onChange={(e) => updateField('niche', e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none"
                                         placeholder="Fashion, Fitness, Tech"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-600 uppercase mb-2">Target Band</label>
+                                    <input
+                                        value={`${selectedBand.label} (${selectedBand.min.toLocaleString()}-${selectedBand.max.toLocaleString()})`}
+                                        disabled
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-600"
                                     />
                                 </div>
                             </div>
@@ -204,14 +290,15 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                         <div className="space-y-4">
                             <h2 className="text-2xl font-bold text-gray-900">Review</h2>
                             <div className="rounded-xl border border-gray-200 p-4 bg-gray-50 text-sm space-y-2">
-                                <p><span className="font-semibold">Budget:</span> â‚¹{Number(formData.budget || 0).toLocaleString()}</p>
-                                <p><span className="font-semibold">Type:</span> Micro influencers only</p>
+                                <p><span className="font-semibold">Budget:</span> Rs.{Number(formData.budget || 0).toLocaleString()}</p>
+                                <p><span className="font-semibold">Follower Band:</span> {selectedBand.label}</p>
+                                <p><span className="font-semibold">Estimated Creators:</span> {estimatedCreators > 0 ? estimatedCreators : 0}</p>
                                 <p><span className="font-semibold">Platform:</span> {formData.platform}</p>
                                 <p><span className="font-semibold">Location:</span> {formData.location}</p>
                                 <p><span className="font-semibold">Niche:</span> {formData.niche || 'Any'}</p>
                                 <p><span className="font-semibold">Engagement:</span> {formData.engagementMin}% - {formData.engagementMax}%</p>
                                 <p className="text-gray-600">
-                                    System will auto-match influencers and internal pricing will be applied after you select creators.
+                                    Requests will be matched from onboarding filters and routed to creators with 24h response window.
                                 </p>
                             </div>
                         </div>
@@ -243,7 +330,7 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
                                 disabled={isPending}
                                 className="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold disabled:opacity-40"
                             >
-                                {isPending ? 'Saving...' : 'Create & Match'}
+                                {isPending ? 'Saving...' : 'Create and Match'}
                             </button>
                         )}
                     </div>
@@ -252,4 +339,3 @@ export default function CampaignWizardClient({ brandId, initialData, campaignId 
         </main>
     );
 }
-
