@@ -93,20 +93,49 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                 <span>All Campaigns</span>
                             </div>
                             <h1 className="text-3xl font-bold text-gray-900">Campaign Management</h1>
-                            <p className="text-gray-500 mt-1">Track, manage, and scale your influencer marketing initiatives in real-time.</p>
+                            <p className="text-gray-500 mt-1">Run campaigns in one flow: Setup | Match | Select | Execute.</p>
                         </div>
                         <Link
                             href="/brand/campaigns/new"
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+                            className="group rounded-[24px] bg-[linear-gradient(135deg,#2563eb_0%,#4338ca_100%)] px-6 py-4 text-white shadow-xl shadow-blue-200/70 transition hover:-translate-y-0.5"
                         >
-                            <Plus className="w-5 h-5" />
-                            Create New Campaign
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15">
+                                    <Plus className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="text-base font-black">Create New Campaign</div>
+                                    <div className="text-xs font-semibold text-blue-100">Start campaign setup</div>
+                                </div>
+                            </div>
                         </Link>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-[1600px] mx-auto px-6 py-8">
+                <div className="mb-5 rounded-[32px] border border-slate-200 bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#4338ca_100%)] p-6 text-white shadow-[0_28px_80px_-38px_rgba(15,23,42,0.55)]">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Execution Model</p>
+                            <h2 className="mt-2 text-2xl font-black">PM-led delivery after full upfront payment</h2>
+                            <p className="mt-2 max-w-2xl text-sm text-slate-200">
+                                Launch new campaigns, review creator matches, and manage execution from one place.
+                            </p>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-[22px] border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">Current Active Spend</p>
+                                <p className="mt-2 text-2xl font-black text-white">Rs.{totalActiveSpend.toLocaleString()}</p>
+                            </div>
+                            <div className="rounded-[22px] border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-sm">
+                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">Active Campaigns</p>
+                                <p className="mt-2 text-2xl font-black text-white">{activeCampaignsCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Tabs & Search */}
                 <div className="bg-white rounded-t-xl border border-gray-200 p-4 mb-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {/* Tabs */}
@@ -181,7 +210,7 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                                 {/* Mock Niche/Platform if empty */}
                                                 <span>General</span>
-                                                <span>• Multi-channel</span>
+                                                <span>| Multi-channel</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -199,14 +228,14 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                             {campaign._count.candidates > 0 ? (
                                                 <div className="flex flex-col items-center">
                                                     <span className="font-bold text-gray-900">{campaign._count.candidates}</span>
-                                                    <span className="text-[10px] text-gray-400 uppercase">Candidates</span>
+                                                    <span className="text-[10px] text-gray-400 uppercase">Matches</span>
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-400 text-sm">—</span>
+                                                <span className="text-gray-400 text-sm">-</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 font-mono text-sm text-gray-700">
-                                            {campaign.budget ? `₹${campaign.budget.toLocaleString()}` : <span className="text-gray-400 italic">Not set</span>}
+                                            {campaign.budget ? `Rs.${campaign.budget.toLocaleString()}` : <span className="text-gray-400 italic">Not set</span>}
                                         </td>
                                         <td className="px-6 py-4 text-sm text-gray-600">
                                             {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
@@ -278,7 +307,7 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                         <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Total Active Spend</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">₹{totalActiveSpend.toLocaleString()}</div>
+                        <div className="text-3xl font-bold text-gray-900 mb-2">Rs.{totalActiveSpend.toLocaleString()}</div>
                         <div className="flex items-center text-xs font-medium text-green-600">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             12.5% vs last month
@@ -313,3 +342,6 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
         </div>
     );
 }
+
+
+

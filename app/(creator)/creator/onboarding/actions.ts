@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth"
+import { normalizeSharedNiche } from "@/lib/onboarding-taxonomy"
 
 export async function completeOnboarding(payload?: {
     niche: string
@@ -33,10 +34,11 @@ export async function completeOnboarding(payload?: {
         });
 
         const shouldResetStatus = !existingCreator || existingCreator.verificationStatus === 'REJECTED' || existingCreator.verificationStatus === 'NOT_SUBMITTED';
+        const normalizedNiche = normalizeSharedNiche(payload?.niche);
 
         // Prepare update data - ONLY update status if needed
         const updateData: any = {
-            niche: payload?.niche,
+            niche: normalizedNiche || payload?.niche,
             pricing: null,
             price: null,
             priceStory: null,
@@ -67,7 +69,7 @@ export async function completeOnboarding(payload?: {
             update: updateData,
             create: {
                 userId,
-                niche: payload?.niche,
+                niche: normalizedNiche || payload?.niche,
                 pricing: null,
                 verificationStatus: 'PENDING',
                 kycSubmission: {

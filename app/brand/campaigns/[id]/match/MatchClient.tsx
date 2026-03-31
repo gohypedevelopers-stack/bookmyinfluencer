@@ -39,13 +39,27 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
         () => (state?.matches || []).filter((match: any) => match.brandDecision === 'PENDING'),
         [state]
     );
+    const awaitingCreatorMatches = useMemo(
+        () =>
+            (state?.matches || []).filter(
+                (match: any) => match.brandDecision === 'ACCEPTED' && match.creatorDecision === 'PENDING'
+            ),
+        [state]
+    );
     const acceptedMatches = useMemo(
-        () => (state?.matches || []).filter((match: any) => match.brandDecision === 'ACCEPTED'),
+        () =>
+            (state?.matches || []).filter(
+                (match: any) => match.brandDecision === 'ACCEPTED' && match.creatorDecision === 'ACCEPTED'
+            ),
         [state]
     );
 
     const targetCreatorCount = Number(state?.summary?.targetCreatorCount || 0);
-    const canProceedToPayment = acceptedMatches.length > 0 && (targetCreatorCount === 0 || acceptedMatches.length >= targetCreatorCount);
+    const availableCreatorCount = pendingMatches.length + awaitingCreatorMatches.length + acceptedMatches.length;
+    const requiredCreatorCount = targetCreatorCount > 0
+        ? Math.max(1, Math.min(targetCreatorCount, availableCreatorCount || acceptedMatches.length))
+        : 0;
+    const canProceedToPayment = acceptedMatches.length > 0 && (requiredCreatorCount === 0 || acceptedMatches.length >= requiredCreatorCount);
 
     const handleDecision = (candidateId: string, decision: 'ACCEPT' | 'REJECT') => {
         startTransition(async () => {
@@ -72,14 +86,22 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
 
     return (
         <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 pb-28">
-            <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="mb-5 rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-900 p-5 text-white shadow-xl shadow-indigo-200/40">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Creator Request Stage</p>
+                <h2 className="mt-1 text-2xl font-black">Step 2 of 4: Review and Send Requests</h2>
+                <p className="mt-1 text-sm text-slate-200">
+                    Review recommendations, send requests to creators, and wait for creator confirmation before payment.
+                </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6 flex flex-wrap items-center justify-between gap-4 shadow-sm">
                 <div>
                     <h2 className="text-lg font-bold text-gray-900">Selection Summary</h2>
                     <p className="text-sm text-gray-500">
-                        Accepted: {state?.summary?.acceptedCount || 0} | Pending: {state?.summary?.pendingCount || 0} | Rejected: {state?.summary?.rejectedCount || 0}
+                        Confirmed: {acceptedMatches.length} | Awaiting creator: {awaitingCreatorMatches.length} | New recommendations: {pendingMatches.length}
                     </p>
                     <p className="text-xs font-semibold text-indigo-600 mt-1">
-                        Target creators: {targetCreatorCount || 0} ({state?.campaign?.followerLabel || 'Follower band'})
+                        Required confirmations: {requiredCreatorCount || targetCreatorCount || 0} ({state?.campaign?.followerLabel || 'Follower band'})
                     </p>
                 </div>
                 <div className="text-right">
@@ -91,7 +113,7 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
 
             {acceptedMatches.length > 0 && (
                 <div className="mb-6">
-                    <h3 className="text-sm font-bold uppercase text-teal-700 mb-3">Accepted Influencers</h3>
+                    <h3 className="text-sm font-bold uppercase text-teal-700 mb-3">Creator Confirmed</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                         {acceptedMatches.map((match: any) => (
                             <div key={match.id} className="relative bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-center gap-3">
@@ -129,11 +151,38 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                 </div>
             )}
 
+            {awaitingCreatorMatches.length > 0 && (
+                <div className="mb-6">
+                    <h3 className="text-sm font-bold uppercase text-amber-700 mb-3">Awaiting Creator Response</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {awaitingCreatorMatches.map((match: any) => (
+                            <div key={match.id} className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white">
+                                    {match.image ? (
+                                        <Image src={match.image} alt={match.name} width={48} height={48} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-amber-700 font-bold">{match.name?.[0] || 'C'}</div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-gray-900 truncate">{match.name}</p>
+                                    <p className="text-xs text-gray-600 truncate">{match.niche || 'General'} - {match.location || 'Any location'}</p>
+                                    <p className="text-xs font-semibold text-amber-700 mt-1">Request sent to creator dashboard. Waiting for creator accept.</p>
+                                </div>
+                                <div className="rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700 border border-amber-200">
+                                    Pending
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div>
-                <h3 className="text-sm font-bold uppercase text-gray-500 mb-3">Pending Recommendations</h3>
+                <h3 className="text-sm font-bold uppercase text-gray-500 mb-3">Recommended Creators</h3>
                 {pendingMatches.length === 0 ? (
                     <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-500">
-                        No pending matches left. Accept creators or shuffle by rejecting existing recommendations.
+                        No fresh recommendations left right now. Skip a creator to fetch another option.
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -172,14 +221,14 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                                         disabled={isPending || paid}
                                         className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 disabled:opacity-50"
                                     >
-                                        Reject + Shuffle
+                                        Skip
                                     </button>
                                     <button
                                         onClick={() => handleDecision(match.id, 'ACCEPT')}
                                         disabled={isPending || paid}
                                         className="px-4 py-2 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 disabled:opacity-50"
                                     >
-                                        Accept
+                                        Send Request
                                     </button>
                                 </div>
                             </div>
@@ -195,9 +244,9 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                         <p className="font-semibold text-gray-900">
                             {paid ? 'Campaign already paid and active' : 'Confirm upfront payment to activate manager-led execution'}
                         </p>
-                        {!paid && targetCreatorCount > 0 && acceptedMatches.length < targetCreatorCount && (
+                        {!paid && requiredCreatorCount > 0 && acceptedMatches.length < requiredCreatorCount && (
                             <p className="text-xs font-semibold text-amber-600 mt-1">
-                                Payment requires {targetCreatorCount} accepted creators ({acceptedMatches.length}/{targetCreatorCount}).
+                                Payment requires {requiredCreatorCount} creator confirmations ({acceptedMatches.length}/{requiredCreatorCount}).
                             </p>
                         )}
                     </div>

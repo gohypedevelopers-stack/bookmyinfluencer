@@ -125,8 +125,8 @@ export function FeaturesSection() {
                         },
                         {
                             icon: MessageSquare,
-                            title: "Trio-Chat System",
-                            desc: "A revolutionary 3-way channel connecting brands, creators, and expert account managers for seamless execution.",
+                            title: "Manager-Led Channels",
+                            desc: "Two protected channels keep brand and creator communication separated while project managers coordinate end-to-end delivery.",
                             gradient: "from-pink-600 to-rose-600",
                             shadow: "shadow-pink-200",
                             iconBg: "bg-pink-50"

@@ -14,6 +14,10 @@ import { registerUserAction } from './actions';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LivePhotoCapture from "@/components/kyc/LivePhotoCapture";
+import {
+    SHARED_CREATOR_FOLLOWER_RANGES,
+    SHARED_PLATFORM_OPTIONS,
+} from "@/lib/onboarding-taxonomy";
 
 // Total steps
 const TOTAL_STEPS = 12;
@@ -36,9 +40,30 @@ const slideVariants = {
 // 1.1 platforms
 const platforms = [
     { value: '', label: 'Select Platform' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'youtube', label: 'YouTube' },
+    ...SHARED_PLATFORM_OPTIONS.map((platform) => ({
+        value: platform.id,
+        label: platform.label,
+    })),
 ];
+
+const creatorPlatformCards = [
+    { id: "Instagram", provider: "instagram", icon: Instagram, activeColor: "text-pink-500", inactiveColor: "text-pink-400", activeBg: "bg-pink-50", inactiveBg: "bg-pink-50/60" },
+    { id: "YouTube", provider: "youtube", icon: Youtube, activeColor: "text-red-500", inactiveColor: "text-red-400", activeBg: "bg-red-50", inactiveBg: "bg-red-50/60" },
+] as const;
+
+const creatorNicheCards = [
+    { name: "Tech & Gadgets", icon: Laptop },
+    { name: "Fashion & Style", icon: Shirt },
+    { name: "Beauty & Makeup", icon: Sparkles },
+    { name: "Fitness & Health", icon: Dumbbell },
+    { name: "Food & Culinary", icon: Utensils },
+    { name: "Travel & Lifestyle", icon: Globe },
+    { name: "Finance & Crypto", icon: TrendingUp },
+    { name: "Education", icon: GraduationCap },
+    { name: "Gaming", icon: Gamepad2 },
+    { name: "Parenting", icon: Heart },
+    { name: "Other", icon: Sparkles },
+] as const;
 
 const CardWrapper = ({ children, stepKey, direction, progressPercentage, currentStep, totalSteps }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number; currentStep?: number; totalSteps?: number }) => (
     <div className="relative z-10 flex h-full min-h-0 w-full flex-col text-slate-900">
@@ -731,10 +756,7 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    {[
-                                        { id: "Instagram", icon: Instagram, activeColor: "text-pink-500", inactiveColor: "text-pink-400", activeBg: "bg-pink-50", inactiveBg: "bg-pink-50/60" },
-                                        { id: "YouTube", icon: Youtube, activeColor: "text-red-500", inactiveColor: "text-red-400", activeBg: "bg-red-50", inactiveBg: "bg-red-50/60" },
-                                    ].map((p) => {
+                                    {creatorPlatformCards.map((p) => {
                                         const isActive = onboardingData.platforms.includes(p.id);
                                         return (
                                             <motion.button
@@ -774,18 +796,7 @@ export default function RegisterPage() {
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
                                     <div className="grid grid-cols-2 gap-2.5 w-full">
-                                        {[
-                                            { name: "Fashion", icon: Shirt },
-                                            { name: "Tech", icon: Laptop },
-                                            { name: "Fitness", icon: Dumbbell },
-                                            { name: "Finance", icon: TrendingUp },
-                                            { name: "Travel", icon: Globe },
-                                            { name: "Food", icon: Utensils },
-                                            { name: "Gaming", icon: Gamepad2 },
-                                            { name: "Lifestyle", icon: Heart },
-                                            { name: "Education", icon: GraduationCap },
-                                            { name: "Other", icon: Sparkles },
-                                        ].map((item) => (
+                                        {creatorNicheCards.map((item) => (
                                             <motion.button
                                                 key={item.name}
                                                 whileHover={{ scale: 1.02 }}
@@ -925,24 +936,24 @@ export default function RegisterPage() {
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
-                                <div className="space-y-4">
-                                    {["1K - 10K", "10K - 50K", "50K - 100K", "100K - 500K", "500K+"].map((range) => (
+                                <div className="grid grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
+                                    {SHARED_CREATOR_FOLLOWER_RANGES.map((range) => (
                                         <motion.button
-                                            key={range}
+                                            key={range.label}
                                             whileHover={{ scale: 1.01, x: 5 }}
                                             whileTap={{ scale: 0.99 }}
                                             onClick={() => {
-                                                updateOnboarding("followers", range)
+                                                updateOnboarding("followers", range.label)
                                                 goNext()
                                             }}
-                                            className={`w-full py-4 px-5 rounded-2xl border-2 flex justify-between items-center transition-all cursor-pointer hover:translate-x-1
-                                ${onboardingData.followers === range
+                                            className={`w-full py-4 px-4 rounded-2xl border-2 flex justify-between items-center transition-all cursor-pointer hover:translate-y-[-1px]
+                                ${onboardingData.followers === range.label
                                                     ? "bg-indigo-50 text-indigo-600 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
                                                     : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 transition-all"
                                                 }`}
                                         >
-                                            <span className="font-bold text-lg">{range}</span>
-                                            {onboardingData.followers === range && <Check />}
+                                            <span className="font-bold text-base">{range.label}</span>
+                                            {onboardingData.followers === range.label && <Check />}
                                         </motion.button>
                                     ))}
                                 </div>

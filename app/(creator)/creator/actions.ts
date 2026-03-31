@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { refillPaidCampaignInvitations } from "@/app/brand/campaigns/flow-actions";
+import { ensureCampaignSuggestions } from "@/lib/campaign-flow";
 
 // Helper to get the actual Creator ID (Resolved to a User table ID)
 // Helper to get the actual Creator ID (Resolved to a User table ID)
@@ -100,7 +101,11 @@ export async function getCreatorNotifications() {
             }),
             db.message.count({
                 where: {
-                    thread: { participants: { contains: userId } },
+                    thread: {
+                        participants: { contains: userId },
+                        candidateId: { not: null },
+                        initiatedBy: { contains: ":manager-creator" },
+                    },
                     senderId: { not: userId },
                     read: false
                 }
@@ -135,15 +140,14 @@ export async function markCreatorNotificationRead(notificationId: string) {
 
 export async function getCreatorThreads() {
     const userId = await getCreatorId();
-    console.log("getCreatorThreads userId:", userId);
     if (!userId) return [];
 
     try {
         const threads = await db.chatThread.findMany({
             where: {
-                participants: {
-                    contains: userId
-                }
+                participants: { contains: userId },
+                candidateId: { not: null },
+                initiatedBy: { contains: ":manager-creator" },
             },
             include: {
                 messages: {
@@ -154,10 +158,21 @@ export async function getCreatorThreads() {
                 candidate: {
                     select: {
                         id: true,
+                        creatorDecision: true,
                         contract: { select: { status: true } },
                         campaign: {
                             select: {
-                                id: true, title: true,
+                                id: true,
+                                title: true,
+                                paymentStatus: true,
+                                assignment: {
+                                    select: {
+                                        managerId: true,
+                                        manager: {
+                                            select: { id: true, name: true, image: true },
+                                        },
+                                    },
+                                },
                                 brand: {
                                     select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, image: true } } }
                                 }
@@ -169,73 +184,28 @@ export async function getCreatorThreads() {
             orderBy: { updatedAt: 'desc' }
         });
 
-        console.log(`Found ${threads.length} threads for creator ${userId}`);
-
-        // For direct messages, we need to fetch the other user (Brand User)
-        // Identify direct threads (candidate is null)
-        const directThreadIds = threads.filter(t => !t.candidate).map(t => t.id);
-
-        let directUsersMap = new Map();
-        if (directThreadIds.length > 0) {
-            const directThreads = threads.filter(t => !t.candidate);
-            const otherUserIds = directThreads.map(t => {
-                const parts = t.participants.split(',');
-                return parts.find(id => id !== userId);
-            }).filter((id): id is string => !!id);
-
-            if (otherUserIds.length > 0) {
-                const users = await db.user.findMany({
-                    where: { id: { in: otherUserIds } },
-                    select: { id: true, name: true, image: true, brandProfile: { select: { id: true, companyName: true } } }
-                });
-                users.forEach(u => directUsersMap.set(u.id, u));
-            }
-        }
-
-        // Format for UI
-        return threads.map(thread => {
-            let name = "Unknown Brand";
-            let image = null;
-            let brandProfileId = null;
-            let brandUserId = null;
-
-            if (thread.candidate) {
-                const brand = thread.candidate.campaign.brand;
-                name = brand?.companyName || "Unknown Brand";
-                image = brand?.user?.image || null;
-                brandProfileId = brand?.id || null;
-                brandUserId = brand?.userId || null;
-            } else {
-                // Direct DM
-                const otherParticipantId = thread.participants.split(',').map(p => p.trim()).find(id => id !== userId);
-                if (otherParticipantId) {
-                    const otherUser = directUsersMap.get(otherParticipantId);
-                    if (otherUser) {
-                        name = otherUser.brandProfile?.companyName || otherUser.name || "Brand";
-                        image = otherUser.image || null;
-                        brandProfileId = otherUser.brandProfile?.id || null;
-                        brandUserId = otherUser.id;
-                    }
-                }
-            }
-
+        return threads
+            .filter((thread) => thread.candidate?.campaign.paymentStatus === "PAID")
+            .map((thread) => {
+            const brand = thread.candidate?.campaign.brand;
+            const manager = thread.candidate?.campaign.assignment?.manager;
             const lastMsg = thread.messages[0];
 
             return {
                 id: thread.id,
-                name,
-                image,
+                name: manager?.name || "Project Manager",
+                image: manager?.image || null,
                 lastMessage: lastMsg?.content || "No messages yet",
                 updatedAt: lastMsg?.createdAt || thread.updatedAt,
                 unread: false,
-                brandId: brandProfileId,
-                brandUserId: brandUserId,
+                brandId: brand?.id || null,
+                brandUserId: brand?.userId || null,
                 isLastMessageMe: lastMsg?.senderId === userId,
                 contractStatus: thread.candidate?.contract?.status || null,
-                isCampaign: !!thread.candidate
+                isCampaign: true,
+                creatorDecision: thread.candidate?.creatorDecision || null,
             };
         });
-
     } catch (error) {
         console.error("Failed to fetch threads", error);
         return [];
@@ -247,6 +217,26 @@ export async function getThreadMessages(threadId: string) {
     if (!userId) return [];
 
     try {
+        const thread = await db.chatThread.findFirst({
+            where: {
+                id: threadId,
+                participants: { contains: userId },
+                candidateId: { not: null },
+                initiatedBy: { contains: ":manager-creator" },
+            },
+            include: {
+                candidate: {
+                    select: {
+                        creatorDecision: true,
+                        campaign: { select: { paymentStatus: true } },
+                    },
+                },
+            },
+        });
+
+        if (!thread) return [];
+        if (thread.candidate?.campaign.paymentStatus !== "PAID") return [];
+
         const messages = await db.message.findMany({
             where: { threadId },
             orderBy: { createdAt: 'desc' },
@@ -279,13 +269,21 @@ export async function getThreadMessages(threadId: string) {
 
 import { pusherServer } from "@/lib/pusher-server";
 
-// ... (getCreatorThreads and getThreadMessages remain unchanged)
-
 export async function markMessagesRead(threadId: string) {
     const userId = await getCreatorId();
     if (!userId) return { success: false };
 
     try {
+        const thread = await db.chatThread.findFirst({
+            where: {
+                id: threadId,
+                participants: { contains: userId },
+                candidateId: { not: null },
+                initiatedBy: { contains: ":manager-creator" },
+            },
+        });
+        if (!thread) return { success: false };
+
         const result = await db.message.updateMany({
             where: {
                 threadId,
@@ -300,18 +298,13 @@ export async function markMessagesRead(threadId: string) {
         });
 
         if (result.count > 0) {
-            const thread = await db.chatThread.findUnique({
-                where: { id: threadId }
-            });
-            if (thread) {
-                const participants = thread.participants.split(',');
-                const otherUserId = participants.find(p => p !== userId);
-                if (otherUserId) {
-                    await pusherServer.trigger(otherUserId, 'message:seen', {
-                        threadId,
-                        userId: userId
-                    });
-                }
+            const participants = thread.participants.split(',');
+            const otherUserId = participants.find(p => p !== userId);
+            if (otherUserId) {
+                await pusherServer.trigger(otherUserId, 'message:seen', {
+                    threadId,
+                    userId: userId
+                });
             }
         }
 
@@ -328,11 +321,49 @@ export async function sendMessage(threadId: string, content: string) {
     if (!userId) return { success: false, error: "Unauthorized" };
 
     try {
+        const trimmed = String(content || "").trim();
+        if (!trimmed) {
+            return { success: false, error: "Message is required" };
+        }
+
+        const thread = await db.chatThread.findFirst({
+            where: {
+                id: threadId,
+                participants: { contains: userId },
+                candidateId: { not: null },
+                initiatedBy: { contains: ":manager-creator" },
+            },
+            include: {
+                candidate: {
+                    select: {
+                        creatorDecision: true,
+                        campaign: {
+                            select: {
+                                id: true,
+                                paymentStatus: true,
+                                assignment: { select: { managerId: true } },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!thread) {
+            return { success: false, error: "Thread not found" };
+        }
+        if (thread.candidate?.campaign.paymentStatus !== "PAID") {
+            return { success: false, error: "Chat unlocks only after payment." };
+        }
+        if (thread.candidate?.creatorDecision !== "ACCEPTED") {
+            return { success: false, error: "Accept invitation before messaging manager." };
+        }
+
         const message = await db.message.create({
             data: {
                 threadId,
                 senderId: userId,
-                content,
+                content: trimmed,
                 status: "SENT"
             },
             include: {
@@ -342,17 +373,10 @@ export async function sendMessage(threadId: string, content: string) {
             }
         });
 
-        const thread = await db.chatThread.findUnique({
-            where: { id: threadId }
-        });
-
-        if (thread) {
-            const participants = thread.participants.split(',');
-            const recipientId = participants.find(p => p !== userId);
-
-            if (recipientId) {
-                await pusherServer.trigger(recipientId, 'message:new', message);
-            }
+        const participants = thread.participants.split(',');
+        const recipientId = participants.find(p => p !== userId);
+        if (recipientId) {
+            await pusherServer.trigger(recipientId, 'message:new', message);
         }
 
         // Update thread updated at
@@ -414,13 +438,19 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
         if (!isOwner) {
             return { success: false, error: "Unauthorized - This invitation doesn't belong to you" };
         }
+        if (candidate.brandDecision !== "ACCEPTED") {
+            return { success: false, error: "Invitation is no longer available." };
+        }
+        if (candidate.creatorDecision !== "PENDING") {
+            return { success: false, error: "Invitation already responded." };
+        }
 
         if (action === 'ACCEPT') {
             await db.campaignCandidate.update({
                 where: { id: candidateId },
                 data: {
                     creatorDecision: 'ACCEPTED',
-                    status: 'HIRED',
+                    status: candidate.campaign.paymentStatus === 'PAID' ? 'HIRED' : 'IN_NEGOTIATION',
                     managerReviewStatus: 'PENDING',
                 }
             });
@@ -462,12 +492,14 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
             revalidatePath('/creator/campaigns');
             revalidatePath('/manager/campaigns');
             revalidatePath('/brand/campaigns');
+            revalidatePath(`/brand/campaigns/${candidate.campaign.id}/match`);
             return { success: true };
         }
 
         await db.campaignCandidate.update({
             where: { id: candidateId },
             data: {
+                brandDecision: 'DECLINED',
                 creatorDecision: 'DECLINED',
                 status: 'REJECTED'
             }
@@ -509,11 +541,14 @@ export async function respondToInvitation(candidateId: string, action: 'ACCEPT' 
 
         if (candidate.campaign.paymentStatus === "PAID") {
             await refillPaidCampaignInvitations(candidate.campaign.id);
+        } else {
+            await ensureCampaignSuggestions(candidate.campaign.id, candidate.campaign.brand.userId);
         }
 
         revalidatePath('/creator/campaigns');
         revalidatePath('/manager/campaigns');
         revalidatePath('/brand/campaigns');
+        revalidatePath(`/brand/campaigns/${candidate.campaign.id}/match`);
         return { success: true };
 
     } catch (error) {

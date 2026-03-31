@@ -67,38 +67,43 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-xl p-0 rounded-3xl border-0 overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white relative">
+            <DialogContent className="max-w-2xl overflow-hidden rounded-[34px] border-0 p-0 shadow-[0_40px_120px_-50px_rgba(15,23,42,0.6)]">
+                <DialogTitle className="sr-only">Submit deliverable for {candidate?.campaign?.title || "campaign"}</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Share the final content link and optional notes for manager review.
+                </DialogDescription>
+                <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f172a_0%,#1e1b4b_50%,#7c3aed_100%)] p-7 text-white">
+                    <div className="pointer-events-none absolute right-[-30px] top-[-30px] h-44 w-44 rounded-full bg-white/10 blur-3xl" />
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="absolute right-4 top-4 text-white/80 hover:bg-white/20 rounded-full"
+                        className="absolute right-4 top-4 rounded-full text-white/80 hover:bg-white/20"
                         onClick={onClose}
                     >
                         <X className="w-5 h-5" />
                     </Button>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                            <Upload className="w-6 h-6" />
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-2xl bg-white/15 p-3 backdrop-blur-sm">
+                            <Upload className="h-6 w-6" />
                         </div>
-                        <h2 className="text-xl font-bold">Submit Deliverable</h2>
+                        <div>
+                            <h2 className="text-2xl font-black tracking-tight">Submit Deliverable</h2>
+                            <p className="mt-1 text-sm text-slate-200">Share one clean link for manager review and final approval.</p>
+                        </div>
                     </div>
-                    <p className="text-white/80 text-sm ml-11">
-                        Upload your content URL for review by the campaign manager.
-                    </p>
                 </div>
 
-                <div className="p-6">
-                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-6">
+                <div className="bg-white p-7">
+                    <div className="mb-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
                         <div className="flex items-center gap-2 mb-2">
                             <FileText className="w-4 h-4 text-indigo-600" />
-                            <h3 className="font-bold text-gray-900 text-sm">Manager Submission</h3>
+                            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">Manager Submission</h3>
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm leading-6 text-slate-600">
                             Share the final content URL for manager review. Direct brand messaging is disabled in this workflow.
                         </p>
                         {hasSubmission && (
-                            <p className="text-xs text-indigo-600 mt-2">
+                            <p className="mt-3 text-xs font-semibold text-indigo-600">
                                 Existing submission will be replaced by this new link.
                             </p>
                         )}
@@ -106,8 +111,8 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="url" className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                <LinkIcon className="w-4 h-4 text-gray-400" />
+                            <Label htmlFor="url" className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <LinkIcon className="h-4 w-4 text-slate-400" />
                                 Content Link <span className="text-red-500">*</span>
                             </Label>
                             <Input
@@ -115,35 +120,35 @@ export default function SubmitDeliverableModal({ isOpen, onClose, candidate, onS
                                 placeholder="https://instagram.com/p/..."
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
-                                className="h-11 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-100"
+                                className="h-12 rounded-2xl border-slate-200 bg-slate-50 px-4 focus:border-indigo-500 focus:ring-indigo-100"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="notes" className="text-sm font-bold text-gray-700">
-                                Additional Notes <span className="text-gray-400 font-normal">(Optional)</span>
+                            <Label htmlFor="notes" className="text-sm font-bold text-slate-700">
+                                Additional Notes <span className="font-normal text-slate-400">(Optional)</span>
                             </Label>
                             <Textarea
                                 id="notes"
                                 placeholder="Any context about this submission..."
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
-                                className="min-h-[100px] rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-100 resize-none"
+                                className="min-h-[120px] resize-none rounded-[24px] border-slate-200 bg-slate-50 px-4 py-4 focus:border-indigo-500 focus:ring-indigo-100"
                             />
                         </div>
 
-                        <div className="pt-4 flex justify-end gap-3">
-                            <Button type="button" variant="outline" onClick={onClose} className="border-gray-200 font-bold rounded-xl h-11 px-6">
+                        <div className="flex justify-end gap-3 pt-4">
+                            <Button type="button" variant="outline" onClick={onClose} className="h-12 rounded-2xl border-slate-200 px-6 font-bold">
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || !url.trim()}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-11 px-8 shadow-lg shadow-indigo-200 disabled:opacity-50"
+                                className="h-12 rounded-2xl bg-[linear-gradient(135deg,#7c3aed_0%,#4f46e5_100%)] px-8 font-bold text-white shadow-lg shadow-violet-200/60 hover:opacity-95 disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Submitting...
                                     </>
                                 ) : (

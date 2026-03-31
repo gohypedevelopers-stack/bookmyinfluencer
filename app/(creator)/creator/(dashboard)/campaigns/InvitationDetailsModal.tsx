@@ -8,7 +8,17 @@ import {
     DialogDescription,
     DialogTitle
 } from "@/components/ui/dialog";
-import { Briefcase, CheckCircle2, Globe, MapPin, ShieldCheck, Users, X, XCircle } from "lucide-react";
+import {
+    BriefcaseBusiness,
+    CheckCircle2,
+    Globe,
+    MapPin,
+    ShieldCheck,
+    Sparkles,
+    Users,
+    X,
+    XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { respondToInvitation } from '@/app/(creator)/creator/actions';
 import { useRouter } from 'next/navigation';
@@ -19,6 +29,24 @@ interface InvitationDetailsModalProps {
     invitation: any;
 }
 
+function formatPlatformLabel(value: unknown) {
+    if (!value) return 'Multi-platform';
+    if (Array.isArray(value)) return value.join(' | ');
+    if (typeof value !== 'string') return String(value);
+
+    const raw = value.trim();
+    if (!raw) return 'Multi-platform';
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed.join(' | ');
+    } catch (_error) {
+        // Keep fallback below.
+    }
+
+    return raw.replace(/[\[\]"]/g, '');
+}
+
 export default function InvitationDetailsModal({ isOpen, onClose, invitation }: InvitationDetailsModalProps) {
     const router = useRouter();
     const [busy, setBusy] = useState<null | 'ACCEPT' | 'DECLINE'>(null);
@@ -27,12 +55,14 @@ export default function InvitationDetailsModal({ isOpen, onClose, invitation }: 
 
     const campaign = invitation.campaign;
     const brand = campaign.brand;
+    const paymentPending = campaign.paymentStatus !== 'PAID';
+    const platformLabel = formatPlatformLabel(campaign.platform);
 
     const handleAction = async (action: 'ACCEPT' | 'DECLINE') => {
         setBusy(action);
         const result = await respondToInvitation(invitation.id, action);
         if (result.success) {
-            toast.success(action === 'ACCEPT' ? 'Invitation accepted' : 'Invitation declined');
+            toast.success(action === 'ACCEPT' ? 'Request accepted' : 'Request declined');
             onClose();
             router.refresh();
         } else {
@@ -43,85 +73,81 @@ export default function InvitationDetailsModal({ isOpen, onClose, invitation }: 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl p-0 rounded-3xl border-0 overflow-hidden [&>button]:hidden">
+            <DialogContent className="max-w-3xl overflow-hidden rounded-[34px] border-0 p-0 shadow-[0_40px_120px_-50px_rgba(15,23,42,0.6)] [&>button]:hidden">
                 <DialogTitle className="sr-only">{campaign.title}</DialogTitle>
-                <DialogDescription className="sr-only">Review this campaign invitation.</DialogDescription>
+                <DialogDescription className="sr-only">Review this campaign request from {brand.companyName}.</DialogDescription>
 
-                <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
-                    <Button variant="ghost" size="icon" className="absolute right-4 top-4 text-white hover:bg-white/20 rounded-full" onClick={onClose}>
-                        <X className="w-5 h-5" />
+                <div className="relative overflow-hidden bg-[linear-gradient(135deg,#0f172a_0%,#1e1b4b_50%,#7c3aed_100%)] px-8 pb-10 pt-8 text-white">
+                    <div className="pointer-events-none absolute right-[-40px] top-[-40px] h-52 w-52 rounded-full bg-white/10 blur-3xl" />
+                    <div className="pointer-events-none absolute bottom-[-70px] left-[-20px] h-48 w-48 rounded-full bg-fuchsia-400/20 blur-3xl" />
+
+                    <Button variant="ghost" size="icon" className="absolute right-5 top-5 rounded-full text-white/80 hover:bg-white/15" onClick={onClose}>
+                        <X className="h-5 w-5" />
                     </Button>
+
+                    <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                        <div className="max-w-2xl">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-100">
+                                <Sparkles className="h-4 w-4" />
+                                Campaign Request
+                            </div>
+                            <h2 className="mt-5 text-4xl font-black tracking-tight">{campaign.title}</h2>
+                            <p className="mt-3 text-base leading-7 text-slate-200">
+                                Request from <span className="font-bold text-white">{brand.companyName}</span>. Project communication stays manager-led throughout the workflow.
+                            </p>
+                        </div>
+
+                        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-2xl font-black text-slate-950 shadow-xl shadow-slate-950/15">
+                            {(brand.companyName || 'BR').slice(0, 2).toUpperCase()}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="px-8 pb-8 -mt-10">
-                    <div className="w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-md flex items-center justify-center font-bold text-lg mb-4">
-                        {brand.companyName?.slice(0, 2).toUpperCase()}
+                <div className="bg-white p-8">
+                    <div className="flex flex-wrap gap-2">
+                        <DetailChip icon={BriefcaseBusiness} label={paymentPending ? 'Awaiting brand payment' : 'Payment confirmed'} />
+                        <DetailChip icon={MapPin} label={campaign.location || 'Any location'} />
+                        <DetailChip icon={Globe} label={platformLabel} />
+                        <DetailChip icon={Users} label={campaign.niche || 'General niche'} />
                     </div>
 
-                    <div className="space-y-4">
-                        <h2 className="text-2xl font-bold text-gray-900">{campaign.title}</h2>
-                        <p className="text-sm text-gray-600">
-                            Invitation from <span className="font-semibold">{brand.companyName}</span>. Communication and execution are handled by the internal project manager.
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
-                                <Briefcase className="w-4 h-4 text-blue-600" />
-                                Upfront payment confirmed
-                            </span>
-                            {campaign.location && (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
-                                    <MapPin className="w-4 h-4 text-rose-500" />
-                                    {campaign.location}
-                                </span>
-                            )}
-                            {campaign.platform && (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
-                                    <Globe className="w-4 h-4 text-indigo-500" />
-                                    {campaign.platform}
-                                </span>
-                            )}
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold">
-                                <Users className="w-4 h-4 text-emerald-600" />
-                                {campaign.niche || 'General niche'}
-                            </span>
+                    {campaign.description && (
+                        <div className="mt-6 rounded-[24px] border border-slate-200 bg-slate-50 p-5">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Campaign Overview</p>
+                            <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-700">{campaign.description}</p>
                         </div>
+                    )}
 
-                        {campaign.description && (
-                            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap">
-                                {campaign.description}
-                            </div>
-                        )}
-
-                        {campaign.requirements && (
-                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-sm text-indigo-900 whitespace-pre-wrap">
-                                <p className="font-semibold mb-1">Deliverable notes</p>
-                                {campaign.requirements}
-                            </div>
-                        )}
-
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-800 flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4" />
-                            Accept to start creation. You will submit only the content link for manager review.
+                    {campaign.requirements && (
+                        <div className="mt-5 rounded-[24px] border border-violet-100 bg-violet-50 p-5">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-violet-500">Deliverable Notes</p>
+                            <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-violet-950">{campaign.requirements}</p>
                         </div>
+                    )}
 
-                        <div className="pt-2 flex gap-3">
-                            <Button
-                                variant="outline"
-                                className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
-                                onClick={() => handleAction('DECLINE')}
-                                disabled={busy !== null}
-                            >
-                                {busy === 'DECLINE' ? 'Declining...' : <><XCircle className="w-4 h-4 mr-2" />Decline</>}
-                            </Button>
-                            <Button
-                                className="flex-1 bg-green-600 hover:bg-green-700"
-                                onClick={() => handleAction('ACCEPT')}
-                                disabled={busy !== null}
-                            >
-                                {busy === 'ACCEPT' ? 'Accepting...' : <><CheckCircle2 className="w-4 h-4 mr-2" />Accept</>}
-                            </Button>
-                        </div>
+                    <div className="mt-5 rounded-[24px] border border-emerald-100 bg-emerald-50 p-5 text-sm leading-7 text-emerald-900">
+                        <ShieldCheck className="mr-2 inline h-4 w-4" />
+                        {paymentPending
+                            ? 'Accept to reserve this request. Work starts after brand payment clears and the manager activates execution.'
+                            : 'Accept to begin work. You will submit only the content link for manager review.'}
+                    </div>
+
+                    <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                        <Button
+                            variant="outline"
+                            className="h-12 flex-1 rounded-2xl border-red-200 text-red-700 hover:bg-red-50"
+                            onClick={() => handleAction('DECLINE')}
+                            disabled={busy !== null}
+                        >
+                            {busy === 'DECLINE' ? 'Declining...' : <><XCircle className="mr-2 h-4 w-4" />Decline</>}
+                        </Button>
+                        <Button
+                            className="h-12 flex-1 rounded-2xl bg-[linear-gradient(135deg,#16a34a_0%,#16a34a_100%)] text-white shadow-lg shadow-emerald-200 hover:opacity-95"
+                            onClick={() => handleAction('ACCEPT')}
+                            disabled={busy !== null}
+                        >
+                            {busy === 'ACCEPT' ? 'Accepting...' : <><CheckCircle2 className="mr-2 h-4 w-4" />Accept Request</>}
+                        </Button>
                     </div>
                 </div>
             </DialogContent>
@@ -129,3 +155,11 @@ export default function InvitationDetailsModal({ isOpen, onClose, invitation }: 
     );
 }
 
+function DetailChip({ icon: Icon, label }: { icon: any; label: string }) {
+    return (
+        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
+            <Icon className="h-4 w-4 text-slate-400" />
+            <span>{label}</span>
+        </div>
+    );
+}

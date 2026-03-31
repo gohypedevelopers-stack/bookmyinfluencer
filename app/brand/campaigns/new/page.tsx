@@ -22,10 +22,6 @@ export default async function CreateCampaignPage() {
         return <div className="p-10 text-center">Brand profile not setup. Please contact support.</div>;
     }
 
-    return (
-        <div className="bg-gray-50 font-sans text-gray-900 antialiased min-h-screen flex flex-col">
-            <CampaignWizardClient brandId={user.brandProfile.id} />
-        </div>
-    );
+    return <CampaignWizardClient brandId={user.brandProfile.id} />;
 }
 

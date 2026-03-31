@@ -7,22 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { completeOnboarding } from "../actions"
+import { SHARED_NICHE_LABELS, SHARED_PLATFORM_OPTIONS } from "@/lib/onboarding-taxonomy"
 
-const NICHES = [
-    "Tech & Gadgets",
-    "Fitness",
-    "Lifestyle",
-    "Beauty",
-    "Gaming",
-    "Travel",
-    "Fashion",
-    "Food"
-]
+const NICHES = [...SHARED_NICHE_LABELS]
 
-const PLATFORMS = [
-    { id: "instagram", name: "Instagram", icon: Instagram },
-    { id: "youtube", name: "YouTube", icon: Youtube },
-]
+const PLATFORMS = SHARED_PLATFORM_OPTIONS.map((platform) => ({
+    id: platform.id,
+    name: platform.label,
+    icon: platform.id === "instagram" ? Instagram : Youtube,
+}))
 
 interface FinalizeProfileClientProps {
     initialData: any

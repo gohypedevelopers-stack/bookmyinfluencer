@@ -16,14 +16,14 @@ const TESTIMONIALS = [
     {
         name: "Marco Rossi",
         role: "Tech Content Creator",
-        content: "As a creator, I love the transparency. I get clear briefs, direct communication with brands, and most importantly, I get paid the moment my content is approved.",
+        content: "As a creator, the process is much cleaner now. I receive clear manager updates, submit content links, and always know where the project stands.",
         image: "/images/marco.png",
         metrics: { label: "Brand Deals", value: "12/mo" }
     },
     {
         name: "Aisha Patel",
         role: "Creative Director at Vibe",
-        content: "The Tri-Chat system is a game changer. Having our account manager in the loop ensures everything runs smoothly without any miscommunications.",
+        content: "The manager-led workflow is a game changer. Our updates stay centralized, creator coordination stays disciplined, and campaigns close faster.",
         image: "/images/elena.png",
         metrics: { label: "Reach Growth", value: "+125%" }
     }

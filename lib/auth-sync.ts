@@ -26,6 +26,8 @@ type CreatorProfileInput = {
   priceCollab?: number | null
   priceType?: string | null
   location?: string | null
+  followersCount?: number | null
+  engagementRate?: number | null
   onboardingCompleted?: boolean
 }
 
@@ -148,6 +150,8 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
         ...(profile.pricePost !== undefined ? { pricePost: profile.pricePost } : {}),
         ...(profile.priceCollab !== undefined ? { priceCollab: profile.priceCollab } : {}),
         ...(profile.priceType !== undefined ? { priceType: profile.priceType } : {}),
+        ...(profile.followersCount !== undefined ? { followers: profile.followersCount ?? 0 } : {}),
+        ...(profile.engagementRate !== undefined ? { engagementRate: profile.engagementRate ?? 0 } : {}),
         ...(profile.onboardingCompleted !== undefined ? { onboardingCompleted: profile.onboardingCompleted } : {}),
       },
       create: {
@@ -164,6 +168,8 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
         pricePost: profile.pricePost ?? null,
         priceCollab: profile.priceCollab ?? null,
         priceType: profile.priceType ?? "Per Post",
+        followers: profile.followersCount ?? 0,
+        engagementRate: profile.engagementRate ?? 0,
         onboardingCompleted: profile.onboardingCompleted ?? false,
       },
       select: { id: true, userId: true },

@@ -143,53 +143,137 @@ export async function fundEscrowTransaction(contractId: string) {
 
 export async function sendMessage(threadId: string, senderId: string, content: string, attachmentUrl?: string, attachmentType?: string) {
     try {
-        const message = await db.message.create({
-            data: {
-                threadId,
-                senderId,
-                content,
-                attachmentUrl,
-                attachmentType,
-                status: "SENT"
-            },
-            include: {
-                sender: {
-                    select: { name: true, image: true, id: true }
-                }
-            }
-        });
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return { success: false, error: "Unauthorized" };
+        }
 
-        // Get thread to find the other participant to notify
+        // Keep signature compatibility for old callers, but trust server session only.
+        const sessionUserId = session.user.id;
+        void senderId;
+
+        const trimmedContent = String(content || "").trim();
+        if (!trimmedContent && !attachmentUrl) {
+            return { success: false, error: "Message cannot be empty." };
+        }
+
         const thread = await db.chatThread.findUnique({
-            where: { id: threadId }
+            where: { id: threadId },
+            include: {
+                candidate: {
+                    select: {
+                        id: true,
+                        creatorDecision: true,
+                        campaign: {
+                            select: {
+                                id: true,
+                                paymentStatus: true,
+                                brand: { select: { userId: true } },
+                                assignment: { select: { managerId: true } },
+                            },
+                        },
+                    },
+                },
+            },
         });
 
-        if (thread) {
-            const participants = thread.participants.split(',');
-            const recipientId = participants.find(p => p !== senderId);
+        if (!thread) {
+            return { success: false, error: "Thread not found." };
+        }
 
-            if (recipientId) {
-                // Push real-time message event
-                await pusherServer.trigger(recipientId, 'message:new', message);
+        const participants = thread.participants.split(",").map((value) => value.trim()).filter(Boolean);
+        if (!participants.includes(sessionUserId)) {
+            return { success: false, error: "Unauthorized participant." };
+        }
 
-                // Also create a Notification record so it shows in the bell menu
-                const senderName = message.sender?.name || 'Someone';
-                const preview = content ? (content.length > 60 ? content.slice(0, 57) + '...' : content) : (attachmentType ? `Sent a ${attachmentType}` : 'Sent a message');
-                await createNotification(
-                    recipientId,
-                    `New message from ${senderName}`,
-                    preview,
-                    'MESSAGE',
-                    '/brand/messages'
-                );
+        const role = String(session.user.role || "");
+        const initiatedBy = String(thread.initiatedBy || "");
+        const isBrandManagerThread = initiatedBy.startsWith("campaign:") && initiatedBy.endsWith(":brand-manager");
+        const isManagerCreatorThread =
+            Boolean(thread.candidateId) &&
+            initiatedBy.startsWith("candidate:") &&
+            initiatedBy.endsWith(":manager-creator");
+
+        if (!isBrandManagerThread && !isManagerCreatorThread) {
+            return { success: false, error: "Direct brand-creator chat is disabled." };
+        }
+
+        if (isBrandManagerThread && !["BRAND", "MANAGER", "ADMIN"].includes(role)) {
+            return { success: false, error: "Unauthorized role for manager channel." };
+        }
+
+        if (isManagerCreatorThread) {
+            const campaign = thread.candidate?.campaign;
+            if (!campaign || campaign.paymentStatus !== "PAID") {
+                return { success: false, error: "Campaign chat is locked until payment is confirmed." };
+            }
+            if (role === "BRAND") {
+                return { success: false, error: "Brand cannot message creators directly." };
+            }
+            if (role === "MANAGER" && campaign.assignment?.managerId !== sessionUserId) {
+                return { success: false, error: "Only the assigned manager can message this creator." };
+            }
+            if (role === "INFLUENCER" && thread.candidate?.creatorDecision !== "ACCEPTED") {
+                return { success: false, error: "Accept invitation before using campaign chat." };
+            }
+            if (!["INFLUENCER", "MANAGER", "ADMIN"].includes(role)) {
+                return { success: false, error: "Unauthorized role for creator channel." };
             }
         }
 
-        revalidatePath('/brand/chat');
+        const message = await db.message.create({
+            data: {
+                threadId,
+                senderId: sessionUserId,
+                content: trimmedContent || null,
+                attachmentUrl,
+                attachmentType,
+                status: "SENT",
+            },
+            include: {
+                sender: {
+                    select: { name: true, image: true, id: true },
+                },
+            },
+        });
+
+        const recipientId = participants.find((participantId) => participantId !== sessionUserId);
+        if (recipientId) {
+            await pusherServer.trigger(recipientId, "message:new", message);
+
+            const senderName = message.sender?.name || "Someone";
+            const preview = trimmedContent
+                ? (trimmedContent.length > 60 ? `${trimmedContent.slice(0, 57)}...` : trimmedContent)
+                : (attachmentType ? `Sent a ${attachmentType}` : "Sent a message");
+
+            let notificationLink = "/manager/campaigns";
+            if (isBrandManagerThread) {
+                const campaignId = initiatedBy.split(":")[1] || "";
+                notificationLink = role === "BRAND"
+                    ? `/manager/campaigns/${campaignId}`
+                    : `/brand/campaigns/${campaignId}`;
+            } else if (isManagerCreatorThread) {
+                notificationLink = recipientId === thread.candidate?.campaign?.assignment?.managerId
+                    ? `/manager/campaigns/${thread.candidate?.campaign?.id || ""}`
+                    : "/creator/campaigns";
+            }
+
+            await createNotification(
+                recipientId,
+                `New message from ${senderName}`,
+                preview,
+                "MESSAGE",
+                notificationLink
+            );
+        }
+
+        revalidatePath("/brand/campaigns");
+        revalidatePath("/manager/campaigns");
+        revalidatePath("/creator/campaigns");
         return { success: true };
     } catch (error) {
         console.error("Failed to send message", error);
-        return { success: false };
+        return { success: false, error: "Failed to send message." };
     }
 }
 
@@ -1748,57 +1832,18 @@ export async function createOrGetThread(creatorUserId: string) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) {
-            return { success: false, error: 'Unauthorized' };
+            return { success: false, error: 'Unauthorized', threadId: null, isNew: false };
         }
-
-        const brandUserId = session.user.id;
-
-        // Check if thread exists between these two participants
-        // We check both orderings or use 'contains' logic carefully
-        const existingThread = await db.chatThread.findFirst({
-            where: {
-                AND: [
-                    { participants: { contains: brandUserId } },
-                    { participants: { contains: creatorUserId } }
-                ],
-                candidateId: null // Ensure it's a direct chat, not a campaign candidate chat? 
-                // actually, we might want to resume ANY chat. But usually campaign chats are linked to candidateId.
-                // If we want a generic DMs, we look for candidateId: null.
-            }
-        });
-
-        if (existingThread) {
-            return { success: true, threadId: existingThread.id, isNew: false };
-        }
-
-        const newThread = await db.chatThread.create({
-            data: {
-                participants: `${brandUserId},${creatorUserId}`
-            }
-        });
-
-        await db.message.create({
-            data: {
-                threadId: newThread.id,
-                senderId: brandUserId,
-                content: 'Started a conversation',
-                read: false
-            }
-        });
-
-        // Notify Creator
-        await createNotification(
-            creatorUserId,
-            'New Message',
-            'A brand has started a conversation with you',
-            'MESSAGE',
-            `/creator/messages?threadId=${newThread.id}`
-        );
-
-        return { success: true, threadId: newThread.id, isNew: true };
+        void creatorUserId;
+        return {
+            success: false,
+            error: "Direct brand-creator chat is disabled. Use campaign manager channel after payment.",
+            threadId: null,
+            isNew: false,
+        };
     } catch (error) {
         console.error('Failed to create/get thread:', error);
-        return { success: false, error: 'Failed to start conversation' };
+        return { success: false, error: 'Failed to start conversation', threadId: null, isNew: false };
     }
 
 }

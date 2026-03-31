@@ -66,6 +66,7 @@ export function CreatorNotificationPopover() {
     }
 
     useEffect(() => {
+        let isActive = true
         fetchNotifications(true)
 
         // Poll every 60s as fallback
@@ -76,7 +77,7 @@ export function CreatorNotificationPopover() {
         fetch('/api/me')
             .then(r => r.json())
             .then(({ userId }) => {
-                if (!userId) return
+                if (!isActive || !userId) return
                 channel = pusherClient.subscribe(`user-${userId}`)
                 channelRef.current = channel
 
@@ -90,10 +91,21 @@ export function CreatorNotificationPopover() {
             .catch(() => { /* ignore */ })
 
         return () => {
+            isActive = false
             clearInterval(interval)
-            if (channelRef.current) {
-                channelRef.current.unbind_all()
-                pusherClient.unsubscribe(channelRef.current.name)
+            const currentChannel = channelRef.current
+            if (currentChannel) {
+                if (typeof currentChannel.unbind_all === "function") {
+                    currentChannel.unbind_all()
+                } else if (typeof currentChannel.unbind === "function") {
+                    currentChannel.unbind()
+                }
+
+                if (typeof currentChannel.name === "string" && currentChannel.name.length > 0) {
+                    pusherClient.unsubscribe(currentChannel.name)
+                }
+
+                channelRef.current = null
             }
         }
     }, [])

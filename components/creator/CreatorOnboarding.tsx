@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation"
 import { submitCreatorOnboarding } from "@/app/actions/onboarding";
 import { useSession } from "next-auth/react";
+import { SHARED_CREATOR_FOLLOWER_RANGES, SHARED_NICHE_LABELS, SHARED_PLATFORM_OPTIONS } from "@/lib/onboarding-taxonomy";
 
 // Types
 type CreatorData = {
@@ -253,27 +254,24 @@ export default function CreatorOnboarding() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        { id: "Instagram", icon: Instagram, color: "group-hover:text-pink-400" },
-                                        { id: "YouTube", icon: Youtube, color: "group-hover:text-red-500" },
-                                    ].map((p) => (
+                                    {SHARED_PLATFORM_OPTIONS.map((p) => (
                                         <motion.button
-                                            key={p.id}
+                                            key={p.label}
                                             whileHover={{ scale: 1.03, y: -2 }}
                                             whileTap={{ scale: 0.97 }}
-                                            onClick={() => togglePlatform(p.id)}
+                                            onClick={() => togglePlatform(p.label)}
                                             className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all group backdrop-blur-sm
-                                ${formData.platforms.includes(p.id)
+                                ${formData.platforms.includes(p.label)
                                                     ? "bg-white text-purple-600 border-white shadow-lg"
                                                     : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
                                                 }`}
                                         >
-                                            {p.icon ? (
-                                                <p.icon className={`w-8 h-8 ${!formData.platforms.includes(p.id) ? "text-white" : "text-purple-600"}`} />
+                                            {p.id === "instagram" ? (
+                                                <Instagram className={`w-8 h-8 ${!formData.platforms.includes(p.label) ? "text-white" : "text-purple-600"}`} />
                                             ) : (
-                                                <span className="w-8 h-8 flex items-center justify-center font-bold text-lg">Tk</span>
+                                                <Youtube className={`w-8 h-8 ${!formData.platforms.includes(p.label) ? "text-white" : "text-purple-600"}`} />
                                             )}
-                                            <span className="font-semibold">{p.id}</span>
+                                            <span className="font-semibold">{p.label}</span>
                                         </motion.button>
                                     ))}
                                 </div>
@@ -303,36 +301,34 @@ export default function CreatorOnboarding() {
                             >
                                 <h2 className="text-3xl font-bold text-center">Your Primary Niche?</h2>
                                 <div className="grid grid-cols-2 gap-3 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {[
-                                        { name: "Fashion", icon: Shirt },
-                                        { name: "Tech", icon: Laptop },
-                                        { name: "Fitness", icon: Dumbbell },
-                                        { name: "Finance", icon: TrendingUp },
-                                        { name: "Travel", icon: Globe },
-                                        { name: "Food", icon: Utensils },
-                                        { name: "Gaming", icon: Gamepad2 },
-                                        { name: "Lifestyle", icon: Heart },
-                                        { name: "Education", icon: GraduationCap },
-                                        { name: "Other", icon: Sparkles },
-                                    ].map((item) => (
+                                    {SHARED_NICHE_LABELS.map((item) => (
                                         <motion.button
-                                            key={item.name}
+                                            key={item}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => {
-                                                updateData("niche", item.name)
+                                                updateData("niche", item)
                                                 handleNext()
                                             }}
                                             className={`p-4 rounded-xl border flex items-center gap-3 transition-all text-left
-                                ${formData.niche === item.name
+                                ${formData.niche === item
                                                     ? "bg-white text-purple-600 border-white shadow-lg"
                                                     : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
                                                 }`}
                                         >
-                                            <div className={`p-2 rounded-lg ${formData.niche === item.name ? "bg-purple-100" : "bg-white/10"}`}>
-                                                <item.icon size={20} />
+                                            <div className={`p-2 rounded-lg ${formData.niche === item ? "bg-purple-100" : "bg-white/10"}`}>
+                                                {item === "Tech & Gadgets" && <Laptop size={20} />}
+                                                {item === "Fashion & Style" && <Shirt size={20} />}
+                                                {item === "Beauty & Makeup" && <Sparkles size={20} />}
+                                                {item === "Fitness & Health" && <Dumbbell size={20} />}
+                                                {item === "Food & Culinary" && <Utensils size={20} />}
+                                                {item === "Travel & Lifestyle" && <Globe size={20} />}
+                                                {item === "Finance & Crypto" && <TrendingUp size={20} />}
+                                                {item === "Education" && <GraduationCap size={20} />}
+                                                {item === "Gaming" && <Gamepad2 size={20} />}
+                                                {item === "Parenting" && <Heart size={20} />}
                                             </div>
-                                            <span className="font-semibold">{item.name}</span>
+                                            <span className="font-semibold">{item}</span>
                                         </motion.button>
                                     ))}
                                 </div>
@@ -353,23 +349,23 @@ export default function CreatorOnboarding() {
                                 <h2 className="text-3xl font-bold text-center">How many followers?</h2>
 
                                 <div className="space-y-4">
-                                    {["1K - 10K", "10K - 50K", "50K - 100K", "100K - 500K", "500K+"].map((range) => (
+                                    {SHARED_CREATOR_FOLLOWER_RANGES.map((range) => (
                                         <motion.button
-                                            key={range}
+                                            key={range.label}
                                             whileHover={{ scale: 1.01, x: 5 }}
                                             whileTap={{ scale: 0.99 }}
                                             onClick={() => {
-                                                updateData("followers", range)
+                                                updateData("followers", range.label)
                                                 handleNext()
                                             }}
                                             className={`w-full p-5 rounded-xl border flex justify-between items-center transition-all
-                                ${formData.followers === range
+                                ${formData.followers === range.label
                                                     ? "bg-white text-purple-600 border-white shadow-lg"
                                                     : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
                                                 }`}
                                         >
-                                            <span className="font-bold text-lg">{range}</span>
-                                            {formData.followers === range && <Check />}
+                                            <span className="font-bold text-lg">{range.label}</span>
+                                            {formData.followers === range.label && <Check />}
                                         </motion.button>
                                     ))}
                                 </div>

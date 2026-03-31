@@ -43,12 +43,15 @@ export function parseFollowerRangeWindow(influencerType?: string | null, minFoll
     if (rangeMatch) {
         const parsedMin = Number(rangeMatch[1] || 0);
         const parsedMax = Number(rangeMatch[2] || 0);
-        const safeMin = Math.max(0, Math.min(parsedMin, parsedMax));
-        const safeMax = Math.max(safeMin, Math.max(parsedMin, parsedMax));
+        const boundedMin = Math.max(MICRO_FOLLOWER_MIN, Math.min(parsedMin, parsedMax));
+        const boundedMax = Math.min(
+            MICRO_FOLLOWER_MAX,
+            Math.max(boundedMin, Math.max(parsedMin, parsedMax))
+        );
         return {
-            min: safeMin,
-            max: safeMax,
-            targetFollowers: safeMax > 0 ? safeMax : Math.max(1_000, safeMin),
+            min: boundedMin,
+            max: boundedMax,
+            targetFollowers: boundedMax > 0 ? boundedMax : Math.max(1_000, boundedMin),
         };
     }
 
@@ -68,10 +71,14 @@ export function parseFollowerRangeWindow(influencerType?: string | null, minFoll
         };
     }
 
-    const fallbackFollowers = Math.max(1_000, Math.floor(Number(minFollowers || MICRO_FOLLOWER_MIN)));
+    const fallbackFollowers = clamp(
+        Math.floor(Number(minFollowers || MICRO_FOLLOWER_MIN)),
+        MICRO_FOLLOWER_MIN,
+        MICRO_FOLLOWER_MAX
+    );
     return {
         min: fallbackFollowers,
-        max: Math.max(fallbackFollowers, MICRO_FOLLOWER_MAX),
+        max: MICRO_FOLLOWER_MAX,
         targetFollowers: fallbackFollowers,
     };
 }
@@ -401,7 +408,7 @@ export async function assignManagerIfMissing(campaignId: string) {
 
     const manager = await db.user.findFirst({
         where: {
-            role: { in: ["MANAGER", "ADMIN"] },
+            role: "MANAGER",
         },
         orderBy: { createdAt: "asc" },
     });

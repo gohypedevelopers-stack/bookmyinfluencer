@@ -11,6 +11,11 @@ import {
 import { registerBrand, sendEmailOtp, verifyEmailOtp } from '@/app/brand/auth-actions';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+    SHARED_FOLLOWER_TIERS as followerTiers,
+    SHARED_MICRO_FOLLOWER_RANGES as microFollowerRanges,
+    SHARED_NICHE_LABELS,
+} from '@/lib/onboarding-taxonomy';
 
 // Animation variants
 const slideVariants = {
@@ -72,36 +77,6 @@ const NextButton = ({
 );
 
 const TOTAL_STEPS = 13;
-
-type FollowerRangeOption = { label: string; min: number; max: number };
-type FollowerTier = {
-    label: "Micro" | "Macro";
-    desc: string;
-    badge: string;
-    min: number;
-    max: number;
-    color: string;
-    rangeOptions: FollowerRangeOption[];
-};
-
-const microFollowerRanges: FollowerRangeOption[] = Array.from({ length: 10 }, (_, idx) => {
-    const min = idx * 10000;
-    const max = (idx + 1) * 10000;
-    return { label: `${idx * 10}-${(idx + 1) * 10}K`, min, max };
-});
-
-const macroFollowerRanges: FollowerRangeOption[] = [
-    { label: "100-200K", min: 100000, max: 200000 },
-    { label: "200-300K", min: 200000, max: 300000 },
-    { label: "300-400K", min: 300000, max: 400000 },
-    { label: "400-500K", min: 400000, max: 500000 },
-];
-
-// Follower tiers
-const followerTiers: FollowerTier[] = [
-    { label: "Micro", desc: "0K - 100K followers", badge: "High Engagement", min: 0, max: 100000, color: "from-blue-400 to-cyan-500", rangeOptions: microFollowerRanges },
-    { label: "Macro", desc: "100K - 500K followers", badge: "Broad Reach", min: 100000, max: 500000, color: "from-violet-400 to-purple-500", rangeOptions: macroFollowerRanges },
-];
 
 type PriceTier = { label: string; badge: string; min: number; max: number };
 
@@ -1008,7 +983,7 @@ export default function BrandRegisterPage() {
                                             <p className="text-sm text-slate-400 mt-1">Select the main category for this campaign.</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 pb-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                                            {['Tech & Gadgets', 'Fashion & Style', 'Beauty & Makeup', 'Fitness & Health', 'Food & Culinary', 'Travel & Lifestyle', 'Finance & Crypto', 'Education', 'Gaming', 'Parenting'].map((cat) => (
+                                            {SHARED_NICHE_LABELS.map((cat) => (
                                                 <button key={cat}
                                                     onClick={() => { updateOnboarding('niche', cat); goNext(); }}
                                                     className={`p-3 border-2 rounded-xl flex items-center justify-between text-left transition-all group
@@ -1031,7 +1006,7 @@ export default function BrandRegisterPage() {
                                                 <input
                                                     type="text"
                                                     value={
-                                                        ['Tech & Gadgets', 'Fashion & Style', 'Beauty & Makeup', 'Fitness & Health', 'Food & Culinary', 'Travel & Lifestyle', 'Finance & Crypto', 'Education', 'Gaming', 'Parenting'].includes(onboardingData.niche)
+                                                        SHARED_NICHE_LABELS.some((label) => label === onboardingData.niche)
                                                             ? "" : onboardingData.niche
                                                     }
                                                     onChange={(e) => updateOnboarding('niche', e.target.value)}

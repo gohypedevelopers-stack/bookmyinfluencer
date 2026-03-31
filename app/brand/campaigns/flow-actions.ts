@@ -9,7 +9,6 @@ import {
     DEFAULT_ENGAGEMENT_MAX,
     DEFAULT_ENGAGEMENT_MIN,
     MICRO_FOLLOWER_MIN,
-    assignManagerIfMissing,
     calculateInternalPricing,
     ensureCampaignSuggestions,
     parseFollowerRangeWindow,
@@ -39,8 +38,9 @@ async function requireBrandSession() {
 const CREATOR_RESPONSE_WINDOW_HOURS = 24;
 
 function parseFollowerBand(formData: FormData) {
-    const followerMin = Math.max(0, parseNumber(formData.get("followerMin"), 10_000));
-    const followerMax = Math.max(followerMin, parseNumber(formData.get("followerMax"), Math.max(followerMin, 20_000)));
+    const followerMin = Math.max(10_000, parseNumber(formData.get("followerMin"), 10_000));
+    const requestedMax = parseNumber(formData.get("followerMax"), Math.max(followerMin, 20_000));
+    const followerMax = Math.min(500_000, Math.max(followerMin, requestedMax));
     const influencerType = `${FOLLOWER_RANGE_PREFIX}${followerMin}_${followerMax}`;
     return {
         followerMin,
@@ -552,13 +552,40 @@ export async function decideCampaignMatch(campaignId: string, candidateId: strin
     }
 
     if (decision === "ACCEPT") {
-        await db.campaignCandidate.update({
+        const updated = await db.campaignCandidate.update({
             where: { id: candidate.id },
             data: {
                 brandDecision: "ACCEPTED",
-                status: "IN_NEGOTIATION",
+                creatorDecision: "PENDING",
+                status: "CONTACTED",
+            },
+            include: {
+                influencer: {
+                    select: {
+                        userId: true,
+                        user: { select: { name: true } },
+                    },
+                },
+                campaign: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
             },
         });
+
+        if (updated.influencer.userId) {
+            await db.notification.create({
+                data: {
+                    userId: updated.influencer.userId,
+                    type: "CAMPAIGN_INVITATION",
+                    title: "New campaign request",
+                    message: `You have a new campaign request for "${updated.campaign.title}".`,
+                    link: "/creator/campaigns",
+                },
+            });
+        }
     } else {
         await db.campaignCandidate.update({
             where: { id: candidate.id },
@@ -572,6 +599,7 @@ export async function decideCampaignMatch(campaignId: string, candidateId: strin
     }
 
     revalidatePath(`/brand/campaigns/${campaignId}/match`);
+    revalidatePath(`/creator/campaigns`);
     return { success: true };
 }
 
@@ -667,7 +695,6 @@ export async function activateCampaignPayment(campaignId: string) {
         },
         include: {
             candidates: {
-                where: { brandDecision: "ACCEPTED" },
                 include: {
                     influencer: { select: { id: true, userId: true, followers: true } },
                 },
@@ -677,15 +704,24 @@ export async function activateCampaignPayment(campaignId: string) {
     });
 
     if (!campaign) return { success: false, error: "Campaign not found." };
-    if (!campaign.candidates.length) {
-        return { success: false, error: "Accept at least one influencer before payment." };
+    const confirmedCandidates = campaign.candidates.filter(
+        (candidate) => candidate.brandDecision === "ACCEPTED" && candidate.creatorDecision === "ACCEPTED"
+    );
+    if (!confirmedCandidates.length) {
+        return { success: false, error: "Wait for at least one creator confirmation before payment." };
     }
     const followerRange = parseFollowerRangeWindow(campaign.influencerType, campaign.minFollowers);
     const targetCreatorCount = getTargetCreatorCount(campaign.budget || 0, followerRange.targetFollowers);
-    if (targetCreatorCount > 0 && campaign.candidates.length < targetCreatorCount) {
+    const availableCreatorCount = campaign.candidates.filter((candidate) =>
+        ["PENDING", "ACCEPTED"].includes(candidate.brandDecision)
+    ).length;
+    const requiredCreatorCount = targetCreatorCount > 0
+        ? Math.max(1, Math.min(targetCreatorCount, availableCreatorCount || confirmedCandidates.length))
+        : 0;
+    if (requiredCreatorCount > 0 && confirmedCandidates.length < requiredCreatorCount) {
         return {
             success: false,
-            error: `Accept at least ${targetCreatorCount} creators before payment for this follower target.`,
+            error: `Wait for ${requiredCreatorCount} creator confirmations before payment for this campaign.`,
         };
     }
 
@@ -706,30 +742,57 @@ export async function activateCampaignPayment(campaignId: string) {
             where: {
                 campaignId: campaign.id,
                 brandDecision: "ACCEPTED",
+                creatorDecision: "ACCEPTED",
             },
             data: {
-                creatorDecision: "PENDING",
-                status: "CONTACTED",
+                status: "HIRED",
                 managerReviewStatus: "PENDING",
             },
         });
 
-        const assignment = await assignManagerIfMissing(campaign.id);
-        managerId = assignment?.managerId || null;
+        let assignment = await tx.campaignAssignment.findUnique({
+            where: { campaignId: campaign.id },
+        });
 
-        if (assignment?.managerId) {
-            await tx.notification.create({
+        if (!assignment) {
+            const manager = await tx.user.findFirst({
+                where: {
+                    role: "MANAGER",
+                },
+                orderBy: { createdAt: "asc" },
+            });
+
+            if (manager) {
+                assignment = await tx.campaignAssignment.create({
+                    data: {
+                        campaignId: campaign.id,
+                        managerId: manager.id,
+                    },
+                });
+            }
+        }
+
+        managerId = assignment?.managerId || null;
+    });
+
+    const notificationJobs: Promise<any>[] = [];
+
+    if (managerId) {
+        notificationJobs.push(
+            db.notification.create({
                 data: {
-                    userId: assignment.managerId,
+                    userId: managerId,
                     type: "CAMPAIGN_ASSIGNMENT",
                     title: "New campaign assigned",
                     message: `${campaign.brand.companyName} campaign is paid and ready for execution.`,
                     link: `/manager/campaigns/${campaign.id}`,
                 },
-            });
-        }
+            })
+        );
+    }
 
-        await tx.notification.create({
+    notificationJobs.push(
+        db.notification.create({
             data: {
                 userId: campaign.brand.userId,
                 type: "PAYMENT",
@@ -737,21 +800,27 @@ export async function activateCampaignPayment(campaignId: string) {
                 message: "Your campaign is now active and assigned to a project manager.",
                 link: `/brand/campaigns/${campaign.id}`,
             },
-        });
+        })
+    );
 
-        for (const candidate of campaign.candidates) {
-            if (!candidate.influencer.userId) continue;
-            await tx.notification.create({
+    for (const candidate of confirmedCandidates) {
+        if (!candidate.influencer.userId) continue;
+        notificationJobs.push(
+            db.notification.create({
                 data: {
                     userId: candidate.influencer.userId,
                     type: "CAMPAIGN_INVITATION",
-                    title: "New campaign invitation",
-                    message: `You have a paid campaign invitation to review and accept.`,
+                    title: "Campaign activated",
+                    message: `Payment is confirmed for "${campaign.title}". Your project manager will coordinate next steps.`,
                     link: `/creator/campaigns`,
                 },
-            });
-        }
-    });
+            })
+        );
+    }
+
+    if (notificationJobs.length > 0) {
+        await Promise.all(notificationJobs);
+    }
 
     if (managerId) {
         await ensureBrandManagerThread({
@@ -760,7 +829,7 @@ export async function activateCampaignPayment(campaignId: string) {
             managerId,
         });
 
-        for (const candidate of campaign.candidates) {
+        for (const candidate of confirmedCandidates) {
             if (!candidate.influencer.userId) continue;
             await ensureManagerCreatorThread({
                 candidateId: candidate.id,

@@ -9,6 +9,9 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const formattedAmount = new Intl.NumberFormat('en-IN', {
+        maximumFractionDigits: 0,
+    }).format(amount);
 
     const handlePayment = async () => {
         setLoading(true);
@@ -31,7 +34,7 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
 
     if (success) {
         return (
-            <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6 animate-in zoom-in-95 duration-500">
+            <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center space-y-6 animate-in zoom-in-95 duration-500 border border-emerald-100">
                 <div className="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center">
                     <Check className="w-12 h-12 text-green-600" strokeWidth={3} />
                 </div>
@@ -48,6 +51,11 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
 
     return (
         <div className="bg-white p-8 md:p-10 rounded-3xl shadow-xl max-w-md w-full border border-gray-100">
+            <div className="mb-6 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-900 p-4 text-white">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Step 3 of 4</p>
+                <p className="mt-1 font-bold">Pay | Manager executes campaign workflow</p>
+            </div>
+
             <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center">
                     <ShieldCheck className="w-6 h-6 text-teal-600" />
@@ -63,7 +71,7 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
                     <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-2">Total Amount</p>
                     <p className="text-4xl font-black text-gray-900 flex items-center gap-1">
                         <IndianRupee className="w-8 h-8" strokeWidth={3} />
-                        {amount.toLocaleString()}
+                        {formattedAmount}
                     </p>
                 </div>
 
@@ -88,4 +96,5 @@ export default function PaymentClient({ campaignId, amount }: { campaignId: stri
         </div>
     );
 }
+
 

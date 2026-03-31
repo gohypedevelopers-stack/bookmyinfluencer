@@ -5,31 +5,29 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Instagram, Rocket, Sparkles, TrendingUp, User, Youtube } from 'lucide-react'
 import { saveProfileSetup } from './actions'
+import {
+    SHARED_CREATOR_FOLLOWER_RANGES,
+    SHARED_NICHE_LABELS,
+    SHARED_PLATFORM_OPTIONS,
+} from '@/lib/onboarding-taxonomy'
 
 const TOTAL_SLIDES = 7
 
-const PLATFORMS = [
-    { id: 'instagram', label: 'Instagram', icon: Instagram, color: 'from-pink-500 to-purple-500', bg: 'bg-pink-500/10', border: 'border-pink-500/30' },
-    { id: 'youtube', label: 'YouTube', icon: Youtube, color: 'from-red-500 to-red-600', bg: 'bg-red-500/10', border: 'border-red-500/30' },
-]
+const PLATFORMS = SHARED_PLATFORM_OPTIONS.map((platform) => ({
+    id: platform.id,
+    label: platform.label,
+    icon: platform.id === 'instagram' ? Instagram : Youtube,
+    color: platform.id === 'instagram' ? 'from-pink-500 to-purple-500' : 'from-red-500 to-red-600',
+    bg: platform.id === 'instagram' ? 'bg-pink-500/10' : 'bg-red-500/10',
+    border: platform.id === 'instagram' ? 'border-pink-500/30' : 'border-red-500/30',
+}))
 
-const NICHES = [
-    { id: 'fashion', label: 'Fashion' },
-    { id: 'tech', label: 'Tech' },
-    { id: 'fitness', label: 'Fitness' },
-    { id: 'finance', label: 'Finance' },
-    { id: 'travel', label: 'Travel' },
-    { id: 'food', label: 'Food' },
-    { id: 'gaming', label: 'Gaming' },
-    { id: 'lifestyle', label: 'Lifestyle' },
-]
+const NICHES = SHARED_NICHE_LABELS.map((label) => ({
+    id: label,
+    label,
+}))
 
-const FOLLOWER_RANGES = [
-    '10K - 50K (Micro)',
-    '50K - 100K (Micro)',
-    '100K - 250K (Micro)',
-    '250K - 500K (Micro)',
-]
+const FOLLOWER_RANGES = SHARED_CREATOR_FOLLOWER_RANGES.map((range) => range.label)
 
 const slideVariants = {
     enter: (direction: number) => ({ x: direction > 0 ? 280 : -280, opacity: 0, scale: 0.95 }),
@@ -209,7 +207,7 @@ export default function ProfileSetupClient({ userId }: { userId: string }) {
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Follower range</h2>
                                 <div className="relative mt-6">
                                     <button onClick={() => setShowFollowerDropdown(!showFollowerDropdown)} className="w-full flex items-center justify-between px-5 py-4 bg-white/5 border-2 border-white/10 rounded-2xl text-left">
-                                        <span className={followerRange ? 'text-white font-medium' : 'text-white/30'}>{followerRange || 'Select micro range'}</span>
+                                        <span className={followerRange ? 'text-white font-medium' : 'text-white/30'}>{followerRange || 'Select follower range'}</span>
                                         <ChevronDown className={`w-5 h-5 text-white/40 transition-transform ${showFollowerDropdown ? 'rotate-180' : ''}`} />
                                     </button>
                                     <AnimatePresence>

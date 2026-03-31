@@ -34,6 +34,15 @@ export default function ManagerCampaignDetailsClient({
     const [sendingBrandMsg, setSendingBrandMsg] = useState(false);
     const [creatorInputs, setCreatorInputs] = useState<Record<string, string>>({});
     const [sendingCreatorId, setSendingCreatorId] = useState<string | null>(null);
+    const formatNumber = (value: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
+    const formatDateTime = (value: string | Date) =>
+        new Intl.DateTimeFormat("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(new Date(value));
 
     const submitted = useMemo(
         () => campaign.candidates.filter((candidate: any) => candidate.managerReviewStatus === "SUBMITTED"),
@@ -95,6 +104,14 @@ export default function ManagerCampaignDetailsClient({
 
     return (
         <div className="space-y-8 pb-20">
+            <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-900 p-5 text-white shadow-xl shadow-indigo-200/40">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Manager Control Room</p>
+                <h2 className="mt-1 text-2xl font-black">Coordinate both channels, approve submissions, close delivery</h2>
+                <p className="mt-2 text-sm text-slate-200">
+                    Brand and creator remain separated. You control communication and final review readiness.
+                </p>
+            </div>
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">{campaign.title}</h1>
@@ -195,7 +212,7 @@ export default function ManagerCampaignDetailsClient({
                                 </div>
 
                                 <div className="text-sm text-gray-600 space-y-1">
-                                    <p><span className="font-semibold">Followers:</span> {Number(candidate.influencer?.followers || 0).toLocaleString()}</p>
+                                    <p><span className="font-semibold">Followers:</span> {formatNumber(Number(candidate.influencer?.followers || 0))}</p>
                                     <p><span className="font-semibold">Engagement:</span> {Number(candidate.influencer?.engagementRate || 0).toFixed(1)}%</p>
                                 </div>
 
@@ -297,7 +314,7 @@ export default function ManagerCampaignDetailsClient({
                             auditLogs.map((log: any) => (
                                 <div key={log.id} className="p-4 hover:bg-gray-50 transition-colors">
                                     <p className="font-bold text-gray-900 text-sm">{String(log.action || "").replace(/_/g, " ")}</p>
-                                    <p className="text-xs text-gray-500" suppressHydrationWarning>{new Date(log.createdAt).toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">{formatDateTime(log.createdAt)}</p>
                                 </div>
                             ))
                         ) : (

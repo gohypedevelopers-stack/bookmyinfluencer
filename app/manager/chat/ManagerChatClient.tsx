@@ -95,6 +95,8 @@ export default function ManagerChatClient({
         localMessages,
         (state, newMessage: Message) => [...state, newMessage]
     );
+    const formatDate = (value: string | number | Date) =>
+        new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
 
     // Scroll to bottom
     useEffect(() => {
@@ -193,7 +195,7 @@ export default function ManagerChatClient({
                                         <h3 className="font-semibold text-gray-900 truncate text-sm">{thread.title}</h3>
                                         {thread.updatedAt && (
                                             <span className="text-[10px] text-gray-400 shrink-0 ml-2">
-                                                {new Date(thread.updatedAt).toLocaleDateString()}
+                                                {formatDate(thread.updatedAt)}
                                             </span>
                                         )}
                                     </div>

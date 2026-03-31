@@ -4,6 +4,13 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth";
+import {
+    estimateFollowersCountFromRange,
+    normalizeSharedNiche,
+    normalizeSharedPlatformId,
+    parseEngagementRate,
+} from "@/lib/onboarding-taxonomy";
 
 export async function submitBrandOnboarding(data: {
     brandName: string;
@@ -76,8 +83,6 @@ export async function submitBrandOnboarding(data: {
     }
 }
 
-import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth";
-
 export async function submitCreatorOnboarding(data: {
     fullName: string;
     platforms: string[];
@@ -91,6 +96,15 @@ export async function submitCreatorOnboarding(data: {
     }
 
     try {
+        const normalizedNiche = normalizeSharedNiche(data.niche);
+        const estimatedFollowers = estimateFollowersCountFromRange(data.followers);
+        const parsedEngagementRate = parseEngagementRate(data.engagement);
+        const selectedProvider =
+            data.platforms
+                .map((platform) => normalizeSharedPlatformId(platform))
+                .find((platform): platform is "instagram" | "youtube" => Boolean(platform))
+            ?? "instagram";
+
         // Check if creator already exists
         const existing = await db.creator.findUnique({
             where: { userId: creatorId },
@@ -103,7 +117,7 @@ export async function submitCreatorOnboarding(data: {
                 where: { userId: creatorId },
                 data: {
                     fullName: data.fullName,
-                    niche: data.niche,
+                    niche: normalizedNiche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
                     pricing: null as any,
@@ -115,6 +129,7 @@ export async function submitCreatorOnboarding(data: {
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
+                            followersEstimate: estimatedFollowers ?? null,
                             engagement: data.engagement,
                         }
                     }),
@@ -126,7 +141,7 @@ export async function submitCreatorOnboarding(data: {
                 data: {
                     userId: creatorId,
                     fullName: data.fullName,
-                    niche: data.niche,
+                    niche: normalizedNiche,
                     platforms: JSON.stringify(data.platforms),
                     onboardingCompleted: true,
                     pricing: null as any,
@@ -138,11 +153,71 @@ export async function submitCreatorOnboarding(data: {
                     rawSocialData: JSON.stringify({
                         selfReported: {
                             followers: data.followers,
+                            followersEstimate: estimatedFollowers ?? null,
                             engagement: data.engagement,
                         }
                     }),
                 } as any
             });
+        }
+
+        const otpUser = await db.otpUser.findUnique({
+            where: { id: creatorId },
+            select: { email: true },
+        });
+
+        if (estimatedFollowers !== null) {
+            const creator = await db.creator.findUnique({
+                where: { userId: creatorId },
+                select: { id: true },
+            });
+
+            const authUser = otpUser?.email
+                ? await db.user.findUnique({
+                    where: { email: otpUser.email.toLowerCase() },
+                    select: { id: true },
+                })
+                : null;
+
+            if (creator) {
+                await db.creatorSelfReportedMetric.upsert({
+                    where: {
+                        creatorId_provider: {
+                            creatorId: creator.id,
+                            provider: selectedProvider,
+                        },
+                    },
+                    update: {
+                        followersCount: estimatedFollowers,
+                    },
+                    create: {
+                        creatorId: creator.id,
+                        provider: selectedProvider,
+                        followersCount: estimatedFollowers,
+                    },
+                });
+            }
+
+            if (authUser) {
+                await db.influencerProfile.upsert({
+                    where: { userId: authUser.id },
+                    update: {
+                        niche: normalizedNiche || "General",
+                        followers: estimatedFollowers,
+                        engagementRate: parsedEngagementRate ?? 0,
+                        platforms: JSON.stringify(data.platforms),
+                        onboardingCompleted: true,
+                    },
+                    create: {
+                        userId: authUser.id,
+                        niche: normalizedNiche || "General",
+                        followers: estimatedFollowers,
+                        engagementRate: parsedEngagementRate ?? 0,
+                        platforms: JSON.stringify(data.platforms),
+                        onboardingCompleted: true,
+                    },
+                });
+            }
         }
 
         revalidatePath("/creator/dashboard");

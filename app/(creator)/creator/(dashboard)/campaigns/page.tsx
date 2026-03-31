@@ -35,9 +35,6 @@ export default async function CreatorCampaignsPage() {
                                 lte: 500_000,
                             },
                         },
-                        campaign: {
-                            paymentStatus: "PAID",
-                        },
                         brandDecision: "ACCEPTED",
                     },
                     include: {

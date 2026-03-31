@@ -2,6 +2,12 @@ import PusherClient from "pusher-js";
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY;
 const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "mt1";
+const createFallbackChannel = (name = "") => ({
+    name,
+    bind: () => { },
+    unbind: () => { },
+    unbind_all: () => { },
+});
 
 export const pusherClient = pusherKey
     ? new PusherClient(pusherKey, {
@@ -9,9 +15,10 @@ export const pusherClient = pusherKey
         authEndpoint: "/api/pusher/auth",
     })
     : {
-        subscribe: () => ({ bind: () => { }, unbind: () => { } }),
+        subscribe: (name: string) => createFallbackChannel(name),
         unsubscribe: () => { },
         bind: () => { },
         unbind: () => { },
+        unbind_all: () => { },
     } as any;
 

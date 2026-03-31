@@ -33,7 +33,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
                 <div className="max-w-5xl mx-auto px-4 py-4">
                     <h1 className="text-xl font-bold tracking-tight text-gray-900">Campaign Matches</h1>
                     <p className="text-sm text-gray-500">
-                        Match, accept, and shuffle creators from your selected follower band before payment.
+                        Review creator recommendations, send requests, and move to payment after creator confirmation.
                     </p>
                 </div>
             </header>

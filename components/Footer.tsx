@@ -15,7 +15,7 @@ export function Footer() {
                         </div>
                         <span className="font-black text-xl text-slate-900 tracking-tighter">Bookmyinfluencer</span>
                     </Link>
-                    <p className="text-sm text-slate-500 font-medium tracking-tight">© 2026 Bookmyinfluencer Inc. All rights reserved.</p>
+                    <p className="text-sm text-slate-500 font-medium tracking-tight">(c) 2026 Bookmyinfluencer Inc. All rights reserved.</p>
                 </div>
 
                 <div className="flex gap-10 text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">
@@ -27,3 +27,4 @@ export function Footer() {
         </footer>
     )
 }
+

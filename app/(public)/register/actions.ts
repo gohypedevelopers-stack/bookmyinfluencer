@@ -2,6 +2,12 @@
 
 import { db } from "@/lib/db"
 import { ensureCreatorAuthUser, syncCreatorProfileByEmail } from "@/lib/auth-sync"
+import {
+    estimateFollowersCountFromRange,
+    normalizeSharedNiche,
+    normalizeSharedPlatformId,
+    parseEngagementRate,
+} from "@/lib/onboarding-taxonomy"
 import bcrypt from "bcryptjs"
 
 export async function registerUserAction(formData: FormData) {
@@ -45,6 +51,24 @@ export async function registerUserAction(formData: FormData) {
             return isNaN(parsed) ? null : parsed;
         };
 
+        const normalizedNiche = normalizeSharedNiche(niche);
+        const estimatedFollowers = estimateFollowersCountFromRange(followers);
+        const parsedEngagementRate = parseEngagementRate(engagement);
+        const parsedPlatforms = (() => {
+            try {
+                const parsed = JSON.parse(platforms || "[]");
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        })();
+        const selectedProvider =
+            parsedPlatforms
+                .map((platform) => normalizeSharedPlatformId(String(platform)))
+                .find((platform): platform is "instagram" | "youtube" => Boolean(platform))
+            ?? normalizeSharedPlatformId(primaryPlatform)
+            ?? "instagram";
+
         const parsedPriceStory = safeParseInt(formData.get("priceStory"));
         const parsedPricePost = safeParseInt(formData.get("pricePost"));
         const parsedPriceCollab = safeParseInt(formData.get("priceCollab"));
@@ -52,10 +76,10 @@ export async function registerUserAction(formData: FormData) {
         const fallbackPrice = parsedPricePost !== null ? parsedPricePost : parsedRates;
         const location = formData.get("location") as string;
 
-        await syncCreatorProfileByEmail(normalizedEmail, {
+        const syncResult = await syncCreatorProfileByEmail(normalizedEmail, {
             fullName,
             phone: mobileNumber || null,
-            niche: niche || null,
+            niche: normalizedNiche || null,
             location: location || null,
             instagramUrl: instagramUrl || null,
             youtubeUrl: youtubeUrl || null,
@@ -73,11 +97,33 @@ export async function registerUserAction(formData: FormData) {
                 ? JSON.stringify({
                     selfReported: {
                         followers: followers || "",
+                        followersEstimate: estimatedFollowers ?? null,
                         engagement: engagement || "",
                     }
                 })
                 : null,
+            followersCount: estimatedFollowers,
+            engagementRate: parsedEngagementRate,
         })
+
+        if (estimatedFollowers !== null) {
+            await db.creatorSelfReportedMetric.upsert({
+                where: {
+                    creatorId_provider: {
+                        creatorId: syncResult.creator.id,
+                        provider: selectedProvider,
+                    },
+                },
+                update: {
+                    followersCount: estimatedFollowers,
+                },
+                create: {
+                    creatorId: syncResult.creator.id,
+                    provider: selectedProvider,
+                    followersCount: estimatedFollowers,
+                },
+            })
+        }
 
         console.info("[REGISTER] Creator registration synced", {
             email: normalizedEmail,

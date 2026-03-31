@@ -9,40 +9,40 @@ const stepsData = {
     brand: [
         {
             step: "1",
-            title: "Design Campaign",
-            desc: "Define your goals and target audience. Our internal project managers will handle the search and vetting.",
+            title: "Setup Campaign",
+            desc: "Enter campaign brief, filters, and total budget. The system auto-matches verified micro creators.",
             icon: "search"
         },
         {
             step: "2",
-            title: "Expert Execution",
-            desc: "Review your curated matches. We handle all negotiations, contracts, and execution for you.",
+            title: "Pay & Activate",
+            desc: "Confirm upfront payment to lock selected creators and activate manager-led execution.",
             icon: "chat"
         },
         {
             step: "3",
-            title: "Approve & Scale",
-            desc: "Review high-quality results. Once satisfied, release payment. Scale with guaranteed results.",
+            title: "Manager Delivery",
+            desc: "Project manager handles all communication, reviews creator submissions, and sends final updates to your team.",
             icon: "check_circle"
         }
     ],
     creator: [
         {
             step: "1",
-            title: "Create Profile",
-            desc: "Build a stunning portfolio showcasing your best work, stats, and pricing packages to attract top brands.",
+            title: "Receive Invitation",
+            desc: "Get paid campaign invitations matched to your niche, location, and engagement quality.",
             icon: "person"
         },
         {
             step: "2",
-            title: "Get Hired",
-            desc: "Receive direct offers or apply to open campaigns. Negotiate terms and secure the deal safely.",
+            title: "Work with Manager",
+            desc: "Accept invitation and coordinate only with your assigned project manager for instructions and updates.",
             icon: "handshake"
         },
         {
             step: "3",
-            title: "Create Content & Earn",
-            desc: "Deliver high-quality content, get approval, and receive instant payment directly to your wallet.",
+            title: "Submit & Get Paid",
+            desc: "Submit deliverable link for review. After completion, payout is manually processed by the platform team.",
             icon: "attach_money"
         }
     ]
@@ -65,7 +65,7 @@ export function WorkflowSection() {
                         Streamlined <span className="text-indigo-600">Workflow</span>
                     </h2>
                     <p className="text-lg sm:text-xl text-slate-600 mb-12 sm:mb-16 max-w-2xl mx-auto font-medium">
-                        Whether you're hiring or getting hired, we've made the process simple, secure, and lightning-fast.
+                        Clear, manager-led operations for brands and creators with controlled communication and predictable outcomes.
                     </p>
                 </motion.div>
 

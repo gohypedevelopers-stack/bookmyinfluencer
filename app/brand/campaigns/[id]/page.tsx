@@ -1,4 +1,3 @@
-
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
@@ -29,7 +28,7 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
 
     const campaign = await db.campaign.findFirst({
         where: {
-            id: id,
+            id,
             brandId: brand.id
         }
     });
@@ -38,13 +37,11 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
         notFound();
     }
 
-    // Fetch Analytics Data
     const [analytics, managerConversation] = await Promise.all([
         getCampaignAnalytics(id),
         getBrandManagerConversation(id),
     ]);
 
-    // Default empty data structure if fetch fails
     const analyticsData = analytics.success ? analytics.data : {
         summary: {
             totalReach: 0,
@@ -59,33 +56,41 @@ export default async function CampaignDetailsPage({ params }: { params: Promise<
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            {/* Simple Back Header */}
-            <div className="bg-white/50 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <Link href="/brand/campaigns" className="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium w-fit">
-                        <ArrowLeft className="w-4 h-4" />
+        <div className="min-h-screen bg-[linear-gradient(180deg,#f8fbff_0%,#f8fafc_28%,#eef4ff_100%)] pb-24">
+            <div className="sticky top-0 z-20 border-b border-white/70 bg-white/80 backdrop-blur-xl">
+                <div className="mx-auto flex max-w-[1400px] items-center px-6 py-4">
+                    <Link
+                        href="/brand/campaigns"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-950"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
                         Back to Campaigns
                     </Link>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <AnalyticsDashboard
-                    data={analyticsData as any}
-                    campaignTitle={campaign.title}
-                />
-                <div className="mt-8">
-                    <BrandManagerChatCard
-                        campaignId={campaign.id}
-                        currentUserId={session.user.id}
-                        managerName={(managerConversation.success ? managerConversation.managerName : "Project Manager") || "Project Manager"}
-                        locked={managerConversation.success ? Boolean(managerConversation.locked) : true}
-                        initialMessages={managerConversation.success ? (managerConversation.messages as any[]) : []}
+            <div className="relative mx-auto max-w-[1400px] px-6 py-8">
+                <div className="pointer-events-none absolute inset-x-8 top-0 -z-10 h-72 rounded-[40px] bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.16),_transparent_42%),radial-gradient(circle_at_top_right,_rgba(13,148,136,0.18),_transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0))]" />
+
+                <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+                    <AnalyticsDashboard
+                        data={analyticsData as any}
+                        campaignTitle={campaign.title}
+                        campaignStatus={campaign.status}
                     />
+
+                    <div className="xl:sticky xl:top-24">
+                        <BrandManagerChatCard
+                            campaignId={campaign.id}
+                            currentUserId={session.user.id}
+                            managerName={(managerConversation.success ? managerConversation.managerName : "Project Manager") || "Project Manager"}
+                            locked={managerConversation.success ? Boolean(managerConversation.locked) : true}
+                            initialMessages={managerConversation.success ? (managerConversation.messages as any[]) : []}
+                            compact
+                        />
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
-

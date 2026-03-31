@@ -188,6 +188,7 @@ export async function sendManagerBrandMessage(campaignId: string, content: strin
             select: {
                 id: true,
                 title: true,
+                paymentStatus: true,
                 assignment: { select: { managerId: true } },
                 brand: { select: { userId: true } },
             },
@@ -199,6 +200,9 @@ export async function sendManagerBrandMessage(campaignId: string, content: strin
 
         if (session.user.role !== "ADMIN" && campaign.assignment?.managerId !== session.user.id) {
             return { success: false, error: "Unauthorized" };
+        }
+        if (campaign.paymentStatus !== "PAID") {
+            return { success: false, error: "Brand chat unlocks only after campaign payment." };
         }
 
         if (!campaign.assignment?.managerId || !campaign.brand.userId) {
@@ -260,7 +264,9 @@ export async function sendManagerCreatorMessage(candidateId: string, content: st
             where: { id: candidateId },
             include: {
                 campaign: {
-                    include: {
+                    select: {
+                        id: true,
+                        paymentStatus: true,
                         assignment: true,
                         brand: { select: { companyName: true } },
                     },
@@ -276,6 +282,9 @@ export async function sendManagerCreatorMessage(candidateId: string, content: st
         if (!candidate) return { success: false, error: "Candidate not found." };
         if (session.user.role !== "ADMIN" && candidate.campaign.assignment?.managerId !== session.user.id) {
             return { success: false, error: "Unauthorized" };
+        }
+        if (candidate.campaign.paymentStatus !== "PAID") {
+            return { success: false, error: "Creator channel is available only after payment." };
         }
         if (!candidate.influencer.userId) {
             return { success: false, error: "Creator user is missing." };
