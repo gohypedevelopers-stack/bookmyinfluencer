@@ -181,8 +181,8 @@ export default function CreatorDashboardPage() {
 
   return (
     <div className="min-h-full">
-      <div className="mx-auto max-w-[1400px] px-6 py-8">
-        <div className="relative overflow-hidden rounded-[34px] border border-white/80 bg-[linear-gradient(135deg,#0f172a_0%,#1e1b4b_48%,#7c3aed_100%)] p-7 text-white shadow-[0_35px_90px_-45px_rgba(79,70,229,0.75)]">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-8">
+        <div className="relative overflow-hidden rounded-[34px] border border-white/80 bg-[linear-gradient(135deg,#0f172a_0%,#1e1b4b_48%,#7c3aed_100%)] p-5 md:p-8 text-white shadow-[0_35px_90px_-45px_rgba(79,70,229,0.75)]">
           <div className="pointer-events-none absolute right-[-40px] top-[-60px] h-56 w-56 rounded-full bg-white/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-[-70px] left-[-30px] h-52 w-52 rounded-full bg-fuchsia-400/15 blur-3xl" />
 

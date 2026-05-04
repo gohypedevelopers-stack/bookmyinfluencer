@@ -3,15 +3,19 @@
 import Image from "next/image"
 import { Shield, Lock, MessageSquare } from "lucide-react"
 import { Container } from "@/components/container"
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 
 export function FeaturesSection() {
+    const { scrollYProgress } = useScroll();
+    const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+    const y2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
+
     return (
         <section className="w-full py-24 md:py-32 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-                <div className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[10%] right-[20%] w-[40%] h-[40%] bg-indigo-600/5 rounded-full blur-[120px]" />
+                <motion.div style={{ y: y1 }} className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]" />
+                <motion.div style={{ y: y2 }} className="absolute bottom-[10%] right-[20%] w-[40%] h-[40%] bg-indigo-600/5 rounded-full blur-[120px]" />
             </div>
 
             <Container className="text-center relative z-10">

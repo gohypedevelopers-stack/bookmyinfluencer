@@ -22,8 +22,8 @@ export function BrandTopNav() {
 
     return (
         <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-            <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between gap-8">
-                <h1 className="text-xl font-bold text-gray-800">{getPageTitle()}</h1>
+            <div className="max-w-[1400px] mx-auto px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-8">
+                <h1 className="text-lg md:text-xl font-bold text-gray-800 truncate">{getPageTitle()}</h1>
                 {mounted && <NotificationPopover />}
             </div>
         </header>

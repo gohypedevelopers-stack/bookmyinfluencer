@@ -63,7 +63,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
 
             <div className="space-y-4">
                 {activities.map((activity) => (
-                    <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div key={activity.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors gap-4">
                         <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getBgColor(activity.type)}`}>
                                 {getIcon(activity.type)}

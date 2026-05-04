@@ -7,11 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function BrandSettingsPage() {
     return (
-        <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 md:py-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
             <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="mb-8">
+                <TabsList className="mb-8 w-full justify-start overflow-x-auto whitespace-nowrap">
                     <TabsTrigger value="profile">Profile Settings</TabsTrigger>
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="notifications">Notifications</TabsTrigger>

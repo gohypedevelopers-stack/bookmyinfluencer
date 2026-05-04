@@ -10,7 +10,10 @@ import {
     Megaphone,
     Settings,
     LogOut,
-    User
+    User,
+    Menu,
+    X,
+    Search
 } from "lucide-react"
 import {
     DropdownMenu,
@@ -26,6 +29,7 @@ export function BrandNavbar() {
     const pathname = usePathname()
     const { data: session } = useSession()
     const [mounted, setMounted] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -36,6 +40,11 @@ export function BrandNavbar() {
             name: "Dashboard",
             href: "/brand",
             icon: LayoutDashboard,
+        },
+        {
+            name: "Marketplace",
+            href: "/brand/discover",
+            icon: Search,
         },
         {
             name: "Campaigns",
@@ -81,8 +90,14 @@ export function BrandNavbar() {
                     })}
                 </div>
 
-                {/* User Menu */}
-                <div className="flex items-center gap-4">
+                {/* User Menu & Mobile Toggle */}
+                <div className="flex items-center gap-2 md:gap-4">
+                    <button
+                        className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
                     {mounted ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger className="focus:outline-none" asChild>
@@ -132,6 +147,48 @@ export function BrandNavbar() {
                     )}
                 </div>
             </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden border-t border-gray-100 bg-white py-4 px-6 space-y-2 animate-in slide-in-from-top duration-200">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href || (item.href !== '/brand' && pathname?.startsWith(item.href))
+
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-all ${isActive
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                                    }`}
+                            >
+                                <item.icon className={`w-5 h-5 ${isActive ? "text-blue-600" : "text-gray-400"}`} />
+                                {item.name}
+                            </Link>
+                        )
+                    })}
+                    <div className="pt-4 border-t border-gray-100">
+                        <Link
+                            href="/brand/settings"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-gray-600 hover:bg-gray-50"
+                        >
+                            <Settings className="w-5 h-5 text-gray-400" />
+                            Settings
+                        </Link>
+                        <Link
+                            href="/brand/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold text-gray-600 hover:bg-gray-50"
+                        >
+                            <User className="w-5 h-5 text-gray-400" />
+                            Profile
+                        </Link>
+                    </div>
+                </div>
+            )}
         </nav>
     )
 }

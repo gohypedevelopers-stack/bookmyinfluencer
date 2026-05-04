@@ -92,7 +92,7 @@ export function ConnectSocialDialog({
             ) : (
                 <DialogTrigger asChild>
                     <div
-                        className={`flex items-center justify-between p-5 border border-dashed border-gray-300 rounded-2xl ${config.hoverBorder} ${config.hoverBg} transition-all cursor-pointer group bg-gray-50/50`}
+                        className={`flex flex-wrap items-center justify-between gap-4 p-5 border border-dashed border-gray-300 rounded-2xl ${config.hoverBorder} ${config.hoverBg} transition-all cursor-pointer group bg-gray-50/50`}
                     >
                         <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 group-hover:${config.colorClass} group-hover:border-opacity-50 transition-colors shadow-sm`}>

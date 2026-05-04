@@ -14,42 +14,23 @@ export default async function CampaignsPage() {
     }
 
     // Fetch campaigns for the logged-in brand
-    // Fetch campaigns for the logged-in brand using raw query to ensure new fields (images) are fetched
-    // despite potential stale Prisma Client definitions.
-    const campaignsRaw = await db.$queryRaw`
-        SELECT c.*, 
-        (SELECT COUNT(*) FROM "CampaignCandidate" WHERE "campaignId" = c."id") as "candidatesCount"
-        FROM "Campaign" c
-        JOIN "BrandProfile" b ON c."brandId" = b."id"
-        WHERE b."userId" = ${session.user.id}
-        ORDER BY c."createdAt" DESC
-    ` as any[];
-
-    const campaigns = campaignsRaw.map(c => {
-        // Raw SQL returns `images` as a JSON string from Postgres â€” parse it into a real array
-        let images: string[] = [];
-        if (c.images) {
-            if (Array.isArray(c.images)) {
-                images = c.images;
-            } else if (typeof c.images === 'string') {
-                try { images = JSON.parse(c.images); } catch { images = []; }
+    const campaigns = await db.campaign.findMany({
+        where: {
+            brand: {
+                userId: session.user.id
             }
-        }
-
-        return {
-            ...c,
-            images,
-            // Ensure dates are Date objects if driver returns strings
-            createdAt: new Date(c.createdAt),
-            startDate: c.startDate ? new Date(c.startDate) : null,
-            endDate: c.endDate ? new Date(c.endDate) : null,
-            // Map count
+        },
+        include: {
             _count: {
-                candidates: Number(c.candidatesCount || 0)
+                select: {
+                    candidates: true
+                }
             }
-        };
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
     });
 
     return <CampaignListClient campaigns={campaigns} />;
 }
-

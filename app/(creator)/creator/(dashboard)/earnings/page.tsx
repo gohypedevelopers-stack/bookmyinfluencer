@@ -157,10 +157,10 @@ export default function CreatorEarningsPage() {
     }
 
     return (
-        <div className="h-full overflow-y-auto p-10 bg-gray-50">
+        <div className="h-full overflow-y-auto p-4 md:p-10 bg-gray-50">
 
             {/* Balance Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[2.5rem] p-10 mb-8 border border-blue-100 flex items-center justify-between">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-10 mb-8 border border-blue-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                 <div>
                     <div className="flex items-center gap-2 text-blue-600 font-bold text-sm mb-2">
                         <Wallet className="w-4 h-4" />
@@ -172,7 +172,7 @@ export default function CreatorEarningsPage() {
                     <p className="text-gray-400 text-sm">Automatic transfer scheduled for Oct 24, 2024</p>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                     <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
                         <DialogTrigger asChild>
                             <Button
@@ -206,7 +206,7 @@ export default function CreatorEarningsPage() {
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                 <Card className="rounded-[2rem] border-gray-100 shadow-sm p-8 flex items-center gap-6">
                     <div className="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center text-yellow-600">
                         <Hourglass className="w-8 h-8" />
@@ -234,9 +234,9 @@ export default function CreatorEarningsPage() {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-12 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
                 {/* Income Trends Chart */}
-                <Card className="col-span-8 rounded-[2rem] border-gray-100 shadow-sm p-8">
+                <Card className="lg:col-span-8 rounded-[1.5rem] md:rounded-[2rem] border-gray-100 shadow-sm p-6 md:p-8">
                     <div className="flex justify-between items-start mb-8">
                         <div>
                             <h3 className="font-bold text-lg text-gray-900">Income Trends</h3>
@@ -276,7 +276,7 @@ export default function CreatorEarningsPage() {
                 </Card>
 
                 {/* Payout Method */}
-                <Card className="col-span-4 rounded-[2rem] border-gray-100 shadow-sm p-8">
+                <Card className="lg:col-span-4 rounded-[1.5rem] md:rounded-[2rem] border-gray-100 shadow-sm p-6 md:p-8">
                     <h3 className="font-bold text-lg text-gray-900 mb-6">Payout Method</h3>
 
                     {earnings?.payoutMethods && earnings.payoutMethods.length > 0 ? (
@@ -329,8 +329,8 @@ export default function CreatorEarningsPage() {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-lg text-gray-900">Transaction History</h3>
                         <div className="flex gap-3">
@@ -378,16 +378,17 @@ export default function CreatorEarningsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="grid grid-cols-4 px-8 py-4 bg-gray-50/50 text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
+                    <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden overflow-x-auto">
+                        <div className="min-w-[600px]">
+                            <div className="grid grid-cols-4 px-6 md:px-8 py-4 bg-gray-50/50 text-xs font-bold text-gray-400 uppercase border-b border-gray-100">
                             <span>Brand</span>
                             <span>Date</span>
                             <span>Amount</span>
                             <span className="text-right">Status</span>
                         </div>
-                        {isWithdrawOpen && <div className="hidden">Hack to prevent unused var warning if I don't use it in JSX yet</div>}
-                        {filteredTransactions.map((tx, i) => (
-                            <div key={i} className="grid grid-cols-4 px-8 py-5 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center text-sm">
+                                {isWithdrawOpen && <div className="hidden">Hack to prevent unused var warning if I don't use it in JSX yet</div>}
+                                {filteredTransactions.map((tx, i) => (
+                                    <div key={i} className="grid grid-cols-4 px-6 md:px-8 py-5 border-b border-gray-50 hover:bg-gray-50 transition-colors items-center text-sm">
                                 <span className="font-bold text-gray-900">{tx.brand}</span>
                                 <span className="text-gray-500">{tx.date}</span>
                                 <span className={`font-bold ${tx.isDebit ? 'text-red-500' : 'text-green-600'}`}>{tx.amount}</span>
@@ -403,18 +404,19 @@ export default function CreatorEarningsPage() {
                                 </div>
                             </div>
                         ))}
-                        {filteredTransactions.length === 0 && (
-                            <div className="p-8 text-center text-gray-400">No transactions found.</div>
-                        )}
-                        <div className="p-4 text-center">
-                            <button className="text-sm font-bold text-gray-400 hover:text-gray-600">View All Transactions</button>
+                            {filteredTransactions.length === 0 && (
+                                <div className="p-8 text-center text-gray-400">No transactions found.</div>
+                            )}
+                            <div className="p-4 text-center">
+                                <button className="text-sm font-bold text-gray-400 hover:text-gray-600">View All Transactions</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="col-span-4">
+                <div className="lg:col-span-4">
                     <h3 className="font-bold text-lg text-gray-900 mb-6">Tax Documents</h3>
-                    <Card className="rounded-[2rem] border-gray-100 shadow-sm p-6 space-y-4">
+                    <Card className="rounded-[1.5rem] md:rounded-[2rem] border-gray-100 shadow-sm p-6 space-y-4">
                         {[2023, 2022, 2021].map((year) => (
                             <div key={year} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer transition-colors group">
                                 <div className="flex items-center gap-3">

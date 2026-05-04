@@ -84,8 +84,8 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-[1600px] mx-auto px-6 py-8">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6 md:py-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                                 <span>Dashboard</span>
@@ -113,8 +113,8 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                 </div>
             </div>
 
-            <div className="max-w-[1600px] mx-auto px-6 py-8">
-                <div className="mb-5 rounded-[32px] border border-slate-200 bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#4338ca_100%)] p-6 text-white shadow-[0_28px_80px_-38px_rgba(15,23,42,0.55)]">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
+                <div className="mb-5 rounded-[32px] border border-slate-200 bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#4338ca_100%)] p-5 md:p-6 text-white shadow-[0_28px_80px_-38px_rgba(15,23,42,0.55)]">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Execution Model</p>
@@ -304,7 +304,7 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                         <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Total Active Spend</div>
                         <div className="text-3xl font-bold text-gray-900 mb-2">Rs.{totalActiveSpend.toLocaleString()}</div>

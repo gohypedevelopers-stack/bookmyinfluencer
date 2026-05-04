@@ -61,15 +61,15 @@ export default function CreatorAnalyticsPage() {
     const kpis = analytics?.kpis || { avgLikes: 0, reach: 0, engagementRate: 0, followersCount: 0 };
 
     return (
-        <div className="h-full overflow-y-auto p-10 bg-gray-50">
-            <div className="flex justify-between items-end mb-8">
+        <div className="h-full overflow-y-auto p-4 md:p-10 bg-gray-50">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Creator Performance</h1>
                     <p className="text-gray-500">Track your growth and engagement metrics</p>
                 </div>
 
-                <div className="flex gap-4">
-                    <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 flex">
+                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                    <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 flex overflow-x-auto">
                         <button
                             onClick={() => setPlatform("ALL")}
                             className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${platform === "ALL" ? 'bg-gray-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
@@ -121,9 +121,9 @@ export default function CreatorAnalyticsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column (Chart & Stats) */}
-                <div className="col-span-8 space-y-8">
+                <div className="lg:col-span-8 space-y-8">
                     {/* Chart Card */}
                     <Card className="rounded-3xl border-gray-100 shadow-sm overflow-hidden p-6 bg-white">
                         <div className="flex justify-between items-start mb-8">
@@ -200,7 +200,7 @@ export default function CreatorAnalyticsPage() {
                     </Card>
 
                     {/* KPI Cards */}
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <Card className="rounded-2xl border-gray-100 shadow-sm p-5 bg-white">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">AVG. LIKES PER POST</p>
                             <div className="flex items-end gap-3">
@@ -241,7 +241,7 @@ export default function CreatorAnalyticsPage() {
                 </div>
 
                 {/* Right Column */}
-                <div className="col-span-4 space-y-6">
+                <div className="lg:col-span-4 space-y-6">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="font-bold text-lg text-gray-900">Top Performing Content</h3>
                         <button className="text-gray-400 hover:text-gray-600" onClick={fetchAnalytics}>

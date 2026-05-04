@@ -53,7 +53,7 @@ export default async function BrandDashboardPage() {
     const { unreadMessageCount } = await getBrandNotifications();
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>

@@ -163,7 +163,7 @@ export async function GET() {
                 followers: fmtFollowers,
                 followersCount: followers,
                 engagementRate: engagement,
-                avgViews: latestMetric?.viewsCount ? formatPriceRange(latestMetric.viewsCount.toString()) : 'N/A', // Reusing helper or similar
+                avgViews: latestMetric?.viewsCount || 'N/A',
                 verified: creator.verificationStatus === 'APPROVED',
                 tags: creator.niche ? creator.niche.split(',').slice(0, 3).map((t: string) => t.trim()) : [],
                 priceRange: formatPriceRange(creator.pricing),

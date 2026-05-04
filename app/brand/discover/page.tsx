@@ -1,6 +1,16 @@
-import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import DiscoveryClient from "./DiscoveryClient";
 
-export default function BrandDiscoverPage() {
-    redirect("/brand/campaigns/new");
+export const dynamic = "force-dynamic";
+
+export default async function BrandDiscoverPage() {
+    const influencers = await db.influencerProfile.findMany({
+        include: {
+            user: true
+        },
+        take: 20,
+    });
+
+    return <DiscoveryClient influencers={influencers as any} />;
 }
 

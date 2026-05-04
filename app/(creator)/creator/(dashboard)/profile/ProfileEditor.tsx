@@ -190,7 +190,7 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
             )}
 
             {/* Header */}
-            <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-5 flex items-center justify-between">
+            <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 md:px-8 py-4 md:py-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
@@ -200,14 +200,14 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                     </button>
                     <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
                 </div>
-                <div className="flex gap-3">
-                    <Button variant="ghost" onClick={() => router.refresh()} className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 font-medium">
+                <div className="flex gap-2 md:gap-3">
+                    <Button variant="ghost" onClick={() => router.refresh()} className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 font-medium px-2 md:px-4">
                         Discard
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={loading}
-                        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-200 rounded-lg px-6"
+                        className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-200 rounded-lg px-4 md:px-6 text-sm md:text-base"
                     >
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         Save Changes
@@ -215,9 +215,9 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                 </div>
             </header>
 
-            <div className="p-10 max-w-5xl mx-auto space-y-8">
+            <div className="p-4 md:p-10 max-w-5xl mx-auto space-y-8">
                 {/* Profile Banner */}
-                <div className={`rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden relative group min-h-[300px] flex items-end ${!bannerImage ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' : 'bg-white'}`}>
+                <div className={`rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden relative group min-h-[200px] md:min-h-[300px] flex items-end ${!bannerImage ? 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500' : 'bg-white'}`}>
                     {/* Background Image - Absolute to cover full card */}
                     <div className="absolute inset-0">
                         {bannerImage && (
@@ -253,11 +253,11 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                         />
                     </div>
 
-                    <div className="px-8 pb-8 flex items-end relative z-10 w-full">
-                        <div className="flex items-end gap-6 w-full">
+                    <div className="px-4 md:px-8 pb-4 md:pb-8 flex items-end relative z-10 w-full">
+                        <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full text-center md:text-left">
                             {/* Profile Picture */}
                             <div className="relative group/avatar shrink-0">
-                                <div className="w-32 h-32 rounded-2xl border-[4px] border-white/50 backdrop-blur-sm shadow-xl overflow-hidden bg-orange-100 flex items-center justify-center relative">
+                                <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[3px] md:border-[4px] border-white/50 backdrop-blur-sm shadow-xl overflow-hidden bg-orange-100 flex items-center justify-center relative">
                                     {profileImage ? (
                                         <Image
                                             src={profileImage}
@@ -287,7 +287,7 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                             </div>
 
                             <div className="mb-2 flex-1">
-                                <h2 className="text-3xl font-bold text-white flex items-center gap-2 drop-shadow-md">
+                                <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center justify-center md:justify-start gap-2 drop-shadow-md">
                                     {displayName}
                                 </h2>
                                 <div className="mt-3 flex items-center gap-4">
@@ -302,8 +302,8 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                 </div>
 
                 {/* General Information */}
-                <Card className="rounded-[2rem] border-gray-100 shadow-sm overflow-hidden">
-                    <CardContent className="p-8">
+                <Card className="rounded-[1.5rem] md:rounded-[2rem] border-gray-100 shadow-sm overflow-hidden">
+                    <CardContent className="p-5 md:p-8">
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
                                 <Briefcase className="w-5 h-5" />
@@ -311,7 +311,7 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                             <h3 className="text-lg font-bold text-gray-900">General Information</h3>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-8 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Display Name</label>
                                 <Input
@@ -382,8 +382,8 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
                 </Card>
 
                 {/* Linked Socials - Kept as Read Only / Manage separate actions */}
-                <Card className="rounded-[2rem] border-gray-100 shadow-sm overflow-hidden">
-                    <CardContent className="p-8">
+                <Card className="rounded-[1.5rem] md:rounded-[2rem] border-gray-100 shadow-sm overflow-hidden">
+                    <CardContent className="p-5 md:p-8">
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
