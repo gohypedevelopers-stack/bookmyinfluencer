@@ -90,7 +90,7 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
 
                                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-10">
                                         <div className="flex items-center gap-1.5 mb-1transform group-hover:-translate-y-1 transition-transform duration-500">
-                                            <h3 className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
+                                            <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
                                             <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 drop-shadow-sm flex-shrink-0" />
                                         </div>
                                         <p className="text-xs sm:text-sm text-slate-600 font-medium mb-4 sm:mb-5 truncate group-hover:text-slate-900 transition-colors">{creator.niche || 'General Content'}</p>
@@ -98,11 +98,11 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
                                         <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold border-t border-slate-100 pt-3 sm:pt-4 group-hover:border-slate-200 transition-colors">
                                             <div className="space-y-1">
                                                 <p className="text-slate-500 uppercase tracking-tighter">Followers</p>
-                                                <p className="text-slate-900 text-xs sm:text-sm font-black">{fmtFollowers}</p>
+                                                <p className="text-slate-900 text-xs sm:text-sm font-bold">{fmtFollowers}</p>
                                             </div>
                                             <div className="text-right space-y-1">
                                                 <p className="text-slate-500 uppercase tracking-tighter">Engagement</p>
-                                                <p className="text-indigo-600 text-xs sm:text-sm font-black">{engagement.toFixed(1)}%</p>
+                                                <p className="text-indigo-600 text-xs sm:text-sm font-bold">{engagement.toFixed(1)}%</p>
                                             </div>
                                         </div>
                                     </div>

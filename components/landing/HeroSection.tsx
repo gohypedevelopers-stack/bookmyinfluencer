@@ -54,10 +54,10 @@ export function HeroSection() {
                         >
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-indigo-100/50 backdrop-blur-md shadow-sm">
                                 <Zap className="w-3 h-3 text-indigo-600 fill-indigo-600" />
-                                <span className="text-[9px] font-black tracking-[0.15em] uppercase text-indigo-600/80">Premium Influencer Network</span>
+                                <span className="text-[9px] font-bold tracking-[0.15em] uppercase text-indigo-600/80">Premium Influencer Network</span>
                             </div>
 
-                            <h1 className="text-4xl sm:text-6xl lg:text-[4rem] font-black text-slate-900 tracking-tight leading-[1.05] text-left">
+                            <h1 className="text-4xl sm:text-6xl lg:text-[4rem] font-bold text-slate-900 tracking-tight leading-[1.05] text-left">
                                 The Most <span className="text-indigo-600">Trusted</span> <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-indigo-600 to-fuchsia-500 drop-shadow-sm">Bridge Between</span> <br />
                                 <span className="text-slate-800">Brands & Creators</span>
@@ -74,13 +74,13 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="flex flex-wrap items-center gap-5"
                         >
-                            <Button size="lg" className="rounded-2xl bg-gradient-to-br from-[#ff4d8d] to-[#f43f5e] hover:from-[#f43f5e] hover:to-[#e11d48] text-white px-10 h-16 text-sm font-black shadow-xl shadow-rose-200/50 transition-all hover:-translate-y-1 hover:scale-[1.02] border-none uppercase tracking-widest" asChild>
+                            <Button size="lg" className="rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:via-violet-700 hover:to-purple-700 text-white px-10 h-16 text-[15px] font-semibold shadow-xl shadow-indigo-300/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-400/30 border-none" asChild>
                                 <Link href="/brand/register">
                                     Hire Now
                                     <ArrowRight className="ml-2 h-5 w-5" />
                                 </Link>
                             </Button>
-                            <Button size="lg" variant="ghost" className="rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/50 px-10 h-16 text-sm font-black transition-all uppercase tracking-widest border border-slate-200/60" asChild>
+                            <Button size="lg" variant="ghost" className="rounded-2xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/60 px-10 h-16 text-[15px] font-semibold transition-all duration-300 border border-slate-200/80 hover:border-indigo-200 hover:-translate-y-0.5" asChild>
                                 <Link href="/register">
                                     Join as Creator
                                 </Link>
@@ -120,10 +120,10 @@ export function HeroSection() {
                                         </div>
 
                                         <div className="space-y-0.5">
-                                            <span className="text-2xl font-black text-slate-900 leading-none tracking-tight block">
+                                            <span className="text-2xl font-bold text-slate-900 leading-none tracking-tight block">
                                                 {stat.value}
                                             </span>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 group-hover:text-indigo-600 transition-colors duration-300">
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 group-hover:text-indigo-600 transition-colors duration-300">
                                                 {stat.label}
                                             </span>
                                         </div>
@@ -144,7 +144,7 @@ export function HeroSection() {
                         className="relative"
                     >
                         {/* Main Card */}
-                        <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] border-[12px] border-white bg-white group">
+                        <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] bg-white group">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={currentIndex}
@@ -177,7 +177,7 @@ export function HeroSection() {
                                     <TrendingUp className="w-5 h-5 text-indigo-600" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-black text-slate-900 leading-none">High Growth</span>
+                                    <span className="text-sm font-bold text-slate-900 leading-none">High Growth</span>
                                     <span className="text-[9px] text-slate-500 font-bold uppercase mt-1 tracking-wider">Top 1% Creator</span>
                                 </div>
                             </div>

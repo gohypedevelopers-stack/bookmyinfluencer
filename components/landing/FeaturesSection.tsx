@@ -11,7 +11,7 @@ export function FeaturesSection() {
     const y2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
 
     return (
-        <section className="w-full py-24 md:py-32 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full pt-12 pb-20 md:pt-16 md:pb-28 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
                 <motion.div style={{ y: y1 }} className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]" />
@@ -26,14 +26,14 @@ export function FeaturesSection() {
                     transition={{ duration: 0.6 }}
                     className="mb-32"
                 >
-                    <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-12">Trusted by Industry Leaders</p>
+                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-[0.3em] mb-12">Trusted by Industry Leaders</p>
 
 
                     {/* Infinite Animated Carousel Container - Two Rows */}
-                    <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-16 bg-sky-600 rounded-[3rem] border border-sky-500 shadow-2xl shadow-sky-300/50">
+                    <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-16 bg-gradient-to-br from-white via-indigo-50 to-sky-100 rounded-[3rem] border border-white shadow-2xl shadow-slate-200/80">
                         {/* Gradient masks */}
-                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-sky-600 to-transparent z-10 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-sky-600 to-transparent z-10 pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-sky-100 to-transparent z-10 pointer-events-none" />
 
                         {/* Top Row - Scrolls Left */}
                         <motion.div
@@ -43,22 +43,22 @@ export function FeaturesSection() {
                                 <div key={`row1-${setIndex}`} className="flex items-center gap-12 md:gap-40">
                                     {[
                                         { name: "Fabhotels", src: "/images/logos/fabhotels.avif", width: 220, height: 100 },
-                                        { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 100 },
-                                        { name: "Homify", src: "/images/logos/homify.avif", width: 180, height: 100 },
-                                        { name: "IndianOil", src: "/images/logos/indianoil.avif", width: 180, height: 100 },
-                                        { name: "Lazada", src: "/images/logos/lazada.avif", width: 200, height: 100 },
+                                        { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 100, filter: "brightness-0 scale-125" },
+                                        { name: "Homify", src: "/images/logos/homify.avif", width: 180, height: 100, filter: "brightness-0 scale-125" },
+                                        { name: "IndianOil", src: "/images/logos/indianoil.avif", width: 180, height: 100, filter: "scale-75" },
+                                        { name: "Lazada", src: "/images/logos/lazada.avif", width: 200, height: 100, filter: "brightness-0" },
                                         { name: "Yatra", src: "/images/logos/yatra.png", width: 180, height: 100 },
                                     ].map((brand, i) => (
                                         <div
                                             key={`${setIndex}-r1-${brand.name}-${i}`}
-                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 group/logo"
+                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 group/logo flex items-center justify-center w-32 md:w-48 lg:w-64 h-24 md:h-32 lg:h-40"
                                         >
                                             <Image
                                                 src={brand.src}
                                                 alt={brand.name}
-                                                width={brand.width * 1.5}
-                                                height={brand.height * 1.5}
-                                                className="h-16 md:h-24 lg:h-32 w-auto object-contain transition-all duration-300"
+                                                width={brand.width * 2}
+                                                height={brand.height * 2}
+                                                className={`w-full h-full object-contain contrast-110 drop-shadow-[0_3px_10px_rgba(15,23,42,0.24)] transition-all duration-300 ${brand.filter ?? ""}`}
                                             />
                                         </div>
                                     ))}
@@ -73,22 +73,22 @@ export function FeaturesSection() {
                             {[1, 2, 3].map((setIndex) => (
                                 <div key={`row2-${setIndex}`} className="flex items-center gap-12 md:gap-40">
                                     {[
-                                        { name: "Mash", src: "/images/logos/mash.avif", width: 160, height: 60 },
-                                        { name: "Neo", src: "/images/logos/neo.avif", width: 180, height: 60 },
-                                        { name: "Pai", src: "/images/logos/pai.avif", width: 140, height: 60 },
-                                        { name: "Rapid Repair", src: "/images/logos/rapidrepair.avif", width: 220, height: 60 },
+                                        { name: "Mash", src: "/images/logos/mash.avif", width: 160, height: 60, filter: "scale-125" },
+                                        { name: "Neo", src: "/images/logos/neo.avif", width: 180, height: 60, filter: "scale-125" },
+                                        { name: "Pai", src: "/images/logos/pai.avif", width: 140, height: 60, filter: "brightness-0 scale-110" },
+                                        { name: "Rapid Repair", src: "/images/logos/rapidrepair.avif", width: 220, height: 60, filter: "brightness-0 scale-125" },
                                         { name: "Taneja Group", src: "/images/logos/taneja group.avif", width: 280, height: 60 },
                                     ].map((brand, i) => (
                                         <div
                                             key={`${setIndex}-r2-${brand.name}-${i}`}
-                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4"
+                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 flex items-center justify-center w-32 md:w-48 lg:w-64 h-24 md:h-32 lg:h-40"
                                         >
                                             <Image
                                                 src={brand.src}
                                                 alt={brand.name}
-                                                width={brand.width * 1.5}
-                                                height={brand.height * 1.5}
-                                                className="h-14 md:h-20 lg:h-24 w-auto object-contain transition-all duration-300"
+                                                width={brand.width * 2}
+                                                height={brand.height * 2}
+                                                className={`w-full h-full object-contain contrast-110 drop-shadow-[0_3px_10px_rgba(15,23,42,0.24)] transition-all duration-300 ${brand.filter ?? ""}`}
                                             />
                                         </div>
                                     ))}
@@ -103,9 +103,9 @@ export function FeaturesSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="max-w-3xl mx-auto mb-20"
+                    className="max-w-3xl mx-auto mt-50 mb-24"
                 >
-                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 tracking-tight">Standardizing the <span className="text-indigo-600">Industry</span></h2>
+                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight">Standardizing the <span className="text-indigo-600">Industry</span></h2>
                     <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed font-medium">We build the infrastructure for secure and professional creative collaborations.</p>
                 </motion.div>
 
@@ -161,7 +161,7 @@ export function FeaturesSection() {
                                     </svg>
                                 </div>
 
-                                <h3 className="text-2xl font-black text-slate-900 mb-5 group-hover:text-indigo-600 transition-colors">
+                                <h3 className="text-2xl font-bold text-slate-900 mb-5 group-hover:text-indigo-600 transition-colors">
                                     {feature.title}
                                 </h3>
 

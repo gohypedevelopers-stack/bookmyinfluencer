@@ -32,5 +32,16 @@ export default async function CampaignsPage() {
         }
     });
 
-    return <CampaignListClient campaigns={campaigns} />;
+    const formattedCampaigns = campaigns.map(campaign => ({
+        ...campaign,
+        images: (() => {
+            try {
+                return JSON.parse(campaign.images || "[]");
+            } catch (e) {
+                return [];
+            }
+        })()
+    }));
+
+    return <CampaignListClient campaigns={formattedCampaigns} />;
 }

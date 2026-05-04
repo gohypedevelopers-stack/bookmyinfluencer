@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
 import { signIn, getSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -86,10 +87,23 @@ export default function LoginPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 p-12 flex-col justify-between relative overflow-hidden"
+                className="hidden lg:flex lg:w-[45%] bg-slate-900 p-12 flex-col justify-between relative overflow-hidden"
             >
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=2874&auto=format&fit=crop"
+                        alt="Creator Background"
+                        fill
+                        className="object-cover opacity-40 mix-blend-luminosity scale-105"
+                        priority
+                        sizes="50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 via-indigo-600/80 to-violet-700/90 mix-blend-multiply" />
+                </div>
+
                 {/* Decorative Elements */}
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-0">
                     <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white rounded-full blur-[100px]" />
                     <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-300 rounded-full blur-[100px]" />
                 </div>
@@ -144,7 +158,7 @@ export default function LoginPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="w-full max-w-[440px] bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 relative z-10"
+                    className="w-full max-w-[380px] bg-white p-6 sm:p-7 rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 relative z-10"
                 >
                     <div className="text-center mb-8">
                         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mb-5 shadow-sm shadow-blue-100">
@@ -205,7 +219,7 @@ export default function LoginPage() {
                                         value={formData.password}
                                         onChange={handleInputChange}
                                         className="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all shadow-sm"
-                                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                        placeholder="••••••••"
                                         required
                                     />
                                     <button

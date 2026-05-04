@@ -12,7 +12,7 @@ export function CallToAction() {
 
 
     return (
-        <section className="w-full py-20 sm:py-32 bg-transparent relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-20 md:py-28 bg-transparent relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -32,7 +32,7 @@ export function CallToAction() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
-                            className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-tight"
+                            className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight"
                         >
                             Ready to Scale Your <br />
                             <span className="text-indigo-100">Global Reach?</span>
@@ -55,7 +55,7 @@ export function CallToAction() {
                             transition={{ delay: 0.4 }}
                             className="flex flex-col sm:flex-row gap-6 justify-center"
                         >
-                            <Button size="lg" className="bg-white text-indigo-600 hover:bg-slate-50 font-black h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-base sm:text-lg transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 tracking-widest uppercase text-xs" asChild>
+                            <Button size="lg" className="bg-white text-indigo-600 hover:bg-slate-50 font-semibold h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-sm sm:text-[15px] transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/10" asChild>
                                 <Link href="/login">
                                     Get Started Free
                                 </Link>
@@ -64,7 +64,7 @@ export function CallToAction() {
                                 onClick={() => setIsModalOpen(true)}
                                 size="lg"
                                 variant="outline"
-                                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-md h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-base sm:text-lg transition-all hover:scale-105 active:scale-95 font-black tracking-widest uppercase text-xs"
+                                className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 backdrop-blur-md h-14 sm:h-16 px-8 sm:px-12 rounded-[2rem] text-sm sm:text-[15px] transition-all duration-300 hover:scale-105 active:scale-95 font-semibold"
                             >
                                 Contact Sales
                             </Button>

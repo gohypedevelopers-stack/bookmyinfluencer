@@ -53,7 +53,7 @@ export function WorkflowSection() {
 
 
     return (
-        <section className="w-full py-20 md:py-32 bg-transparent text-center overflow-hidden transition-colors duration-500">
+        <section className="w-full py-20 md:py-28 bg-transparent text-center overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export function WorkflowSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                    <h2 className="text-3xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
                         Streamlined <span className="text-indigo-600">Workflow</span>
                     </h2>
                     <p className="text-lg sm:text-xl text-slate-600 mb-12 sm:mb-16 max-w-2xl mx-auto font-medium">
@@ -87,14 +87,14 @@ export function WorkflowSection() {
 
                         <button
                             onClick={() => setActiveTab('brand')}
-                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'brand' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-500 ${activeTab === 'brand' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Brand
                         </button>
                         <button
                             onClick={() => setActiveTab('creator')}
-                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-black tracking-widest uppercase transition-all duration-500 ${activeTab === 'creator' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
+                            className={`relative z-10 px-6 sm:px-14 py-4 rounded-[1.5rem] text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-500 ${activeTab === 'creator' ? 'text-white' : 'text-slate-500 hover:text-slate-700'
                                 }`}
                         >
                             I'm a Creator
@@ -127,7 +127,7 @@ export function WorkflowSection() {
                       transition-all duration-500 group-hover:scale-110 group-hover:rotate-[15deg] group-hover:border-indigo-600 group-hover:shadow-indigo-100 ${activeTab === 'brand' ? 'text-indigo-600' : 'text-blue-600'
                                             }`}
                                         >
-                                            <span className="text-3xl sm:text-4xl font-black italic tracking-tighter text-slate-900">{item.step}</span>
+                                            <span className="text-3xl sm:text-4xl font-bold italic tracking-tighter text-slate-900">{item.step}</span>
                                         </div>
 
                                         {/* Premium Glow */}
@@ -136,7 +136,7 @@ export function WorkflowSection() {
                                         />
                                     </div>
 
-                                    <h3 className="text-2xl font-black text-slate-900 mb-5 tracking-tight group-hover:text-indigo-600 transition-colors">
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-5 tracking-tight group-hover:text-indigo-600 transition-colors">
                                         {item.title}
                                     </h3>
                                     <p className="text-slate-600 max-w-xs mx-auto leading-relaxed font-medium">

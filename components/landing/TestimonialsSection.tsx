@@ -37,7 +37,7 @@ const STATS = [
 
 export function TestimonialsSection() {
     return (
-        <section className="w-full py-24 md:py-32 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-20 md:py-28 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ export function TestimonialsSection() {
                     viewport={{ once: true }}
                     className="text-center mb-16 sm:mb-20"
                 >
-                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
                         Proven Results for <span className="text-indigo-600">Industry Leaders</span>
                     </h2>
                     <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
@@ -67,7 +67,7 @@ export function TestimonialsSection() {
                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-indigo-600 group-hover:scale-110 transition-transform">
                                 <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
-                            <div className="text-3xl sm:text-4xl font-black text-slate-900 mb-2 tracking-tighter">{stat.value}</div>
+                            <div className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2 tracking-tighter">{stat.value}</div>
                             <div className="text-slate-500 font-bold uppercase tracking-widest text-[10px] sm:text-xs">{stat.label}</div>
                         </motion.div>
                     ))}
@@ -104,8 +104,8 @@ export function TestimonialsSection() {
                                         <div className="text-slate-500 text-sm font-medium">{t.role}</div>
                                     </div>
                                     <div className="ml-auto text-right">
-                                        <div className="text-indigo-600 font-black text-lg leading-none mb-1">{t.metrics.value}</div>
-                                        <div className="text-slate-700 text-[10px] font-black uppercase tracking-widest">{t.metrics.label}</div>
+                                        <div className="text-indigo-600 font-bold text-lg leading-none mb-1">{t.metrics.value}</div>
+                                        <div className="text-slate-700 text-[10px] font-bold uppercase tracking-widest">{t.metrics.label}</div>
                                     </div>
                                 </div>
                             </div>

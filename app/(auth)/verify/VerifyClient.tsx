@@ -211,8 +211,8 @@ export function VerifyClient() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-white">
-      <div className="mx-auto w-full max-w-md px-4 py-16">
-        <Card>
+      <div className="mx-auto w-full max-w-[380px] px-4 py-16">
+        <Card className="rounded-[2rem] shadow-xl border-slate-100">
           <CardHeader>
             <CardTitle>Verify your email</CardTitle>
             <CardDescription>

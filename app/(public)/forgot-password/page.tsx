@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 relative z-10"
+                className="w-full max-w-[380px] bg-white p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-100 relative z-10"
             >
                 <Link
                     href="/login"

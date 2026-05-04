@@ -20,7 +20,7 @@ interface Campaign {
     id: string;
     title: string;
     description: string | null;
-    status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'ARCHIVED';
+    status: string;
     budget: number | null;
     startDate: string | Date | null;
     endDate: string | Date | null;
@@ -29,8 +29,8 @@ interface Campaign {
     _count: {
         candidates: number;
     };
-    platform?: string; // Optional if we infer or add later
-    niche?: string;    // Optional
+    platform?: string | null;
+    niche?: string | null;
 }
 
 interface CampaignListClientProps {

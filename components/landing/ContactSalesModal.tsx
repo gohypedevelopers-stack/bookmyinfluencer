@@ -66,7 +66,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                             {/* Header */}
                             <div className="relative px-10 pt-10 pb-6 flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                                    <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
                                         {step === "form" ? "Contact Sales" : "Message Sent!"}
                                     </h2>
                                     <p className="text-slate-600 font-medium">
@@ -98,7 +98,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                             <div className="space-y-5">
                                                 <div className="grid grid-cols-2 gap-5">
                                                     <div className="space-y-2">
-                                                        <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Full Name</label>
+                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Full Name</label>
                                                         <input
                                                             required
                                                             type="text"
@@ -109,7 +109,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Company</label>
+                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Company</label>
                                                         <input
                                                             required
                                                             type="text"
@@ -122,7 +122,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Work Email</label>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Work Email</label>
                                                     <input
                                                         required
                                                         type="email"
@@ -134,7 +134,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest pl-1">Message</label>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-1">Message</label>
                                                     <textarea
                                                         required
                                                         rows={3}
@@ -150,7 +150,7 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                                 <button
                                                     type="submit"
                                                     disabled={isLoading}
-                                                    className="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group uppercase tracking-widest text-xs"
+                                                    className="w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:via-violet-700 hover:to-purple-700 text-white font-semibold py-4 rounded-2xl shadow-xl shadow-indigo-200/40 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed group text-[15px]"
                                                 >
                                                     {isLoading ? (
                                                         <>
@@ -176,13 +176,13 @@ export function ContactSalesModal({ isOpen, onClose }: ContactSalesModalProps) {
                                             <div className="w-24 h-24 bg-indigo-50 border border-indigo-100 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-indigo-600 shadow-xl shadow-indigo-50">
                                                 <CheckCircle className="w-12 h-12" />
                                             </div>
-                                            <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Request Received</h3>
+                                            <h3 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Request Received</h3>
                                             <p className="text-slate-600 mb-10 max-w-[320px] mx-auto font-medium text-lg leading-relaxed">
                                                 Our executive team will analyze your requirements and reach out within 24 hours.
                                             </p>
                                             <button
                                                 onClick={resetForm}
-                                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-black uppercase tracking-widest text-xs py-4 rounded-2xl transition-all border border-slate-200"
+                                                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-[15px] py-4 rounded-2xl transition-all duration-300 border border-slate-200"
                                             >
                                                 Return to Site
                                             </button>

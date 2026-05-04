@@ -85,7 +85,7 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage, current
             initial="enter"
             animate="center"
             exit="exit"
-            className="flex flex-1 flex-col items-center justify-center w-full max-w-[460px] mx-auto px-5 pt-16 pb-8 md:px-8 md:py-8"
+            className="flex flex-1 flex-col items-center justify-center w-full max-w-[400px] mx-auto px-5 pt-16 pb-8 md:px-8 md:py-8"
         >
             {children}
         </motion.div>

@@ -44,7 +44,7 @@ const CardWrapper = ({ children, stepKey, direction }: { children: React.ReactNo
         animate="center"
         exit="exit"
         transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-        className="flex flex-col w-full max-w-[440px] mx-auto"
+        className="flex flex-col w-full max-w-[380px] mx-auto"
     >
         {children}
     </motion.div>

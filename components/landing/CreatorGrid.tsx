@@ -114,7 +114,7 @@ export function CreatorGrid() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Followers</p>
-                                        <p className="text-lg font-black text-slate-900 leading-none">{creator.followers}</p>
+                                        <p className="text-lg font-bold text-slate-900 leading-none">{creator.followers}</p>
                                     </div>
                                 </div>
 
