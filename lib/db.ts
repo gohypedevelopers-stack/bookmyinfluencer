@@ -83,16 +83,11 @@ const prismaClientSingleton = () => {
     }
 
     const client = new PrismaClient({
-<<<<<<< HEAD
+        // Event-based logging is required for the $on("error") / $on("warn") listeners below.
         log: [
             { emit: "event", level: "error" },
-            { emit: "event", level: "warn" }
+            { emit: "event", level: "warn" },
         ],
-        datasources: {
-            db: {
-                url: dbUrl,
-=======
-        log: isDev ? ["warn", "error"] : ["error"],
         // Only pass datasources override when URL is defined.
         // Prisma v5 throws PrismaClientConstructorValidationError if url is `undefined`.
         // When omitted, Prisma reads DATABASE_URL from the environment directly (via schema.prisma).
@@ -101,10 +96,9 @@ const prismaClientSingleton = () => {
                 db: {
                     url: dbUrl,
                 },
->>>>>>> 3f26028 (feat: implement animated stat cards, update testimonials UI, and add new support, terms, and privacy policy pages)
             },
         } : {}),
-})
+    })
 
     // @ts-ignore
     client.$on("error", (e: any) => {
