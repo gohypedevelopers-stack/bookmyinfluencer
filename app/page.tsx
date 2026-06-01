@@ -15,6 +15,10 @@ export default function Home() {
       <HeroSection />
       
       <Reveal>
+        <WorkflowSection />
+      </Reveal>
+      
+      <Reveal>
         <FeaturesSection />
       </Reveal>
       
@@ -26,9 +30,7 @@ export default function Home() {
         <TestimonialsSection />
       </Reveal>
       
-      <Reveal>
-        <WorkflowSection />
-      </Reveal>
+
       
       <Reveal>
         <CallToAction />

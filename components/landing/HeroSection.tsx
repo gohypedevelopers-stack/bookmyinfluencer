@@ -30,7 +30,7 @@ export function HeroSection() {
     }, []);
 
     return (
-        <section className="w-full bg-[#fdf8f7] pt-8 md:pt-16 lg:pt-20 pb-12 md:pb-20 lg:pb-28 relative overflow-hidden">
+        <section className="w-full bg-[#fdf8f7] pb-12 md:pb-20 lg:pb-28 relative overflow-hidden">
             {/* Background Aesthetic Elements */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <motion.div style={{ y: y1 }} className="absolute -top-[10%] -right-[5%] w-[40%] h-[40%] bg-pink-100/30 rounded-full blur-[120px]" />
@@ -38,7 +38,7 @@ export function HeroSection() {
                 <motion.div style={{ y: y1 }} className="absolute bottom-[10%] right-[20%] w-[25%] h-[25%] bg-indigo-50/20 rounded-full blur-[80px]" />
             </div>
 
-            <Container className="relative z-10">
+            <Container className="relative z-10 pt-4 md:pt-6">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     
                     {/* Left Column: Content */}
@@ -74,17 +74,42 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="flex flex-wrap items-center gap-5"
                         >
-                            <Button size="lg" className="rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:via-violet-700 hover:to-purple-700 text-white px-10 h-16 text-[15px] font-semibold shadow-xl shadow-indigo-300/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-400/30 border-none" asChild>
-                                <Link href="/brand/register">
-                                    Hire Now
-                                    <ArrowRight className="ml-2 h-5 w-5" />
-                                </Link>
-                            </Button>
-                            <Button size="lg" variant="ghost" className="rounded-2xl text-slate-700 hover:text-indigo-600 hover:bg-indigo-50/60 px-10 h-16 text-[15px] font-semibold transition-all duration-300 border border-slate-200/80 hover:border-indigo-200 hover:-translate-y-0.5" asChild>
-                                <Link href="/register">
-                                    Join as Creator
-                                </Link>
-                            </Button>
+                            {/* Primary Button: Hire Now */}
+                            <Link href="/brand/register" className="group relative inline-flex items-center justify-center px-10 h-16 rounded-[2rem] font-bold text-white overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(99,102,241,0.5)]">
+                                {/* Animated Gradient Background */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 bg-[length:200%_auto] animate-gradient-x transition-all duration-500 group-hover:scale-105" />
+                                
+                                {/* Inner glow / shine effect */}
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.8),transparent_60%)] transition-opacity duration-500" />
+                                
+                                {/* Glass shine sweep */}
+                                <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-[30deg] group-hover:left-[200%] transition-all duration-1000 ease-out" />
+                                
+                                {/* Content */}
+                                <div className="relative z-10 flex items-center gap-2">
+                                    <span className="text-[15px] tracking-wide">Hire Now</span>
+                                    <div className="flex items-center justify-center w-7 h-7 rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
+                                        <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform duration-300" />
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Secondary Button: Join as Creator */}
+                            <Link href="/register" className="group relative inline-flex items-center justify-center px-10 h-16 rounded-[2rem] font-bold text-slate-700 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] bg-white/80 backdrop-blur-md border border-slate-200/80 hover:border-indigo-200">
+                                {/* Subtle inner gradient on hover */}
+                                <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                
+                                {/* Outer glow */}
+                                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500 rounded-[2.5rem] opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500" />
+                                
+                                {/* Content */}
+                                <div className="relative z-10 flex items-center gap-2 overflow-hidden">
+                                    <span className="text-[15px] tracking-wide group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-fuchsia-600 transition-all duration-300">Join as Creator</span>
+                                    <div className="w-0 opacity-0 -translate-x-4 group-hover:w-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 flex items-center justify-center">
+                                        <ArrowRight className="w-4 h-4 text-fuchsia-600 flex-shrink-0" />
+                                    </div>
+                                </div>
+                            </Link>
                         </motion.div>
 
                         {/* Metric Blocks - Enhanced Premium Style */}
