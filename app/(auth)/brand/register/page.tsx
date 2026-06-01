@@ -235,6 +235,11 @@ export default function BrandRegisterPage() {
         setOtpLoading(true); setError('');
         const res = await sendEmailOtp(formData.email);
         if (res.success) { setOtpSent(true); setTimer(60); }
+        else if (res.devOtpAvailable) {
+            setOtpSent(true);
+            setTimer(60);
+            setError(`${res.error || "Email was not sent."} Use the OTP printed in the server console for local testing.`);
+        }
         else { setError(res.error || "Failed to send OTP"); }
         setOtpLoading(false);
     };

@@ -1,12 +1,31 @@
 import nodemailer from 'nodemailer';
 
+function getSmtpPassword() {
+    return process.env.SMTP_PASS?.replace(/\s/g, "");
+}
+
+function getMailErrorMessage(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : "";
+    const responseCode =
+        typeof error === "object" && error !== null && "responseCode" in error
+            ? Number((error as { responseCode?: unknown }).responseCode)
+            : undefined;
+
+    if (code === "EAUTH" || responseCode === 535 || /badcredentials|username and password not accepted/i.test(message)) {
+        return "Gmail rejected SMTP credentials. Set SMTP_USER to the full Gmail address and SMTP_PASS to a Google App Password, not the normal Gmail password, then restart the dev server.";
+    }
+
+    return message || "Failed to send email";
+}
+
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    secure: process.env.SMTP_PORT === '465',
     auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS?.replace(/\s/g, ""),
+        pass: getSmtpPassword(),
     },
 });
 
@@ -105,7 +124,7 @@ export async function sendOtpEmail(email: string, otp: string) {
         return { success: true };
     } catch (error) {
         console.error('Error sending OTP email:', error);
-        return { success: false, error: 'Failed to send OTP email' };
+        return { success: false, error: getMailErrorMessage(error) };
     }
 }
 

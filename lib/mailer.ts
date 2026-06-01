@@ -4,27 +4,77 @@ import { env } from "@/lib/env"
 // Singleton transporter
 let transporter: nodemailer.Transporter | null = null
 
-function getTransporter() {
-    if (transporter) return transporter
+function getSmtpPassword() {
+    return env.smtpPass?.replace(/\s/g, "")
+}
 
-    if (!env.smtpUser || !env.smtpPass) {
+function getSmtpPort() {
+    const port = Number(env.smtpPort ?? 465)
+    if (!Number.isInteger(port) || port <= 0) {
+        throw new Error("Invalid SMTP_PORT. Use 465 for Gmail SSL or 587 for STARTTLS.")
+    }
+    return port
+}
+
+function getSafeSmtpConfig() {
+    const smtpPass = getSmtpPassword()
+    const smtpPort = getSmtpPort()
+    const smtpHost = env.smtpHost || "smtp.gmail.com"
+
+    if (!env.smtpUser || !smtpPass) {
         throw new Error("Missing SMTP_USER or SMTP_PASS for Gmail authentication")
     }
 
-    // Gmail App Password strategy
+    if (/^your-|password$/i.test(smtpPass)) {
+        throw new Error("SMTP_PASS is still a placeholder. Use a Gmail App Password.")
+    }
+
+    return {
+        host: smtpHost,
+        port: smtpPort,
+        user: env.smtpUser,
+        pass: smtpPass,
+    }
+}
+
+function normalizeMailError(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code?: unknown }).code) : ""
+    const responseCode =
+        typeof error === "object" && error !== null && "responseCode" in error
+            ? Number((error as { responseCode?: unknown }).responseCode)
+            : undefined
+
+    if (code === "EAUTH" || responseCode === 535 || /badcredentials|username and password not accepted/i.test(message)) {
+        return new Error(
+            "Gmail rejected SMTP credentials. Set SMTP_USER to the full Gmail address and SMTP_PASS to a Google App Password, not the normal Gmail password, then restart the dev server."
+        )
+    }
+
+    return error
+}
+
+function getTransporter() {
+    if (transporter) return transporter
+
+    const smtp = getSafeSmtpConfig()
+
+    // Gmail App Password strategy. Also respects SMTP_HOST/SMTP_PORT for other SMTP providers.
     transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.port === 465,
         auth: {
-            user: env.smtpUser,
-            pass: env.smtpPass?.replace(/\s/g, ""), // App Password without spaces
+            user: smtp.user,
+            pass: smtp.pass,
         },
         // In dev, allow unauthorized to bypass self-signed cert issues if any
         // Note: Gmail generally has valid certs, but this helps in some local network setups
         tls: {
             rejectUnauthorized: env.isProduction,
         },
-        debug: !env.isProduction, // Enable debug logs in dev
-        logger: !env.isProduction, // Enable logger in dev
+        debug: process.env.SMTP_DEBUG === "true",
+        logger: process.env.SMTP_DEBUG === "true",
     })
 
     return transporter
@@ -79,7 +129,7 @@ export async function sendOtpEmail({
         }
     } catch (error) {
         console.error("[Mailer] Nodemailer send failed:", error)
-        throw error
+        throw normalizeMailError(error)
     }
 }
 
@@ -87,9 +137,33 @@ export async function verifyEmailProvider() {
     try {
         const t = getTransporter()
         await t.verify()
-        return { ok: true, provider: "gmail", detail: "Connection successful" }
+        return {
+            ok: true,
+            provider: "smtp",
+            detail: "Connection successful",
+            host: getSafeSmtpConfig().host,
+            port: getSafeSmtpConfig().port,
+            user: getSafeSmtpConfig().user,
+            from: env.mailFrom || getSafeSmtpConfig().user,
+        }
     } catch (error: any) {
-        console.error("[Mailer] Verify failed:", error)
-        return { ok: false, provider: "gmail", error: error.message }
+        const normalized = normalizeMailError(error)
+        const message = normalized instanceof Error ? normalized.message : String(normalized)
+        console.error("[Mailer] Verify failed:", message)
+        let config: ReturnType<typeof getSafeSmtpConfig> | null = null
+        try {
+            config = getSafeSmtpConfig()
+        } catch {
+            config = null
+        }
+        return {
+            ok: false,
+            provider: "smtp",
+            error: message,
+            host: config?.host || env.smtpHost || "smtp.gmail.com",
+            port: config?.port || Number(env.smtpPort ?? 465),
+            user: config?.user || env.smtpUser || null,
+            from: env.mailFrom || config?.user || env.smtpUser || null,
+        }
     }
 }

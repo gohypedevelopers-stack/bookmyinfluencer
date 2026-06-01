@@ -225,6 +225,10 @@ export default function RegisterPage() {
             });
             const data = await res.json();
             if (data.ok) { setOtpSent(true); }
+            else if (data.devOtpAvailable) {
+                setOtpSent(true);
+                setError([data.message, data.infoMessage].filter(Boolean).join(" "));
+            }
             else { setError(data.message || data.error || "Failed to send OTP"); }
         } catch { setError("Failed to send OTP"); }
         finally { setOtpLoading(false); }

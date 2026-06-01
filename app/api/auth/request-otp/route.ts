@@ -3,6 +3,8 @@ import { z } from "zod"
 import { Prisma } from "@prisma/client"
 
 import { db } from "@/lib/db"
+import { cacheDevOtp } from "@/lib/dev-otp"
+import { env } from "@/lib/env"
 import { hashOtp, generateOtp } from "@/lib/otp"
 import { sendOtpEmail } from "@/lib/mailer"
 
@@ -76,6 +78,8 @@ export async function POST(req: Request) {
       },
     })
 
+    cacheDevOtp(email, otp, expiresAt)
+
     // 5. Send Email via Gmail
     console.info("[OTP] sending email", { email })
     try {
@@ -107,6 +111,24 @@ export async function POST(req: Request) {
         error: errorMessage,
         stack: errorStack,
       })
+
+      if (!env.isProduction) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "SMTP_FAILED",
+            resendIn: RESEND_LIMIT_SECONDS,
+            provider: "dev",
+            devOtpAvailable: true,
+            message: errorMessage,
+            infoMessage: "Email was not sent. For local testing, use the OTP printed in the server console.",
+          },
+          { status: 502 }
+        )
+      }
+
+      await db.emailOtp.deleteMany({ where: { userId: user.id } })
+
       // Return 500 so client knows it failed
       return NextResponse.json(
         { ok: false, error: "SMTP_FAILED", message: "Email delivery failed" },

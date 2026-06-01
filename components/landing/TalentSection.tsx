@@ -85,6 +85,9 @@ export async function TalentSection() {
             orderBy: {
                 verifiedAt: "desc",
             },
+        }).catch(err => {
+            console.warn("TalentSection background query failed:", err.message);
+            return [];
         });
 
         const timeoutFallback = new Promise<any[]>((resolve) => {

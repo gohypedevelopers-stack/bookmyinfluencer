@@ -175,6 +175,11 @@ export async function sendEmailOtp(email: string) {
         const emailResult = await sendOtpEmail(normalizedEmail, otp);
         if (!emailResult.success) {
             console.log(`[DEV] OTP for ${normalizedEmail}: ${otp}`);
+            return {
+                success: false,
+                error: emailResult.error || 'Failed to send OTP email.',
+                devOtpAvailable: process.env.NODE_ENV !== 'production',
+            };
         }
 
         return { success: true, message: 'OTP sent to your email.' };

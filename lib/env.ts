@@ -24,11 +24,10 @@ const isProduction = nodeEnv === "production"
 
 const mailFrom =
   process.env.FROM_EMAIL ||
-  process.env.SMTP_FROM ||
-  "no-reply@example.com"
+  process.env.SMTP_FROM
 
 if (isProduction && !process.env.FROM_EMAIL && !process.env.SMTP_FROM) {
-  console.warn("Warning: FROM_EMAIL (or SMTP_FROM) is not set in production. Using default.")
+  console.warn("Warning: FROM_EMAIL (or SMTP_FROM) is not set in production. Falling back to SMTP_USER.")
 }
 
 export const env: EnvConfig = {
