@@ -1,12 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
-import { signIn, getSession } from 'next-auth/react';
+import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
+import { signIn, getSession, getProviders } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Session } from 'next-auth';
+
+function getPostLoginPath(session: Session | null) {
+    if (session?.user?.role === 'ADMIN') return '/admin';
+    if (session?.user?.role === 'MANAGER') return '/manager';
+    if (session?.user?.role === 'BRAND') return '/brand/campaigns';
+    if (session?.user?.role === 'INFLUENCER') {
+        return (session.user as any)?.onboardingComplete ? '/creator/dashboard' : '/creator/onboarding';
+    }
+
+    return '/';
+}
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
@@ -15,14 +27,51 @@ export default function LoginPage() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
     const [mounted, setMounted] = useState(false);
+    const [googleAvailable, setGoogleAvailable] = useState(false);
+    const [providersLoaded, setProvidersLoaded] = useState(false);
 
     const router = useRouter();
 
+    const redirectAfterLogin = useCallback((session: Session | null) => {
+        const nextPath = getPostLoginPath(session);
+        router.push(nextPath);
+        router.refresh();
+    }, [router]);
+
     useEffect(() => {
-        setMounted(true);
-    }, []);
+        let active = true;
+
+        async function hydrateAuthState() {
+            const [providers, session] = await Promise.all([
+                getProviders(),
+                getSession(),
+            ]);
+
+            if (!active) return;
+
+            setGoogleAvailable(Boolean(providers?.google));
+            setProvidersLoaded(true);
+            setMounted(true);
+
+            if (session?.user) {
+                redirectAfterLogin(session);
+            }
+        }
+
+        hydrateAuthState().catch((error) => {
+            console.error(error);
+            if (!active) return;
+            setProvidersLoaded(true);
+            setMounted(true);
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [redirectAfterLogin]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -48,33 +97,60 @@ export default function LoginPage() {
                 setError('Invalid email or password');
                 setLoading(false);
             } else {
-                // Successful login - Redirect based on role
                 const session = await getSession();
-
-                if (session?.user?.role === 'ADMIN') {
-                    router.push('/admin');
-                } else if (session?.user?.role === 'INFLUENCER') {
-                    // Check if creator has completed onboarding
-                    const onboardingComplete = (session?.user as any)?.onboardingComplete;
-                    if (onboardingComplete) {
-                        router.push('/creator/dashboard');
-                    } else {
-                        router.push('/creator/onboarding');
-                    }
-                } else if (session?.user?.role === 'BRAND') {
-                    router.push('/brand/campaigns');
-                } else if (session?.user?.role === 'MANAGER') {
-                    router.push('/manager');
-                } else {
-                    router.push('/');
-                }
-
-                router.refresh(); // Refresh to update session state
+                redirectAfterLogin(session);
             }
         } catch (error) {
             console.error(error);
             setError('An error occurred during login');
             setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        if (!providersLoaded) return;
+
+        if (!googleAvailable) {
+            // Check if we are in development mode to offer a simulation bypass
+            const isDev = process.env.NODE_ENV === 'development';
+            if (isDev) {
+                setGoogleLoading(true);
+                setError('');
+                try {
+                    // Sign in as a test creator using the credentials provider
+                    const result = await signIn('credentials', {
+                        redirect: false,
+                        email: 'dheerajsorout02@gmail.com',
+                        password: 'password123',
+                    });
+
+                    if (result?.error) {
+                        setError('Simulation failed: test account dheerajsorout02@gmail.com not found in database.');
+                        setGoogleLoading(false);
+                    } else {
+                        const session = await getSession();
+                        redirectAfterLogin(session);
+                    }
+                } catch (err) {
+                    setError('Simulation error: ' + String(err));
+                    setGoogleLoading(false);
+                }
+                return;
+            }
+
+            setError('Google login is not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, then restart the server.');
+            return;
+        }
+
+        setGoogleLoading(true);
+        setError('');
+
+        try {
+            await signIn('google', { callbackUrl: '/login' });
+        } catch (error) {
+            console.error(error);
+            setError('Unable to start Google login');
+            setGoogleLoading(false);
         }
     };
 
@@ -255,10 +331,17 @@ export default function LoginPage() {
                         <div className="grid grid-cols-1 gap-3">
                             <button
                                 type="button"
-                                onClick={() => signIn('google', { callbackUrl: '/' })}
-                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                                onClick={handleGoogleLogin}
+                                disabled={!providersLoaded || googleLoading || loading}
+                                title={!googleAvailable ? (process.env.NODE_ENV === 'development' ? 'Google login [Simulation Mode]' : 'Google login needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET') : 'Continue with Google'}
+                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-medium text-sm hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                <Chrome className="w-5 h-5 text-slate-900" /> Google
+                                {googleLoading ? (
+                                    <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
+                                ) : (
+                                    <Chrome className="w-5 h-5 text-slate-900" />
+                                )}
+                                Google
                             </button>
                         </div>
                     </form>

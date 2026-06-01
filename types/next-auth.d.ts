@@ -7,6 +7,7 @@ declare module "next-auth" {
             id: string
             role: UserRole
             kycStatus?: KYCStatus
+            onboardingComplete?: boolean
         } & DefaultSession["user"]
     }
 
@@ -14,6 +15,7 @@ declare module "next-auth" {
         id: string
         role: UserRole
         kycStatus?: KYCStatus
+        onboardingComplete?: boolean
     }
 }
 
@@ -22,5 +24,6 @@ declare module "next-auth/jwt" {
         id: string
         role: UserRole
         kycStatus?: KYCStatus
+        onboardingComplete?: boolean
     }
 }

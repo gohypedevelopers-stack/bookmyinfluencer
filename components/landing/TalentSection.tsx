@@ -7,54 +7,6 @@ import { CreatorCarousel } from "./CreatorCarousel"
 
 const CREATOR_QUERY_TIMEOUT_MS = 2500;
 
-const DUMMY_CREATORS = [
-    {
-        id: "dummy-1",
-        displayName: "Aryan Sharma",
-        fullName: "Aryan Sharma",
-        profileImageUrl: "/images/elena.png",
-        niche: "Lifestyle & Fitness",
-        metrics: [{ followersCount: 85000, engagementRate: 4.8 }],
-        verificationStatus: 'APPROVED'
-    },
-    {
-        id: "dummy-2",
-        displayName: "Sanya Malhotra",
-        fullName: "Sanya Malhotra",
-        profileImageUrl: "/images/julian.png",
-        niche: "Fashion & Beauty",
-        metrics: [{ followersCount: 425000, engagementRate: 5.2 }],
-        verificationStatus: 'APPROVED'
-    },
-    {
-        id: "dummy-3",
-        displayName: "Rohan Varma",
-        fullName: "Rohan Varma",
-        profileImageUrl: "/images/marco.png",
-        niche: "Tech & Gadgets",
-        metrics: [{ followersCount: 450000, engagementRate: 6.1 }],
-        verificationStatus: 'APPROVED'
-    },
-    {
-        id: "dummy-4",
-        displayName: "Priya Singh",
-        fullName: "Priya Singh",
-        profileImageUrl: "/images/sarah.png",
-        niche: "Travel & Food",
-        metrics: [{ followersCount: 320000, engagementRate: 7.4 }],
-        verificationStatus: 'APPROVED'
-    },
-    {
-        id: "dummy-5",
-        displayName: "Kabir Das",
-        fullName: "Kabir Das",
-        profileImageUrl: "/images/marco.png",
-        niche: "Comedy & Entertainment",
-        metrics: [{ followersCount: 410000, engagementRate: 3.9 }],
-        verificationStatus: 'APPROVED'
-    }
-];
-
 export async function TalentSection() {
     // Fetch verified micro creators with a strict timeout so landing page stays fast.
     let dbCreators: any[] = [];
@@ -100,8 +52,7 @@ export async function TalentSection() {
         dbCreators = [];
     }
 
-    // Combine database creators with dummy creators, ensuring we always have data to show
-    const creators = [...dbCreators, ...DUMMY_CREATORS].slice(0, 12);
+    const creators = dbCreators.slice(0, 12);
 
     return (
         <section className="w-full py-20 md:py-28 bg-slate-50/50 overflow-hidden transition-colors duration-500">

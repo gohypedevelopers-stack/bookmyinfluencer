@@ -148,20 +148,38 @@ const providers: NextAuthOptions["providers"] = [
     }),
 ]
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const isGoogleConfigured = googleClientId && 
+    googleClientId.trim() !== "" && 
+    !googleClientId.startsWith("your-") && 
+    googleClientSecret && 
+    googleClientSecret.trim() !== "" && 
+    !googleClientSecret.startsWith("your-");
+
+if (isGoogleConfigured) {
     providers.push(
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: googleClientId!,
+            clientSecret: googleClientSecret!,
         })
     )
 }
 
-if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+const githubClientId = process.env.GITHUB_CLIENT_ID;
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
+const isGithubConfigured = githubClientId && 
+    githubClientId.trim() !== "" && 
+    !githubClientId.startsWith("your-") && 
+    githubClientSecret && 
+    githubClientSecret.trim() !== "" && 
+    !githubClientSecret.startsWith("your-");
+
+if (isGithubConfigured) {
     providers.push(
         GithubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            clientId: githubClientId!,
+            clientSecret: githubClientSecret!,
         })
     )
 }

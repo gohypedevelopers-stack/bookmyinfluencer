@@ -35,6 +35,7 @@ interface CampaignDetailsModalProps {
 
 export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVerified, followerCount }: CampaignDetailsModalProps) {
     const [isApplying, setIsApplying] = useState(false);
+    const [hasImageError, setHasImageError] = useState(false);
 
     if (!campaign) return null;
 
@@ -106,11 +107,12 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                 <div className="relative">
                     {/* Header Image/Gradient */}
                     <div className="h-32 w-full relative overflow-hidden bg-gray-900">
-                        {campaign.images && campaign.images.length > 0 ? (
+                        {campaign.images && campaign.images.length > 0 && !hasImageError ? (
                             <img
                                 src={campaign.images[0]}
                                 alt="Campaign Cover"
                                 className="w-full h-full object-cover"
+                                onError={() => setHasImageError(true)}
                             />
                         ) : (
                             <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>

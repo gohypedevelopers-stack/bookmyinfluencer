@@ -27,82 +27,6 @@ function formatPriceRange(pricing: string | null): string {
     }
 }
 
-
-const DUMMY_MARKETPLACE_CREATORS = [
-    {
-        id: "dummy-m-1",
-        dbId: "dummy-m-1",
-        name: "Aarav Mehta",
-        handle: "@aarav_vlogs",
-        niche: "Travel & Adventure",
-        location: "Mumbai, India",
-        followers: "1.2M",
-        followersCount: 1200000,
-        engagementRate: "5.4%",
-        avgViews: "250K",
-        profileImage: "https://images.unsplash.com/photo-1506794778202-cad8d9741ad2?auto=format&fit=crop&q=80&w=200&h=200",
-        thumbnail: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=800&h=1000",
-        verified: true,
-        tags: ["Adventure", "Vlogging", "Travel"],
-        priceRange: "₹5000-₹15000",
-        saved: false
-    },
-    {
-        id: "dummy-m-2",
-        dbId: "dummy-m-2",
-        name: "Isha Kapoor",
-        handle: "@glam_by_isha",
-        niche: "Fashion & Beauty",
-        location: "Delhi, India",
-        followers: "850K",
-        followersCount: 850000,
-        engagementRate: "6.2%",
-        avgViews: "180K",
-        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200",
-        thumbnail: "https://images.unsplash.com/photo-1490481651871-ab38ed250239?auto=format&fit=crop&q=80&w=800&h=1000",
-        verified: true,
-        tags: ["Fashion", "Makeup", "Lifestyle"],
-        priceRange: "₹3000-₹8000",
-        saved: false
-    },
-    {
-        id: "dummy-m-3",
-        dbId: "dummy-m-3",
-        name: "Vikram Singh",
-        handle: "@tech_vikram",
-        niche: "Technology & Gadgets",
-        location: "Bangalore, India",
-        followers: "450K",
-        followersCount: 450000,
-        engagementRate: "7.8%",
-        avgViews: "320K",
-        profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200",
-        thumbnail: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800&h=1000",
-        verified: true,
-        tags: ["Tech", "Reviews", "Gadgets"],
-        priceRange: "₹8000-₹20000",
-        saved: false
-    },
-    {
-        id: "dummy-m-4",
-        dbId: "dummy-m-4",
-        name: "Ananya Roy",
-        handle: "@fitness_ananya",
-        niche: "Health & Fitness",
-        location: "Pune, India",
-        followers: "620K",
-        followersCount: 620000,
-        engagementRate: "4.9%",
-        avgViews: "150K",
-        profileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200&h=200",
-        thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=800&h=1000",
-        verified: true,
-        tags: ["Fitness", "Diet", "Yoga"],
-        priceRange: "₹2500-₹6000",
-        saved: false
-    }
-];
-
 export async function GET() {
     try {
         // Get all creators from the Creator table (OTP auth system)
@@ -216,10 +140,7 @@ export async function GET() {
             });
         });
 
-        const dbCreators = Array.from(creatorMap.values());
-        const allCreators = [...dbCreators, ...DUMMY_MARKETPLACE_CREATORS];
-
-        return NextResponse.json({ creators: allCreators });
+        return NextResponse.json({ creators: Array.from(creatorMap.values()) });
     } catch (error) {
         console.error("Failed to fetch public creators:", error);
         return NextResponse.json({ creators: [] }, { status: 500 });

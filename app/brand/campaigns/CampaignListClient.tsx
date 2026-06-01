@@ -40,6 +40,7 @@ interface CampaignListClientProps {
 export default function CampaignListClient({ campaigns }: CampaignListClientProps) {
     const [selectedTab, setSelectedTab] = useState<'ALL' | 'ACTIVE' | 'PENDING' | 'COMPLETED'>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
+    const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
     async function handleDelete(id: string) {
         const { deleteCampaign } = await import('@/app/brand/actions');
@@ -198,8 +199,13 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                                     <tr key={campaign.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
-                                                {campaign.images && campaign.images.length > 0 ? (
-                                                    <img src={campaign.images[0]} alt="" className="w-full h-full object-cover" />
+                                                {campaign.images && campaign.images.length > 0 && !imageErrors[campaign.id] ? (
+                                                    <img 
+                                                        src={campaign.images[0]} 
+                                                        alt="" 
+                                                        className="w-full h-full object-cover" 
+                                                        onError={() => setImageErrors(prev => ({ ...prev, [campaign.id]: true }))}
+                                                    />
                                                 ) : (
                                                     <span className="text-gray-400 text-[10px]">No Img</span>
                                                 )}
