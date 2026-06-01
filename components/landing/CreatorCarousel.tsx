@@ -31,7 +31,7 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
                 modules={[Autoplay]}
                 spaceBetween={24}
                 slidesPerView={1}
-                loop={true}
+                loop={creators.length >= 8}
                 speed={1000}
                 autoplay={{
                     delay: 3000,

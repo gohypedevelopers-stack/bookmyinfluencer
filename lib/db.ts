@@ -83,12 +83,30 @@ const prismaClientSingleton = () => {
     }
 
     const client = new PrismaClient({
-        log: isDev ? ["warn", "error"] : ["error"],
+        log: [
+            { emit: "event", level: "error" },
+            { emit: "event", level: "warn" }
+        ],
         datasources: {
             db: {
                 url: dbUrl,
             },
         },
+    })
+
+    // @ts-ignore
+    client.$on("error", (e: any) => {
+        const msg = e.message || String(e);
+        if (msg.includes("Closed") || msg.includes("kind: Closed") || msg.includes("connection closed")) {
+            // Silence transient connection drops caused by Next.js HMR reloads
+            return;
+        }
+        console.error("[PRISMA ERROR]", msg);
+    })
+
+    // @ts-ignore
+    client.$on("warn", (e: any) => {
+        console.warn("[PRISMA WARN]", e.message || String(e));
     })
 
     return client.$extends({

@@ -68,8 +68,6 @@ export async function ensureCreatorAuthUser(input: EnsureCreatorAuthUserInput) {
     })
 
     return { otpUser, user }
-  }, {
-    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   })
 }
 
@@ -176,7 +174,5 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
     })
 
     return { otpUser, user, creator }
-  }, {
-    isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
   })
 }

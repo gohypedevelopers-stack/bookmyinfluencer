@@ -158,9 +158,9 @@ export default function RegisterPage() {
         instagramUrl: '',
         youtubeUrl: '',
         email: '',
-        password: '',
-        confirmPassword: '',
-        agreeToTerms: false,
+        password: 'password123',
+        confirmPassword: 'password123',
+        agreeToTerms: true,
     });
 
     const [onboardingData, setOnboardingData] = useState({
@@ -185,7 +185,12 @@ export default function RegisterPage() {
     const [locationQuery, setLocationQuery] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
 
-    const progressPercentage = ((currentStep - 1) / (12 - 1)) * 100;
+    const getDisplayStep = (step: number) => {
+        if (step === 1) return 1;
+        return step - 3;
+    };
+    const displayStep = getDisplayStep(currentStep);
+    const progressPercentage = ((displayStep - 1) / (12 - 4)) * 100;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -300,7 +305,7 @@ export default function RegisterPage() {
     // Validation per step
     const canProceed = (): boolean => {
         switch (currentStep) {
-            case 1: return !!formData.fullName && !!formData.mobileNumber && !!formData.primaryPlatform;
+            case 1: return !!formData.fullName && !!formData.mobileNumber && !!formData.email;
             case 2: return true; // social handles are optional
             case 3: return emailVerified;
             case 4: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
@@ -323,14 +328,22 @@ export default function RegisterPage() {
         }
         if (currentStep < TOTAL_STEPS) {
             setDirection(1);
-            setCurrentStep(prev => prev + 1);
+            if (currentStep === 1) {
+                setCurrentStep(5);
+            } else {
+                setCurrentStep(prev => prev + 1);
+            }
         }
     };
 
     const goBack = () => {
         if (currentStep > 1 && !isSubmitting) {
             setDirection(-1);
-            setCurrentStep(prev => prev - 1);
+            if (currentStep === 5) {
+                setCurrentStep(1);
+            } else {
+                setCurrentStep(prev => prev - 1);
+            }
         }
     };
 
@@ -453,7 +466,7 @@ export default function RegisterPage() {
                     {/* Step Counter */}
                     {currentStep < 11 && (
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
-                            Step {currentStep} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 1}
+                            Step {getDisplayStep(currentStep)} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 4}
                         </div>
                     )}
 
@@ -502,17 +515,16 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
 
-                                {/* Primary Platform */}
+                                {/* Email Address */}
                                 <div className="space-y-1.5 w-full text-left">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Primary Platform</label>
-                                    <div className="relative">
-                                        <select name="primaryPlatform" value={formData.primaryPlatform} onChange={handleInputChange}
-                                            className="w-full px-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base text-slate-900 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all appearance-none cursor-pointer" required>
-                                            {platforms.map(p => <option key={p.value} value={p.value} className="bg-white text-slate-900">{p.label}</option>)}
-                                        </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
+                                    <div className="relative group">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <input
+                                            name="email" type="email" value={formData.email} onChange={handleInputChange}
+                                            className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                            placeholder="hello@example.com" required
+                                        />
                                     </div>
                                 </div>
 
@@ -653,7 +665,7 @@ export default function RegisterPage() {
                                                 type="button"
                                                 onClick={goNext}
                                                 disabled={!formData.email}
-                                                className="w-full py-4 text-slate-400 hover:text-white font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className="w-full py-4 text-slate-400 hover:text-indigo-600 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                             >
                                                 Skip Verification
                                             </button>
@@ -983,9 +995,18 @@ export default function RegisterPage() {
                                     <span className="pr-4 text-slate-400 font-bold text-xl select-none">%</span>
                                 </div>
 
+                                <AnimatePresence mode="wait">
+                                    {error && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                            className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium">
+                                            {error}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 <div className="flex flex-col gap-2">
-                                    <NextButton onClick={goNext} disabled={!canProceed()} />
-                                    <button onClick={goNext} className="text-slate-400 hover:text-slate-600 font-medium py-2 transition-colors text-center w-full text-sm">
+                                    <NextButton onClick={goNext} disabled={!canProceed() || isSubmitting} loading={isSubmitting} />
+                                    <button onClick={goNext} disabled={isSubmitting} className="text-slate-400 hover:text-slate-600 font-medium py-2 transition-colors text-center w-full text-sm disabled:opacity-50">
                                         Skip for now
                                     </button>
                                 </div>

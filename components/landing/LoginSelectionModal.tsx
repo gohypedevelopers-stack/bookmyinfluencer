@@ -4,15 +4,14 @@ import { useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Users, Building2, ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
-interface JoinSelectionModalProps {
+interface LoginSelectionModalProps {
     isOpen: boolean
     onClose: () => void
-    onOpenLoginModal?: () => void
+    onOpenJoinModal?: () => void
 }
 
-export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSelectionModalProps) {
+export function LoginSelectionModal({ isOpen, onClose, onOpenJoinModal }: LoginSelectionModalProps) {
     const modalRef = useRef<HTMLDivElement>(null)
 
     // Handle ESC key to close
@@ -63,13 +62,13 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
 
                         <div className="p-5 sm:p-6">
                             <div className="text-center mb-6">
-                                <h2 className="text-lg font-bold text-slate-900 tracking-tight uppercase italic underline decoration-emerald-500/30 underline-offset-4">Join Our Platform</h2>
+                                <h2 className="text-lg font-bold text-slate-900 tracking-tight uppercase italic underline decoration-indigo-500/30 underline-offset-4">Log In to Platform</h2>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">
                                 {/* Creator Card */}
                                 <Link
-                                    href="/register"
+                                    href="/login"
                                     onClick={onClose}
                                     className="group relative flex items-center p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl transition-all duration-300 hover:bg-white hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-100/50"
                                 >
@@ -77,7 +76,7 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
                                         <Users className="w-5 h-5" />
                                     </div>
                                     <div className="ml-4 text-left">
-                                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Join as a Creator</h3>
+                                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Log in as a Creator</h3>
                                         <p className="text-slate-500 text-[11px] font-medium leading-tight">Partnerships & Growth</p>
                                     </div>
                                     <ArrowRight className="w-4 h-4 ml-auto text-emerald-600 group-hover:translate-x-1 transition-transform" />
@@ -85,7 +84,7 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
 
                                 {/* Brand Card */}
                                 <Link
-                                    href="/brand/register"
+                                    href="/brand/login"
                                     onClick={onClose}
                                     className="group relative flex items-center p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl transition-all duration-300 hover:bg-white hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-100/50"
                                 >
@@ -93,7 +92,7 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
                                         <Building2 className="w-5 h-5" />
                                     </div>
                                     <div className="ml-4 text-left">
-                                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Join as a Brand</h3>
+                                        <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Log in as a Brand</h3>
                                         <p className="text-slate-500 text-[11px] font-medium leading-tight">Campaigns & Strategy</p>
                                     </div>
                                     <ArrowRight className="w-4 h-4 ml-auto text-indigo-600 group-hover:translate-x-1 transition-transform" />
@@ -102,18 +101,19 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
 
                             <div className="text-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100">
                                 <p className="text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em]">
-                                Already have an account?{" "}
-                                <button
-                                    onClick={() => {
-                                        onClose();
-                                        if (onOpenLoginModal) {
-                                            setTimeout(() => onOpenLoginModal(), 150);
-                                        }
-                                    }}
-                                    className="text-slate-900 font-bold hover:text-indigo-600 transition-colors underline decoration-indigo-500/30 underline-offset-4"
-                                >
-                                    Log in here
-                                </button>
+                                    Don't have an account?{" "}
+                                    <button 
+                                        onClick={() => {
+                                            onClose();
+                                            if (onOpenJoinModal) {
+                                                // Give a brief delay for smoother animation transition
+                                                setTimeout(() => onOpenJoinModal(), 150);
+                                            }
+                                        }} 
+                                        className="text-slate-900 font-bold hover:text-indigo-600 transition-colors underline decoration-indigo-500/30 underline-offset-4"
+                                    >
+                                        Join now
+                                    </button>
                                 </p>
                             </div>
                         </div>
