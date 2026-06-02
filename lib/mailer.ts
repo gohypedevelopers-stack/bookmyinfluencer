@@ -47,7 +47,7 @@ function normalizeMailError(error: unknown) {
 
     if (code === "EAUTH" || responseCode === 535 || /badcredentials|username and password not accepted/i.test(message)) {
         return new Error(
-            "Gmail rejected SMTP credentials. Set SMTP_USER to the full Gmail address and SMTP_PASS to a Google App Password, not the normal Gmail password, then restart the dev server."
+            `SMTP Authentication Rejected by ${env.smtpHost || 'Mail Server'}. Please verify that SMTP_USER (${env.smtpUser}) and SMTP_PASS are correct, and restart your server. Error: ${message}`
         )
     }
 

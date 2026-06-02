@@ -158,9 +158,9 @@ export default function RegisterPage() {
         instagramUrl: '',
         youtubeUrl: '',
         email: '',
-        password: 'password123',
-        confirmPassword: 'password123',
-        agreeToTerms: true,
+        password: '',
+        confirmPassword: '',
+        agreeToTerms: false,
     });
 
     const [onboardingData, setOnboardingData] = useState({
@@ -186,11 +186,10 @@ export default function RegisterPage() {
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const getDisplayStep = (step: number) => {
-        if (step === 1) return 1;
-        return step - 3;
+        return step;
     };
     const displayStep = getDisplayStep(currentStep);
-    const progressPercentage = ((displayStep - 1) / (12 - 4)) * 100;
+    const progressPercentage = ((displayStep - 1) / TOTAL_STEPS) * 100;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -305,7 +304,7 @@ export default function RegisterPage() {
     // Validation per step
     const canProceed = (): boolean => {
         switch (currentStep) {
-            case 1: return !!formData.fullName && !!formData.mobileNumber && !!formData.email;
+            case 1: return !!formData.fullName && !!formData.mobileNumber;
             case 2: return true; // social handles are optional
             case 3: return emailVerified;
             case 4: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
@@ -328,22 +327,14 @@ export default function RegisterPage() {
         }
         if (currentStep < TOTAL_STEPS) {
             setDirection(1);
-            if (currentStep === 1) {
-                setCurrentStep(5);
-            } else {
-                setCurrentStep(prev => prev + 1);
-            }
+            setCurrentStep(prev => prev + 1);
         }
     };
 
     const goBack = () => {
         if (currentStep > 1 && !isSubmitting) {
             setDirection(-1);
-            if (currentStep === 5) {
-                setCurrentStep(1);
-            } else {
-                setCurrentStep(prev => prev - 1);
-            }
+            setCurrentStep(prev => prev - 1);
         }
     };
 
@@ -466,7 +457,7 @@ export default function RegisterPage() {
                     {/* Step Counter */}
                     {currentStep < 11 && (
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
-                            Step {getDisplayStep(currentStep)} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS - 4}
+                            Step {getDisplayStep(currentStep)} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS}
                         </div>
                     )}
 
@@ -514,20 +505,6 @@ export default function RegisterPage() {
                                         />
                                     </div>
                                 </div>
-
-                                {/* Email Address */}
-                                <div className="space-y-1.5 w-full text-left">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
-                                    <div className="relative group">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
-                                        <input
-                                            name="email" type="email" value={formData.email} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
-                                            placeholder="hello@example.com" required
-                                        />
-                                    </div>
-                                </div>
-
                                 <NextButton onClick={goNext} disabled={!canProceed()} />
 
                                 <div className="flex items-center my-0 before:flex-1 before:border-t before:border-slate-200 before:mr-4 after:flex-1 after:border-t after:border-slate-200 after:ml-4">

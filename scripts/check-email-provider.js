@@ -38,6 +38,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  console.error("RAW ERROR OBJECT:", error)
   const responseCode = error && typeof error === "object" ? error.responseCode : undefined
   const code = error && typeof error === "object" ? error.code : undefined
   const message = error instanceof Error ? error.message : String(error)

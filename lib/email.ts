@@ -13,7 +13,7 @@ function getMailErrorMessage(error: unknown) {
             : undefined;
 
     if (code === "EAUTH" || responseCode === 535 || /badcredentials|username and password not accepted/i.test(message)) {
-        return "Gmail rejected SMTP credentials. Set SMTP_USER to the full Gmail address and SMTP_PASS to a Google App Password, not the normal Gmail password, then restart the dev server.";
+        return `SMTP Authentication Rejected by ${process.env.SMTP_HOST || 'Mail Server'}. Please verify that SMTP_USER (${process.env.SMTP_USER}) and SMTP_PASS are correct, and restart your server. Error: ${message}`;
     }
 
     return message || "Failed to send email";
