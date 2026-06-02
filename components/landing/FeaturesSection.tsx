@@ -109,69 +109,86 @@ export function FeaturesSection() {
                     <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed font-medium">We build the infrastructure for secure and professional creative collaborations.</p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-8 md:gap-10">
+                <div className="grid md:grid-cols-3 gap-5 md:gap-6">
                     {[
                         {
                             icon: Shield,
                             title: "Verified Creators",
-                            desc: "Every influencer undergoes strict KYC identity checks and audience quality auditing to ensure real impact.",
-                            gradient: "from-blue-600 to-indigo-600",
-                            shadow: "shadow-blue-200",
-                            iconBg: "bg-blue-50"
+                            tag: "KYC Audited",
+                            desc: "Every influencer undergoes strict identity checks and audience quality auditing to ensure real impact.",
+                            gradient: "from-blue-500 to-indigo-600",
+                            tagColor: "bg-blue-50 text-blue-600 border-blue-100",
+                            stopA: "#3b82f6", stopB: "#4f46e5",
+                            glowColor: "group-hover:shadow-blue-100/80",
                         },
                         {
                             icon: Lock,
                             title: "Secure Escrow",
-                            desc: "Safe-locked payments held in escrow until deliverables are approved. Your investment is always protected.",
-                            gradient: "from-indigo-600 to-purple-600",
-                            shadow: "shadow-indigo-200",
-                            iconBg: "bg-indigo-50"
+                            tag: "Zero Risk",
+                            desc: "Payments held in escrow until deliverables are approved. Your investment is always protected.",
+                            gradient: "from-violet-500 to-purple-600",
+                            tagColor: "bg-violet-50 text-violet-600 border-violet-100",
+                            stopA: "#8b5cf6", stopB: "#9333ea",
+                            glowColor: "group-hover:shadow-violet-100/80",
                         },
                         {
                             icon: MessageSquare,
                             title: "Manager-Led Channels",
-                            desc: "Two protected channels keep brand and creator communication separated while project managers coordinate end-to-end delivery.",
-                            gradient: "from-pink-600 to-rose-600",
-                            shadow: "shadow-pink-200",
-                            iconBg: "bg-pink-50"
+                            tag: "End-to-End",
+                            desc: "Two protected channels keep brands & creators separated while project managers coordinate delivery.",
+                            gradient: "from-rose-500 to-pink-600",
+                            tagColor: "bg-rose-50 text-rose-600 border-rose-100",
+                            stopA: "#f43f5e", stopB: "#db2777",
+                            glowColor: "group-hover:shadow-rose-100/80",
                         }
                     ].map((feature, i) => (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 24 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.15, duration: 0.7, ease: "easeOut" }}
+                            transition={{ delay: i * 0.12, duration: 0.6, ease: "easeOut" }}
                             className="group relative"
                         >
-                            {/* Card Content with Glassmorphism */}
-                            <div className="relative h-full bg-white p-10 rounded-[2.5rem] border border-slate-100 group-hover:border-slate-200 transition-all duration-500 group-hover:-translate-y-3 flex flex-col items-start text-left overflow-hidden shadow-xl shadow-slate-200/50 group-hover:shadow-2xl group-hover:shadow-slate-300/50">
+                            {/* Subtle gradient border glow on hover */}
+                            <div className={`absolute -inset-[1.5px] rounded-[1.6rem] bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-[2px]`} />
 
-                                {/* Glow Effect on Hover */}
-                                <div className={`absolute -inset-2 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.03] blur-2xl transition-opacity duration-700`} />
+                            <div className={`relative h-full bg-white/90 backdrop-blur-sm rounded-[1.5rem] border border-slate-100 group-hover:border-transparent transition-all duration-500 group-hover:-translate-y-2 flex flex-col items-start text-left overflow-hidden shadow-lg ${feature.glowColor} group-hover:shadow-xl`}>
 
-                                {/* Icon Container */}
-                                <div className={`relative mb-6 sm:mb-10 p-4 sm:p-5 rounded-xl sm:rounded-2xl ${feature.iconBg} border border-white shadow-sm group-hover:scale-110 transition-transform duration-500`}>
-                                    <feature.icon className={`w-8 h-8 text-transparent bg-clip-text bg-gradient-to-br ${feature.gradient}`} style={{ color: 'unset', fill: 'none', stroke: 'url(#feature-grad-' + i + ')' }} />
-                                    <svg width="0" height="0">
-                                        <linearGradient id={`feature-grad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" className="feature-stop-1" style={{ stopColor: feature.gradient.split(' ')[0].replace('from-', '') === 'blue-600' ? '#2563eb' : feature.gradient.split(' ')[0].replace('from-', '') === 'indigo-600' ? '#4f46e5' : '#db2777' }} />
-                                            <stop offset="100%" className="feature-stop-2" style={{ stopColor: feature.gradient.split(' ')[1].replace('to-', '') === 'indigo-600' ? '#4f46e5' : feature.gradient.split(' ')[1].replace('to-', '') === 'purple-600' ? '#9333ea' : '#e11d48' }} />
-                                        </linearGradient>
-                                    </svg>
-                                </div>
+                                {/* Top gradient accent strip */}
+                                <div className={`w-full h-1 bg-gradient-to-r ${feature.gradient} rounded-t-[1.5rem]`} />
 
-                                <h3 className="text-2xl font-bold text-slate-900 mb-5 group-hover:text-indigo-600 transition-colors">
-                                    {feature.title}
-                                </h3>
+                                {/* Noise mesh overlay */}
+                                <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
+                                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
-                                <p className="text-slate-600 leading-relaxed text-lg font-medium">
-                                    {feature.desc}
-                                </p>
+                                <div className="p-6 flex flex-col gap-4 flex-1">
+                                    {/* Header row: icon + tag */}
+                                    <div className="flex items-start justify-between w-full">
+                                        {/* Icon pill */}
+                                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${feature.gradient} shadow-md`}>
+                                            <feature.icon className="w-5 h-5 text-white" style={{ fill: 'none' }} />
+                                        </div>
+                                        {/* Tag chip */}
+                                        <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border ${feature.tagColor}`}>
+                                            {feature.tag}
+                                        </span>
+                                    </div>
 
-                                {/* Bottom Indicator */}
-                                <div className={`mt-auto pt-10 w-full`}>
-                                    <div className={`h-1.5 w-12 bg-gradient-to-r ${feature.gradient} rounded-full transform origin-left scale-x-50 group-hover:scale-x-100 transition-transform duration-500 shadow-sm`} />
+                                    {/* Title */}
+                                    <h3 className="text-base font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors duration-300">
+                                        {feature.title}
+                                    </h3>
+
+                                    {/* Description */}
+                                    <p className="text-sm text-slate-500 leading-relaxed font-medium flex-1">
+                                        {feature.desc}
+                                    </p>
+
+                                    {/* Bottom progress bar */}
+                                    <div className="w-full pt-2">
+                                        <div className={`h-[3px] w-8 bg-gradient-to-r ${feature.gradient} rounded-full origin-left scale-x-50 group-hover:scale-x-100 transition-transform duration-500`} />
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

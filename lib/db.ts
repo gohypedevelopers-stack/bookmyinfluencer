@@ -83,15 +83,21 @@ const prismaClientSingleton = () => {
     }
 
     const client = new PrismaClient({
+        // Event-based logging is required for the $on("error") / $on("warn") listeners below.
         log: [
             { emit: "event", level: "error" },
-            { emit: "event", level: "warn" }
+            { emit: "event", level: "warn" },
         ],
-        datasources: {
-            db: {
-                url: dbUrl,
+        // Only pass datasources override when URL is defined.
+        // Prisma v5 throws PrismaClientConstructorValidationError if url is `undefined`.
+        // When omitted, Prisma reads DATABASE_URL from the environment directly (via schema.prisma).
+        ...(dbUrl ? {
+            datasources: {
+                db: {
+                    url: dbUrl,
+                },
             },
-        },
+        } : {}),
     })
 
     // @ts-ignore
@@ -104,51 +110,51 @@ const prismaClientSingleton = () => {
         console.error("[PRISMA ERROR]", msg);
     })
 
-    // @ts-ignore
-    client.$on("warn", (e: any) => {
-        console.warn("[PRISMA WARN]", e.message || String(e));
-    })
+// @ts-ignore
+client.$on("warn", (e: any) => {
+    console.warn("[PRISMA WARN]", e.message || String(e));
+})
 
-    return client.$extends({
-        query: {
-            $allModels: {
-                async $allOperations({ model, operation, args, query }) {
-                    if (
-                        process.env.NODE_ENV === "production" &&
-                        (operation === "delete" || operation === "deleteMany") &&
-                        typeof model === "string" &&
-                        protectedModels.includes(model)
-                    ) {
-                        const msg = `[CRITICAL_DATA_GUARD] BLOCKED ${operation.toUpperCase()} ON ${model} IN PRODUCTION`
-                        console.error(msg)
-                        throw new Error(msg)
-                    }
+return client.$extends({
+    query: {
+        $allModels: {
+            async $allOperations({ model, operation, args, query }) {
+                if (
+                    process.env.NODE_ENV === "production" &&
+                    (operation === "delete" || operation === "deleteMany") &&
+                    typeof model === "string" &&
+                    protectedModels.includes(model)
+                ) {
+                    const msg = `[CRITICAL_DATA_GUARD] BLOCKED ${operation.toUpperCase()} ON ${model} IN PRODUCTION`
+                    console.error(msg)
+                    throw new Error(msg)
+                }
 
-                    for (let attempt = 1; attempt <= MAX_DB_RETRY_ATTEMPTS; attempt++) {
-                        try {
-                            return await query(args)
-                        } catch (error) {
-                            if (!isRetryableDbError(error) || attempt === MAX_DB_RETRY_ATTEMPTS) {
-                                throw error
-                            }
-
-                            const delayMs = 400 * attempt
-                            console.warn("[DB] Retrying query after transient failure", {
-                                model,
-                                operation,
-                                attempt,
-                                delayMs,
-                                message: error instanceof Error ? error.message : String(error),
-                            })
-                            await sleep(delayMs)
+                for (let attempt = 1; attempt <= MAX_DB_RETRY_ATTEMPTS; attempt++) {
+                    try {
+                        return await query(args)
+                    } catch (error) {
+                        if (!isRetryableDbError(error) || attempt === MAX_DB_RETRY_ATTEMPTS) {
+                            throw error
                         }
-                    }
 
-                    throw new Error("Unreachable retry state")
-                },
+                        const delayMs = 400 * attempt
+                        console.warn("[DB] Retrying query after transient failure", {
+                            model,
+                            operation,
+                            attempt,
+                            delayMs,
+                            message: error instanceof Error ? error.message : String(error),
+                        })
+                        await sleep(delayMs)
+                    }
+                }
+
+                throw new Error("Unreachable retry state")
             },
         },
-    })
+    },
+})
 }
 
 export type ExtendedPrismaClient = ReturnType<typeof prismaClientSingleton>

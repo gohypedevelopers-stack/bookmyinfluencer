@@ -19,9 +19,9 @@ export function Footer() {
                 </div>
 
                 <div className="flex gap-10 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
-                    <Link href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
-                    <Link href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
-                    <Link href="#" className="hover:text-indigo-600 transition-colors">Support</Link>
+                    <Link href="/privacy-policy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
+                    <Link href="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
+                    <Link href="/support" className="hover:text-indigo-600 transition-colors">Support</Link>
                 </div>
             </Container>
         </footer>
