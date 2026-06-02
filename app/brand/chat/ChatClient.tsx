@@ -21,7 +21,7 @@ import {
     CheckCheck,
     CheckCircle2,
     Clock,
-    DollarSign,
+    IndianRupee,
     FileText,
     Shield,
     User,
@@ -827,7 +827,7 @@ export default function ChatClient({
                                     <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="p-1.5 bg-teal-100 text-teal-600 rounded-lg">
-                                                <DollarSign className="w-4 h-4" />
+                                                <IndianRupee className="w-4 h-4" />
                                             </div>
                                             <span className="font-bold text-gray-900 text-sm">Offer Details</span>
                                         </div>

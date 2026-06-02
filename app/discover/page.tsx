@@ -545,21 +545,24 @@ export default function PublicMarketplacePage() {
                             <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {filteredBrands.map((brand) => (
                                     <div key={brand.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-                                        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
                                             {brand.logo ? (
-                                                <Image
-                                                    src={brand.logo}
-                                                    alt={brand.name}
-                                                    width={80}
-                                                    height={80}
-                                                    className="object-contain"
-                                                    unoptimized={true}
-                                                    referrerPolicy="no-referrer"
-                                                />
+                                                <>
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img
+                                                        src={brand.logo}
+                                                        alt={brand.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    {/* Top gradient overlay for readability of badges */}
+                                                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+                                                </>
                                             ) : (
-                                                <Building2 className="w-16 h-16 text-slate-400" />
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <Building2 className="w-12 h-12 text-slate-400" />
+                                                </div>
                                             )}
-                                            <span className="absolute top-3 right-3 px-2 py-1 bg-green-600 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                                            <span className="absolute top-3 right-3 px-2 py-1 bg-green-600 text-white text-xs font-bold rounded-full flex items-center gap-1 z-10">
                                                 <Briefcase className="w-3 h-3" />
                                                 Hiring
                                             </span>

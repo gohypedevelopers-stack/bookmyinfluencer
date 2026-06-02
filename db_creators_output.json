@@ -1,174 +1,115 @@
 {
   "creators": [
     {
-      "id": "08d2fcf6-43e8-47a7-8398-d5a6113e90a6",
-      "displayName": "Priya Sharma",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":6800,\"post\":21000,\"collab\":64000}"
-    },
-    {
       "id": "622e023b-590d-49b7-89c3-9bdb81cbb153",
-      "displayName": "Sneha Patel",
+      "displayName": "Ishita Mehta",
       "verificationStatus": "NOT_SUBMITTED",
       "pricing": null
     },
     {
-      "id": "27577aae-bb62-4348-bd9f-257911c05d70",
-      "displayName": "Rahul Mehta",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":6000,\"post\":18000,\"collab\":52000}"
-    },
-    {
-      "id": "31d77cbc-9bcd-4af7-8e1f-4b8c7c72a6c3",
-      "displayName": "Aisha Khan",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":7000,\"post\":22000,\"collab\":68000}"
-    },
-    {
-      "id": "39347323-ca51-4a78-a99d-c42e2983fedc",
-      "displayName": "Vikram Nair",
-      "verificationStatus": "APPROVED",
-      "pricing": null
-    },
-    {
-      "id": "858df0f8-5811-4f89-95fe-2fac6f848b92",
-      "displayName": "Kavya Iyer",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":3500,\"post\":11000,\"collab\":36000}"
-    },
-    {
-      "id": "93ec599d-ba68-4b48-ac8a-cd60619dce26",
-      "displayName": "Rohan Desai",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":4500,\"post\":14000,\"collab\":42000}"
-    },
-    {
-      "id": "c8d5f3c8-f768-4266-b224-c08ca81a46c0",
-      "displayName": "Divya Bose",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":5200,\"post\":16500,\"collab\":50000}"
-    },
-    {
-      "id": "cae0f669-5e2a-4285-8f8e-e3cf52e28040",
-      "displayName": "Karan Trivedi",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":10000,\"post\":32000,\"collab\":98000}"
-    },
-    {
-      "id": "d687fb1f-97d2-4b7e-b191-cf8b0e38f2aa",
-      "displayName": "Nisha Choudhary",
-      "verificationStatus": "APPROVED",
-      "pricing": "{\"story\":12000,\"post\":36000,\"collab\":110000}"
-    },
-    {
       "id": "d8366898-04df-4978-83d4-8059d1ff8358",
-      "displayName": "Aarav Gupta",
+      "displayName": "Yash Kapoor",
       "verificationStatus": "APPROVED",
       "pricing": "{\"story\":9000,\"post\":28000,\"collab\":86000}"
     },
     {
       "id": "fec8549a-7986-4f46-978c-1f8d891a8294",
-      "displayName": "Meera Joshi",
+      "displayName": "Ananya Nair",
       "verificationStatus": "APPROVED",
       "pricing": "{\"story\":8500,\"post\":24000,\"collab\":76000}"
     },
     {
       "id": "70a560a0-4d39-40a8-92ee-2cb0808d4e89",
-      "displayName": "Arjun Reddy",
+      "displayName": "Aarav Mehta",
+      "verificationStatus": "APPROVED",
+      "pricing": null
+    },
+    {
+      "id": "72269516-46ce-4695-a895-7032dbaec0ae",
+      "displayName": "Neha Kapoor",
+      "verificationStatus": "NOT_SUBMITTED",
+      "pricing": null
+    },
+    {
+      "id": "bbfec807-c73b-47ee-b52d-d1535345b2f4",
+      "displayName": "Rohan Verma",
+      "verificationStatus": "NOT_SUBMITTED",
+      "pricing": null
+    },
+    {
+      "id": "c11f7ffb-474b-444d-849e-81d81b7a404c",
+      "displayName": "Sana Verma",
+      "verificationStatus": "NOT_SUBMITTED",
+      "pricing": null
+    },
+    {
+      "id": "cf6fcd9a-1efb-4db0-bdc1-602d3b4b9575",
+      "displayName": "Kabir Sharma",
+      "verificationStatus": "NOT_SUBMITTED",
+      "pricing": null
+    },
+    {
+      "id": "d0cee908-2f87-4bed-8e46-f826d71fd91f",
+      "displayName": "Priya Sharma",
       "verificationStatus": "APPROVED",
       "pricing": null
     }
   ],
   "profiles": [
     {
-      "id": "cmmk8dyn10004itpl5qxlj2fp",
+      "id": "cmn2qfo5z0004ntn2tpy3c290",
       "pricing": null,
       "user": {
-        "name": "Yash Singhania"
+        "name": "Vihaan Iyer"
       }
     },
     {
       "id": "cmmk90sqv00046dsjrcv8fi3l",
       "pricing": null,
       "user": {
-        "name": "Pooja Kapoor"
+        "name": "Dev Nair"
+      }
+    },
+    {
+      "id": "cmowvi5ar0004srxl3o95s42a",
+      "pricing": null,
+      "user": {
+        "name": "Kiara Arora"
+      }
+    },
+    {
+      "id": "cmpqxzq890004dzptfy9sy7vj",
+      "pricing": null,
+      "user": {
+        "name": "Arjun Arora"
+      }
+    },
+    {
+      "id": "cmpuyeyna0002xvgqprr863es",
+      "pricing": "{\"story\":1000,\"post\":2500,\"collab\":4000}",
+      "user": {
+        "name": "Aaradhya Sethi"
       }
     },
     {
       "id": "cmmm1djul0004r7znh79189e5",
       "pricing": null,
       "user": {
-        "name": "Siddharth Rao"
+        "name": "Diya Iyer"
       }
     },
     {
-      "id": "cmmx5ayo60002vz67s9p3a8l1",
-      "pricing": "{\"story\":6000,\"post\":18000,\"collab\":52000}",
+      "id": "cmpv2t1gi000aouhpfqfmxcaa",
+      "pricing": null,
       "user": {
-        "name": "Tanya Malhotra"
+        "name": "Aditya Sethi"
       }
     },
     {
-      "id": "cmmx5bacp0008vz67s4gn5c0i",
-      "pricing": "{\"story\":8500,\"post\":24000,\"collab\":76000}",
+      "id": "cmpv4mqsl0005r5ar8xc9hwvv",
+      "pricing": null,
       "user": {
-        "name": "Akash Verma"
-      }
-    },
-    {
-      "id": "cmmx5bgik000evz67tvimuits",
-      "pricing": "{\"story\":10000,\"post\":32000,\"collab\":98000}",
-      "user": {
-        "name": "Simran Kohli"
-      }
-    },
-    {
-      "id": "cmmx5bnxy000kvz67k1rwvccd",
-      "pricing": "{\"story\":4500,\"post\":14000,\"collab\":42000}",
-      "user": {
-        "name": "Dev Anand"
-      }
-    },
-    {
-      "id": "cmmx5bu09000qvz67km53epma",
-      "pricing": "{\"story\":9000,\"post\":28000,\"collab\":86000}",
-      "user": {
-        "name": "Riya Saxena"
-      }
-    },
-    {
-      "id": "cmmx5c0qt000wvz6782cc3xwd",
-      "pricing": "{\"story\":7000,\"post\":22000,\"collab\":68000}",
-      "user": {
-        "name": "Vivek Pillai"
-      }
-    },
-    {
-      "id": "cmmx5c7p20012vz67iowush2c",
-      "pricing": "{\"story\":3500,\"post\":11000,\"collab\":36000}",
-      "user": {
-        "name": "Anjali Tiwari"
-      }
-    },
-    {
-      "id": "cmmx5cdzm0018vz67awksyu05",
-      "pricing": "{\"story\":5200,\"post\":16500,\"collab\":50000}",
-      "user": {
-        "name": "Nikhil Seth"
-      }
-    },
-    {
-      "id": "cmmx5ckc6001evz679zbh2wzv",
-      "pricing": "{\"story\":12000,\"post\":36000,\"collab\":110000}",
-      "user": {
-        "name": "Ishaani Roy"
-      }
-    },
-    {
-      "id": "cmmx5crx8001kvz67imv9ef61",
-      "pricing": "{\"story\":6800,\"post\":21000,\"collab\":64000}",
-      "user": {
-        "name": "Gautam Bhatt"
+        "name": "Meera Joshi"
       }
     }
   ]

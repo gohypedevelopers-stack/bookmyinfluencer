@@ -26,7 +26,7 @@ export async function GET() {
 
             return {
                 id: brand.userId,
-                name: brand.user.name || brand.companyName || 'Brand',
+                name: brand.companyName || brand.user.name || 'Brand',
                 company: brand.companyName || 'Company',
                 industry: brand.industry || 'Business',
                 location: brand.location || 'India',

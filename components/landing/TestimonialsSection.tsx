@@ -76,8 +76,10 @@ function StatCard({ label, numericValue, decimals, prefix, suffix, icon: Icon, g
                 {/* Background gradient wash */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-[0.035] transition-opacity duration-700`} />
 
-                {/* Top accent line */}
-                <div className={`absolute top-0 left-[20%] right-[20%] h-[2px] bg-gradient-to-r ${gradient} rounded-b-full opacity-60 group-hover:left-[5%] group-hover:right-[5%] transition-all duration-500`} />
+                {/* Accent line — sweeps top → bottom on hover */}
+                <div className="absolute inset-x-0 top-0 h-full pointer-events-none overflow-hidden rounded-[1.8rem]">
+                    <div className={`absolute left-[10%] right-[10%] h-[2px] bg-gradient-to-r ${gradient} rounded-full opacity-60 -translate-y-full group-hover:translate-y-[calc(var(--card-h,320px))] transition-transform duration-700 ease-in-out`} />
+                </div>
 
                 {/* Icon with spinning ring */}
                 <div className="relative w-14 h-14 flex items-center justify-center">
@@ -199,7 +201,7 @@ const TESTIMONIALS = [
 // ─── Section ──────────────────────────────────────────────────────────────────
 export function TestimonialsSection() {
     return (
-        <section className="w-full py-20 md:py-28 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-12 md:py-16 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -216,7 +218,7 @@ export function TestimonialsSection() {
                 </motion.div>
 
                 {/* Animated Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-20 sm:mb-24">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
                     {STATS.map((stat, i) => (
                         <StatCard key={i} {...stat} />
                     ))}
@@ -239,8 +241,10 @@ export function TestimonialsSection() {
 
                             <div className="relative bg-white border border-slate-100 group-hover:border-transparent rounded-[1.4rem] p-5 flex flex-col gap-4 shadow-md group-hover:shadow-xl transition-all duration-400 overflow-hidden h-full">
 
-                                {/* Top accent line */}
-                                <div className={`absolute top-0 left-[25%] right-[25%] h-[2px] bg-gradient-to-r ${t.gradient} rounded-b-full opacity-50 group-hover:left-[8%] group-hover:right-[8%] transition-all duration-500`} />
+                                {/* Accent line — sweeps top → bottom on hover */}
+                                <div className="absolute inset-x-0 top-0 h-full pointer-events-none overflow-hidden rounded-[1.4rem]">
+                                    <div className={`absolute left-[8%] right-[8%] h-[2px] bg-gradient-to-r ${t.gradient} rounded-full opacity-50 -translate-y-full group-hover:translate-y-[280px] transition-transform duration-700 ease-in-out`} />
+                                </div>
 
                                 {/* Header: quote mark + tag */}
                                 <div className="flex items-center justify-between">

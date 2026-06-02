@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     Eye, EyeOff, Building2, Mail, Lock, CheckCircle, ArrowRight, Loader2,
-    Check, ChevronLeft, Target, Megaphone, Smartphone, DollarSign, Users,
+    Check, ChevronLeft, Target, Megaphone, Smartphone, IndianRupee, Users,
     Instagram, Youtube, Sparkles, TrendingUp, Globe, Zap, Rocket, X
 } from 'lucide-react';
 import { registerBrand, sendEmailOtp, verifyEmailOtp } from '@/app/brand/auth-actions';
@@ -354,7 +354,7 @@ export default function BrandRegisterPage() {
         if (currentStep === 4) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Onboarding", title: "Perfect Start", desc: "Your basic account is ready. Let's fine-tune your platform to match your specific needs." };
         if (currentStep === 5) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Profile", title: "Personal Branding", desc: "How should creators see you? Your public name is the first thing they'll notice." };
         if (currentStep === 6) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Campaigns", title: "Strategy First", desc: "Different goals require different creators. Let's define what success looks like for you." };
-        if (currentStep === 7) return { icon: <DollarSign className="w-8 h-8 text-white" />, tag: "Planning", title: "Smart Budgeting", desc: "We match you with creators who provide the best ROI within your target range." };
+        if (currentStep === 7) return { icon: <IndianRupee className="w-8 h-8 text-white" />, tag: "Planning", title: "Smart Budgeting", desc: "We match you with creators who provide the best ROI within your target range." };
         if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Target Market", desc: "Where should your creators be located?" };
         if (currentStep === 9) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Niche", title: "Industry Focus", desc: "Help us understand your specific niche to match you perfectly." };
         if (currentStep === 10) return { icon: <Users className="w-8 h-8 text-white" />, tag: "Matchmaking", title: "Smart Reach", desc: "From high-engagement Micro creators to broad-reach Macro influencers, our team finds the right voice for you." };
@@ -743,9 +743,9 @@ export default function BrandRegisterPage() {
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Password</label>
                                             <div className="relative">
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
-                                                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
+                                                <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange} autoComplete="new-password"
                                                     className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-[6px] focus:ring-indigo-500/5 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
-                                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+                                                    placeholder="••••••••" required />
                                                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
                                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -757,9 +757,9 @@ export default function BrandRegisterPage() {
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Confirm Password</label>
                                             <div className="relative">
                                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4.5 h-4.5" />
-                                                <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
+                                                <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange} autoComplete="new-password"
                                                     className="w-full pl-11 pr-11 py-3 text-base border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-[6px] focus:ring-indigo-500/5 focus:outline-none transition-all bg-[#f0f4ff]/50 focus:bg-white text-slate-800 placeholder-slate-400"
-                                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+                                                    placeholder="••••••••" required />
                                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1">
                                                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -841,7 +841,7 @@ export default function BrandRegisterPage() {
                                                 { label: "Brand Awareness", icon: Target },
                                                 { label: "App Installs", icon: Smartphone },
                                                 { label: "Event Promotion", icon: Building2 },
-                                                { label: "Affiliate Marketing", icon: DollarSign },
+                                                { label: "Affiliate Marketing", icon: IndianRupee },
                                                 { label: "Other", icon: Users },
                                             ].map((option) => (
                                                 <button key={option.label}
@@ -874,7 +874,7 @@ export default function BrandRegisterPage() {
                                         <div className="space-y-3">
                                             <label className="text-sm font-semibold text-slate-600">Enter pricing budget</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold">â‚¹</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-semibold">₹</span>
                                                 <input
                                                     type="number"
                                                     min={1}
@@ -1366,7 +1366,7 @@ export default function BrandRegisterPage() {
                                                     {selectedFollowerTier.label} · {selectedFollowerRange?.label ?? "Any"} creators
                                                 </span>
                                                 <span className="px-3.5 py-1.5 bg-emerald-50/80 backdrop-blur-sm text-emerald-700 rounded-xl font-bold border border-emerald-100/50 shadow-sm flex items-center gap-2">
-                                                    <DollarSign size={14} className="text-emerald-500" />
+                                                    <IndianRupee size={14} className="text-emerald-500" />
                                                     {selectedPerCollabPriceTier?.label ?? "Any"} scope
                                                 </span>
                                                 {onboardingData.platforms.length > 0 && (

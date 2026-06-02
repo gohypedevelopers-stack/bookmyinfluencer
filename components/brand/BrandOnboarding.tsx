@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     ArrowRight, Check, ChevronLeft, Building2, Megaphone, Users, Target,
-    DollarSign, Smartphone, Instagram, Youtube, Facebook, Twitter, Linkedin,
+    IndianRupee, Smartphone, Instagram, Youtube, Facebook, Twitter, Linkedin,
     TrendingUp, Sparkles
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -260,7 +260,7 @@ export default function BrandOnboarding() {
                                         { label: "Brand Awareness", icon: Target },
                                         { label: "App Installs", icon: Smartphone },
                                         { label: "Event Promotion", icon: Building2 },
-                                        { label: "Affiliate Marketing", icon: DollarSign },
+                                        { label: "Affiliate Marketing", icon: IndianRupee },
                                         { label: "Other", icon: Users },
                                     ].map((option) => (
                                         <button

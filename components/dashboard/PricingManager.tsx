@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Trash2, Plus, DollarSign } from "lucide-react"
+import { Trash2, Plus, IndianRupee } from "lucide-react"
 import { updateCreatorPricing } from "@/app/(creator)/creator/(dashboard)/dashboard/actions"
 
 interface PricingPackage {
@@ -95,7 +95,7 @@ export function PricingManager({ initialPricing }: { initialPricing?: string }) 
                             <div>
                                 <Label htmlFor={`price-${index}`}>Price ($)</Label>
                                 <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
                                         id={`price-${index}`}
                                         type="number"

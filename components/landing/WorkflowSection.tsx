@@ -53,7 +53,7 @@ export function WorkflowSection() {
 
 
     return (
-        <section className="w-full py-20 md:py-28 bg-transparent text-center overflow-hidden transition-colors duration-500">
+        <section className="w-full py-12 md:py-16 bg-transparent text-center overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

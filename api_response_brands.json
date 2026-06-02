@@ -1,0 +1,54 @@
+{
+  "brands": [
+    {
+      "id": "cmmk9azid00056dsjpzalyixw",
+      "name": "Nike",
+      "company": "Nike",
+      "industry": "Technology",
+      "location": "India",
+      "logo": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80",
+      "activeCampaigns": 1,
+      "totalSpent": 5000
+    },
+    {
+      "id": "cmmvvmdbb00004slz0dwr5q7y",
+      "name": "Air",
+      "company": "Air",
+      "industry": "Technology",
+      "location": "India",
+      "logo": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop&q=80",
+      "activeCampaigns": 1,
+      "totalSpent": 2000000
+    },
+    {
+      "id": "cmmx91dme0000nxmw8qy867ut",
+      "name": "OPPO",
+      "company": "OPPO",
+      "industry": "Technology",
+      "location": "India",
+      "logo": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=80",
+      "activeCampaigns": 0,
+      "totalSpent": 0
+    },
+    {
+      "id": "cmn2rr4l90000362ykfje5hnt",
+      "name": "VIVO",
+      "company": "VIVO",
+      "industry": "Technology",
+      "location": "Pan India",
+      "logo": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=500&auto=format&fit=crop&q=80",
+      "activeCampaigns": 0,
+      "totalSpent": 0
+    },
+    {
+      "id": "cmpnwrw5o0000jo4oko8kgyv9",
+      "name": "Boat",
+      "company": "Boat",
+      "industry": "Technology",
+      "location": "Delhi",
+      "logo": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=80",
+      "activeCampaigns": 0,
+      "totalSpent": 0
+    }
+  ]
+}

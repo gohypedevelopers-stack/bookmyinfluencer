@@ -14,7 +14,7 @@ import {
 import {
     X,
     CheckCircle2,
-    DollarSign,
+    IndianRupee,
     Briefcase,
     Globe,
     MapPin,
@@ -153,7 +153,7 @@ export default function CampaignDetailsModal({ isOpen, onClose, campaign, isVeri
                             <h3 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h3>
                             <div className="flex flex-wrap gap-3">
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">
-                                    <DollarSign className="w-4 h-4 text-green-600" />
+                                    <IndianRupee className="w-4 h-4 text-green-600" />
                                     {campaign.budget ? `Budget: ₹${campaign.budget.toLocaleString()}` : 'Budget: Negotiable'}
                                 </div>
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">

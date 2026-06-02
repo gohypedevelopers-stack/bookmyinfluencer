@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 import { Card } from "@/components/ui/card"
 import {
-    CircleDollarSign,
+    IndianRupee,
     ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
@@ -48,7 +48,7 @@ export default async function PricingPayoutsPage() {
                 <Card className="rounded-3xl border-gray-100 shadow-sm p-8 bg-white">
                     <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <CircleDollarSign className="w-6 h-6" />
+                            <IndianRupee className="w-6 h-6" />
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-900 mb-2">Internal Pricing Model</h2>

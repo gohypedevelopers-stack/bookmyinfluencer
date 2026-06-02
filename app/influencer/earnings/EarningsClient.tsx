@@ -6,7 +6,7 @@ import {
     Share2,
     Bell,
     Download,
-    DollarSign,
+    IndianRupee,
     TrendingUp,
     Hourglass,
     Wallet,
@@ -124,7 +124,7 @@ export default function EarningsClient({ stats, jobs, influencerId }: EarningsCl
                             <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between h-40 group hover:border-teal-500/30 transition-colors">
                                 <div className="flex justify-between items-start">
                                     <div className="p-2 bg-teal-500/10 rounded-lg text-teal-600">
-                                        <DollarSign className="w-6 h-6" />
+                                        <IndianRupee className="w-6 h-6" />
                                     </div>
                                     <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
                                         <TrendingUp className="w-3 h-3 mr-1" />

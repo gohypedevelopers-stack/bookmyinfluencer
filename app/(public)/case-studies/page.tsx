@@ -2,7 +2,7 @@
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, TrendingUp, Users, DollarSign, Target } from "lucide-react"
+import { ArrowRight, TrendingUp, Users, IndianRupee, Target } from "lucide-react"
 import Link from "next/link"
 
 const caseStudies = [

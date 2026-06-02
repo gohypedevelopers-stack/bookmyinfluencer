@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
     ArrowLeft,
     User,
-    DollarSign,
+    IndianRupee,
     CheckCircle,
     XCircle,
     MessageSquare,
@@ -153,7 +153,7 @@ export default function AdminCampaignDetailsClient({ data, managers }: { data: a
                 <TabsList className="bg-gray-100 p-1 rounded-lg">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="chat" className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> Chat</TabsTrigger>
-                    <TabsTrigger value="payments" className="flex items-center gap-2"><DollarSign className="w-3 h-3" /> Payments</TabsTrigger>
+                    <TabsTrigger value="payments" className="flex items-center gap-2"><IndianRupee className="w-3 h-3" /> Payments</TabsTrigger>
                     <TabsTrigger value="deliverables" className="flex items-center gap-2"><FileText className="w-3 h-3" /> Deliverables</TabsTrigger>
                     <TabsTrigger value="timeline" className="flex items-center gap-2"><History className="w-3 h-3" /> Timeline</TabsTrigger>
                 </TabsList>

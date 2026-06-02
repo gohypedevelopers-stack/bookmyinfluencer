@@ -174,11 +174,27 @@ export async function sendEmailOtp(email: string) {
 
         const emailResult = await sendOtpEmail(normalizedEmail, otp);
         if (!emailResult.success) {
-            console.log(`[DEV] OTP for ${normalizedEmail}: ${otp}`);
+            console.log(`\n┌────────────────────────────────────────────────────────┐`);
+            console.log(`│                  [DEVELOPMENT OTP BYPASS]              │`);
+            console.log(`├────────────────────────────────────────────────────────┤`);
+            console.log(`│  Email: ${normalizedEmail.padEnd(46)} │`);
+            console.log(`│  OTP:   ${otp.padEnd(46)} │`);
+            console.log(`├────────────────────────────────────────────────────────┤`);
+            console.log(`│  SMTP error occurred: ${String(emailResult.error || 'Unknown').substring(0, 31).padEnd(31)} │`);
+            console.log(`└────────────────────────────────────────────────────────┘\n`);
+
+            if (process.env.NODE_ENV !== 'production') {
+                return {
+                    success: true,
+                    message: 'OTP has been generated. Since you are in local development, please use the OTP code printed in your server terminal/console.',
+                    devOtpAvailable: true,
+                };
+            }
+
             return {
                 success: false,
                 error: emailResult.error || 'Failed to send OTP email.',
-                devOtpAvailable: process.env.NODE_ENV !== 'production',
+                devOtpAvailable: false,
             };
         }
 

@@ -8,7 +8,7 @@ import {
     Plus,
     MoreVertical,
     Calendar,
-    DollarSign,
+    IndianRupee,
     Users,
     TrendingUp,
     Eye,

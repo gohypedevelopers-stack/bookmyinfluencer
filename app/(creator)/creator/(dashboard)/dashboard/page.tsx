@@ -12,7 +12,7 @@ import {
   Award,
   Calendar,
   Check,
-  DollarSign,
+  IndianRupee,
   Download,
   Facebook,
   Handshake,
@@ -151,7 +151,7 @@ export default function CreatorDashboardPage() {
       note: earningsMomentum,
       accent: "from-violet-500/18 via-fuchsia-500/10 to-white",
       iconWrap: "bg-violet-500/12 text-violet-600",
-      icon: DollarSign,
+      icon: IndianRupee,
     },
     {
       label: "Live Work",
@@ -287,17 +287,28 @@ export default function CreatorDashboardPage() {
             className="mt-8"
           >
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {summaryCards.map((card) => {
+              {summaryCards.map((card, i) => {
                 const Icon = card.icon
                 return (
-                  <Card key={card.label} className={`overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,255,255,0.92)),linear-gradient(135deg,var(--tw-gradient-stops))] ${card.accent} p-6 shadow-[0_24px_50px_-38px_rgba(15,23,42,0.35)]`}>
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.iconWrap}`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</p>
-                    <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{card.value}</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-500">{card.note}</p>
-                  </Card>
+                  <motion.div
+                    key={card.label}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
+                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                    className="flex w-full animate-fade-in-up"
+                  >
+                    <Card className="group w-full overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,255,255,0.92)),linear-gradient(135deg,var(--tw-gradient-stops))] p-6 shadow-[0_24px_50px_-38px_rgba(15,23,42,0.35)] hover:shadow-[0_32px_60px_-30px_rgba(15,23,42,0.45)] transition-all duration-300 flex flex-col justify-between" style={{ borderColor: 'rgba(255,255,255,0.8)' }}>
+                      <div>
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.iconWrap} group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300`}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</p>
+                        <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{card.value}</p>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-500">{card.note}</p>
+                    </Card>
+                  </motion.div>
                 )
               })}
             </div>
@@ -368,9 +379,9 @@ export default function CreatorDashboardPage() {
                 <Card className="rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-6 shadow-[0_28px_60px_-40px_rgba(15,23,42,0.3)]">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-500">Quick Actions</p>
                   <div className="mt-5 space-y-3">
-                    <QuickLink href="/creator/campaigns" title="Review campaign requests" description="Respond fast to manager-led invites and keep the queue moving." />
-                    <QuickLink href="/creator/profile" title="Polish your profile" description="Sharper niche, bio, and proof points improve shortlist quality." />
-                    <QuickLink href="/creator/earnings" title="Track payouts" description="See released amounts and upcoming earnings workflow updates." />
+                    <QuickLink href="/creator/campaigns" title="Review campaign requests" description="Respond fast to manager-led invites and keep the queue moving." icon={Handshake} gradient="from-violet-500 to-indigo-600" />
+                    <QuickLink href="/creator/profile" title="Polish your profile" description="Sharper niche, bio, and proof points improve shortlist quality." icon={Sparkles} gradient="from-amber-400 to-orange-500" />
+                    <QuickLink href="/creator/earnings" title="Track payouts" description="See released amounts and upcoming earnings workflow updates." icon={IndianRupee} gradient="from-emerald-400 to-teal-500" />
                   </div>
                 </Card>
               </div>
@@ -412,16 +423,28 @@ function InsightCard({ title, value, description }: { title: string; value: stri
   )
 }
 
-function QuickLink({ href, title, description }: { href: string; title: string; description: string }) {
+function QuickLink({
+  href,
+  title,
+  description,
+  icon: Icon,
+  gradient
+}: {
+  href: string
+  title: string
+  description: string
+  icon: React.ElementType
+  gradient: string
+}) {
   return (
-    <Link href={href} className="block rounded-[24px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/60">
+    <Link href={href} className="group block rounded-[24px] border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/60">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-bold text-slate-950">{title}</p>
+          <p className="font-bold text-slate-950 group-hover:text-indigo-600 transition-colors">{title}</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white">
-          <Target className="h-4 w-4" />
+        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-md group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300 flex-shrink-0`}>
+          <Icon className="h-5 w-5" />
         </div>
       </div>
     </Link>
