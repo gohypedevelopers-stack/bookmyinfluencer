@@ -151,6 +151,7 @@ export default function BrandRegisterPage() {
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
+    const [devEmailFailed, setDevEmailFailed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [campaignWorkflow, setCampaignWorkflow] = useState<any>(null);
     const [autoCampaignId, setAutoCampaignId] = useState<string | null>(null);
@@ -232,15 +233,19 @@ export default function BrandRegisterPage() {
 
     const requestOtp = async () => {
         if (!formData.email) { setError("Please enter an email address first"); return; }
-        setOtpLoading(true); setError('');
+        setOtpLoading(true); setError(''); setDevEmailFailed(false);
         const res = await sendEmailOtp(formData.email);
-        if (res.success) { setOtpSent(true); setTimer(60); }
-        else if (res.devOtpAvailable) {
+        if (res.success) {
             setOtpSent(true);
             setTimer(60);
-            setError(`${res.error || "Email was not sent."} Use the OTP printed in the server console for local testing.`);
+            setDevEmailFailed(false);
+        } else if (res.devOtpAvailable) {
+            setOtpSent(true);
+            setTimer(60);
+            setDevEmailFailed(true);
+        } else {
+            setError(res.error || "Failed to send OTP");
         }
-        else { setError(res.error || "Failed to send OTP"); }
         setOtpLoading(false);
     };
 
@@ -658,6 +663,7 @@ export default function BrandRegisterPage() {
                                             <div className="relative">
                                                 <Mail className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${emailVerified ? 'text-emerald-500' : 'text-gray-400'}`} />
                                                 <input name="email" type="email" value={formData.email} onChange={handleInputChange}
+                                                    autoComplete="off"
                                                     className={`w-full pl-11 pr-28 py-3 text-base border rounded-2xl focus:outline-none transition-all ${emailVerified
                                                         ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                                                         : 'bg-[#f0f4ff]/50 border-slate-200 focus:border-indigo-500'
@@ -676,10 +682,31 @@ export default function BrandRegisterPage() {
                                         {/* OTP Entry */}
                                         {otpSent && !emailVerified && (
                                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 pt-4 border-t border-gray-100">
+
+                                                {/* Dev-mode banner: SMTP failed, OTP is in terminal */}
+                                                {devEmailFailed && (
+                                                    <div className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-50 border border-amber-200">
+                                                        <span className="text-amber-500 text-lg leading-none mt-0.5">⚠️</span>
+                                                        <div>
+                                                            <p className="text-xs font-bold text-amber-800 uppercase tracking-wide mb-0.5">SMTP not configured — Dev mode</p>
+                                                            <p className="text-xs text-amber-700 leading-relaxed">
+                                                                The email could not be sent. Your OTP was printed in the{' '}
+                                                                <span className="font-black">server terminal / console</span>. Copy it from there and enter it below.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Verification Code</label>
                                                 <div className="flex gap-2 justify-center">
                                                     {[0, 1, 2, 3, 4, 5].map((i) => (
-                                                        <input key={i} type="text" maxLength={1} value={otp[i] || ''}
+                                                        <input
+                                                            key={i}
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            autoComplete="off"
+                                                            maxLength={1}
+                                                            value={otp[i] || ''}
                                                             onChange={(e) => {
                                                                 const val = e.target.value.replace(/\D/g, '');
                                                                 const newOtp = otp.split(''); newOtp[i] = val; setOtp(newOtp.join(''));
@@ -687,6 +714,17 @@ export default function BrandRegisterPage() {
                                                             }}
                                                             onKeyDown={(e) => {
                                                                 if (e.key === 'Backspace' && !otp[i] && i > 0) { const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement; prev?.focus(); }
+                                                            }}
+                                                            onPaste={(e) => {
+                                                                if (i !== 0) return;
+                                                                e.preventDefault();
+                                                                const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                                                                if (pasted) {
+                                                                    setOtp(pasted.padEnd(6, '').slice(0, 6));
+                                                                    const inputs = (e.target as HTMLElement).parentElement?.children;
+                                                                    const focusIdx = Math.min(pasted.length, 5);
+                                                                    (inputs?.[focusIdx] as HTMLInputElement)?.focus();
+                                                                }
                                                             }}
                                                             className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 bg-slate-50 focus:bg-white transition-all text-slate-800"
                                                         />
@@ -696,7 +734,7 @@ export default function BrandRegisterPage() {
                                                     <button type="button" onClick={requestOtp} disabled={otpLoading || timer > 0} className="text-sm text-violet-600 font-semibold hover:underline">
                                                         {timer > 0 ? `Retry in ${timer}s` : 'Resend OTP'}
                                                     </button>
-                                                    <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setError(''); }} className="text-sm text-slate-400 font-medium hover:text-slate-700">
+                                                    <button type="button" onClick={() => { setOtpSent(false); setOtp(''); setError(''); setDevEmailFailed(false); }} className="text-sm text-slate-400 font-medium hover:text-slate-700">
                                                         Change Email
                                                     </button>
                                                 </div>
@@ -1164,27 +1202,43 @@ export default function BrandRegisterPage() {
                             {/* ===== STEP 13: Success ===== */}
                             {currentStep === 13 && (
                                 <CardWrapper stepKey="step13" direction={direction}>
-                                    <div className="w-full space-y-8 py-6 px-1">
-                                        <div className="flex flex-col items-center text-center space-y-4">
-                                            <div className="relative">
-                                                <div className="absolute -inset-4 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
+                                    <div className="w-full space-y-6 py-4 px-1">
+                                        {/* ── Hero: animated success badge ── */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                            className="flex flex-col items-center text-center space-y-5"
+                                        >
+                                            {/* Multi-ring glow check */}
+                                            <div className="relative flex items-center justify-center">
+                                                <div className="absolute w-36 h-36 rounded-full bg-emerald-400/10 animate-ping" style={{ animationDuration: '2.5s' }} />
+                                                <div className="absolute w-28 h-28 rounded-full bg-emerald-400/15 blur-lg animate-pulse" />
+                                                <div className="absolute w-20 h-20 rounded-full bg-emerald-500/20 blur-md" />
                                                 <motion.div
-                                                    initial={{ scale: 0.5, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.1 }}
-                                                    className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/30 transform rotate-3 hover:rotate-0 transition-transform relative z-10"
+                                                    initial={{ scale: 0.4, rotate: -15, opacity: 0 }}
+                                                    animate={{ scale: 1, rotate: 3, opacity: 1 }}
+                                                    transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.15 }}
+                                                    whileHover={{ rotate: 0, scale: 1.05 }}
+                                                    className="relative z-10 w-[72px] h-[72px] rounded-[20px] flex items-center justify-center shadow-2xl"
+                                                    style={{ background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)', boxShadow: '0 20px 50px -10px rgba(5,150,105,0.45)' }}
                                                 >
-                                                    <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                                                    <Check className="w-9 h-9 text-white" strokeWidth={3.5} />
                                                 </motion.div>
                                             </div>
 
-                                            <div className="space-y-2 mt-2">
-                                                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Campaign Queue Started</h1>
-                                                <p className="text-slate-500 max-w-sm text-sm mx-auto font-medium">
+                                            <div className="space-y-2">
+                                                <h1
+                                                    className="text-[1.75rem] font-black tracking-tight leading-tight"
+                                                    style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #4f46e5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                                                >
+                                                    Campaign Queue Started
+                                                </h1>
+                                                <p className="text-slate-500 max-w-[280px] mx-auto text-[13px] leading-relaxed font-medium">
                                                     Your brand profile is live. Our team will handle influencer matching and sequence execution.
                                                 </p>
                                             </div>
-                                        </div>
+                                        </motion.div>
 
                                         {workflowWarning && (
                                             <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-5 py-4 text-sm font-semibold text-amber-700 flex items-start gap-3">
@@ -1194,219 +1248,256 @@ export default function BrandRegisterPage() {
                                         )}
 
                                         {campaignWorkflow ? (
-                                            <div className="space-y-6">
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ duration: 0.5, delay: 0.2 }}
+                                                className="space-y-4"
+                                            >
                                                 {/* Overview Cards Container */}
-                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                <div className="grid gap-3 sm:grid-cols-2">
                                                     
                                                     {/* Campaign Summary Card */}
-                                                    <div className="rounded-3xl border border-slate-200/60 bg-white/50 backdrop-blur-xl p-6 shadow-sm relative overflow-hidden group hover:shadow-md hover:border-violet-200 transition-all">
-                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-violet-500/10 transition-colors" />
-                                                        <div className="flex items-center gap-2 mb-4">
-                                                            <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
-                                                                <Target className="w-4 h-4 text-violet-600" />
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 16 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                                        className="rounded-2xl border border-violet-100/80 bg-gradient-to-br from-white to-violet-50/30 backdrop-blur-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-lg hover:shadow-violet-100/40 hover:-translate-y-0.5 transition-all duration-300"
+                                                    >
+                                                        <div className="absolute top-0 right-0 w-28 h-28 bg-violet-400/8 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none group-hover:bg-violet-400/15 transition-colors duration-500" />
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            <div className="w-7 h-7 rounded-xl bg-violet-100 flex items-center justify-center shadow-sm">
+                                                                <Target className="w-3.5 h-3.5 text-violet-600" />
                                                             </div>
-                                                            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Campaign Summary</div>
+                                                            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-violet-400/80">Campaign Summary</div>
                                                         </div>
-                                                        <h2 className="text-xl font-black text-slate-900 mb-1 leading-tight">{campaignWorkflow.campaign.title}</h2>
-                                                        <p className="text-xs font-semibold text-slate-500 mb-5 line-clamp-2">{campaignWorkflow.campaign.summary || 'Initial collaboration system.'}</p>
+                                                        <h2 className="text-base font-black text-slate-900 mb-1 leading-snug line-clamp-2">{campaignWorkflow.campaign.title}</h2>
+                                                        <p className="text-[11px] font-medium text-slate-400 mb-4 line-clamp-2">{campaignWorkflow.campaign.summary || 'Initial collaboration system.'}</p>
                                                         
-                                                        <div className="grid grid-cols-2 gap-2 text-sm relative z-10">
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Budget</div>
-                                                                <div className="font-extrabold text-slate-900 truncate">{campaignWorkflow.campaign.totalBudgetLabel}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Category</div>
-                                                                <div className="font-extrabold text-slate-900 capitalize truncate">{campaignWorkflow.campaign.categoryLabel}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reach</div>
-                                                                <div className="font-extrabold text-slate-900 truncate">{campaignWorkflow.campaign.followerRangeLabel}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-white p-3 border border-slate-100 shadow-sm flex flex-col justify-center">
-                                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Match Date</div>
-                                                                <div className="font-extrabold text-slate-900 truncate flex items-center">
-                                                                    {formatSummaryDate(campaignWorkflow.campaign.matchingTriggeredAt)}
+                                                        <div className="grid grid-cols-2 gap-2 relative z-10">
+                                                            {[
+                                                                { label: 'Budget', value: campaignWorkflow.campaign.totalBudgetLabel },
+                                                                { label: 'Category', value: campaignWorkflow.campaign.categoryLabel },
+                                                                { label: 'Reach', value: campaignWorkflow.campaign.followerRangeLabel },
+                                                                { label: 'Match Date', value: formatSummaryDate(campaignWorkflow.campaign.matchingTriggeredAt) },
+                                                            ].map(({ label, value }) => (
+                                                                <div key={label} className="rounded-xl bg-white/80 p-2 border border-slate-100/80 shadow-sm flex flex-col justify-center min-w-0 overflow-hidden">
+                                                                    <div className="text-[8px] font-black text-slate-400 uppercase tracking-wide mb-0.5">{label}</div>
+                                                                    <div className="font-black text-slate-800 capitalize text-[9.5px] break-words whitespace-normal leading-tight">{value}</div>
                                                                 </div>
-                                                            </div>
+                                                            ))}
                                                         </div>
-                                                    </div>
+                                                    </motion.div>
 
                                                     {/* Request Health Card */}
-                                                    <div className="rounded-3xl border border-slate-200/60 bg-slate-50/50 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-all">
-                                                        <div className="flex items-center gap-2 mb-5">
-                                                            <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
-                                                                <Zap className="w-4 h-4 text-blue-600" />
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 16 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                                        className="rounded-2xl border border-blue-100/60 bg-gradient-to-br from-slate-50/80 to-blue-50/20 backdrop-blur-xl p-5 shadow-sm hover:shadow-lg hover:shadow-blue-100/30 hover:-translate-y-0.5 transition-all duration-300"
+                                                    >
+                                                        <div className="flex items-center gap-2 mb-4">
+                                                            <div className="w-7 h-7 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                                                                <Zap className="w-3.5 h-3.5 text-blue-600" />
                                                             </div>
-                                                            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Request Health</div>
+                                                            <div className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400/80">Request Health</div>
                                                         </div>
                                                         
-                                                        <div className="grid grid-cols-2 gap-3 mb-4">
-                                                            <div className="rounded-2xl bg-blue-50/80 p-3 border border-blue-100/50 shadow-sm relative overflow-hidden group">
-                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-blue-500/10 rounded-full blur-md" />
-                                                                <div className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">Pending</div>
-                                                                <div className="text-3xl font-black text-blue-700 tracking-tight">{campaignWorkflow.counts.pending}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-emerald-50/80 p-3 border border-emerald-100/50 shadow-sm relative overflow-hidden group">
-                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-emerald-500/10 rounded-full blur-md" />
-                                                                <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-1">Accepted</div>
-                                                                <div className="text-3xl font-black text-emerald-700 tracking-tight">{campaignWorkflow.counts.accepted}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-amber-50/80 p-3 border border-amber-100/50 shadow-sm relative overflow-hidden group">
-                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-amber-500/10 rounded-full blur-md" />
-                                                                <div className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Expired</div>
-                                                                <div className="text-3xl font-black text-amber-700 tracking-tight">{campaignWorkflow.counts.expired}</div>
-                                                            </div>
-                                                            <div className="rounded-2xl bg-violet-50/80 p-3 border border-violet-100/50 shadow-sm relative overflow-hidden group">
-                                                                <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-violet-500/10 rounded-full blur-md" />
-                                                                <div className="text-[10px] font-bold text-violet-500 uppercase tracking-wider mb-1">Available</div>
-                                                                <div className="text-3xl font-black text-violet-700 tracking-tight">{campaignWorkflow.counts.remainingAcceptedSlots}</div>
-                                                            </div>
+                                                        <div className="grid grid-cols-2 gap-2 mb-3">
+                                                            {[
+                                                                { label: 'Pending', value: campaignWorkflow.counts.pending, bg: 'from-blue-50 to-blue-100/40', border: 'border-blue-200/50', text: 'text-blue-700', dot: 'bg-blue-500' },
+                                                                { label: 'Accepted', value: campaignWorkflow.counts.accepted, bg: 'from-emerald-50 to-emerald-100/40', border: 'border-emerald-200/50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+                                                                { label: 'Expired', value: campaignWorkflow.counts.expired, bg: 'from-amber-50 to-amber-100/40', border: 'border-amber-200/50', text: 'text-amber-700', dot: 'bg-amber-500' },
+                                                                { label: 'Available', value: campaignWorkflow.counts.remainingAcceptedSlots, bg: 'from-violet-50 to-violet-100/40', border: 'border-violet-200/50', text: 'text-violet-700', dot: 'bg-violet-500' },
+                                                            ].map(({ label, value, bg, border, text, dot }) => (
+                                                                <div key={label} className={`rounded-xl bg-gradient-to-br ${bg} p-2.5 border ${border} shadow-sm relative overflow-hidden`}>
+                                                                    <div className="flex items-center gap-1.5 mb-1">
+                                                                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${dot}`} />
+                                                                        <div className={`text-[8px] font-black uppercase tracking-normal ${text} opacity-70`}>{label}</div>
+                                                                    </div>
+                                                                    <div className={`text-xl font-black ${text} tracking-tight leading-none`}>{value}</div>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                        <div className="rounded-2xl border border-slate-200/50 bg-white/60 px-4 py-3 text-xs font-semibold text-slate-500 shadow-sm">
+                                                        <div className="rounded-xl border border-indigo-100/60 bg-indigo-50/50 px-3.5 py-2.5 text-[11px] font-medium text-slate-500 shadow-sm">
                                                             <span className="text-indigo-600 font-bold">Auto-pilot:</span> Maintaining up to {campaignWorkflow.campaign.activeRequestLimit} pending requests.
                                                         </div>
-                                                    </div>
+                                                    </motion.div>
                                                 </div>
 
                                                 {/* Sent Requests Card */}
-                                                <div className="rounded-3xl border border-slate-200/60 bg-white shadow-sm overflow-hidden">
-                                                    <div className="flex items-center justify-between p-5 lg:p-6 border-b border-slate-100 bg-slate-50/50 flex-wrap gap-4">
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 16 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.45, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                                    className="rounded-2xl border border-orange-100/60 bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
+                                                >
+                                                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-orange-50/20">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                                                                <Megaphone className="w-5 h-5 text-orange-600" />
+                                                            <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
+                                                                <Megaphone className="w-4 h-4 text-orange-600" />
                                                             </div>
                                                             <div>
-                                                                <h3 className="text-lg font-black text-slate-900 leading-tight">Sent Requests</h3>
-                                                                <p className="text-xs font-semibold text-slate-500">Live tracker for newest matches.</p>
+                                                                <h3 className="text-[15px] font-black text-slate-900 leading-tight">Sent Requests</h3>
+                                                                <p className="text-[11px] font-medium text-slate-400">Live tracker for newest matches.</p>
                                                             </div>
                                                         </div>
-                                                        <div className="rounded-full bg-slate-200/60 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-inner">
+                                                        <div className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black text-slate-500 border border-slate-200/60">
                                                             {campaignWorkflow.counts.sent} request{campaignWorkflow.counts.sent !== 1 ? 's' : ''}
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex-1 overflow-y-auto max-h-[300px] p-2 bg-white custom-scrollbar">
+                                                    <div className="overflow-y-auto max-h-[260px] divide-y divide-slate-100/60 bg-white">
                                                         {campaignWorkflow.sentRequests.length > 0 ? (
-                                                            <div className="space-y-2">
-                                                                {campaignWorkflow.sentRequests.map((request: any) => (
-                                                                    <div key={request.id} className="rounded-2xl border border-transparent hover:border-slate-100 bg-slate-50/50 hover:bg-slate-50 p-4 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                                        <div className="flex items-start gap-3">
-                                                                            <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center text-indigo-700 font-bold text-sm shrink-0">
-                                                                                {request.influencer.displayName.charAt(0).toUpperCase()}
-                                                                            </div>
-                                                                            <div>
-                                                                                <div className="font-bold text-slate-900 text-sm">{request.influencer.displayName}</div>
-                                                                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200/50 px-2 py-0.5 rounded-md">
-                                                                                        {request.influencer.followersLabel}
-                                                                                    </span>
-                                                                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100/50">
-                                                                                        {request.influencer.engagementRate.toFixed(1)}% ER
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
+                                                            campaignWorkflow.sentRequests.map((request: any, i: number) => (
+                                                                <motion.div
+                                                                    key={request.id}
+                                                                    initial={{ opacity: 0, x: -8 }}
+                                                                    animate={{ opacity: 1, x: 0 }}
+                                                                    transition={{ delay: 0.5 + i * 0.08, duration: 0.35 }}
+                                                                    className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-slate-50/80 transition-colors group"
+                                                                >
+                                                                    {/* Avatar + name */}
+                                                                    <div className="flex items-center gap-3 min-w-0">
+                                                                        <div
+                                                                            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 shadow-md"
+                                                                            style={{ background: `linear-gradient(135deg, #6366f1, #8b5cf6)` }}
+                                                                        >
+                                                                            {request.influencer.displayName.charAt(0).toUpperCase()}
                                                                         </div>
-                                                                        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-200/60">
-                                                                            <span className={`inline-flex items-center justify-center rounded-lg border px-3 py-1 text-[10px] font-black uppercase tracking-wider w-full sm:w-auto text-center ${getStatusClasses(request.status)}`}>
-                                                                                {request.status}
-                                                                            </span>
-                                                                            <div className="text-[10px] font-semibold text-slate-400 capitalize whitespace-nowrap hidden sm:block">
-                                                                                Exp {formatSummaryDate(request.expiresAt)}
+                                                                        <div className="min-w-0">
+                                                                            <div className="font-bold text-slate-900 text-[13px] truncate max-w-[130px]">{request.influencer.displayName}</div>
+                                                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                                                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                                                                                    {request.influencer.followersLabel}
+                                                                                </span>
+                                                                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200/50">
+                                                                                    {request.influencer.engagementRate.toFixed(1)}% ER
+                                                                                </span>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                ))}
-                                                            </div>
+                                                                    {/* Status + expiry */}
+                                                                    <div className="flex flex-col items-end gap-1 shrink-0">
+                                                                        <span className={`inline-flex items-center justify-center rounded-lg border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${getStatusClasses(request.status)}`}>
+                                                                            {request.status}
+                                                                        </span>
+                                                                        <div className="text-[9px] font-medium text-slate-300 whitespace-nowrap">
+                                                                            Exp {formatSummaryDate(request.expiresAt)}
+                                                                        </div>
+                                                                    </div>
+                                                                </motion.div>
+                                                            ))
                                                         ) : (
                                                             <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                                                                <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center mb-4 rotate-3">
-                                                                    <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
+                                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                                                                    <Loader2 className="w-5 h-5 text-slate-300 animate-spin" />
                                                                 </div>
-                                                                <p className="text-sm font-bold text-slate-600">Matching in progress</p>
-                                                                <p className="text-xs font-medium text-slate-400 mt-1 max-w-[200px] mx-auto">Requests will appear here once our system identifies perfect matches.</p>
+                                                                <p className="text-[13px] font-bold text-slate-600">Matching in progress</p>
+                                                                <p className="text-[11px] font-medium text-slate-400 mt-1 max-w-[180px] mx-auto">Requests will appear here once our system identifies perfect matches.</p>
                                                             </div>
                                                         )}
                                                     </div>
-                                                </div>
+                                                </motion.div>
 
                                                 {/* Accepted Influencers Module (Only show if > 0) */}
                                                 {campaignWorkflow.acceptedInfluencers.length > 0 && (
-                                                    <div className="rounded-3xl border border-emerald-200/50 bg-emerald-50/30 p-5 lg:p-6 text-left relative overflow-hidden group">
-                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:bg-emerald-400/20 transition-colors" />
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 12 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.55, duration: 0.45 }}
+                                                        className="rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/60 to-white p-5 relative overflow-hidden"
+                                                    >
+                                                        <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-400/10 rounded-full blur-3xl -mr-8 -mt-8 pointer-events-none" />
                                                         <div className="flex items-center gap-2 mb-4 relative z-10">
-                                                            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
-                                                                <Users className="w-4 h-4 text-emerald-600" />
+                                                            <div className="w-7 h-7 rounded-xl bg-emerald-100 flex items-center justify-center shadow-sm">
+                                                                <Users className="w-3.5 h-3.5 text-emerald-600" />
                                                             </div>
-                                                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">Hired Creators</h3>
+                                                            <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500">Hired Creators</h3>
                                                         </div>
                                                         
-                                                        <div className="grid gap-3 sm:grid-cols-2 relative z-10">
+                                                        <div className="grid gap-2.5 sm:grid-cols-2 relative z-10">
                                                             {campaignWorkflow.acceptedInfluencers.map((influencer: any) => (
-                                                                <div key={influencer.id} className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm flex items-center gap-3 hover:shadow-md transition-shadow">
-                                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 border-2 border-white shadow-sm flex items-center justify-center text-emerald-700 font-bold shrink-0">
+                                                                <div key={influencer.id} className="rounded-xl border border-emerald-200/60 bg-white p-3.5 shadow-sm flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 min-w-0 overflow-hidden">
+                                                                    <div
+                                                                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-black shrink-0 shadow-md"
+                                                                        style={{ background: 'linear-gradient(135deg, #34d399, #059669)' }}
+                                                                    >
                                                                         {influencer.displayName.charAt(0).toUpperCase()}
                                                                     </div>
-                                                                    <div>
-                                                                        <div className="font-bold text-slate-900 text-sm">{influencer.displayName}</div>
-                                                                        <div className="text-xs font-semibold text-emerald-600 mt-0.5">
-                                                                            {influencer.followersLabel} â€¢ {influencer.engagementRate.toFixed(1)}% ER
+                                                                    <div className="min-w-0">
+                                                                        <div className="font-bold text-slate-900 text-[13px] truncate">{influencer.displayName}</div>
+                                                                        <div className="text-[11px] font-semibold text-emerald-600 mt-0.5 truncate">
+                                                                            {influencer.followersLabel} · {influencer.engagementRate.toFixed(1)}% ER
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                    </div>
+                                                    </motion.div>
                                                 )}
-                                            </div>
+                                            </motion.div>
                                         ) : (
-                                            <div className="flex flex-wrap justify-center gap-2 text-sm pt-4 pb-2">
-                                                <span className="px-3.5 py-1.5 bg-indigo-50/80 backdrop-blur-sm text-indigo-700 rounded-xl font-bold border border-indigo-100/50 shadow-sm flex items-center gap-2">
-                                                    <Users size={14} className="text-indigo-500" />
-                                                    {selectedFollowerTier.label} · {selectedFollowerRange?.label ?? "Any"} creators
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                transition={{ delay: 0.3, duration: 0.4 }}
+                                                className="flex flex-wrap justify-center gap-2 pt-4 pb-2"
+                                            >
+                                                <span className="px-3.5 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl font-bold border border-indigo-100 shadow-sm flex items-center gap-2 text-[12px]">
+                                                    <Users size={13} className="text-indigo-500" />
+                                                    {selectedFollowerTier.label} · {selectedFollowerRange?.label ?? 'Any'} creators
                                                 </span>
-                                                <span className="px-3.5 py-1.5 bg-emerald-50/80 backdrop-blur-sm text-emerald-700 rounded-xl font-bold border border-emerald-100/50 shadow-sm flex items-center gap-2">
-                                                    <IndianRupee size={14} className="text-emerald-500" />
-                                                    {selectedPerCollabPriceTier?.label ?? "Any"} scope
+                                                <span className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl font-bold border border-emerald-100 shadow-sm flex items-center gap-2 text-[12px]">
+                                                    <IndianRupee size={13} className="text-emerald-500" />
+                                                    {selectedPerCollabPriceTier?.label ?? 'Any'} scope
                                                 </span>
                                                 {onboardingData.platforms.length > 0 && (
-                                                    <span className="px-3.5 py-1.5 bg-pink-50/80 backdrop-blur-sm text-pink-700 rounded-xl font-bold border border-pink-100/50 shadow-sm flex items-center gap-2">
-                                                        <TrendingUp size={14} className="text-pink-500" />
-                                                        {onboardingData.platforms.slice(0, 2).join(", ")}{onboardingData.platforms.length > 2 ? ' +' + (onboardingData.platforms.length - 2) : ''}
+                                                    <span className="px-3.5 py-1.5 bg-pink-50 text-pink-700 rounded-xl font-bold border border-pink-100 shadow-sm flex items-center gap-2 text-[12px]">
+                                                        <TrendingUp size={13} className="text-pink-500" />
+                                                        {onboardingData.platforms.slice(0, 2).join(', ')}{onboardingData.platforms.length > 2 ? ' +' + (onboardingData.platforms.length - 2) : ''}
                                                     </span>
                                                 )}
-                                            </div>
+                                            </motion.div>
                                         )}
-
-                                        <div className="flex flex-col gap-3 mt-6 pt-4 relative z-20">
+                                        {/* CTA Buttons */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 12 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.6, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                                            className="flex flex-col gap-3 pt-2 relative z-20"
+                                        >
                                             <button
                                                 onClick={async () => {
                                                     const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
                                                     if (result?.ok) { router.push(autoCampaignId ? `/brand/campaigns/${autoCampaignId}/match` : '/brand/campaigns/new'); }
                                                     else { router.push('/brand/login'); }
                                                 }}
-                                                className="w-full py-4.5 bg-slate-900 text-white text-base font-black rounded-2xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 flex items-center justify-center gap-2 group hover:-translate-y-0.5 active:translate-y-0"
+                                                className="w-full py-4 text-white text-[15px] font-black rounded-2xl transition-all flex items-center justify-center gap-2.5 group relative overflow-hidden"
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #312e81 100%)',
+                                                    boxShadow: '0 16px 40px -8px rgba(15,23,42,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset'
+                                                }}
+                                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 20px 48px -8px rgba(79,70,229,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset'; }}
+                                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 16px 40px -8px rgba(15,23,42,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset'; }}
                                             >
-                                                <Sparkles size={18} className="text-amber-300 group-hover:scale-110 transition-transform" />
+                                                {/* Shimmer overlay */}
+                                                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none" />
+                                                <Sparkles size={17} className="text-amber-300 group-hover:rotate-12 transition-transform duration-300 shrink-0" />
                                                 Go to Dashboard
                                             </button>
                                             
-                                            <div className="flex items-center justify-center gap-4">
-                                                <button
-                                                    onClick={async () => {
-                                                        const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-                                                        if (result?.ok) {
-                                                            router.push('/brand/campaigns');
-                                                        } else {
-                                                            router.push('/brand/login');
-                                                        }
-                                                    }}
-                                                    className="py-3 px-6 text-slate-500 text-sm font-black text-center rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-all"
-                                                >
-                                                    Open Campaigns
-                                                </button>
-                                            </div>
-                                        </div>
+                                            <button
+                                                onClick={async () => {
+                                                    const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
+                                                    if (result?.ok) { router.push('/brand/campaigns'); }
+                                                    else { router.push('/brand/login'); }
+                                                }}
+                                                className="w-full py-3 text-slate-500 text-[13px] font-black text-center rounded-xl hover:bg-slate-100 hover:text-slate-800 transition-all border border-transparent hover:border-slate-200"
+                                            >
+                                                Open Campaigns
+                                            </button>
+                                        </motion.div>
                                     </div>
                                 </CardWrapper>
                             )}

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Layers3, Plus } from "lucide-react";
+import { Layers3, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { BrandStats } from "@/components/brand/dashboard/brand-stats";
 import { RecommendedInfluencers } from "@/components/brand/dashboard/recommended-influencers";
@@ -53,23 +53,36 @@ export default async function BrandDashboardPage() {
     const { unreadMessageCount } = await getBrandNotifications();
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-h-screen relative overflow-hidden font-sans pb-16" style={{ background: "radial-gradient(circle at top right, #f8fafc 0%, #f1f5f9 100%)" }}>
+            
+            {/* Animated background orbs */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+                <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-indigo-500/10 to-transparent blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
+                <div className="absolute top-[20%] -right-[10%] w-[40%] h-[60%] rounded-full bg-gradient-to-bl from-purple-500/10 to-transparent blur-[120px] animate-[pulse_14s_ease-in-out_infinite_2s]" />
+                <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[50%] rounded-full bg-gradient-to-t from-blue-500/10 to-transparent blur-[120px] animate-[pulse_12s_ease-in-out_infinite_4s]" />
+            </div>
+
+            <div className="max-w-[1400px] mx-auto relative z-10 px-4 md:px-8 pt-8">
+                <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div>
-                        <h1 className="mb-2 text-3xl font-bold text-gray-900">Brand Home Overview</h1>
-                        <p className="text-gray-500">Welcome back, {brandName}. Here&apos;s what&apos;s happening with your influencer campaigns today.</p>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/60 backdrop-blur-md border border-indigo-100 rounded-full text-[11px] font-black uppercase tracking-widest text-indigo-600 shadow-sm mb-3">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            Command Center
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Brand Overview</h1>
+                        <p className="text-slate-500 font-medium text-[15px]">Welcome back, <span className="text-slate-800 font-bold">{brandName}</span>. Here&apos;s what&apos;s happening with your influencer campaigns today.</p>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
                         <Link href="/brand/campaigns">
-                            <Button variant="outline" className="rounded-2xl border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50">
-                                <Layers3 className="mr-2 h-4 w-4" />
+                            <Button variant="outline" className="h-12 px-6 rounded-2xl border-slate-200/80 bg-white/80 backdrop-blur-md font-bold text-slate-700 hover:bg-white hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all duration-300 hover:shadow-md hover:shadow-indigo-100/50 hover:-translate-y-0.5">
+                                <Layers3 className="mr-2.5 h-4 w-4" />
                                 Campaign Pipeline
                             </Button>
                         </Link>
                         <Link href="/brand/campaigns/new">
-                            <Button className="rounded-2xl bg-blue-600 font-semibold text-white hover:bg-blue-700">
+                            <Button className="h-12 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-bold text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-300/50 hover:-translate-y-0.5 transition-all duration-300 group relative overflow-hidden">
+                                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                 <Plus className="mr-2 h-4 w-4" />
                                 Create New Campaign
                             </Button>
@@ -77,31 +90,34 @@ export default async function BrandDashboardPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-8 lg:flex-row">
-                    <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-8 xl:flex-row">
+                    <div className="min-w-0 flex-1 flex flex-col gap-8">
                         <BrandStats stats={stats} />
                         <RecommendedInfluencers influencers={recommendedInfluencers} />
                         <RecentActivity activities={activities} />
                     </div>
 
-                    <div className="w-full shrink-0 space-y-6 lg:w-80">
-                        <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 text-white shadow-lg">
+                    <div className="w-full shrink-0 flex flex-col gap-8 xl:w-[360px] animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both">
+                        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 p-8 text-white shadow-xl shadow-indigo-200/50 group">
+                            {/* Animated Background Gradients */}
+                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
+                            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-400/40 blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:translate-x-5" />
+                            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-400/40 blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:-translate-x-5" />
+                            
                             <div className="relative z-10">
                                 <Link href="/brand/campaigns">
-                                    <div className="mb-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-500 transition-colors hover:bg-blue-400">
-                                        <Layers3 className="h-5 w-5 text-white" />
+                                    <div className="mb-6 flex h-14 w-14 cursor-pointer items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-110 hover:rotate-3 shadow-lg">
+                                        <Layers3 className="h-6 w-6 text-white" />
                                     </div>
                                 </Link>
-                                <h3 className="mb-2 text-xl font-bold">Campaign visibility</h3>
-                                <p className="mb-6 text-sm text-blue-100">Track paid campaign progress from setup to manager review in one place.</p>
+                                <h3 className="mb-3 text-2xl font-black tracking-tight leading-tight">Campaign Visibility</h3>
+                                <p className="mb-8 text-[15px] font-medium text-blue-100/90 leading-relaxed">Track paid campaign progress from setup to manager review in one unified mission control.</p>
                                 <Link href="/brand/campaigns">
-                                    <Button className="w-full border-none bg-white font-bold text-blue-600 hover:bg-blue-50">
+                                    <Button className="w-full h-12 rounded-xl bg-white text-indigo-600 font-black hover:bg-blue-50 hover:text-indigo-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                                         Open Campaigns
                                     </Button>
                                 </Link>
                             </div>
-                            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blue-500/30 blur-2xl"></div>
-                            <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-blue-400/20 blur-2xl"></div>
                         </div>
 
                         <QuickActions unreadMessageCount={unreadMessageCount} />

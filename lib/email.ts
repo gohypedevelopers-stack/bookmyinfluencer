@@ -13,25 +13,34 @@ function getMailErrorMessage(error: unknown) {
             : undefined;
 
     if (code === "EAUTH" || responseCode === 535 || /badcredentials|username and password not accepted/i.test(message)) {
-        return `SMTP Authentication Rejected by ${process.env.SMTP_HOST || 'Mail Server'}. Please verify that SMTP_USER (${process.env.SMTP_USER}) and SMTP_PASS are correct, and restart your server. Error: ${message}`;
+        return `SMTP Authentication Rejected by ${process.env.SMTP_HOST || 'Mail Server'}. Verify SMTP_USER (${process.env.SMTP_USER}) and SMTP_PASS in .env. Error: ${message}`;
     }
 
     return message || "Failed to send email";
 }
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_PORT === '465',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: getSmtpPassword(),
-    },
-});
+/** Lazily creates a fresh transporter on every call so .env changes take effect without a restart. */
+function getTransporter() {
+    const port = parseInt(process.env.SMTP_PORT || '587');
+    const secure = port === 465;
+    return nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port,
+        secure,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: getSmtpPassword(),
+        },
+        tls: {
+            // Required for some Hostinger / shared-hosting SMTP servers
+            rejectUnauthorized: false,
+        },
+    });
+}
 
 export async function sendVerificationApprovedEmail(email: string, creatorName: string) {
     try {
-        await transporter.sendMail({
+        await getTransporter().sendMail({
             from: process.env.FROM_EMAIL,
             to: email,
             subject: '🎉 Your Creator Profile Has Been Verified!',
@@ -82,7 +91,7 @@ export async function sendVerificationApprovedEmail(email: string, creatorName: 
 
 export async function sendOtpEmail(email: string, otp: string) {
     try {
-        await transporter.sendMail({
+        await getTransporter().sendMail({
             from: process.env.FROM_EMAIL,
             to: email,
             subject: 'Verify Your Email - BookMyInfluencer',
@@ -130,7 +139,7 @@ export async function sendOtpEmail(email: string, otp: string) {
 
 export async function sendVerificationRejectedEmail(email: string, creatorName: string, reason?: string) {
     try {
-        await transporter.sendMail({
+        await getTransporter().sendMail({
             from: process.env.FROM_EMAIL,
             to: email,
             subject: 'Update on Your Creator Verification',

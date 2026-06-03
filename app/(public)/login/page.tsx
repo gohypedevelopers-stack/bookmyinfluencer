@@ -350,7 +350,7 @@ export default function LoginPage() {
                     
                     <div className="relative bg-white/90 backdrop-blur-2xl p-7 sm:p-8 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] border border-white/80 ring-1 ring-slate-200/50">
                         {/* Header */}
-                        <div className="mb-6 text-center">
+                        <div className="mb-5 text-center">
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -363,6 +363,47 @@ export default function LoginPage() {
                             <p className="text-slate-500 text-sm font-medium leading-relaxed">
                                 Sign in to your creator dashboard.
                             </p>
+                        </div>
+
+                        {/* Google Sign-In — placed directly below subtitle */}
+                        <div className="mb-5">
+                            <button
+                                type="button"
+                                onClick={handleGoogleLogin}
+                                disabled={!providersLoaded || googleLoading || loading}
+                                title={!googleAvailable ? (process.env.NODE_ENV === 'development' ? 'Google login [Simulation Mode]' : 'Google login needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET') : 'Continue with Google'}
+                                className="relative w-full overflow-hidden flex items-center justify-center gap-2 h-[52px] bg-white border border-slate-200/80 rounded-2xl text-slate-700 font-bold text-[15px] transition-all duration-400 hover:bg-slate-50 hover:border-slate-300 hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 group"
+                            >
+                                {/* Click Ripple / Hover Glow Effect */}
+                                <div className="absolute inset-0 bg-slate-100 opacity-0 group-active:opacity-100 transition-opacity duration-150" />
+                                
+                                <div className="relative z-10 flex items-center gap-2.5">
+                                    <div className="w-5 h-5 flex items-center justify-center">
+                                        {googleLoading ? (
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                                            >
+                                                <GoogleIcon className="w-5 h-5 opacity-90 drop-shadow-sm" />
+                                            </motion.div>
+                                        ) : (
+                                            <GoogleIcon className="w-5 h-5 group-hover:scale-110 group-hover:drop-shadow-md transition-all duration-300" />
+                                        )}
+                                    </div>
+                                    <span className="group-hover:text-slate-900 transition-colors">
+                                        {googleLoading ? "Connecting..." : "Google"}
+                                    </span>
+                                </div>
+                                
+                                {/* Subtle interactive shine */}
+                                <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/80 to-transparent -skew-x-[30deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out" />
+                            </button>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="relative mb-5">
+                            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200/60"></div></div>
+                            <div className="relative flex justify-center text-xs"><span className="bg-white/80 px-3 text-slate-400 font-medium leading-none">Or sign in with email</span></div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -436,44 +477,7 @@ export default function LoginPage() {
                                 </button>
                             </div>
 
-                            <div className="relative my-5">
-                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200/60"></div></div>
-                                <div className="relative flex justify-center text-xs"><span className="bg-white/80 px-3 text-slate-400 font-medium leading-none">Or continue with</span></div>
-                            </div>
 
-                            <div>
-                                <button
-                                    type="button"
-                                    onClick={handleGoogleLogin}
-                                    disabled={!providersLoaded || googleLoading || loading}
-                                    title={!googleAvailable ? (process.env.NODE_ENV === 'development' ? 'Google login [Simulation Mode]' : 'Google login needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET') : 'Continue with Google'}
-                                    className="relative w-full overflow-hidden flex items-center justify-center gap-2 h-[52px] bg-white border border-slate-200/80 rounded-2xl text-slate-700 font-bold text-[15px] transition-all duration-400 hover:bg-slate-50 hover:border-slate-300 hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 group"
-                                >
-                                    {/* Click Ripple / Hover Glow Effect */}
-                                    <div className="absolute inset-0 bg-slate-100 opacity-0 group-active:opacity-100 transition-opacity duration-150" />
-                                    
-                                    <div className="relative z-10 flex items-center gap-2.5">
-                                        <div className="w-5 h-5 flex items-center justify-center">
-                                            {googleLoading ? (
-                                                <motion.div
-                                                    animate={{ rotate: 360 }}
-                                                    transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                                                >
-                                                    <GoogleIcon className="w-5 h-5 opacity-90 drop-shadow-sm" />
-                                                </motion.div>
-                                            ) : (
-                                                <GoogleIcon className="w-5 h-5 group-hover:scale-110 group-hover:drop-shadow-md transition-all duration-300" />
-                                            )}
-                                        </div>
-                                        <span className="group-hover:text-slate-900 transition-colors">
-                                            {googleLoading ? "Connecting..." : "Google"}
-                                        </span>
-                                    </div>
-                                    
-                                    {/* Subtle interactive shine */}
-                                    <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/80 to-transparent -skew-x-[30deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out" />
-                                </button>
-                            </div>
                         </form>
 
                         <div className="mt-6 text-center">

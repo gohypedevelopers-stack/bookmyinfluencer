@@ -44,7 +44,11 @@ function BrandLoginForm() {
 
             if (res?.error) {
                 const diagnostic = await inspectBrandLoginEmail(normalizedEmail)
-                setError(diagnostic.message || "Invalid email or password.")
+                if (diagnostic.role === "INFLUENCER") {
+                    setError("INFLUENCER_CONFLICT")
+                } else {
+                    setError(diagnostic.message || "Invalid email or password.")
+                }
                 setIsLoading(false)
                 return
             }
@@ -59,7 +63,7 @@ function BrandLoginForm() {
             await signOut({ redirect: false })
 
             if (session?.user?.role === "INFLUENCER") {
-                setError("This email is linked to an influencer account. Use creator sign in or a different business email for your brand.")
+                setError("INFLUENCER_CONFLICT")
             } else if (session?.user?.role === "MANAGER") {
                 setError("This email is linked to a manager account, not a brand account.")
             } else {
@@ -72,6 +76,8 @@ function BrandLoginForm() {
         }
     }
 
+    const isInfluencerConflict = error === "INFLUENCER_CONFLICT"
+
     return (
         <div className="w-full">
             <AnimatePresence mode="wait">
@@ -83,11 +89,41 @@ function BrandLoginForm() {
                     </motion.div>
                 )}
                 
-                {error && (
+                {error && !isInfluencerConflict && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                         className="mb-5 rounded-xl bg-rose-50/80 border border-rose-200 p-3.5 flex items-start gap-3 text-sm font-medium text-rose-800 shadow-sm backdrop-blur-sm">
                         <Zap className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                         <p>{error}</p>
+                    </motion.div>
+                )}
+
+                {isInfluencerConflict && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mb-5 rounded-xl border border-amber-200 bg-amber-50/90 p-4 shadow-sm backdrop-blur-sm"
+                    >
+                        <div className="flex items-start gap-3 mb-3">
+                            <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center">
+                                <Zap className="w-3.5 h-3.5 text-amber-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-amber-900 leading-snug">
+                                    This email belongs to a creator account.
+                                </p>
+                                <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                                    Use the Creator sign-in portal, or try a different business email for your brand.
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/login"
+                            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold shadow-md hover:shadow-lg hover:from-violet-500 hover:to-indigo-500 hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                            Go to Creator Sign In
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
                     </motion.div>
                 )}
             </AnimatePresence>
