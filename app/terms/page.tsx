@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Navbar } from "@/components/Navbar"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { FileText, Users, CreditCard, Ban, Scale, RefreshCw, ArrowLeft, ChevronRight, AlertTriangle } from "lucide-react"
 import { Container } from "@/components/container"
 
@@ -87,11 +87,11 @@ const SECTIONS = [
     },
 ]
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: {},
     visible: { transition: { staggerChildren: 0.1 } }
 }
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { opacity: 0, y: 24 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } }
 }

@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react"
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, type Variants } from "framer-motion"
 
 interface Influencer {
     id: string
@@ -24,7 +24,7 @@ interface RecommendedInfluencersProps {
     influencers: Influencer[]
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
@@ -32,7 +32,7 @@ const containerVariants = {
     }
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 10 },
     show: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } },
     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }

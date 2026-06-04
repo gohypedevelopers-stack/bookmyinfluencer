@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import {
     ArrowUpRight,
     BriefcaseBusiness,
@@ -65,7 +65,7 @@ function getTabDescription(tab: 'INVITATIONS' | 'ACTIVE' | 'COMPLETED') {
     return 'Completed work and ready-for-brand-review items collect here.';
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
@@ -76,7 +76,7 @@ const containerVariants = {
     }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
     show: {
         opacity: 1,

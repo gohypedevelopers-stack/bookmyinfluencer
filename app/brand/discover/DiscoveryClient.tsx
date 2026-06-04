@@ -53,6 +53,12 @@ export default function DiscoveryClient({ influencers }: DiscoveryClientProps) {
         return count.toString();
     };
 
+    const getNicheTags = (niche?: string | null) =>
+        (niche || '')
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter(Boolean);
+
     const platforms = [
         { id: 'Instagram', icon: Camera },
         { id: 'YouTube', icon: PlayCircle },
@@ -68,7 +74,7 @@ export default function DiscoveryClient({ influencers }: DiscoveryClientProps) {
     };
 
     const filteredInfluencers = influencers.filter((inf) => {
-        const niches = typeof inf.niche === 'string' ? inf.niche.toLowerCase() : (inf.niche || []).join(' ').toLowerCase();
+        const niches = getNicheTags(inf.niche).join(' ').toLowerCase();
         if (activePlatform === 'YouTube') return niches.includes('tech') || niches.includes('gaming') || niches.includes('youtube') || niches.includes('vlog');
         if (activePlatform === 'TV Stars') return niches.includes('actor') || niches.includes('tv') || niches.includes('model') || niches.includes('entertainment');
         if (activePlatform === 'Musicians') return niches.includes('music') || niches.includes('singer') || niches.includes('dance') || niches.includes('dj');
@@ -336,7 +342,7 @@ export default function DiscoveryClient({ influencers }: DiscoveryClientProps) {
                                                      activePlatform === 'TV Stars' ? <Tv className="w-3.5 h-3.5 text-amber-500" /> :
                                                      activePlatform === 'Musicians' ? <Music className="w-3.5 h-3.5 text-indigo-500" /> :
                                                      <Camera className="w-3.5 h-3.5 text-pink-500" />}
-                                                    <span>{inf.niche[0] || 'Creator'}</span>
+                                                    <span>{getNicheTags(inf.niche)[0] || 'Creator'}</span>
                                                 </div>
                                                 <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg shadow-blue-500/30 flex items-center gap-1 border border-white/20">
                                                     <Check className="w-3 h-3" />
@@ -367,7 +373,7 @@ export default function DiscoveryClient({ influencers }: DiscoveryClientProps) {
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 mb-6">
-                                                    {(typeof inf.niche === 'string' ? inf.niche.split(',') : inf.niche || []).filter(Boolean).map((tag, i) => (
+                                                    {getNicheTags(inf.niche).map((tag, i) => (
                                                         <span key={i} className="px-3 py-1 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 hover:bg-slate-200 transition-colors cursor-pointer">{tag}</span>
                                                     ))}
                                                 </div>

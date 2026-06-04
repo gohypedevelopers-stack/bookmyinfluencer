@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, type Variants } from "framer-motion"
 import {
     Dialog,
     DialogContent,
@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { getCreatorEarnings, requestPayout } from "@/app/(creator)/creator/actions"
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
@@ -49,7 +49,7 @@ const containerVariants = {
     }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
     show: {
         opacity: 1,
