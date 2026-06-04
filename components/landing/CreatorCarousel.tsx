@@ -84,25 +84,37 @@ export function CreatorCarousel({ creators }: CreatorCarouselProps) {
                                         <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200" />
                                     )}
 
-                                    {/* Premium Overlay - Light Mode Refined */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-black/5 opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
-                                    <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-all duration-500" />
+                                    {/* Subtle Dark Gradient to make white text readable while keeping image sharp */}
+                                    <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-500" />
 
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 z-10">
-                                        <div className="flex items-center gap-1.5 mb-1transform group-hover:-translate-y-1 transition-transform duration-500">
-                                            <h3 className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight truncate max-w-[85%]">{displayName}</h3>
-                                            <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 drop-shadow-sm flex-shrink-0" />
-                                        </div>
-                                        <p className="text-xs sm:text-sm text-slate-600 font-medium mb-4 sm:mb-5 truncate group-hover:text-slate-900 transition-colors">{creator.niche || 'General Content'}</p>
-
-                                        <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold border-t border-slate-100 pt-3 sm:pt-4 group-hover:border-slate-200 transition-colors">
-                                            <div className="space-y-1">
-                                                <p className="text-slate-500 uppercase tracking-tighter">Followers</p>
-                                                <p className="text-slate-900 text-xs sm:text-sm font-bold">{fmtFollowers}</p>
+                                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 z-10 flex flex-col justify-end">
+                                        {/* Name Block - Hidden on Hover */}
+                                        <div className="grid grid-rows-[1fr] group-hover:grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-[0.25,1,0.5,1]">
+                                            <div className="overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+                                                <div className="flex items-center gap-1.5 pb-1">
+                                                    <h3 className="font-bold text-lg sm:text-xl text-white tracking-tight truncate max-w-[85%] drop-shadow-lg">{displayName}</h3>
+                                                    <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 drop-shadow-md flex-shrink-0" />
+                                                </div>
                                             </div>
-                                            <div className="text-right space-y-1">
-                                                <p className="text-slate-500 uppercase tracking-tighter">Engagement</p>
-                                                <p className="text-indigo-600 text-xs sm:text-sm font-bold">{engagement.toFixed(1)}%</p>
+                                        </div>
+                                        
+                                        {/* Smooth Reveal Details */}
+                                        <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-[0.25,1,0.5,1]">
+                                            <div className="overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                                <div className="pt-1 pb-1">
+                                                    <p className="text-xs sm:text-sm text-slate-200 font-medium mb-4 sm:mb-5 truncate drop-shadow-md">{creator.niche || 'General Content'}</p>
+
+                                                    <div className="flex items-center justify-between text-[10px] sm:text-xs font-bold border-t border-slate-700/60 pt-3 sm:pt-4">
+                                                        <div className="space-y-1">
+                                                            <p className="text-slate-300 uppercase tracking-tighter">Followers</p>
+                                                            <p className="text-white text-xs sm:text-sm font-black">{fmtFollowers}</p>
+                                                        </div>
+                                                        <div className="text-right space-y-1">
+                                                            <p className="text-slate-300 uppercase tracking-tighter">Engagement</p>
+                                                            <p className="text-blue-400 text-xs sm:text-sm font-black">{engagement.toFixed(1)}%</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

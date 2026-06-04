@@ -13,14 +13,14 @@ const ABOUT_LINKS = [
 const BRAND_LINKS = [
     { href: "/signup", label: "Sign up today" },
     { href: "/faq", label: "FAQ" },
-    { href: "/brand/login", label: "Login" },
+    { href: "/portal", label: "Login" },
 ]
 
 const CREATOR_LINKS = [
     { href: "/creator/profile", label: "Profile" },
     { href: "/faq", label: "FAQ" },
     { href: "/signup", label: "Sign up today" },
-    { href: "/login", label: "Login" },
+    { href: "/portal", label: "Login" },
 ]
 
 const BOTTOM_LINKS = [

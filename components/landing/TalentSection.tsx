@@ -111,7 +111,7 @@ export async function TalentSection() {
     const creators = dbCreators.slice(0, 12);
 
     return (
-        <section className="w-full py-12 md:py-16 bg-slate-50/50 overflow-hidden transition-colors duration-500">
+        <section className="w-full py-16 md:py-24 bg-slate-50/50 overflow-hidden transition-colors duration-500">
             <Container>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-16">
                     <div className="space-y-4">

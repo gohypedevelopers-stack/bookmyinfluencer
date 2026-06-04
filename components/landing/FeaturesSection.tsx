@@ -11,7 +11,7 @@ export function FeaturesSection() {
     const y2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
 
     return (
-        <section className="w-full py-12 md:py-16 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-16 md:py-24 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             {/* Background decorative elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
                 <motion.div style={{ y: y1 }} className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]" />
@@ -19,85 +19,7 @@ export function FeaturesSection() {
             </div>
 
             <Container className="text-center relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-16"
-                >
-                    <p className="text-xs font-bold text-indigo-600 uppercase tracking-[0.3em] mb-12">Trusted by Industry Leaders</p>
-
-
-                    {/* Infinite Animated Carousel Container - Two Rows */}
-                    <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-16 bg-gradient-to-br from-white via-indigo-50 to-sky-100 rounded-[3rem] border border-white shadow-2xl shadow-slate-200/80">
-                        {/* Gradient masks */}
-                        <div className="absolute left-0 top-0 bottom-0 w-48 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-                        <div className="absolute right-0 top-0 bottom-0 w-48 bg-gradient-to-l from-sky-100 to-transparent z-10 pointer-events-none" />
-
-                        {/* Top Row - Scrolls Left */}
-                        <motion.div
-                            className="flex items-center gap-12 md:gap-40 whitespace-nowrap animate-infinite-scroll hover:[animation-play-state:paused]"
-                        >
-                            {[1, 2, 3].map((setIndex) => (
-                                <div key={`row1-${setIndex}`} className="flex items-center gap-12 md:gap-40">
-                                    {[
-                                        { name: "Fabhotels", src: "/images/logos/fabhotels.avif", width: 220, height: 100 },
-                                        { name: "GDK", src: "/images/logos/gdk.avif", width: 180, height: 100, filter: "brightness-0 scale-125" },
-                                        { name: "Homify", src: "/images/logos/homify.avif", width: 180, height: 100, filter: "brightness-0 scale-125" },
-                                        { name: "IndianOil", src: "/images/logos/indianoil.avif", width: 180, height: 100, filter: "scale-75" },
-                                        { name: "Lazada", src: "/images/logos/lazada.avif", width: 200, height: 100, filter: "brightness-0" },
-                                        { name: "Yatra", src: "/images/logos/yatra.png", width: 180, height: 100 },
-                                    ].map((brand, i) => (
-                                        <div
-                                            key={`${setIndex}-r1-${brand.name}-${i}`}
-                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 group/logo flex items-center justify-center w-32 md:w-48 lg:w-64 h-24 md:h-32 lg:h-40"
-                                        >
-                                            <Image
-                                                src={brand.src}
-                                                alt={brand.name}
-                                                width={brand.width * 2}
-                                                height={brand.height * 2}
-                                                className={`w-full h-full object-contain contrast-110 drop-shadow-[0_3px_10px_rgba(15,23,42,0.24)] transition-all duration-300 ${brand.filter ?? ""}`}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </motion.div>
-
-                        {/* Bottom Row - Scrolls Right (Reverse) */}
-                        <motion.div
-                            className="flex items-center gap-12 md:gap-40 whitespace-nowrap animate-infinite-scroll-reverse hover:[animation-play-state:paused]"
-                        >
-                            {[1, 2, 3].map((setIndex) => (
-                                <div key={`row2-${setIndex}`} className="flex items-center gap-12 md:gap-40">
-                                    {[
-                                        { name: "Mash", src: "/images/logos/mash.avif", width: 160, height: 60, filter: "scale-125" },
-                                        { name: "Neo", src: "/images/logos/neo.avif", width: 180, height: 60, filter: "scale-125" },
-                                        { name: "Pai", src: "/images/logos/pai.avif", width: 140, height: 60, filter: "brightness-0 scale-110" },
-                                        { name: "Rapid Repair", src: "/images/logos/rapidrepair.avif", width: 220, height: 60, filter: "brightness-0 scale-125" },
-                                        { name: "Taneja Group", src: "/images/logos/taneja group.avif", width: 280, height: 60 },
-                                    ].map((brand, i) => (
-                                        <div
-                                            key={`${setIndex}-r2-${brand.name}-${i}`}
-                                            className="opacity-90 hover:opacity-100 transition-all duration-500 cursor-pointer hover:scale-110 px-4 flex items-center justify-center w-32 md:w-48 lg:w-64 h-24 md:h-32 lg:h-40"
-                                        >
-                                            <Image
-                                                src={brand.src}
-                                                alt={brand.name}
-                                                width={brand.width * 2}
-                                                height={brand.height * 2}
-                                                className={`w-full h-full object-contain contrast-110 drop-shadow-[0_3px_10px_rgba(15,23,42,0.24)] transition-all duration-300 ${brand.filter ?? ""}`}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </motion.div>
-
+                
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}

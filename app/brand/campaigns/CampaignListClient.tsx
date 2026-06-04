@@ -115,34 +115,43 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
             </div>
 
             <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-                <div className="mb-5 rounded-[32px] border border-slate-200 bg-[linear-gradient(135deg,#020617_0%,#0f172a_46%,#4338ca_100%)] p-5 md:p-6 text-white shadow-[0_28px_80px_-38px_rgba(15,23,42,0.55)]">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="mb-6 relative rounded-[2.5rem] border border-slate-800 bg-slate-900 p-8 md:p-10 text-white overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)]">
+                    {/* Glowing Orbs */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none -mt-20 -mr-20" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] pointer-events-none -mb-20 -ml-20" />
+
+                    <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Execution Model</p>
-                            <h2 className="mt-2 text-2xl font-black">PM-led delivery after full upfront payment</h2>
-                            <p className="mt-2 max-w-2xl text-sm text-slate-200">
-                                Launch new campaigns, review creator matches, and manage execution from one place.
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 mb-4 backdrop-blur-md">
+                                <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Execution Model</span>
+                            </div>
+                            <h2 className="text-3xl font-black tracking-tight text-white drop-shadow-md">PM-Led Full Delivery</h2>
+                            <p className="mt-3 max-w-2xl text-base text-slate-300/90 font-medium">
+                                Launch new campaigns, review premium creator matches, and manage end-to-end execution from a unified interface.
                             </p>
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="rounded-[22px] border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">Current Active Spend</p>
-                                <p className="mt-2 text-2xl font-black text-white">Rs.{totalActiveSpend.toLocaleString()}</p>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:min-w-[400px]">
+                            <div className="relative rounded-[2rem] border border-white/5 bg-white/5 px-6 py-5 backdrop-blur-xl group hover:bg-white/10 transition-colors duration-300">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-indigo-300 transition-colors">Current Active Spend</p>
+                                <p className="mt-2 text-3xl font-black text-white tracking-tight">Rs.{totalActiveSpend.toLocaleString()}</p>
                             </div>
-                            <div className="rounded-[22px] border border-white/10 bg-white/10 px-4 py-4 backdrop-blur-sm">
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">Active Campaigns</p>
-                                <p className="mt-2 text-2xl font-black text-white">{activeCampaignsCount}</p>
+                            <div className="relative rounded-[2rem] border border-white/5 bg-white/5 px-6 py-5 backdrop-blur-xl group hover:bg-white/10 transition-colors duration-300">
+                                <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem]" />
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-fuchsia-300 transition-colors">Active Campaigns</p>
+                                <p className="mt-2 text-3xl font-black text-white tracking-tight">{activeCampaignsCount}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabs & Search */}
-                <div className="bg-white rounded-t-xl border border-gray-200 p-4 mb-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] border border-slate-200/60 p-4 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm shadow-slate-200/50 relative z-10">
                     {/* Tabs */}
-                    <div className="flex items-center gap-2 overflow-x-auto">
+                    <div className="flex items-center gap-2 overflow-x-auto p-1 bg-slate-100/50 rounded-2xl">
                         {[
-                            { id: 'ALL', label: 'All Campaigns', count: campaigns.length },
+                            { id: 'ALL', label: 'All', count: campaigns.length },
                             { id: 'ACTIVE', label: 'Active', count: campaigns.filter(c => getTabStatus(c.status) === 'ACTIVE').length },
                             { id: 'PENDING', label: 'Pending', count: campaigns.filter(c => getTabStatus(c.status) === 'PENDING').length },
                             { id: 'COMPLETED', label: 'Completed', count: campaigns.filter(c => getTabStatus(c.status) === 'COMPLETED').length },
@@ -150,29 +159,29 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                             <button
                                 key={tab.id}
                                 onClick={() => setSelectedTab(tab.id as any)}
-                                className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${selectedTab === tab.id
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                className={`px-5 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition-all duration-300 ${selectedTab === tab.id
+                                    ? 'bg-white text-indigo-600 shadow-md shadow-slate-200/50 border border-slate-100'
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'
                                     }`}
                             >
-                                {tab.label} <span className="ml-1 text-xs opacity-70">({tab.count})</span>
+                                {tab.label} <span className={`ml-1.5 px-2 py-0.5 rounded-md text-[10px] ${selectedTab === tab.id ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-500'}`}>{tab.count}</span>
                             </button>
                         ))}
                     </div>
 
                     {/* Search & Filter */}
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <div className="relative flex-1 md:w-80 group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                             <input
                                 type="text"
                                 placeholder="Search campaigns..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-all"
+                                className="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 shadow-inner"
                             />
                         </div>
-                        <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <button className="flex items-center gap-2 px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all shadow-sm hover:shadow-md">
                             <Filter className="w-4 h-4" />
                             Filters
                         </button>
@@ -310,37 +319,58 @@ export default function CampaignListClient({ campaigns }: CampaignListClientProp
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Total Active Spend</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">Rs.{totalActiveSpend.toLocaleString()}</div>
-                        <div className="flex items-center text-xs font-medium text-green-600">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            12.5% vs last month
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+                    <div className="bg-white p-8 rounded-[2rem] shadow-sm shadow-slate-200/50 border border-slate-200/60 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500">
+                            <IndianRupee className="w-16 h-16 text-indigo-600" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-[11px] font-black text-slate-400 uppercase mb-3 tracking-widest">Total Active Spend</div>
+                            <div className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Rs.{totalActiveSpend.toLocaleString()}</div>
+                            <div className="flex items-center text-[13px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full w-fit">
+                                <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
+                                12.5% vs last month
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Total Reach (Est)</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">{(estimatedReach / 1000000).toFixed(1)}M</div>
-                        <div className="flex items-center text-xs font-medium text-green-600">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            5.2% vs last month
+                    <div className="bg-white p-8 rounded-[2rem] shadow-sm shadow-slate-200/50 border border-slate-200/60 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500">
+                            <Users className="w-16 h-16 text-fuchsia-600" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-[11px] font-black text-slate-400 uppercase mb-3 tracking-widest">Total Reach (Est)</div>
+                            <div className="text-4xl font-black text-slate-900 mb-3 tracking-tight">{(estimatedReach / 1000000).toFixed(1)}M</div>
+                            <div className="flex items-center text-[13px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full w-fit">
+                                <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
+                                5.2% vs last month
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Active Campaigns</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">{activeCampaignsCount}</div>
-                        <div className="flex items-center text-xs font-medium text-blue-600">
-                            <Users className="w-3 h-3 mr-1" />
-                            {campaigns.filter(c => c.status === 'DRAFT').length} pending approval
+                    <div className="bg-white p-8 rounded-[2rem] shadow-sm shadow-slate-200/50 border border-slate-200/60 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500">
+                            <Calendar className="w-16 h-16 text-blue-600" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-[11px] font-black text-slate-400 uppercase mb-3 tracking-widest">Active Campaigns</div>
+                            <div className="text-4xl font-black text-slate-900 mb-3 tracking-tight">{activeCampaignsCount}</div>
+                            <div className="flex items-center text-[13px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full w-fit">
+                                <Users className="w-3.5 h-3.5 mr-1.5" />
+                                {campaigns.filter(c => c.status === 'DRAFT').length} pending approval
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Avg. Engagement Rate</div>
-                        <div className="text-3xl font-bold text-gray-900 mb-2">{avgEngagement}%</div>
-                        <div className="flex items-center text-xs font-medium text-gray-500">
-                            <Eye className="w-3 h-3 mr-1" />
-                            Benchmark: 3.2%
+                    <div className="bg-white p-8 rounded-[2rem] shadow-sm shadow-slate-200/50 border border-slate-200/60 relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500">
+                            <Eye className="w-16 h-16 text-slate-600" />
+                        </div>
+                        <div className="relative z-10">
+                            <div className="text-[11px] font-black text-slate-400 uppercase mb-3 tracking-widest">Avg. Engagement</div>
+                            <div className="text-4xl font-black text-slate-900 mb-3 tracking-tight">{avgEngagement}%</div>
+                            <div className="flex items-center text-[13px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full w-fit">
+                                <Eye className="w-3.5 h-3.5 mr-1.5" />
+                                Benchmark: 3.2%
+                            </div>
                         </div>
                     </div>
                 </div>

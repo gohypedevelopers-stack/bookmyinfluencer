@@ -11,7 +11,7 @@ export function CallToAction() {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     return (
-        <section className="w-full py-8 md:py-10 bg-transparent relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-16 md:py-24 bg-transparent relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
