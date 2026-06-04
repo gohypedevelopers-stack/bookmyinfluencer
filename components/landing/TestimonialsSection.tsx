@@ -200,8 +200,10 @@ const TESTIMONIALS = [
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 export function TestimonialsSection() {
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
     return (
-        <section className="w-full py-12 md:py-16 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-16 md:py-24 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -224,27 +226,50 @@ export function TestimonialsSection() {
                     ))}
                 </div>
 
-                {/* Testimonials Grid — compact, imageless, modern */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    {TESTIMONIALS.map((t, i) => (
+                {/* Testimonials Sub-heading */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-16 sm:mb-20"
+                >
+                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
+                        Customer <span className="text-indigo-600">Testimonials</span>
+                    </h2>
+                </motion.div>
+
+                {/* Testimonials Grid — fixed positions, dynamic scale */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8 items-center min-h-[400px] pb-10">
+                    {TESTIMONIALS.map((t, i) => {
+                        const isActive = activeIndex === i;
+                        const isAnyActive = activeIndex !== null;
+                        
+                        return (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.12, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                            whileHover={{ y: -4, transition: { duration: 0.25 } }}
-                            className="group relative"
+                            animate={{
+                                height: isActive ? 480 : "100%",
+                                opacity: isActive ? 1 : isAnyActive ? 0.6 : 1,
+                                y: isActive ? -12 : 0,
+                                zIndex: isActive ? 40 : 1,
+                            }}
+                            transition={{ 
+                                height: { type: "spring", stiffness: 280, damping: 26 },
+                                opacity: { duration: 0.3 }
+                            }}
+                            whileHover={!isActive ? { scale: 1.02, opacity: 0.9, y: -4 } : {}}
+                            onClick={() => setActiveIndex(isActive ? null : i)}
+                            className="w-full relative cursor-pointer group"
                         >
-                            {/* Glow border on hover */}
-                            <div className={`absolute -inset-[1.5px] rounded-[1.5rem] bg-gradient-to-br ${t.gradient} opacity-0 group-hover:opacity-30 transition-opacity duration-500 blur-[2px]`} />
+                            {/* Glow border on active or hover */}
+                            <div className={`absolute -inset-[4px] rounded-[1.5rem] bg-gradient-to-br ${t.gradient} ${isActive ? 'opacity-100 blur-[20px]' : 'opacity-0 group-hover:opacity-30 blur-[2px]'} transition-all duration-500`} />
 
-                            <div className="relative bg-white border border-slate-100 group-hover:border-transparent rounded-[1.4rem] p-5 flex flex-col gap-4 shadow-md group-hover:shadow-xl transition-all duration-400 overflow-hidden h-full">
+                            <div className={`relative bg-white border ${isActive ? 'border-transparent shadow-[0_40px_80px_-20px_rgba(0,0,0,0.25)] shadow-slate-300/60' : 'border-slate-100 group-hover:border-transparent group-hover:shadow-xl shadow-md'} rounded-[1.4rem] p-6 flex flex-col gap-4 transition-all duration-500 overflow-hidden h-full`}>
 
-                                {/* Accent line — sweeps top → bottom on hover */}
-                                <div className="absolute inset-x-0 top-0 h-full pointer-events-none overflow-hidden rounded-[1.4rem]">
-                                    <div className={`absolute left-[8%] right-[8%] h-[2px] bg-gradient-to-r ${t.gradient} rounded-full opacity-50 -translate-y-full group-hover:translate-y-[280px] transition-transform duration-700 ease-in-out`} />
-                                </div>
+
 
                                 {/* Header: quote mark + tag */}
                                 <div className="flex items-center justify-between">
@@ -284,7 +309,7 @@ export function TestimonialsSection() {
                                 </div>
                             </div>
                         </motion.div>
-                    ))}
+                    )})}
                 </div>
             </Container>
         </section>

@@ -50,27 +50,27 @@ export default function SignupPage() {
             </motion.div>
 
             {/* Selection Cards */}
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto w-full">
+            <div className="grid md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto w-full">
               
               {/* Brand Card */}
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
                 className="group relative"
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-[3rem] opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700"></div>
-                <div className="relative h-full bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-[3rem] p-10 md:p-14 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.1)] flex flex-col items-center text-center overflow-hidden transition-transform duration-500 group-hover:-translate-y-2">
+                <div className="absolute -inset-0.5 bg-slate-200/50 rounded-[2.5rem] blur-xl opacity-60"></div>
+                <div className="relative h-full bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-[2.5rem] p-8 md:p-10 shadow-lg shadow-indigo-900/5 flex flex-col items-center text-center overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-indigo-900/10 hover:-translate-y-1 border-white/50">
                   
                   {/* Decorative background glow */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                  <div className="w-24 h-24 rounded-3xl bg-indigo-50 flex items-center justify-center mb-8 shadow-inner border border-indigo-100 group-hover:scale-110 transition-transform duration-500">
-                    <Building2 className="w-12 h-12 text-indigo-600" />
+                  <div className="w-20 h-20 rounded-2xl bg-indigo-50/80 flex items-center justify-center mb-6 shadow-sm border border-indigo-100/50 transition-colors duration-300 group-hover:bg-indigo-100/50">
+                    <Building2 className="w-10 h-10 text-indigo-600" />
                   </div>
                   
-                  <h2 className="text-3xl font-extrabold text-slate-900 mb-4">I am a Brand</h2>
-                  <p className="text-slate-600 mb-10 text-lg leading-relaxed flex-1">
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-3">I am a Brand</h2>
+                  <p className="text-slate-500 mb-8 text-base leading-relaxed flex-1">
                     Discover top book influencers, launch campaigns, track analytics, and manage secure escrow payments all in one place.
                   </p>
                   
@@ -89,23 +89,23 @@ export default function SignupPage() {
 
               {/* Creator Card */}
               <motion.div
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
                 className="group relative"
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-400 to-purple-600 rounded-[3rem] opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700"></div>
-                <div className="relative h-full bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-[3rem] p-10 md:p-14 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.1)] flex flex-col items-center text-center overflow-hidden transition-transform duration-500 group-hover:-translate-y-2">
+                <div className="absolute -inset-0.5 bg-slate-200/50 rounded-[2.5rem] blur-xl opacity-60"></div>
+                <div className="relative h-full bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-[2.5rem] p-8 md:p-10 shadow-lg shadow-purple-900/5 flex flex-col items-center text-center overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/10 hover:-translate-y-1 border-white/50">
                   
                   {/* Decorative background glow */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-purple-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                  <div className="w-24 h-24 rounded-3xl bg-purple-50 flex items-center justify-center mb-8 shadow-inner border border-purple-100 group-hover:scale-110 transition-transform duration-500">
-                    <UserCircle className="w-12 h-12 text-purple-600" />
+                  <div className="w-20 h-20 rounded-2xl bg-purple-50/80 flex items-center justify-center mb-6 shadow-sm border border-purple-100/50 transition-colors duration-300 group-hover:bg-purple-100/50">
+                    <UserCircle className="w-10 h-10 text-purple-600" />
                   </div>
                   
-                  <h2 className="text-3xl font-extrabold text-slate-900 mb-4">I am a Creator</h2>
-                  <p className="text-slate-600 mb-10 text-lg leading-relaxed flex-1">
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-3">I am a Creator</h2>
+                  <p className="text-slate-500 mb-8 text-base leading-relaxed flex-1">
                     Connect with publishers, receive free books for review, apply to paid campaigns, and monetize your growing audience securely.
                   </p>
                   
