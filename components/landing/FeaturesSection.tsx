@@ -103,13 +103,13 @@ export function FeaturesSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="max-w-3xl mx-auto mt-16 mb-12"
+                    className="max-w-3xl mx-auto mt-16 mb-20 md:mb-28"
                 >
                     <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 tracking-tight">Standardizing the <span className="text-indigo-600">Industry</span></h2>
                     <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed font-medium">We build the infrastructure for secure and professional creative collaborations.</p>
                 </motion.div>
 
-                <div className="relative mt-8">
+                <div className="relative mt-12 md:mt-16">
                     {/* Background decorative glowing neon blobs to shine through glassmorphism cards */}
                     <div className="absolute -top-16 left-1/12 w-80 h-80 rounded-full bg-blue-400/8 blur-[120px] pointer-events-none animate-pulse" style={{ animationDuration: '6s' }} />
                     <div className="absolute top-24 right-1/12 w-88 h-88 rounded-full bg-purple-400/6 blur-[130px] pointer-events-none animate-pulse" style={{ animationDuration: '8s' }} />
