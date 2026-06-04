@@ -108,6 +108,89 @@ function getBrandAccountConflictMessage(existingAccount: { role: string }) {
     }
 }
 
+export async function ensureDevBrandSimulationAccount() {
+    if (process.env.NODE_ENV === 'production') {
+        return {
+            success: false,
+            error: 'Brand Google login simulation is only available in local development.',
+        };
+    }
+
+    const email = normalizeEmail('brand@nike.com');
+    const password = 'password123';
+
+    try {
+        const existingAccount = await findExistingAccountByEmail(email);
+        if (existingAccount && existingAccount.role !== UserRole.BRAND) {
+            return {
+                success: false,
+                error: getBrandAccountConflictMessage(existingAccount),
+            };
+        }
+
+        const passwordHash = await hash(password, 12);
+        const user = await db.user.upsert({
+            where: { email },
+            update: {
+                name: 'Nike Brand Manager',
+                passwordHash,
+                role: UserRole.BRAND,
+            },
+            create: {
+                email,
+                name: 'Nike Brand Manager',
+                passwordHash,
+                role: UserRole.BRAND,
+            },
+            select: { id: true },
+        });
+
+        const brandProfile = await db.brandProfile.upsert({
+            where: { userId: user.id },
+            update: {
+                companyName: 'Nike',
+                website: 'https://nike.com',
+                industry: 'Sportswear',
+                description: 'Development simulation brand account.',
+                location: 'India',
+                onboardingCompleted: true,
+            },
+            create: {
+                userId: user.id,
+                companyName: 'Nike',
+                website: 'https://nike.com',
+                industry: 'Sportswear',
+                description: 'Development simulation brand account.',
+                location: 'India',
+                onboardingCompleted: true,
+            },
+            select: { id: true },
+        });
+
+        await db.brandWallet.upsert({
+            where: { brandId: brandProfile.id },
+            update: {},
+            create: {
+                brandId: brandProfile.id,
+                balance: 0,
+                currency: 'INR',
+            },
+        });
+
+        return {
+            success: true,
+            email,
+            password,
+        };
+    } catch (err) {
+        console.error('[Brand Login Simulation] Failed to prepare dev account:', err);
+        return {
+            success: false,
+            error: 'Failed to prepare the local brand simulation account. Check your database connection.',
+        };
+    }
+}
+
 export async function inspectBrandLoginEmail(email: string) {
     const normalizedEmail = normalizeEmail(email);
 

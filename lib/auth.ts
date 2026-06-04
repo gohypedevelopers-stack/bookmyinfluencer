@@ -39,6 +39,47 @@ function getNextAuthSecret() {
     return secret
 }
 
+async function getDatabaseAuthUser(email: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) return null
+
+    const user = await db.user.findUnique({
+        where: { email: normalizedEmail },
+        include: {
+            influencerProfile: { select: { kyc: true } },
+            brandProfile: { select: { onboardingCompleted: true } },
+        },
+    })
+
+    if (!user) return null
+
+    let kycStatus: KYCStatus = (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus
+    let onboardingComplete = false
+
+    if (user.role === "INFLUENCER") {
+        const creatorState = await getCreatorAuthState(user.email)
+
+        if (creatorState.creator) {
+            if (creatorState.creator.verificationStatus && creatorState.creator.verificationStatus !== "NOT_SUBMITTED") {
+                kycStatus = creatorState.creator.verificationStatus as KYCStatus
+            }
+            onboardingComplete = creatorState.creator.onboardingCompleted
+        }
+    } else if (user.role === "BRAND") {
+        onboardingComplete = user.brandProfile?.onboardingCompleted || false
+    }
+
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as UserRole,
+        image: user.image,
+        kycStatus,
+        onboardingComplete,
+    }
+}
+
 const providers: NextAuthOptions["providers"] = [
     CredentialsProvider({
         name: "Credentials",
@@ -81,44 +122,17 @@ const providers: NextAuthOptions["providers"] = [
                     return null
                 }
 
-                let kycStatus: KYCStatus = (user.influencerProfile?.kyc?.status || "NOT_SUBMITTED") as KYCStatus
-                let onboardingComplete = false
-
-                if (user.role === "INFLUENCER") {
-                    const creatorState = await getCreatorAuthState(user.email)
-
-                    if (creatorState.creator) {
-                        if (creatorState.creator.verificationStatus && creatorState.creator.verificationStatus !== "NOT_SUBMITTED") {
-                            kycStatus = creatorState.creator.verificationStatus as KYCStatus
-                        }
-                        onboardingComplete = creatorState.creator.onboardingCompleted
-                    }
-                } else if (user.role === "BRAND") {
-                    const brand = await db.brandProfile.findUnique({
-                        where: { userId: user.id },
-                        select: { onboardingCompleted: true },
-                    })
-                    if (brand) {
-                        onboardingComplete = brand.onboardingCompleted
-                    }
-                }
+                const authUser = await getDatabaseAuthUser(user.email)
+                if (!authUser) return null
 
                 console.info("[AUTH][credentials] Login successful", {
                     email: normalizedEmail,
-                    role: user.role,
-                    onboardingComplete,
-                    kycStatus,
+                    role: authUser.role,
+                    onboardingComplete: authUser.onboardingComplete,
+                    kycStatus: authUser.kycStatus,
                 })
 
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role as UserRole,
-                    image: user.image,
-                    kycStatus,
-                    onboardingComplete,
-                }
+                return authUser
             } catch (error) {
                 console.error("[AUTH][credentials] Database failure", {
                     email: normalizedEmail,
@@ -210,10 +224,18 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user, trigger, session }) {
             if (user) {
-                token.role = user.role
-                token.id = user.id
-                token.kycStatus = user.kycStatus
-                token.onboardingComplete = (user as any).onboardingComplete || false
+                const authUser = (user as any).role
+                    ? user
+                    : user.email
+                        ? await getDatabaseAuthUser(user.email)
+                        : null
+
+                if (authUser) {
+                    token.role = authUser.role
+                    token.id = authUser.id
+                    token.kycStatus = authUser.kycStatus
+                    token.onboardingComplete = (authUser as any).onboardingComplete || false
+                }
             }
 
             if (trigger === "update" && session) {
