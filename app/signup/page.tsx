@@ -94,14 +94,14 @@ export default function SignupPage() {
                 transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
                 className="group relative"
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-400 to-purple-600 rounded-[3rem] opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700"></div>
-                <div className="relative h-full bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-[3rem] p-10 md:p-14 shadow-[0_20px_60px_-15px_rgba(79,70,229,0.1)] flex flex-col items-center text-center overflow-hidden transition-transform duration-500 group-hover:-translate-y-2">
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[3rem] opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-700"></div>
+                <div className="relative h-full bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-[3rem] p-10 md:p-14 shadow-[0_20px_60px_-15px_rgba(16,185,129,0.1)] flex flex-col items-center text-center overflow-hidden transition-transform duration-500 group-hover:-translate-y-2">
                   
                   {/* Decorative background glow */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-purple-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                  <div className="w-24 h-24 rounded-3xl bg-purple-50 flex items-center justify-center mb-8 shadow-inner border border-purple-100 group-hover:scale-110 transition-transform duration-500">
-                    <UserCircle className="w-12 h-12 text-purple-600" />
+                  <div className="w-24 h-24 rounded-3xl bg-emerald-50 flex items-center justify-center mb-8 shadow-inner border border-emerald-100 group-hover:scale-110 transition-transform duration-500">
+                    <UserCircle className="w-12 h-12 text-emerald-600" />
                   </div>
                   
                   <h2 className="text-3xl font-extrabold text-slate-900 mb-4">I am a Creator</h2>
@@ -110,10 +110,10 @@ export default function SignupPage() {
                   </p>
                   
                   <Link 
-                    href="/creator/onboarding"
-                    className="w-full relative overflow-hidden px-8 py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-sm hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 flex items-center justify-center gap-3 group/btn"
+                    href="/register"
+                    className="w-full relative overflow-hidden px-8 py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-sm hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-3 group/btn"
                   >
-                    <div className="absolute inset-0 bg-purple-600 translate-x-[-100%] group-hover/btn:translate-x-[0%] transition-transform duration-500 ease-out" />
+                    <div className="absolute inset-0 bg-emerald-600 translate-x-[-100%] group-hover/btn:translate-x-[0%] transition-transform duration-500 ease-out" />
                     <span className="relative z-10 flex items-center gap-2">
                       Register as a Creator
                       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />

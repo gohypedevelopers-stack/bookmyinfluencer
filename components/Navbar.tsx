@@ -11,7 +11,6 @@ import { LoginSelectionModal } from "./landing/LoginSelectionModal"
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
@@ -42,12 +41,12 @@ export function Navbar() {
 
         {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-6">
-          <button 
-            onClick={() => setIsLoginModalOpen(true)}
+          <Link 
+            href="/login"
             className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors tracking-wide cursor-pointer bg-transparent border-0"
           >
             Log In
-          </button>
+          </Link>
           <Button
             onClick={() => setIsJoinModalOpen(true)}
             className="font-bold bg-slate-900 text-white hover:bg-slate-800 px-8 h-12 rounded-xl text-sm tracking-wide transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200"
@@ -81,16 +80,14 @@ export function Navbar() {
             </div>
             <div className="h-px bg-slate-200/50 mx-3" />
             <div className="flex flex-col gap-4">
-              <Button 
-                variant="outline" 
-                className="w-full justify-center border-slate-200 text-slate-900 font-bold h-16 rounded-2xl text-sm tracking-wide shadow-sm" 
-                onClick={() => {
-                  toggleMobileMenu();
-                  setIsLoginModalOpen(true);
-                }}
-              >
-                Log In
-              </Button>
+              <Link href="/login" className="w-full animate-none" onClick={toggleMobileMenu}>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-center border-slate-200 text-slate-900 font-bold h-16 rounded-2xl text-sm tracking-wide shadow-sm" 
+                >
+                  Log In
+                </Button>
+              </Link>
               <Button
                 className="w-full justify-center bg-indigo-600 text-white hover:bg-indigo-700 font-bold h-16 rounded-2xl text-sm tracking-wide shadow-xl shadow-indigo-100"
                 onClick={() => {
@@ -108,12 +105,6 @@ export function Navbar() {
       <JoinSelectionModal
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
-        onOpenLoginModal={() => setIsLoginModalOpen(true)}
-      />
-      <LoginSelectionModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onOpenJoinModal={() => setIsJoinModalOpen(true)}
       />
     </nav>
   )

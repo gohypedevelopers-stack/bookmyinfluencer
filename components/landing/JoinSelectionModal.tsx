@@ -103,17 +103,13 @@ export function JoinSelectionModal({ isOpen, onClose, onOpenLoginModal }: JoinSe
                             <div className="text-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100">
                                 <p className="text-slate-400 font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em]">
                                 Already have an account?{" "}
-                                <button
-                                    onClick={() => {
-                                        onClose();
-                                        if (onOpenLoginModal) {
-                                            setTimeout(() => onOpenLoginModal(), 150);
-                                        }
-                                    }}
+                                <Link
+                                    href="/login"
+                                    onClick={onClose}
                                     className="text-slate-900 font-bold hover:text-indigo-600 transition-colors underline decoration-indigo-500/30 underline-offset-4"
                                 >
                                     Log in here
-                                </button>
+                                </Link>
                                 </p>
                             </div>
                         </div>

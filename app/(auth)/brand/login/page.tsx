@@ -352,6 +352,12 @@ function BrandLoginForm() {
                         Create Account
                     </Link>
                 </p>
+                <div className="pt-2 border-t border-slate-100/80">
+                    <Link href="/login" className="inline-flex items-center gap-2 text-xs font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors uppercase tracking-wider">
+                        <Users className="w-3.5 h-3.5" />
+                        Log in as a Creator instead
+                    </Link>
+                </div>
             </div>
         </div>
     )

@@ -70,7 +70,7 @@ const CardWrapper = ({ children, stepKey, direction, progressPercentage, current
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-[3px] bg-slate-100">
             <motion.div
-                className="h-full rounded-r-full" style={{ background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7)" }}
+                className="h-full rounded-r-full" style={{ background: "linear-gradient(90deg, #10b981, #059669, #34d399)" }}
                 initial={{ width: "0%" }}
                 animate={{ width: `${progressPercentage}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -108,7 +108,7 @@ const NextButton = ({
         whileTap={{ scale: 0.98 }}
         onClick={onClick}
         disabled={disabled}
-        className="w-full py-4 text-white rounded-2xl font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+        className="w-full py-4 text-white rounded-2xl font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-5 shadow-lg shadow-emerald-200/60 hover:shadow-emerald-300/60 hover:scale-[1.01] active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</>
@@ -134,7 +134,7 @@ const ProceedButton = ({
         whileTap={{ scale: disabled ? 1 : 0.95 }}
         onClick={onClick}
         disabled={disabled}
-        className={`w-full py-4 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-5 shadow-lg ${disabled ? "opacity-40 cursor-not-allowed shadow-none hover:shadow-none hover:scale-100 active:scale-100" : "shadow-indigo-200/60 hover:shadow-indigo-300/60 hover:scale-[1.01] active:scale-[0.99]"}`} style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+        className={`w-full py-4 text-white rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2 mt-5 shadow-lg ${disabled ? "opacity-40 cursor-not-allowed shadow-none hover:shadow-none hover:scale-100 active:scale-100" : "shadow-emerald-200/60 hover:shadow-emerald-300/60 hover:scale-[1.01] active:scale-[0.99]"}`} style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
     >
         {btnLoading ? (
             <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</>
@@ -356,19 +356,19 @@ export default function RegisterPage() {
     const sidebar = sidebarContent();
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans text-slate-900" style={{ background: "radial-gradient(ellipse at 20% 50%, #e0e7ff 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #fce7f3 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #dbeafe 0%, transparent 50%), #f8fafc" }}>
+        <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans text-slate-900" style={{ background: "radial-gradient(ellipse at 20% 50%, #e6f4ea 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #e0f2f1 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #f1f8e9 0%, transparent 50%), #f8fafc" }}>
 
             {/* Decorative floating blobs */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
                 <motion.div animate={{ y: [0, -20, 0], x: [0, 10, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-10 left-[8%] w-64 h-64 bg-indigo-200/30 rounded-full blur-3xl" />
+                    className="absolute top-10 left-[8%] w-64 h-64 bg-emerald-200/30 rounded-full blur-3xl" />
                 <motion.div animate={{ y: [0, 20, 0], x: [0, -15, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                    className="absolute bottom-10 right-[8%] w-72 h-72 bg-pink-200/30 rounded-full blur-3xl" />
+                    className="absolute bottom-10 right-[8%] w-72 h-72 bg-teal-200/30 rounded-full blur-3xl" />
                 <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl" />
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-100/20 rounded-full blur-3xl" />
                 {/* Decorative dots grid */}
-                <div className="absolute top-12 right-12 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #6366f1 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
-                <div className="absolute bottom-12 left-12 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #8b5cf6 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
+                <div className="absolute top-12 right-12 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #10b981 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
+                <div className="absolute bottom-12 left-12 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #059669 1px, transparent 1px)", backgroundSize: "24px 24px", width: "120px", height: "120px" }} />
             </div>
 
             {/* Slide Content */}
@@ -379,10 +379,10 @@ export default function RegisterPage() {
                 className="relative z-10 w-full max-w-[28rem] md:max-w-[840px] min-h-[520px] overflow-hidden rounded-[2rem] border border-slate-200/60 ring-1 ring-white/60 shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] flex"
             >
                 <div className="hidden md:flex flex-col w-[34%] min-h-[520px] overflow-hidden relative"
-                    style={{ background: "linear-gradient(165deg, #4f46e5 0%, #7c3aed 100%)" }}>
+                    style={{ background: "linear-gradient(165deg, #059669 0%, #047857 100%)" }}>
                     <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-                        <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[50%] bg-gradient-to-br from-indigo-400/30 to-transparent blur-3xl rotate-12" />
-                        <div className="absolute bottom-[-10%] right-[-10%] w-[120%] h-[50%] bg-gradient-to-tl from-violet-400/30 to-transparent blur-3xl -rotate-12" />
+                        <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[50%] bg-gradient-to-br from-emerald-400/30 to-transparent blur-3xl rotate-12" />
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[120%] h-[50%] bg-gradient-to-tl from-teal-400/30 to-transparent blur-3xl -rotate-12" />
                     </div>
 
                     <div className="relative z-10 flex flex-col h-full p-8 text-white">
@@ -429,11 +429,11 @@ export default function RegisterPage() {
                         <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-4">
                             <div className="flex -space-x-3">
                                 {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-9 h-9 rounded-full border-2 border-indigo-600 bg-slate-200 flex items-center justify-center overflow-hidden">
+                                    <div key={i} className="w-9 h-9 rounded-full border-2 border-emerald-600 bg-slate-200 flex items-center justify-center overflow-hidden">
                                         <img src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="creator" className="w-full h-full object-cover" />
                                     </div>
                                 ))}
-                                <div className="w-9 h-9 rounded-full border-2 border-indigo-600 bg-white/10 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">
+                                <div className="w-9 h-9 rounded-full border-2 border-emerald-600 bg-white/10 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white">
                                     +10k
                                 </div>
                             </div>
@@ -467,8 +467,8 @@ export default function RegisterPage() {
                     {currentStep === 1 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step1" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-indigo-200/60" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg></div>
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create your account</h2>
+                                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 mx-auto shadow-lg shadow-emerald-200/60" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg></div>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create your account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Join thousands of creators earning with top brands.</p>
 
                                 <AnimatePresence>
@@ -484,10 +484,10 @@ export default function RegisterPage() {
                                 <div className="space-y-1.5 w-full text-left">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
                                     <div className="relative group">
-                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                         <input
                                             name="fullName" type="text" value={formData.fullName} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                            className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                             placeholder="e.g. John Doe" required autoFocus
                                         />
                                     </div>
@@ -497,10 +497,10 @@ export default function RegisterPage() {
                                 <div className="space-y-1.5 w-full text-left">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Mobile Number</label>
                                     <div className="relative group">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                         <input
                                             name="mobileNumber" type="tel" value={formData.mobileNumber} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                            className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                             placeholder="e.g. 9876543210" required
                                         />
                                     </div>
@@ -518,7 +518,7 @@ export default function RegisterPage() {
 
                                 <p className="text-center text-sm text-slate-500 pt-1">
                                     Already have an account?{' '}
-                                    <Link href="/login" className="text-[#4f46e5] font-bold hover:underline">Sign in</Link>
+                                    <Link href="/login" className="text-[#059669] font-bold hover:underline">Sign in</Link>
                                 </p>
                             </div>
                         </CardWrapper>
@@ -528,20 +528,20 @@ export default function RegisterPage() {
                     {currentStep === 2 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Link your social profiles to get discovered.</p>
 
                                 <div className="relative group">
-                                    <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                    <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                     <input name="instagramUrl" type="url" value={formData.instagramUrl} onChange={handleInputChange}
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                        className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                         placeholder="Instagram handle" autoFocus />
                                 </div>
 
                                 <div className="relative group">
-                                    <Youtube className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                    <Youtube className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                     <input name="youtubeUrl" type="url" value={formData.youtubeUrl} onChange={handleInputChange}
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                        className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                         placeholder="YouTube channel URL" />
                                 </div>
 
@@ -554,7 +554,7 @@ export default function RegisterPage() {
                     {currentStep === 3 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">We'll send an OTP to confirm your email.</p>
 
                                 <AnimatePresence mode="wait">
@@ -570,16 +570,16 @@ export default function RegisterPage() {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 block text-left">Email</label>
                                     <div className="relative group">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                         <input name="email" type="email" value={formData.email} onChange={handleInputChange}
-                                            className={`w-full pl-11 pr-28 py-3.5 border rounded-2xl text-base placeholder-slate-400 transition-all ${emailVerified ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-[#f0f4ff]/50 border-[#e2e8f0] text-slate-900 focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:bg-white focus:outline-none'}`}
+                                            className={`w-full pl-11 pr-28 py-3.5 border rounded-2xl text-base placeholder-slate-400 transition-all ${emailVerified ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-[#ecfdf5]/50 border-[#e2e8f0] text-slate-900 focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:bg-white focus:outline-none'}`}
                                             placeholder="hello@example.com" required disabled={emailVerified || otpSent} autoFocus />
                                         {emailVerified && (
                                             <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 text-emerald-400" />
                                         )}
                                         {!emailVerified && formData.email && !otpSent && (
                                             <button type="button" onClick={requestOtp} disabled={otpLoading}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 font-bold text-[#4f46e5] bg-[#f0f4ff] rounded-xl hover:bg-[#e0e7ff] transition-all disabled:opacity-50 text-sm">
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 font-bold text-[#059669] bg-[#ecfdf5] rounded-xl hover:bg-[#d1fae5] transition-all disabled:opacity-50 text-sm">
                                                 {otpLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send'}
                                             </button>
                                         )}
@@ -619,7 +619,7 @@ export default function RegisterPage() {
                                                             prev?.focus();
                                                         }
                                                     }}
-                                                    className="w-full aspect-square text-center text-2xl font-bold border border-[#e2e8f0] rounded-2xl focus:outline-none focus:border-[#4f46e5] bg-[#f0f4ff]/50 text-slate-900 transition-all focus:bg-white"
+                                                    className="w-full aspect-square text-center text-2xl font-bold border border-[#e2e8f0] rounded-2xl focus:outline-none focus:border-[#059669] bg-[#ecfdf5]/50 text-slate-900 transition-all focus:bg-white"
                                                 />
                                             ))}
                                         </div>
@@ -642,7 +642,7 @@ export default function RegisterPage() {
                                                 type="button"
                                                 onClick={goNext}
                                                 disabled={!formData.email}
-                                                className="w-full py-4 text-slate-400 hover:text-indigo-600 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className="w-full py-4 text-slate-400 hover:text-emerald-600 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                             >
                                                 Skip Verification
                                             </button>
@@ -657,7 +657,7 @@ export default function RegisterPage() {
                     {currentStep === 4 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Choose a strong password to protect your account.</p>
 
                                 <AnimatePresence mode="wait">
@@ -673,9 +673,9 @@ export default function RegisterPage() {
                                 <div className="space-y-1.5 w-full text-left">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Password</label>
                                     <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                         <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-11 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                            className="w-full pl-11 pr-11 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                             placeholder="Min. 6 characters" required autoFocus />
                                         <button type="button" onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
@@ -688,9 +688,9 @@ export default function RegisterPage() {
                                 <div className="space-y-1.5 w-full text-left">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Confirm Password</label>
                                     <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4f46e5] w-5 h-5 transition-colors" />
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
                                         <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-11 py-2.5 bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5] focus:outline-none transition-all text-slate-900"
+                                            className="w-full pl-11 pr-11 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
                                             placeholder="Repeat your password" required />
                                         <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
@@ -710,9 +710,9 @@ export default function RegisterPage() {
                                 {/* Terms */}
                                 <div className="flex items-start gap-3 px-1">
                                     <input type="checkbox" id="agreeToTerms" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange}
-                                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#4f46e5] accent-[#4f46e5] focus:ring-[#4f46e5] cursor-pointer" />
+                                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#059669] accent-[#059669] focus:ring-[#059669] cursor-pointer" />
                                     <label htmlFor="agreeToTerms" className="text-sm text-slate-500 leading-relaxed cursor-pointer">
-                                        I agree to the <Link href="/terms" className="text-[#4f46e5] font-semibold hover:underline">Terms</Link> and <Link href="/privacy" className="text-[#4f46e5] font-semibold hover:underline">Privacy Policy</Link>.
+                                        I agree to the <Link href="/terms" className="text-[#059669] font-semibold hover:underline">Terms</Link> and <Link href="/privacy" className="text-[#059669] font-semibold hover:underline">Privacy Policy</Link>.
                                     </label>
                                 </div>
 
@@ -725,10 +725,10 @@ export default function RegisterPage() {
                     {currentStep === 5 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
                             <div className="flex flex-col items-center text-center space-y-8">
-                                <div className="w-20 h-20 rounded-2xl rotate-3 shadow-xl shadow-orange-200/60 flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)" }}>
+                                <div className="w-20 h-20 rounded-2xl rotate-3 shadow-xl shadow-emerald-200/60 flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
                                     <Sparkles className="w-12 h-12 text-white" />
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #7c3aed 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                                     Welcome Creator!
                                 </h1>
                                 <p className="text-lg md:text-xl text-slate-600 max-w-sm mx-auto leading-relaxed">
@@ -744,7 +744,7 @@ export default function RegisterPage() {
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-4">
                                 <div className="text-center">
-                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
+                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
                                     <p className="text-slate-400 text-xs">Pick the ones you create on.</p>
                                 </div>
 
@@ -759,19 +759,19 @@ export default function RegisterPage() {
                                                 onClick={() => togglePlatform(p.id)}
                                                 className={`py-5 px-4 rounded-2xl border-2 flex flex-col items-center gap-2.5 transition-all cursor-pointer relative
                                     ${isActive
-                                                        ? "bg-indigo-50 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
-                                                        : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30"
+                                                        ? "bg-emerald-50 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
+                                                        : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30"
                                                     }`}
                                             >
                                                 {isActive && (
-                                                    <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
+                                                    <div className="absolute top-2 right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
                                                         <Check className="w-3 h-3 text-white" />
                                                     </div>
                                                 )}
                                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isActive ? p.activeBg : p.inactiveBg}`}>
                                                     <p.icon className={`w-6 h-6 ${isActive ? p.activeColor : p.inactiveColor}`} />
                                                 </div>
-                                                <span className={`font-semibold text-sm ${isActive ? 'text-indigo-700' : 'text-slate-600'}`}>{p.id}</span>
+                                                <span className={`font-semibold text-sm ${isActive ? 'text-emerald-700' : 'text-slate-600'}`}>{p.id}</span>
                                             </motion.button>
                                         );
                                     })}
@@ -786,7 +786,7 @@ export default function RegisterPage() {
                     {currentStep === 7 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
                                     <div className="grid grid-cols-2 gap-2.5 w-full">
                                         {creatorNicheCards.map((item) => (
@@ -806,11 +806,11 @@ export default function RegisterPage() {
                                                 }}
                                                 className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left cursor-pointer
                                 ${onboardingData.niche === item.name
-                                                        ? "bg-indigo-50 text-indigo-600 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
-                                                        : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 transition-all"
+                                                        ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
+                                                        : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
                                                     }`}
                                             >
-                                                <div className={`p-2 rounded-lg ${onboardingData.niche === item.name ? "bg-[#4f46e5]/10" : "bg-slate-100"}`}>
+                                                <div className={`p-2 rounded-lg ${onboardingData.niche === item.name ? "bg-[#059669]/10" : "bg-slate-100"}`}>
                                                     <item.icon size={20} />
                                                 </div>
                                                 <span className="font-semibold">{item.name}</span>
@@ -820,12 +820,12 @@ export default function RegisterPage() {
                                 ) : (
                                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 w-full pt-4">
                                         <div className="relative group">
-                                            <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 w-6 h-6 transition-colors" />
+                                            <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 w-6 h-6 transition-colors" />
                                             <input
                                                 type="text"
                                                 value={onboardingData.niche}
                                                 onChange={(e) => updateOnboarding("niche", e.target.value)}
-                                                className="w-full pl-16 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-xl text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm"
+                                                className="w-full pl-16 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl text-xl text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
                                                 placeholder="e.g. Sustainable Fashion"
                                                 autoFocus
                                                 onKeyDown={(e) => {
@@ -849,7 +849,7 @@ export default function RegisterPage() {
                     {currentStep === 8 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Where are you based?</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Where are you based?</h2>
                                 <div className="grid grid-cols-2 gap-2.5 w-full z-10 relative">
                                     {popularLocations.map((loc) => (
                                         <motion.button
@@ -863,8 +863,8 @@ export default function RegisterPage() {
                                             }}
                                             className={`p-3 rounded-xl border flex items-center justify-center gap-3 transition-all cursor-pointer
                                                 ${onboardingData.location === loc
-                                                    ? "bg-indigo-50 text-indigo-600 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
-                                                    : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 transition-all"
+                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
+                                                    : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
                                                 }`}
                                         >
                                             <span className="font-semibold">{loc}</span>
@@ -905,10 +905,10 @@ export default function RegisterPage() {
                                                         updateOnboarding("location", loc);
                                                         setShowSuggestions(false);
                                                     }}
-                                                    className="w-full text-left px-5 py-3.5 hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-medium border-b border-slate-100/50 last:border-0 transition-colors flex justify-between items-center"
+                                                    className="w-full text-left px-5 py-3.5 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-medium border-b border-slate-100/50 last:border-0 transition-colors flex justify-between items-center"
                                                 >
                                                     {loc}
-                                                    {onboardingData.location === loc && <Check size={16} className="text-violet-600" />}
+                                                    {onboardingData.location === loc && <Check size={16} className="text-emerald-600" />}
                                                 </button>
                                             ))}
                                             {indiaLocations.filter(loc => loc.toLowerCase().includes(locationQuery.toLowerCase())).length === 0 && (
@@ -928,7 +928,7 @@ export default function RegisterPage() {
                     {currentStep === 9 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
+                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
                                 <div className="grid grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
                                     {SHARED_CREATOR_FOLLOWER_RANGES.map((range) => (
                                         <motion.button
@@ -941,8 +941,8 @@ export default function RegisterPage() {
                                             }}
                                             className={`w-full py-4 px-4 rounded-2xl border-2 flex justify-between items-center transition-all cursor-pointer hover:translate-y-[-1px]
                                 ${onboardingData.followers === range.label
-                                                    ? "bg-indigo-50 text-indigo-600 border-indigo-400 shadow-md shadow-indigo-100/60 ring-1 ring-indigo-200"
-                                                    : "bg-white border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 transition-all"
+                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
+                                                    : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
                                                 }`}
                                         >
                                             <span className="font-bold text-base">{range.label}</span>
@@ -959,11 +959,11 @@ export default function RegisterPage() {
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="text-center">
-                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #4f46e5 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
+                                    <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
                                     <p className="text-xs text-slate-400">Optional, but helps you stand out.</p>
                                 </div>
 
-                                <div className="max-w-[280px] mx-auto flex items-center bg-[#f0f4ff]/50 border border-[#e2e8f0] rounded-2xl shadow-sm focus-within:border-[#4f46e5] focus-within:ring-1 focus-within:ring-[#4f46e5] focus-within:bg-white transition-all overflow-hidden">
+                                <div className="max-w-[280px] mx-auto flex items-center bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl shadow-sm focus-within:border-[#059669] focus-within:ring-1 focus-within:ring-[#059669] focus-within:bg-white transition-all overflow-hidden">
                                     <input type="number" value={onboardingData.engagement}
                                         onChange={(e) => updateOnboarding("engagement", e.target.value)}
                                         placeholder="e.g. 4.5"
@@ -1013,7 +1013,7 @@ export default function RegisterPage() {
                                 <button onClick={() => {
                                     setDirection(1);
                                     setCurrentStep(12);
-                                }} className="text-slate-400 hover:text-white font-medium text-sm transition-colors text-center w-full mt-4 underline decoration-white/20">
+                                }} className="text-slate-400 hover:text-emerald-600 font-medium text-sm transition-colors text-center w-full mt-4 underline decoration-slate-200">
                                     Skip for now (Do this later from Dashboard)
                                 </button>
                             </div>

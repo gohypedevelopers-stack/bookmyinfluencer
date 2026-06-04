@@ -480,13 +480,19 @@ export default function LoginPage() {
 
                         </form>
 
-                        <div className="mt-6 text-center">
+                        <div className="mt-6 text-center space-y-3">
                             <p className="text-sm text-slate-500">
                                 Don't have an account?{' '}
                                 <Link href="/register" className="font-bold text-violet-600 hover:text-violet-700 hover:underline transition-all">
                                     Sign up for free
                                 </Link>
                             </p>
+                            <div className="pt-2 border-t border-slate-100/80">
+                                <Link href="/brand/login" className="inline-flex items-center gap-2 text-xs font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors uppercase tracking-wider">
+                                    <Building2 className="w-3.5 h-3.5" />
+                                    Log in as a Brand instead
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
