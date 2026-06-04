@@ -11,7 +11,7 @@ const ABOUT_LINKS = [
 ]
 
 const BRAND_LINKS = [
-    { href: "/brand/register", label: "Sign up today" },
+    { href: "/signup", label: "Sign up today" },
     { href: "/faq", label: "FAQ" },
     { href: "/brand/login", label: "Login" },
 ]
@@ -19,7 +19,7 @@ const BRAND_LINKS = [
 const CREATOR_LINKS = [
     { href: "/creator/profile", label: "Profile" },
     { href: "/faq", label: "FAQ" },
-    { href: "/creator/onboarding", label: "Sign up today" },
+    { href: "/signup", label: "Sign up today" },
     { href: "/login", label: "Login" },
 ]
 
