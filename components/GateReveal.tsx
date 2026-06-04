@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
 
 const GATE_DURATION = 1.1
-const GATE_EASE = [0.76, 0, 0.24, 1] // cubic-bezier for luxury feel
+const GATE_EASE = [0.76, 0, 0.24, 1] as const // cubic-bezier for luxury feel
 
 export function GateReveal({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)

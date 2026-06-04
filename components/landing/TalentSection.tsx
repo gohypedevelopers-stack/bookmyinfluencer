@@ -5,41 +5,108 @@ import { db } from "@/lib/db"
 
 import { CreatorCarousel } from "./CreatorCarousel"
 
-const CREATOR_QUERY_TIMEOUT_MS = 2500;
+const CREATOR_CACHE_TTL_MS = 60_000;
+const CREATOR_ERROR_RETRY_MS = 30_000;
+
+type TalentCreator = {
+    id: string;
+    displayName: string | null;
+    fullName: string | null;
+    niche: string | null;
+    profileImageUrl: string | null;
+    backgroundImageUrl: string | null;
+    user?: {
+        name: string | null;
+        image: string | null;
+    } | null;
+    metrics: {
+        followersCount: number;
+        engagementRate: number;
+    }[];
+    selfReportedMetrics: {
+        followersCount: number;
+    }[];
+};
+
+const talentCache = globalThis as unknown as {
+    talentCreators?: {
+        data: TalentCreator[];
+        fetchedAt: number;
+    };
+    talentCreatorsInFlight?: Promise<TalentCreator[]>;
+    talentCreatorsLastErrorAt?: number;
+};
+
+async function fetchTalentCreators() {
+    return db.creator.findMany({
+        select: {
+            id: true,
+            displayName: true,
+            fullName: true,
+            niche: true,
+            profileImageUrl: true,
+            backgroundImageUrl: true,
+            metrics: {
+                select: {
+                    followersCount: true,
+                    engagementRate: true,
+                },
+                orderBy: { fetchedAt: "desc" },
+                take: 1,
+            },
+            selfReportedMetrics: {
+                select: {
+                    followersCount: true,
+                },
+                orderBy: { updatedAt: "desc" },
+                take: 1,
+            },
+        },
+        take: 10,
+        orderBy: {
+            verifiedAt: "desc",
+        },
+    });
+}
+
+async function getTalentCreators() {
+    const now = Date.now();
+    const cached = talentCache.talentCreators;
+
+    if (cached && now - cached.fetchedAt < CREATOR_CACHE_TTL_MS) {
+        return cached.data;
+    }
+
+    if (!cached && talentCache.talentCreatorsLastErrorAt && now - talentCache.talentCreatorsLastErrorAt < CREATOR_ERROR_RETRY_MS) {
+        return [];
+    }
+
+    if (talentCache.talentCreatorsInFlight) {
+        return cached?.data ?? talentCache.talentCreatorsInFlight;
+    }
+
+    talentCache.talentCreatorsInFlight = fetchTalentCreators()
+        .then((data) => {
+            talentCache.talentCreators = {
+                data,
+                fetchedAt: Date.now(),
+            };
+            return data;
+        })
+        .catch((err) => {
+            talentCache.talentCreatorsLastErrorAt = Date.now();
+            console.warn("TalentSection creator query failed:", err instanceof Error ? err.message : String(err));
+            return talentCache.talentCreators?.data ?? [];
+        })
+        .finally(() => {
+            talentCache.talentCreatorsInFlight = undefined;
+        });
+
+    return cached?.data ?? talentCache.talentCreatorsInFlight;
+}
 
 export async function TalentSection() {
-    // Fetch verified micro creators with a strict timeout so landing page stays fast.
-    let dbCreators: any[] = [];
-    try {
-        const creatorQuery = db.creator.findMany({
-            include: {
-                user: true,
-                metrics: {
-                    orderBy: { fetchedAt: "desc" },
-                    take: 1,
-                },
-                selfReportedMetrics: {
-                    take: 1,
-                },
-            },
-            take: 10,
-            orderBy: {
-                verifiedAt: "desc",
-            },
-        }).catch(err => {
-            console.warn("TalentSection background query failed:", err.message);
-            return [];
-        });
-
-        const timeoutFallback = new Promise<any[]>((resolve) => {
-            setTimeout(() => resolve([]), CREATOR_QUERY_TIMEOUT_MS);
-        });
-
-        dbCreators = await Promise.race([creatorQuery, timeoutFallback]);
-    } catch (e) {
-        console.warn("TalentSection: Database unreachable (showing empty state). Error details suppressed.");
-        dbCreators = [];
-    }
+    const dbCreators = await getTalentCreators();
 
     const creators = dbCreators.slice(0, 12);
 
