@@ -380,6 +380,27 @@ export async function updateCreatorProfileAction(formData: FormData) {
             data: updateData
         })
 
+        if (displayName?.trim()) {
+            const otpUser = await db.otpUser.findUnique({
+                where: { id: userId },
+                select: { email: true },
+            })
+
+            if (otpUser?.email) {
+                const linkedUser = await db.user.findUnique({
+                    where: { email: otpUser.email.trim().toLowerCase() },
+                    select: { id: true },
+                })
+
+                if (linkedUser) {
+                    await db.user.update({
+                        where: { id: linkedUser.id },
+                        data: { name: displayName.trim() }
+                    })
+                }
+            }
+        }
+
         revalidatePath("/creator/profile")
         return { success: true }
     } catch (e: any) {

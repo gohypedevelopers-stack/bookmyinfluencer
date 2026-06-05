@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useSession, signOut } from "next-auth/react"
+import { signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import {
     User,
@@ -12,9 +12,14 @@ import {
     LogOut
 } from "lucide-react"
 
-export function CreatorProfileSidebar() {
+type CreatorProfileSidebarProps = {
+    name?: string | null
+    image?: string | null
+    role?: string | null
+}
+
+export function CreatorProfileSidebar({ name, image, role }: CreatorProfileSidebarProps) {
     const pathname = usePathname()
-    const { data: session } = useSession()
 
     const navItems = [
         {
@@ -79,20 +84,20 @@ export function CreatorProfileSidebar() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden relative flex items-center justify-center bg-gray-200">
-                            {session?.user?.image ? (
+                            {image ? (
                                 <Image
-                                    src={session.user.image}
-                                    alt={session.user.name || "User"}
+                                    src={image}
+                                    alt={name || "User"}
                                     fill
                                     className="object-cover"
                                 />
                             ) : (
-                                <span className="text-xl font-bold text-gray-500">{session?.user?.name?.[0] || "U"}</span>
+                                <span className="text-xl font-bold text-gray-500">{name?.[0] || "U"}</span>
                             )}
                         </div>
                         <div>
-                            <div className="font-bold text-sm text-gray-900">{session?.user?.name || "User"}</div>
-                            <div className="text-xs text-gray-500">{session?.user?.role || "Creator"}</div>
+                            <div className="font-bold text-sm text-gray-900">{name || "User"}</div>
+                            <div className="text-xs text-gray-500">{role || "Creator"}</div>
                         </div>
                     </div>
                     <button

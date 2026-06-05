@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPopup } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHqSJSK4fBL6R99J1Ms-0H7kt1eZYJXzU",
@@ -57,3 +57,26 @@ export async function handleRedirectResult(): Promise<FirebaseGoogleUser | null>
   }
 }
 export { auth };
+
+/**
+ * Popup-based Google sign-in.
+ * Use this on pages that need to stay in place after auth (e.g. multi-step forms).
+ * The popup opens in a new window — the current page does NOT reload, so React state is preserved.
+ */
+export async function signInWithGooglePopup(): Promise<FirebaseGoogleUser> {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    if (!user.email) {
+      throw new Error("No email returned from Google authentication");
+    }
+    return {
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    };
+  } catch (error) {
+    console.error("Firebase Google Popup Error:", error);
+    throw error;
+  }
+}

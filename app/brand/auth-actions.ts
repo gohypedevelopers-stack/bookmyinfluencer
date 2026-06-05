@@ -475,3 +475,183 @@ export async function sendBrandOTP(mobile: string) {
     console.log(`Sending OTP to ${mobile}: 123456`);
     return { success: true, message: 'OTP sent successfully.' };
 }
+
+export async function completeGoogleBrandOnboarding(formData: FormData) {
+    const email = normalizeEmail(formData.get('email') as string);
+    const companyName = formData.get('companyName') as string;
+    const brandName = formData.get('brandName') as string;
+    const location = formData.get('location') as string;
+    const niche = formData.get('niche') as string;
+    const campaignType = formData.get('campaignType') as string;
+    const campaignBudget = formData.get('campaignBudget');
+    const targetPlatforms = formData.get('targetPlatforms') as string;
+    const preferredCreatorType = formData.get('preferredCreatorType') as string;
+    const campaignGoals = formData.get('campaignGoals') as string;
+    const industry = formData.get('industry') as string;
+    const minFollowers = formData.get('minFollowers');
+    const maxFollowers = formData.get('maxFollowers');
+    const minPricePerPost = formData.get('minPricePerPost');
+    const maxPricePerPost = formData.get('maxPricePerPost');
+    const priceType = formData.get('priceType') as string;
+
+    if (!email) {
+        return { success: false, error: 'Email is required.' };
+    }
+
+    try {
+        const user = await db.user.findUnique({
+            where: { email },
+            include: { brandProfile: true },
+        });
+
+        if (!user || !user.brandProfile) {
+            return { success: false, error: 'Brand account not found. Please sign in again.' };
+        }
+
+        const displayName = brandName || companyName || user.name || 'Brand';
+
+        // Update brand profile with onboarding data
+        await db.brandProfile.update({
+            where: { id: user.brandProfile.id },
+            data: {
+                companyName: displayName,
+                industry: industry || null,
+                location: location || null,
+                niche: niche || null,
+                onboardingCompleted: true,
+                campaignType: campaignType || null,
+                campaignBudget: typeof campaignBudget === 'string' ? campaignBudget : null,
+                targetPlatforms: targetPlatforms || null,
+                preferredCreatorType: preferredCreatorType || null,
+                campaignGoals: campaignGoals || null,
+                minFollowers: safeParseInt(minFollowers),
+                maxFollowers: safeParseInt(maxFollowers),
+                minPricePerPost: safeParseFloat(minPricePerPost),
+                maxPricePerPost: safeParseFloat(maxPricePerPost),
+                priceType: priceType || 'Per Post',
+            },
+        });
+
+        // Also update user display name
+        await db.user.update({
+            where: { id: user.id },
+            data: { name: displayName },
+        });
+
+        ensureRequestExpiryJobStarted();
+
+        let workflowSummary = null;
+        let campaignId: string | null = null;
+        let workflowError: string | null = null;
+
+        const parsedBudget = safeParseFloat(campaignBudget) ?? 0;
+        const parsedMinFollowers = Math.max(0, safeParseInt(minFollowers) ?? 10_000);
+        const parsedMaxFollowers = Math.max(parsedMinFollowers, safeParseInt(maxFollowers) ?? 20_000);
+
+        try {
+            workflowSummary = await createBrandCampaignWorkflow({
+                brandId: user.brandProfile.id,
+                totalBudget: parsedBudget,
+                category: niche || industry || 'general',
+                minFollowers: parsedMinFollowers,
+                maxFollowers: parsedMaxFollowers,
+                summary: campaignGoals || campaignType || 'Initial brand campaign created from onboarding.',
+                title: `${displayName} ${campaignType || 'Campaign'}`.trim(),
+            });
+        } catch (campaignError) {
+            console.error('Brand campaign workflow setup failed:', campaignError);
+            workflowError = 'Brand account was created, but influencer matching could not be initialized yet.';
+        }
+
+        try {
+            if (parsedBudget >= parsedMaxFollowers) {
+                const campaign = await db.campaign.create({
+                    data: {
+                        brandId: user.brandProfile.id,
+                        title: `${displayName} ${campaignType || 'Campaign'}`.trim() || 'New Campaign',
+                        description: campaignGoals || null,
+                        requirements: campaignGoals || null,
+                        budget: parsedBudget,
+                        niche: niche || null,
+                        location: location || null,
+                        platform: targetPlatforms || null,
+                        influencerType: `${FOLLOWER_RANGE_PREFIX}${parsedMinFollowers}_${parsedMaxFollowers}`,
+                        minFollowers: parsedMaxFollowers,
+                        engagementMin: 5,
+                        engagementMax: 10,
+                        paymentType: 'UPFRONT',
+                        paymentStatus: 'PENDING',
+                        status: 'DRAFT',
+                        images: '[]',
+                    },
+                });
+                await ensureCampaignSuggestions(campaign.id, user.id);
+                campaignId = campaign.id;
+            }
+        } catch (autoCampaignError) {
+            console.error('Campaign bootstrap failed:', autoCampaignError);
+        }
+
+        return {
+            success: true,
+            userId: user.id,
+            campaignId,
+            workflowSummary,
+            workflowError,
+        };
+    } catch (error) {
+        console.error('Google Brand Onboarding Error:', error);
+        return { success: false, error: 'Failed to complete brand onboarding.' };
+    }
+}
+
+export async function deleteCreatorAccountForEmail(email: string) {
+    const normalizedEmail = normalizeEmail(email);
+    if (!normalizedEmail) {
+        return { success: false, error: 'Invalid email address.' };
+    }
+
+    try {
+        // Find existing accounts
+        const user = await db.user.findUnique({
+            where: { email: normalizedEmail },
+        });
+
+        const otpUser = await db.otpUser.findUnique({
+            where: { email: normalizedEmail },
+        });
+
+        if (!user && !otpUser) {
+            return { success: true, message: 'No creator account found for this email.' };
+        }
+
+        // Delete User if it exists and has role INFLUENCER
+        if (user) {
+            if (user.role === 'INFLUENCER') {
+                // Delete audit logs first to prevent any potential foreign key constraint issues
+                await db.auditLog.deleteMany({
+                    where: { userId: user.id },
+                });
+                
+                await db.user.delete({
+                    where: { id: user.id },
+                });
+            } else {
+                return { success: false, error: `This email belongs to a ${user.role} account and cannot be deleted.` };
+            }
+        }
+
+        // Delete OtpUser if it exists
+        if (otpUser) {
+            await db.otpUser.delete({
+                where: { id: otpUser.id },
+            });
+        }
+
+        return { success: true, message: 'Creator account successfully removed.' };
+    } catch (error: any) {
+        console.error('Failed to delete creator account:', error);
+        return { success: false, error: error.message || 'Failed to remove creator account. Please try again.' };
+    }
+}
+

@@ -134,7 +134,7 @@ const providers: NextAuthOptions["providers"] = [
                                 data: {
                                     userId: user.id,
                                     niche: "General",
-                                    onboardingCompleted: true,
+                                    onboardingCompleted: false,
                                 }
                             })
                         }
@@ -162,8 +162,7 @@ const providers: NextAuthOptions["providers"] = [
                                     fullName: credentials.name || "Creator",
                                     displayName: credentials.name || "Creator",
                                     profileImageUrl: credentials.image || null,
-                                    onboardingCompleted: true,
-                                    niche: "General",
+                                    onboardingCompleted: false,
                                 }
                             })
                         }

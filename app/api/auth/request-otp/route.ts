@@ -80,6 +80,23 @@ export async function POST(req: Request) {
 
     cacheDevOtp(email, otp, expiresAt)
 
+    if (!env.isProduction) {
+      console.info("[OTP] falling back to local dev OTP delivery", {
+        userId: user.id,
+        email,
+        resendIn: RESEND_LIMIT_SECONDS,
+      })
+
+      return NextResponse.json({
+        ok: true,
+        resendIn: RESEND_LIMIT_SECONDS,
+        provider: "dev",
+        devOtpAvailable: true,
+        message: "Code generated successfully",
+        infoMessage: "Email was not sent. For local testing, use the OTP printed in the server console.",
+      })
+    }
+
     // 5. Send Email via Gmail
     console.info("[OTP] sending email", { email })
     try {
@@ -115,7 +132,7 @@ export async function POST(req: Request) {
       if (!env.isProduction) {
         return NextResponse.json(
           {
-            ok: false,
+            ok: true,
             error: "SMTP_FAILED",
             resendIn: RESEND_LIMIT_SECONDS,
             provider: "dev",
@@ -123,7 +140,7 @@ export async function POST(req: Request) {
             message: errorMessage,
             infoMessage: "Email was not sent. For local testing, use the OTP printed in the server console.",
           },
-          { status: 502 }
+          { status: 200 }
         )
       }
 

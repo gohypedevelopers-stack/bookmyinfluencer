@@ -10,10 +10,14 @@ import {
     Gamepad2, Dumbbell, Utensils, Laptop, Shirt, Smartphone,
     GraduationCap, Globe, Heart, IndianRupee, TrendingUp, Zap, Layers, Rocket
 } from 'lucide-react';
-import { registerUserAction } from './actions';
+import { completeGoogleCreatorOnboarding, registerUserAction } from './actions';
 import { signIn, getProviders, getSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import { signInWithRedirectClient, handleRedirectResult } from '@/lib/firebase-auth-client';
+import {
+    handleRedirectResult,
+    signInWithGooglePopup,
+    type FirebaseGoogleUser,
+} from '@/lib/firebase-auth-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import LivePhotoCapture from "@/components/kyc/LivePhotoCapture";
 import {
@@ -189,6 +193,7 @@ export default function RegisterPage() {
     const [googleAvailable, setGoogleAvailable] = useState(false);
     const [providersLoaded, setProvidersLoaded] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
     const [error, setError] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
@@ -213,6 +218,45 @@ export default function RegisterPage() {
         router.refresh();
     }, [router]);
 
+    const continueGoogleCreatorSignup = useCallback(async (firebaseUser: FirebaseGoogleUser) => {
+        setGoogleLoading(true);
+        setError('');
+
+        const result = await signIn('credentials', {
+            redirect: false,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName || 'Creator',
+            image: firebaseUser.photoURL || null,
+            isGoogleLogin: 'true',
+            role: 'INFLUENCER',
+            password: 'bypass',
+        });
+
+        if (result?.error) {
+            setError(result.error || 'Google sign-up failed');
+            setGoogleLoading(false);
+            return;
+        }
+
+        const session = await getSession();
+        if (session?.user?.role !== 'INFLUENCER') {
+            setGoogleLoading(false);
+            redirectAfterLogin(session);
+            return;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            email: firebaseUser.email,
+            fullName: prev.fullName || firebaseUser.displayName || 'Creator',
+        }));
+        setEmailVerified(true);
+        setIsGoogleUser(true);
+        setDirection(1);
+        setCurrentStep(4);
+        setGoogleLoading(false);
+    }, [redirectAfterLogin]);
+
     useEffect(() => {
         let active = true;
 
@@ -220,25 +264,12 @@ export default function RegisterPage() {
             try {
                 const firebaseUser = await handleRedirectResult();
                 if (firebaseUser) {
-                    setGoogleLoading(true);
-                    const result = await signIn('credentials', {
-                        redirect: false,
-                        email: firebaseUser.email,
-                        name: firebaseUser.displayName || 'Creator',
-                        image: firebaseUser.photoURL || null,
-                        isGoogleLogin: 'true',
-                        role: 'INFLUENCER',
-                        password: 'bypass',
-                    });
-
-                    if (result?.error) {
-                        setError(result.error || 'Google login failed');
-                        setGoogleLoading(false);
-                    } else {
-                        const session = await getSession();
-                        redirectAfterLogin(session);
-                        return;
-                    }
+                    if (!active) return;
+                    setGoogleAvailable(true);
+                    setProvidersLoaded(true);
+                    setMounted(true);
+                    await continueGoogleCreatorSignup(firebaseUser);
+                    return;
                 }
             } catch (err: any) {
                 console.error("Redirect auth error:", err);
@@ -272,17 +303,22 @@ export default function RegisterPage() {
         return () => {
             active = false;
         };
-    }, [redirectAfterLogin]);
+    }, [continueGoogleCreatorSignup, redirectAfterLogin]);
 
     const handleGoogleRegister = async () => {
         setGoogleLoading(true);
         setError('');
 
         try {
-            await signInWithRedirectClient();
+            const firebaseUser = await signInWithGooglePopup();
+            await continueGoogleCreatorSignup(firebaseUser);
         } catch (error: any) {
             console.error(error);
-            setError(error.message || 'Unable to start Google login');
+            if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+                setError('');
+            } else {
+                setError(error.message || 'Unable to complete Google sign-up');
+            }
             setGoogleLoading(false);
         }
     };
@@ -378,7 +414,9 @@ export default function RegisterPage() {
         fd.append('engagement', onboardingData.engagement);
 
         try {
-            const res = await registerUserAction(fd);
+            const res = isGoogleUser
+                ? await completeGoogleCreatorOnboarding(fd)
+                : await registerUserAction(fd);
 
             if (!res?.success) {
                 setError(res?.error || 'Registration failed. Please try again.');
@@ -386,12 +424,23 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Log the user in silently to establish session for KYC upload API
-            await signIn('credentials', {
-                email: formData.email,
-                password: formData.password,
-                redirect: false,
-            });
+            if (isGoogleUser) {
+                await signIn('credentials', {
+                    redirect: false,
+                    email: formData.email,
+                    name: formData.fullName || 'Creator',
+                    isGoogleLogin: 'true',
+                    role: 'INFLUENCER',
+                    password: 'bypass',
+                });
+            } else {
+                // Log the user in silently to establish session for KYC upload API
+                await signIn('credentials', {
+                    email: formData.email,
+                    password: formData.password,
+                    redirect: false,
+                });
+            }
 
             // Move to KYC step
             setDirection(1);

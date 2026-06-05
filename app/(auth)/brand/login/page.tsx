@@ -6,7 +6,7 @@ import { getProviders, getSession, signIn, signOut } from "next-auth/react"
 import type { Session } from "next-auth"
 import Link from "next/link"
 import Image from "next/image"
-import { ensureDevBrandSimulationAccount, inspectBrandLoginEmail } from "@/app/brand/auth-actions"
+import { ensureDevBrandSimulationAccount, inspectBrandLoginEmail, deleteCreatorAccountForEmail } from "@/app/brand/auth-actions"
 import { CheckCircle2, Lock, Eye, EyeOff, Building2, Mail, ArrowRight, Loader2, Zap, Sparkles, Layers, TrendingUp, Users, BarChart3, Star } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { signInWithRedirectClient, handleRedirectResult } from "@/lib/firebase-auth-client"
@@ -30,6 +30,9 @@ function BrandLoginForm() {
     const [providersLoaded, setProvidersLoaded] = useState(false)
     const [error, setError] = useState("")
     const [successMessage, setSuccessMessage] = useState("")
+    const [conflictEmail, setConflictEmail] = useState("")
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -111,6 +114,9 @@ function BrandLoginForm() {
 
         if (session.user.role === "INFLUENCER") {
             setError("INFLUENCER_CONFLICT")
+            if (session.user.email) {
+                setConflictEmail(session.user.email)
+            }
         } else if (session.user.role === "MANAGER") {
             setError("This email is linked to a manager account, not a brand account.")
         } else {
@@ -138,6 +144,7 @@ function BrandLoginForm() {
                 const diagnostic = await inspectBrandLoginEmail(normalizedEmail)
                 if (diagnostic.role === "INFLUENCER") {
                     setError("INFLUENCER_CONFLICT")
+                    setConflictEmail(normalizedEmail)
                 } else {
                     setError(diagnostic.message || "Invalid email or password.")
                 }
@@ -167,6 +174,34 @@ function BrandLoginForm() {
             console.error(error)
             setError(error.message || "Unable to start Google login")
             setGoogleLoading(false)
+        }
+    }
+
+    async function handleDeleteCreatorAccount() {
+        const targetEmail = conflictEmail || email;
+        if (!targetEmail) {
+            setError("No email address found for the conflicting account.");
+            return;
+        }
+
+        setIsDeleting(true);
+        setError("");
+        setSuccessMessage("");
+
+        try {
+            const res = await deleteCreatorAccountForEmail(targetEmail);
+            if (res.success) {
+                setSuccessMessage("Creator account removed successfully! You can now log in or register as a brand.");
+                setError("");
+                setShowDeleteConfirm(false);
+                setConflictEmail("");
+            } else {
+                setError(res.error || "Failed to remove creator account.");
+            }
+        } catch (err: any) {
+            setError(err.message || "An unexpected error occurred.");
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -211,13 +246,58 @@ function BrandLoginForm() {
                                 </p>
                             </div>
                         </div>
-                        <Link
-                            href="/login"
-                            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold shadow-md hover:shadow-lg hover:from-violet-500 hover:to-indigo-500 hover:-translate-y-0.5 transition-all duration-200"
-                        >
-                            Go to Creator Sign In
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
+                        {!showDeleteConfirm ? (
+                            <div className="space-y-2.5">
+                                <Link
+                                    href="/login"
+                                    className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold shadow-md hover:shadow-lg hover:from-violet-500 hover:to-indigo-500 hover:-translate-y-0.5 transition-all duration-200"
+                                >
+                                    Go to Creator Sign In
+                                    <ArrowRight className="w-4 h-4" />
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-full py-2.5 px-4 rounded-xl border border-rose-200 bg-white/60 hover:bg-rose-50/50 text-rose-600 text-xs font-bold transition-all duration-200"
+                                >
+                                    Delete Creator Account & Use as Brand
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="rounded-lg border border-rose-100 bg-rose-50/50 p-3 text-xs space-y-3">
+                                <p className="font-semibold text-rose-900">
+                                    Are you absolutely sure?
+                                </p>
+                                <p className="text-rose-700 leading-relaxed">
+                                    This will permanently delete the creator profile, linked social accounts, and collaboration history associated with <strong className="font-semibold">{conflictEmail || email}</strong>. This action is irreversible.
+                                </p>
+                                <div className="flex gap-2 pt-1">
+                                    <button
+                                        type="button"
+                                        disabled={isDeleting}
+                                        onClick={handleDeleteCreatorAccount}
+                                        className="flex-1 py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold transition-colors text-center flex items-center justify-center gap-1.5 shadow-sm"
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            "Yes, Delete Creator Account"
+                                        )}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={isDeleting}
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 font-bold transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -27,13 +27,13 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
 
     // Form State
     const [displayName, setDisplayName] = useState(
-        creator.displayName || creator.autoDisplayName || creator.fullName || ""
+        creator.displayName || creator.fullName || creator.user?.name || creator.autoDisplayName || ""
     )
     const [title, setTitle] = useState(
         creator.niche ? creator.niche.split(',')[0] : ""
     )
     const [bio, setBio] = useState(
-        creator.bio || creator.autoBio || ""
+        creator.bio || creator.fullName || creator.user?.name || creator.autoBio || ""
     )
 
     // Niches
@@ -47,7 +47,7 @@ export function ProfileEditor({ creator }: ProfileEditorProps) {
 
     // Images State
     const [profileImage, setProfileImage] = useState<string | null>(
-        creator.profileImageUrl || creator.autoProfileImageUrl || creator.user?.image || null
+        creator.profileImageUrl || creator.user?.image || creator.autoProfileImageUrl || null
     )
     // Remove hardcoded Unsplash fallback. If null, show placeholder gradient.
     const [bannerImage, setBannerImage] = useState<string | null>(

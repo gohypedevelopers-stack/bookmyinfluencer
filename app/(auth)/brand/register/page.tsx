@@ -8,10 +8,10 @@ import {
     Check, ChevronLeft, Target, Megaphone, Smartphone, IndianRupee, Users,
     Instagram, Youtube, Sparkles, TrendingUp, Globe, Zap, Rocket, X
 } from 'lucide-react';
-import { registerBrand, sendEmailOtp, verifyEmailOtp, ensureDevBrandSimulationAccount } from '@/app/brand/auth-actions';
+import { registerBrand, sendEmailOtp, verifyEmailOtp, ensureDevBrandSimulationAccount, completeGoogleBrandOnboarding } from '@/app/brand/auth-actions';
 import { signIn, getProviders, getSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import { signInWithRedirectClient, handleRedirectResult } from '@/lib/firebase-auth-client';
+import { signInWithGooglePopup } from '@/lib/firebase-auth-client';
 import { motion, AnimatePresence } from 'framer-motion';
 const GoogleIcon = ({ className = "" }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
@@ -155,6 +155,7 @@ export default function BrandRegisterPage() {
     });
 
     // UI state
+    const [isGoogleUser, setIsGoogleUser] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [googleAvailable, setGoogleAvailable] = useState(false);
     const [providersLoaded, setProvidersLoaded] = useState(false);
@@ -224,40 +225,6 @@ export default function BrandRegisterPage() {
     useEffect(() => {
         let active = true;
         async function hydrateAuthState() {
-            try {
-                const firebaseUser = await handleRedirectResult();
-                if (firebaseUser) {
-                    setGoogleLoading(true);
-                    const result = await signIn("credentials", {
-                        redirect: false,
-                        email: firebaseUser.email,
-                        name: firebaseUser.displayName || "Brand",
-                        image: firebaseUser.photoURL || null,
-                        isGoogleLogin: "true",
-                        role: "BRAND",
-                        password: "bypass",
-                    });
-
-                    if (result?.error) {
-                        setError(result.error || "Google sign-up failed");
-                        setGoogleLoading(false);
-                    } else {
-                        // Google sign-up succeeded — jump to Step 4 "Registration complete!" screen
-                        if (!active) return;
-                        setGoogleLoading(false);
-                        setGoogleAvailable(true);
-                        setProvidersLoaded(true);
-                        setMounted(true);
-                        setCurrentStep(4);
-                        setDirection(1);
-                        return;
-                    }
-                }
-            } catch (err: any) {
-                console.error("Redirect auth error:", err);
-                setError(err.message || "Failed to complete Google authentication");
-            }
-
             const [providers, session] = await Promise.all([
                 getProviders(),
                 getSession(),
@@ -287,10 +254,42 @@ export default function BrandRegisterPage() {
         setError("");
 
         try {
-            await signInWithRedirectClient();
+            // Popup keeps the page alive — React state is preserved, no reload
+            const firebaseUser = await signInWithGooglePopup();
+
+            const result = await signIn("credentials", {
+                redirect: false,
+                email: firebaseUser.email,
+                name: firebaseUser.displayName || "Brand",
+                image: firebaseUser.photoURL || null,
+                isGoogleLogin: "true",
+                role: "BRAND",
+                password: "bypass",
+            });
+
+            if (result?.error) {
+                setError(result.error || "Google sign-up failed");
+                setGoogleLoading(false);
+            } else {
+                // Pre-fill formData so handleFinalSubmit has the user's email + name
+                setFormData(prev => ({
+                    ...prev,
+                    email: firebaseUser.email,
+                    companyName: prev.companyName || firebaseUser.displayName || 'Brand',
+                }));
+                setIsGoogleUser(true);
+                // Session created — jump directly to Step 4 "Registration complete!"
+                setGoogleLoading(false);
+                setDirection(1);
+                setCurrentStep(4);
+            }
         } catch (error: any) {
-            console.error(error);
-            setError(error.message || "Unable to start Google sign-up");
+            // User closed the popup or another error
+            if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+                setError(""); // silent cancel
+            } else {
+                setError(error.message || "Unable to complete Google sign-up");
+            }
             setGoogleLoading(false);
         }
     }
@@ -363,8 +362,6 @@ export default function BrandRegisterPage() {
         const fd = new FormData();
         fd.append('companyName', formData.companyName);
         fd.append('email', formData.email);
-        fd.append('password', formData.password);
-        fd.append('website', formData.website);
         fd.append('industry', formData.industries.join(', '));
         // Onboarding data
         fd.append('brandName', onboardingData.brandName || formData.companyName);
@@ -381,26 +378,44 @@ export default function BrandRegisterPage() {
         fd.append('maxPricePerPost', String(onboardingData.maxPricePerPost));
         fd.append('priceType', onboardingData.priceType);
 
-        const res = await registerBrand(fd);
-        if (res.success) {
-            setCampaignWorkflow(res.workflowSummary ?? null);
-            setAutoCampaignId(res.campaignId ?? null);
-            setWorkflowWarning(res.workflowError || '');
-
-            await signIn('credentials', {
-                email: formData.email,
-                password: formData.password,
-                redirect: false,
-            });
-
-            setDirection(1);
-            setCurrentStep(13);
+        if (isGoogleUser) {
+            // Google user: account already created — just update profile + create campaign
+            const res = await completeGoogleBrandOnboarding(fd);
+            if (res.success) {
+                setCampaignWorkflow(res.workflowSummary ?? null);
+                setAutoCampaignId(res.campaignId ?? null);
+                setWorkflowWarning(res.workflowError || '');
+                setDirection(1);
+                setCurrentStep(13);
+            } else {
+                setError(res.error || 'Failed to complete setup.');
+            }
         } else {
-            setCampaignWorkflow(null);
-            setAutoCampaignId(null);
-            setWorkflowWarning('');
-            setError(res.error || 'Registration failed.');
+            // Email/password user: create account + profile + campaign
+            fd.append('password', formData.password);
+            fd.append('website', formData.website);
+            const res = await registerBrand(fd);
+            if (res.success) {
+                setCampaignWorkflow(res.workflowSummary ?? null);
+                setAutoCampaignId(res.campaignId ?? null);
+                setWorkflowWarning(res.workflowError || '');
+
+                await signIn('credentials', {
+                    email: formData.email,
+                    password: formData.password,
+                    redirect: false,
+                });
+
+                setDirection(1);
+                setCurrentStep(13);
+            } else {
+                setCampaignWorkflow(null);
+                setAutoCampaignId(null);
+                setWorkflowWarning('');
+                setError(res.error || 'Registration failed.');
+            }
         }
+
         setIsSubmitting(false);
     };
 
@@ -614,13 +629,13 @@ export default function BrandRegisterPage() {
                             {currentStep === 1 && (
                                 <CardWrapper stepKey="step1" direction={direction}>
                                     <div className="space-y-6">
-                                        <div className="text-center mb-2">
+                                        <div className="text-center mb-6">
                                             <h2 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Enter Brand Details</h2>
                                             <p className="text-sm text-slate-400 mt-1">Tell us about your company to get started.</p>
                                         </div>
 
                                         {/* Google Sign-In */}
-                                        <div>
+                                        <div className="mt-4">
                                             <button
                                                 type="button"
                                                 onClick={handleGoogleRegister}
@@ -769,16 +784,6 @@ export default function BrandRegisterPage() {
                                             </div>
                                         </div>
 
-                                        {/* Website */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Website URL</label>
-                                            <div className="relative group">
-                                                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors w-5 h-5" />
-                                                <input name="website" type="url" value={formData.website} onChange={handleInputChange}
-                                                    className="w-full pl-12 pr-4 py-3.5 text-sm border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-[6px] focus:ring-indigo-500/5 focus:outline-none transition-all bg-slate-50/30 focus:bg-white text-slate-800 placeholder-slate-300 font-medium"
-                                                    placeholder="https://www.yourbrand.com" />
-                                            </div>
-                                        </div>
 
                                         <NextButton label="Next" onClick={goNext} disabled={!canProceed()} />
 

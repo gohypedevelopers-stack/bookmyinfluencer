@@ -173,6 +173,13 @@ export async function syncCreatorProfileByEmail(email: string, profile: CreatorP
       select: { id: true, userId: true },
     })
 
+    if (profile.fullName !== undefined) {
+      await tx.user.update({
+        where: { id: user.id },
+        data: { name: profile.fullName || null },
+      })
+    }
+
     return { otpUser, user, creator }
   })
 }
