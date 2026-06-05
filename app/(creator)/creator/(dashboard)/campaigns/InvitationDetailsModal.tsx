@@ -14,7 +14,7 @@ import {
     Globe,
     MapPin,
     ShieldCheck,
-    Sparkles,
+    Star,
     Users,
     X,
     XCircle,
@@ -88,7 +88,7 @@ export default function InvitationDetailsModal({ isOpen, onClose, invitation }: 
                     <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <div className="max-w-2xl">
                             <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-100">
-                                <Sparkles className="h-4 w-4" />
+                                <Star className="h-4 w-4" />
                                 Campaign Request
                             </div>
                             <h2 className="mt-5 text-4xl font-black tracking-tight">{campaign.title}</h2>

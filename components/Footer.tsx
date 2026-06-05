@@ -148,19 +148,19 @@ export function Footer() {
                 </Container>
             </div>
 
-            {/* Bottom Bar - Medium Slate Blue */}
-            <div className="relative z-10 border-t border-[#6a5acd] bg-[#7b68ee] shadow-[0_-5px_30px_rgba(123,104,238,0.2)]">
+            {/* Bottom Bar - Dark Premium */}
+            <div className="relative z-10 border-t border-slate-800 bg-slate-950 shadow-[0_-5px_30px_rgba(0,0,0,0.1)]">
                 <Container>
                     <div className="py-6 flex flex-col items-center justify-center">
-                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs md:text-sm font-semibold text-white/90">
+                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs md:text-sm font-medium text-slate-400">
                             {BOTTOM_LINKS.map((link, idx) => (
                                 <Link 
                                     key={idx} 
                                     href={link.href}
-                                    className="hover:text-white transition-colors duration-300 relative group"
+                                    className="hover:text-indigo-400 transition-colors duration-300 relative group"
                                 >
                                     {link.label}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300 rounded-full opacity-80" />
+                                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-indigo-500 group-hover:w-full transition-all duration-300 rounded-full opacity-80" />
                                 </Link>
                             ))}
                         </div>

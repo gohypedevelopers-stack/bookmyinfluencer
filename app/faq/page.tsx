@@ -6,7 +6,7 @@ import { Container } from "@/components/container"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { GateReveal } from "@/components/GateReveal"
-import { Sparkles, Plus, Minus, HelpCircle } from "lucide-react"
+import { Star, Plus, Minus, HelpCircle } from "lucide-react"
 
 const FAQ_DATA = [
   {
@@ -104,7 +104,7 @@ export default function FAQPage() {
                   className="mb-12"
                 >
                   <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-indigo-500" />
+                    <Star className="w-5 h-5 text-indigo-500" />
                     {section.category}
                   </h2>
                   

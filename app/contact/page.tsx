@@ -6,7 +6,7 @@ import { Container } from "@/components/container"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { GateReveal } from "@/components/GateReveal"
-import { Mail, MapPin, Phone, Send, Sparkles, MessageSquare } from "lucide-react"
+import { Mail, MapPin, Phone, Send, Star, MessageSquare } from "lucide-react"
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({ name: "", email: "", subject: "", message: "" })
@@ -65,7 +65,7 @@ export default function ContactPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                    <Sparkles className="w-6 h-6 text-violet-500" />
+                    <Star className="w-6 h-6 text-violet-500" />
                     Contact Information
                   </h3>
 

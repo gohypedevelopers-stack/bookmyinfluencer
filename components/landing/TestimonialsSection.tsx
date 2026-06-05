@@ -2,8 +2,9 @@
 
 import { Container } from "@/components/container"
 import { motion, useInView } from "framer-motion"
-import { Star, TrendingUp, Users, Target } from "lucide-react"
+import { TrendingUp, Users, Target } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
 
 // ─── Count-up Hook ────────────────────────────────────────────────────────────
 function useCountUp(target: number, duration = 2000, decimals = 0) {
@@ -68,30 +69,18 @@ function StatCard({ label, numericValue, decimals, prefix, suffix, icon: Icon, g
             transition={{ delay: delay / 1000, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="group relative"
         >
-            {/* Outer glow ring */}
             <div className={`absolute -inset-[2px] rounded-[2rem] bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-30 transition-opacity duration-500 blur-sm`} />
-
             <div className="relative bg-white border border-slate-100 rounded-[1.8rem] p-7 shadow-xl shadow-slate-200/50 group-hover:shadow-2xl group-hover:shadow-slate-300/40 group-hover:-translate-y-2 transition-all duration-500 overflow-hidden text-center flex flex-col items-center gap-5">
-
-                {/* Background gradient wash */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-[0.035] transition-opacity duration-700`} />
-
-                {/* Accent line — sweeps top → bottom on hover */}
                 <div className="absolute inset-x-0 top-0 h-full pointer-events-none overflow-hidden rounded-[1.8rem]">
                     <div className={`absolute left-[10%] right-[10%] h-[2px] bg-gradient-to-r ${gradient} rounded-full opacity-60 -translate-y-full group-hover:translate-y-[calc(var(--card-h,320px))] transition-transform duration-700 ease-in-out`} />
                 </div>
-
-                {/* Icon with spinning ring */}
                 <div className="relative w-14 h-14 flex items-center justify-center">
-                    {/* Rotating dashed ring */}
                     <div className={`absolute inset-0 rounded-full border-2 border-dashed ${ringColor} opacity-30 animate-spin-slow`} />
-                    {/* Solid inner circle */}
                     <div className={`relative w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
                         <Icon className="w-5 h-5 text-white" />
                     </div>
                 </div>
-
-                {/* Animated counter */}
                 <div className="space-y-1">
                     <div className="flex items-baseline justify-center gap-0.5">
                         <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight tabular-nums leading-none">
@@ -105,8 +94,6 @@ function StatCard({ label, numericValue, decimals, prefix, suffix, icon: Icon, g
                         {label}
                     </div>
                 </div>
-
-                {/* Mini sparkline bars */}
                 <div className="flex items-end gap-[3px] h-8 w-full justify-center">
                     {barHeights.map((h, i) => (
                         <motion.div
@@ -167,151 +154,167 @@ const STATS: StatCardProps[] = [
 
 const TESTIMONIALS = [
     {
-        name: "Sarah Jenkins",
-        role: "Head of Marketing",
-        tag: "Brand",
-        content: "Bookmyinfluencer transformed how we run creator campaigns. The escrow system gives us security, and the creator quality is unmatched.",
-        metrics: { label: "Campaign ROI", value: "4.8x" },
-        gradient: "from-blue-500 to-indigo-600",
-        tagColor: "bg-blue-50 text-blue-600 border-blue-100",
-        initial: "S",
+        name: "Ali Genth",
+        role: "President & Co-founder",
+        image: "https://i.pravatar.cc/150?img=47",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
     },
     {
-        name: "Marco Rossi",
-        role: "Tech Content Creator",
-        tag: "Creator",
-        content: "The process is so much cleaner now. Clear manager updates, easy submission, and I always know exactly where the project stands.",
-        metrics: { label: "Brand Deals", value: "12/mo" },
-        gradient: "from-violet-500 to-purple-600",
-        tagColor: "bg-violet-50 text-violet-600 border-violet-100",
-        initial: "M",
+        name: "John Smith",
+        role: "Co-founder",
+        image: "https://i.pravatar.cc/150?img=11",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
     },
     {
-        name: "Aisha Patel",
-        role: "Creative Director at Vibe",
-        tag: "Agency",
-        content: "Manager-led workflow is a game changer. Updates stay centralized, coordination stays disciplined, and campaigns close faster.",
-        metrics: { label: "Reach Growth", value: "+125%" },
-        gradient: "from-rose-500 to-pink-600",
-        tagColor: "bg-rose-50 text-rose-600 border-rose-100",
-        initial: "A",
+        name: "Marissa Lowe",
+        role: "Operations Manager",
+        image: "https://i.pravatar.cc/150?img=5",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+    },
+    {
+        name: "Jim Watson",
+        role: "Sales Manager",
+        image: "https://i.pravatar.cc/150?img=12",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+    },
+    {
+        name: "Gary Doe",
+        role: "Web Developer",
+        image: "https://i.pravatar.cc/150?img=15",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+    },
+    {
+        name: "Steve Burns",
+        role: "Graphic Designer",
+        image: "https://i.pravatar.cc/150?img=33",
+        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
     }
 ]
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 export function TestimonialsSection() {
-    const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
     return (
-        <section className="w-full py-16 md:py-24 bg-slate-50 relative overflow-hidden transition-colors duration-500">
-            <Container>
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-16 sm:mb-20"
-                >
-                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-                        Proven Results for <span className="text-indigo-600">Industry Leaders</span>
-                    </h2>
-                    <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
-                        Join thousands of brands and creators who are scaling their impact with our platform.
-                    </p>
-                </motion.div>
+        <section className="w-full relative overflow-hidden transition-colors duration-500 bg-slate-50">
+            {/* Stats Container */}
+            <div className="py-12 md:py-16">
+                <Container>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12 md:mb-16"
+                    >
+                        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
+                            Proven Results for <span className="text-indigo-600">Industry Leaders</span>
+                        </h2>
+                        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
+                            Join thousands of brands and creators who are scaling their impact with our platform.
+                        </p>
+                    </motion.div>
 
-                {/* Animated Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
-                    {STATS.map((stat, i) => (
-                        <StatCard key={i} {...stat} />
-                    ))}
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-4">
+                        {STATS.map((stat, i) => (
+                            <StatCard key={i} {...stat} />
+                        ))}
+                    </div>
+                </Container>
+            </div>
 
-                {/* Testimonials Sub-heading */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-16 sm:mb-20"
-                >
-                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-                        Customer <span className="text-indigo-600">Testimonials</span>
-                    </h2>
-                </motion.div>
+            {/* Matching Image Design - Testimonials Container */}
+            <div className="py-20 md:py-32 bg-[#A9B6B9]">
+                <Container>
+                    {/* Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-32"
+                    >
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 uppercase tracking-wider drop-shadow-sm">
+                            Customer Testimonials
+                        </h2>
+                    </motion.div>
 
-                {/* Testimonials Grid — fixed positions, dynamic scale */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8 items-center min-h-[400px] pb-10">
-                    {TESTIMONIALS.map((t, i) => {
-                        const isActive = activeIndex === i;
-                        const isAnyActive = activeIndex !== null;
-                        
-                        return (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            animate={{
-                                height: isActive ? 480 : "100%",
-                                opacity: isActive ? 1 : isAnyActive ? 0.6 : 1,
-                                y: isActive ? -12 : 0,
-                                zIndex: isActive ? 40 : 1,
-                            }}
-                            transition={{ 
-                                height: { type: "spring", stiffness: 280, damping: 26 },
-                                opacity: { duration: 0.3 }
-                            }}
-                            whileHover={!isActive ? { scale: 1.02, opacity: 0.9, y: -4 } : {}}
-                            onClick={() => setActiveIndex(isActive ? null : i)}
-                            className="w-full relative cursor-pointer group"
-                        >
-                            {/* Glow border on active or hover */}
-                            <div className={`absolute -inset-[4px] rounded-[1.5rem] bg-gradient-to-br ${t.gradient} ${isActive ? 'opacity-100 blur-[20px]' : 'opacity-0 group-hover:opacity-30 blur-[2px]'} transition-all duration-500`} />
-
-                            <div className={`relative bg-white border ${isActive ? 'border-transparent shadow-[0_40px_80px_-20px_rgba(0,0,0,0.25)] shadow-slate-300/60' : 'border-slate-100 group-hover:border-transparent group-hover:shadow-xl shadow-md'} rounded-[1.4rem] p-6 flex flex-col gap-4 transition-all duration-500 overflow-hidden h-full`}>
-
-
-
-                                {/* Header: quote mark + tag */}
-                                <div className="flex items-center justify-between">
-                                    {/* Large decorative quote */}
-                                    <span className={`text-4xl font-black leading-none bg-gradient-to-br ${t.gradient} bg-clip-text text-transparent select-none`}>&ldquo;</span>
-                                    <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-full border ${t.tagColor}`}>
-                                        {t.tag}
-                                    </span>
+                    {/* Cards Grid with Perspective for 3D effect */}
+                    <motion.div 
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={{
+                            hidden: { opacity: 0 },
+                            visible: {
+                                opacity: 1,
+                                transition: {
+                                    staggerChildren: 0.2,
+                                    delayChildren: 0.1
+                                }
+                            }
+                        }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-20 max-w-4xl mx-auto [perspective:1200px]"
+                    >
+                        {TESTIMONIALS.map((t, i) => (
+                            <motion.div 
+                                key={i} 
+                                variants={{
+                                    hidden: { 
+                                        opacity: 0, 
+                                        rotateX: -45, 
+                                        y: 50, 
+                                        z: -100,
+                                        scale: 0.95 
+                                    },
+                                    visible: { 
+                                        opacity: 1, 
+                                        rotateX: 0, 
+                                        y: 0, 
+                                        z: 0,
+                                        scale: 1,
+                                        transition: { 
+                                            type: "spring", 
+                                            stiffness: 80, 
+                                            damping: 15,
+                                            mass: 1.2
+                                        } 
+                                    }
+                                }}
+                                className="relative pt-12 origin-top"
+                            >
+                                {/* Avatar */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-10 w-[100px] h-[100px] rounded-full border-[5px] border-white overflow-hidden z-20 shadow-[0_8px_20px_rgba(0,0,0,0.12)] bg-slate-200 group-hover:scale-105 transition-transform duration-500">
+                                    <Image src={t.image} alt={t.name} width={100} height={100} className="w-full h-full object-cover" />
                                 </div>
 
-                                {/* Stars */}
-                                <div className="flex gap-0.5">
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star key={s} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                    ))}
-                                </div>
+                                {/* Card Body */}
+                                <div className="bg-white rounded-[20px] pt-16 shadow-[0_15px_35px_-5px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.2)] text-center overflow-hidden flex flex-col h-full hover:-translate-y-3 transition-all duration-500 border border-slate-100 group relative z-10">
+                                    <div className="px-5 pb-8 flex-1">
+                                        <h3 className="text-lg font-black text-slate-900 uppercase mb-1 tracking-wide">{t.name}</h3>
+                                        <p className="text-[9px] font-bold text-[#27ae60] uppercase tracking-[0.1em] mb-4">{t.role}</p>
+                                        <p className="text-[12px] text-slate-600 leading-relaxed font-medium px-2">
+                                            {t.content}
+                                        </p>
+                                    </div>
 
-                                {/* Quote text */}
-                                <p className="text-sm text-slate-600 leading-relaxed font-medium flex-1">
-                                    {t.content}
-                                </p>
-
-                                {/* Footer: avatar initial + name + metric */}
-                                <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
-                                    {/* Initial avatar */}
-                                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
-                                        {t.initial}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold text-slate-900 truncate">{t.name}</div>
-                                        <div className="text-[10px] text-slate-400 font-medium truncate">{t.role}</div>
-                                    </div>
-                                    <div className="text-right flex-shrink-0">
-                                        <div className={`text-sm font-black bg-gradient-to-br ${t.gradient} bg-clip-text text-transparent`}>{t.metrics.value}</div>
-                                        <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{t.metrics.label}</div>
+                                    {/* Card Footer */}
+                                    <div className="bg-[#27ae60] py-3 flex items-center justify-center gap-2.5">
+                                        <a href="#" aria-label="LinkedIn" className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#27ae60] hover:scale-110 transition-transform font-bold text-[12px]">
+                                            in
+                                        </a>
+                                        <a href="#" aria-label="Facebook" className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#27ae60] hover:scale-110 transition-transform font-bold text-[12px] font-serif italic">
+                                            f
+                                        </a>
+                                        <a href="#" aria-label="Twitter" className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#27ae60] hover:scale-110 transition-transform font-bold text-[12px]">
+                                            t
+                                        </a>
+                                        <a href="#" aria-label="Behance" className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#27ae60] hover:scale-110 transition-transform font-bold text-[11px]">
+                                            Bē
+                                        </a>
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    )})}
-                </div>
-            </Container>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </Container>
+            </div>
         </section>
     )
 }

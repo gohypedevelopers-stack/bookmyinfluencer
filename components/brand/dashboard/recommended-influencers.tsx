@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, Star, CheckCircle2 } from "lucide-react"
 import { useState } from "react"
 import { motion, AnimatePresence, type Variants } from "framer-motion"
 
@@ -54,7 +54,7 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                     <div className="relative">
                         <h2 className="text-2xl font-black text-slate-900 tracking-tight">Micro Influencer Signals</h2>
                         <div className="absolute -top-3 -right-6 text-amber-400">
-                            <Sparkles className="w-5 h-5 animate-pulse" />
+                            <Star className="w-5 h-5 animate-pulse" />
                         </div>
                     </div>
                     <span className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
@@ -133,7 +133,7 @@ export function RecommendedInfluencers({ influencers }: RecommendedInfluencersPr
                 {visibleInfluencers.length === 0 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-16 bg-white/50 backdrop-blur-md rounded-3xl border border-slate-200 border-dashed">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Sparkles className="w-6 h-6 text-slate-400" />
+                            <Star className="w-6 h-6 text-slate-400" />
                         </div>
                         <h3 className="text-lg font-black text-slate-800 mb-2">No creators found</h3>
                         <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">We're constantly expanding our network. Check back later or adjust your campaign parameters.</p>

@@ -6,14 +6,14 @@ import { motion } from "framer-motion"
 
 export function TrustedBySection() {
     return (
-        <section className="w-full py-16 md:py-24 bg-slate-50 relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-12 md:py-16 bg-slate-50 relative overflow-hidden transition-colors duration-500">
             <Container className="text-center relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="mb-8 md:mb-12"
+                    className="mb-12 md:mb-16"
                 >
                     <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight">
                         Trusted by <span className="text-indigo-600">Industry Leaders</span>
@@ -22,7 +22,7 @@ export function TrustedBySection() {
             </Container>
 
             {/* Infinite Animated Carousel Container - Full Width */}
-            <div className="relative flex flex-col gap-12 overflow-hidden w-full group py-8">
+            <div className="relative flex flex-col gap-12 overflow-hidden w-full group">
                 {/* Gradient masks - matches section bg */}
                 <div className="absolute left-0 top-0 bottom-0 w-32 sm:w-48 lg:w-64 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-32 sm:w-48 lg:w-64 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />

@@ -5,13 +5,13 @@ import Link from "next/link"
 import { Container } from "@/components/container"
 import { motion } from "framer-motion"
 import { ContactSalesModal } from "./ContactSalesModal"
-import { ArrowRight, Sparkles, Users, Zap, Globe } from "lucide-react"
+import { ArrowRight, Star, Users, Zap, Globe } from "lucide-react"
 
 export function CallToAction() {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     return (
-        <section className="w-full py-16 md:py-24 bg-transparent relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-12 md:py-16 bg-transparent relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -73,7 +73,6 @@ export function CallToAction() {
                                     transition={{ duration: 2, repeat: Infinity }}
                                     className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.6)]"
                                 />
-                                <Sparkles className="w-3 h-3 text-indigo-200" />
                                 <span>Trusted by 25,000+ Brands</span>
                             </div>
                         </motion.div>
@@ -93,16 +92,7 @@ export function CallToAction() {
                             </span>
                         </motion.h2>
 
-                        {/* Subline */}
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3, duration: 0.6 }}
-                            className="text-white/75 text-sm sm:text-base lg:text-lg mb-8 max-w-2xl mx-auto font-medium leading-relaxed"
-                        >
-                            Join the elite network of top-tier brands and creators making high-impact connections — secured, managed, and scaled.
-                        </motion.p>
+
 
                         {/* Inline stat pills */}
                         <motion.div
@@ -130,30 +120,44 @@ export function CallToAction() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.45, duration: 0.6 }}
-                            className="flex flex-col sm:flex-row gap-3 justify-center"
+                            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                         >
                             {/* Primary CTA */}
-                            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                            <motion.div 
+                                whileHover={{ scale: 1.05, y: -2 }} 
+                                whileTap={{ scale: 0.95 }}
+                                className="relative group w-full sm:w-auto"
+                            >
+                                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-500 rounded-[2rem] blur-md opacity-40 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
                                 <Link
                                     href="/login"
-                                    className="group relative inline-flex items-center gap-2.5 h-12 sm:h-14 px-8 sm:px-10 rounded-[2rem] bg-white text-indigo-700 font-bold text-sm shadow-[0_8px_32px_rgba(0,0,0,0.18),0_0_0_1px_rgba(255,255,255,0.3)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.24)] transition-shadow duration-300 overflow-hidden"
+                                    className="relative flex items-center justify-center gap-2.5 h-12 sm:h-14 px-8 sm:px-10 rounded-[2rem] bg-white text-indigo-700 font-extrabold text-sm sm:text-base shadow-[0_8px_32px_rgba(0,0,0,0.18)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all duration-300 overflow-hidden"
                                 >
-                                    {/* Shimmer sweep */}
-                                    <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-indigo-50/60 to-transparent pointer-events-none" />
+                                    <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-indigo-50/80 to-transparent pointer-events-none" />
                                     <span className="relative z-10">Get Started Free</span>
-                                    <ArrowRight className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                                    <ArrowRight className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1.5" />
                                 </Link>
                             </motion.div>
 
                             {/* Secondary CTA */}
-                            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                            <motion.div 
+                                whileHover={{ scale: 1.05, y: -2 }} 
+                                whileTap={{ scale: 0.95 }}
+                                className="relative group w-full sm:w-auto"
+                            >
+                                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2rem] blur-md opacity-0 group-hover:opacity-40 transition duration-500"></div>
                                 <button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="group relative inline-flex items-center justify-center gap-2.5 h-12 sm:h-14 px-8 sm:px-10 rounded-[2rem] bg-white/[0.08] backdrop-blur-md border border-white/25 text-white font-bold text-sm hover:bg-white/[0.16] hover:border-white/40 transition-all duration-300 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+                                    className="relative flex items-center justify-center gap-2.5 w-full h-12 sm:h-14 px-8 sm:px-10 rounded-[2rem] bg-white/[0.05] backdrop-blur-xl border border-white/20 text-white font-bold text-sm sm:text-base hover:bg-white/[0.15] hover:border-white/40 transition-all duration-300 overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                                 >
-                                    {/* Inner glow on hover */}
-                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 bg-gradient-to-br from-white/10 to-transparent pointer-events-none rounded-[2rem]" />
+                                    <div className="absolute inset-0 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-500 bg-gradient-to-t from-white/[0.15] to-transparent pointer-events-none" />
                                     <span className="relative z-10">Contact Sales</span>
+                                    <motion.div
+                                        animate={{ x: [0, 4, 0] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                    >
+                                        <ArrowRight className="relative z-10 w-4 h-4 sm:w-5 sm:h-5 text-indigo-200 opacity-70 group-hover:opacity-100 group-hover:text-white transition-all duration-300" />
+                                    </motion.div>
                                 </button>
                             </motion.div>
                         </motion.div>

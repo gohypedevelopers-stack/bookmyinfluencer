@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Chrome, Building2, TrendingUp, Users, BarChart3, Star, Sparkles, Loader2, Zap, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Chrome, Building2, TrendingUp, Users, BarChart3, Star, Loader2, Zap, CheckCircle2 } from 'lucide-react';
 import { signIn, getSession, getProviders } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from 'next-auth';
@@ -236,7 +236,7 @@ export default function LoginPage() {
                             className="space-y-5"
                         >
                             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] backdrop-blur-md border border-white/10 text-[11px] font-semibold text-violet-300 uppercase tracking-widest">
-                                <Sparkles className="w-3.5 h-3.5" />
+                                <Star className="w-3.5 h-3.5" />
                                 Creator Portal
                             </div>
 

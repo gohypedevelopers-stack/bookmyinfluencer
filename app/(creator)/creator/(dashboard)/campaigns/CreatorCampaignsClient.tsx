@@ -13,7 +13,7 @@ import {
     Inbox,
     MapPin,
     MessageSquareMore,
-    Sparkles,
+    Star,
     ShieldCheck,
     Users,
     Workflow,
@@ -170,7 +170,7 @@ export default function CreatorCampaignsClient({ candidates, followerCount }: Cr
                     <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                         <div className="max-w-3xl">
                             <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-100 transition-all duration-300 hover:bg-white/15">
-                                <Sparkles className="h-4 w-4 text-violet-300 animate-pulse" />
+                                <Star className="h-4 w-4 text-violet-300 animate-pulse" />
                                 Creator Workflow
                             </div>
                             <h1 className="mt-5 text-4xl font-black tracking-tight md:text-5xl">Campaign requests, submissions, and review flow</h1>

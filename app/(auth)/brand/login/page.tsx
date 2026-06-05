@@ -7,7 +7,7 @@ import type { Session } from "next-auth"
 import Link from "next/link"
 import Image from "next/image"
 import { ensureDevBrandSimulationAccount, inspectBrandLoginEmail } from "@/app/brand/auth-actions"
-import { CheckCircle2, Lock, Eye, EyeOff, Building2, Mail, ArrowRight, Loader2, Zap, Sparkles, Layers, TrendingUp, Users, BarChart3, Star } from "lucide-react"
+import { CheckCircle2, Lock, Eye, EyeOff, Building2, Mail, ArrowRight, Loader2, Zap, Star, Layers, TrendingUp, Users, BarChart3,  } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { signInWithRedirectClient, handleRedirectResult } from "@/lib/firebase-auth-client"
 
@@ -436,7 +436,7 @@ export default function BrandLoginPage() {
                             className="space-y-5"
                         >
                             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] backdrop-blur-md border border-white/10 text-[11px] font-semibold text-violet-300 uppercase tracking-widest">
-                                <Sparkles className="w-3.5 h-3.5" />
+                                <Star className="w-3.5 h-3.5" />
                                 Brand Portal
                             </div>
 

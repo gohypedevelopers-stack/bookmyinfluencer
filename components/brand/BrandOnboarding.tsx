@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
     ArrowRight, Check, ChevronLeft, Building2, Megaphone, Users, Target,
     IndianRupee, Smartphone, Instagram, Youtube, Facebook, Twitter, Linkedin,
-    TrendingUp, Sparkles
+    TrendingUp, Star
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { submitBrandOnboarding } from "@/app/actions/onboarding"
@@ -552,7 +552,7 @@ export default function BrandOnboarding() {
                                         onClick={handleGoToDashboard}
                                         className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base font-semibold rounded-2xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                                     >
-                                        <Sparkles size={18} />
+                                        <Star size={18} />
                                         Create Campaign
                                     </button>
                                     <button

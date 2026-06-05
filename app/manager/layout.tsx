@@ -10,7 +10,7 @@ import {
     FileText,
     LayoutDashboard,
     LogOut,
-    Sparkles,
+    Star,
 } from 'lucide-react';
 import { signOut } from "next-auth/react"
 
@@ -79,7 +79,7 @@ export default function ManagerLayout({
                 <div className="rounded-[28px] border border-indigo-100 bg-[linear-gradient(180deg,#f8faff_0%,#eef2ff_100%)] p-4 shadow-[0_20px_50px_-42px_rgba(79,70,229,0.75)]">
                     <div className="flex items-start gap-3">
                         <div className="mt-0.5 rounded-2xl bg-indigo-500/10 p-2 text-indigo-600">
-                            <Sparkles className="h-4 w-4" />
+                            <Star className="h-4 w-4" />
                         </div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-500">Ops Note</p>

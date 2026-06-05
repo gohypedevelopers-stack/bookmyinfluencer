@@ -4,7 +4,7 @@ import {
     CheckCircle2,
     Clock3,
     FolderKanban,
-    Sparkles,
+    Star,
 } from "lucide-react";
 import { getManagerStats, getManagerCampaigns } from "./actions";
 
@@ -52,7 +52,7 @@ export default async function ManagerDashboard() {
                 <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
                     <div className="max-w-3xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-indigo-100">
-                            <Sparkles className="h-4 w-4" />
+                            <Star className="h-4 w-4" />
                             Manager Command Center
                         </div>
                         <h1 className="mt-5 text-4xl font-black tracking-tight md:text-5xl">
