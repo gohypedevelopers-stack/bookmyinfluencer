@@ -8,6 +8,12 @@ interface BrandStatsProps {
         totalSpent: number
         activeEscrow: number
         completedCampaigns: number
+        totalSpentChange?: string
+        totalSpentProgress?: number
+        activeEscrowStatus?: string
+        activeEscrowHistory?: number[]
+        completedCampaignsChange?: string
+        completedCampaignsHistory?: number[]
     }
 }
 
@@ -24,7 +30,29 @@ const itemVariants: Variants = {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 }
 
+const getBadgeStyle = (change: string) => {
+    if (!change) return 'bg-slate-50 border-slate-100 text-slate-500';
+    if (change.startsWith('-')) return 'bg-rose-50 border-rose-100 text-rose-600';
+    if (change === '+0%' || change === '+0.0%') return 'bg-slate-50 border-slate-100 text-slate-500';
+    return 'bg-emerald-50 border-emerald-100 text-emerald-600';
+}
+
+const getEscrowBadgeStyle = (status: string) => {
+    if (!status) return 'bg-slate-50 border-slate-100 text-slate-500';
+    const lower = status.toLowerCase();
+    if (lower.includes('down')) return 'bg-rose-50 border-rose-100 text-rose-600';
+    if (lower.includes('up') || lower.includes('grow')) return 'bg-emerald-50 border-emerald-100 text-emerald-600';
+    return 'bg-slate-50 border-slate-100 text-slate-500';
+}
+
 export function BrandStats({ stats }: BrandStatsProps) {
+    const totalSpentChange = stats.totalSpentChange || "+0.0%";
+    const totalSpentProgress = stats.totalSpentProgress ?? 0;
+    const activeEscrowStatus = stats.activeEscrowStatus || "Stable";
+    const activeEscrowHistory = stats.activeEscrowHistory || [0, 0, 0, 0, 0];
+    const completedCampaignsChange = stats.completedCampaignsChange || "+0%";
+    const completedCampaignsHistory = stats.completedCampaignsHistory || [0, 0, 0, 0, 0, 0];
+
     return (
         <motion.div 
             variants={containerVariants}
@@ -42,14 +70,14 @@ export function BrandStats({ stats }: BrandStatsProps) {
                                 ₹{stats.totalSpent.toLocaleString()}
                             </h3>
                         </div>
-                        <div className="bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                            +12.4%
+                        <div className={`border text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm ${getBadgeStyle(totalSpentChange)}`}>
+                            {totalSpentChange}
                         </div>
                     </div>
                     <div className="w-full bg-slate-100/80 rounded-full h-1.5 mt-2 relative overflow-hidden">
                         <motion.div 
                             initial={{ width: 0 }}
-                            animate={{ width: "75%" }}
+                            animate={{ width: `${totalSpentProgress}%` }}
                             transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
                             className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" 
                         />
@@ -67,18 +95,18 @@ export function BrandStats({ stats }: BrandStatsProps) {
                                 ₹{stats.activeEscrow.toLocaleString()}
                             </h3>
                         </div>
-                        <div className="bg-slate-50 border border-slate-200 text-slate-500 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                            Stable
+                        <div className={`border text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm ${getEscrowBadgeStyle(activeEscrowStatus)}`}>
+                            {activeEscrowStatus}
                         </div>
                     </div>
-                    <div className="flex gap-1.5 mt-4 relative z-10">
-                        {[1, 2, 3, 4, 5].map((i) => (
+                    <div className="flex gap-1.5 mt-4 items-end h-8 relative z-10">
+                        {activeEscrowHistory.map((height, i) => (
                             <motion.div 
                                 key={i} 
-                                initial={{ scaleY: 0 }}
-                                animate={{ scaleY: 1 }}
-                                transition={{ duration: 0.4, delay: 0.1 * i }}
-                                className={`h-8 flex-1 rounded-md origin-bottom ${i > 3 ? 'bg-gradient-to-t from-blue-600 to-blue-400 shadow-md shadow-blue-200' : 'bg-blue-50'}`}
+                                initial={{ height: 0 }}
+                                animate={{ height: `${height > 0 ? height : 10}%` }}
+                                transition={{ duration: 0.4, delay: 0.1 * i, type: "spring" }}
+                                className={`w-full rounded-md origin-bottom ${height > 0 ? 'bg-gradient-to-t from-blue-600 to-blue-400 shadow-md shadow-blue-200' : 'bg-slate-100/60'}`}
                             />
                         ))}
                     </div>
@@ -95,18 +123,18 @@ export function BrandStats({ stats }: BrandStatsProps) {
                                 {stats.completedCampaigns}
                             </h3>
                         </div>
-                        <div className="bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                            -2%
+                        <div className={`border text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm ${getBadgeStyle(completedCampaignsChange)}`}>
+                            {completedCampaignsChange}
                         </div>
                     </div>
                     <div className="flex gap-1.5 mt-4 items-end h-8 relative z-10">
-                        {[40, 70, 45, 90, 65, 100].map((height, i) => (
+                        {completedCampaignsHistory.map((height, i) => (
                             <motion.div 
                                 key={i} 
                                 initial={{ height: 0 }}
-                                animate={{ height: `${height}%` }}
+                                animate={{ height: `${height > 0 ? height : 10}%` }}
                                 transition={{ duration: 0.5, delay: 0.1 * i, type: "spring" }}
-                                className="w-full bg-gradient-to-t from-purple-500 to-purple-300 rounded-sm shadow-sm" 
+                                className={`w-full rounded-sm shadow-sm ${height > 0 ? 'bg-gradient-to-t from-purple-500 to-purple-300' : 'bg-slate-100/60'}`}
                             />
                         ))}
                     </div>

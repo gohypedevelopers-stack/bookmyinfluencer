@@ -9,6 +9,12 @@ import { Prisma } from "@prisma/client";
 import { CandidateStatus, EscrowTransactionStatus, ContractStatus, CampaignStatus, DeliverableStatus } from "@/lib/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import {
+    isVisibleCreatorProfile,
+    isVisibleInfluencerProfile,
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 // Helper to extract readable price range from raw pricing JSON
 function safeJsonParse(jsonString: string | null | undefined, fallback: any = []): any {
@@ -515,7 +521,7 @@ export async function getPublicCreators(filter?: {
 
         // Fetch from Creator table (OTP auth system)
         const creators = await db.creator.findMany({
-            where: creatorWhere,
+            where: visibleCreatorWhereWith(creatorWhere),
             select: {
                 id: true, userId: true, fullName: true, displayName: true,
                 niche: true, pricing: true, instagramUrl: true,
@@ -530,7 +536,7 @@ export async function getPublicCreators(filter?: {
         });
 
         const influencerProfiles = await db.influencerProfile.findMany({
-            where: influencerWhere,
+            where: visibleInfluencerProfileWhereWith(influencerWhere),
             select: {
                 id: true, userId: true, followers: true, engagementRate: true,
                 niche: true, platforms: true, bio: true, price: true, priceType: true,
@@ -558,7 +564,7 @@ export async function getPublicCreators(filter?: {
         }
 
         // Map Creator data to UI format
-        const mappedCreators = creators.map((c: any) => {
+        const mappedCreators = creators.filter(isVisibleCreatorProfile).map((c: any) => {
             const primaryMetric = c.metrics?.[0];
             const followers = primaryMetric?.followersCount
                 || c.selfReportedMetrics?.[0]?.followersCount
@@ -600,7 +606,7 @@ export async function getPublicCreators(filter?: {
         });
 
         // Map InfluencerProfile data to UI format
-        const mappedInfluencers = influencerProfiles.map((inf: any) => {
+        const mappedInfluencers = influencerProfiles.filter(isVisibleInfluencerProfile).map((inf: any) => {
             const followers = inf.followers || 0;
             const fmtFollowers = followers > 1000000
                 ? `${(followers / 1000000).toFixed(1)}M`
@@ -668,12 +674,12 @@ export async function getPublicCreatorById(id: string) {
 
         // 1. Try Creator table
         const creator = await db.creator.findFirst({
-            where: {
+            where: visibleCreatorWhereWith({
                 OR: [
                     { id: id },
                     { userId: id }
                 ]
-            },
+            }),
             include: {
                 user: true,
                 metrics: true,
@@ -681,7 +687,7 @@ export async function getPublicCreatorById(id: string) {
             }
         });
 
-        if (creator) {
+        if (creator && isVisibleCreatorProfile(creator)) {
             const primaryMetric = creator.metrics[0];
             const selfMetric = creator.selfReportedMetrics[0];
 
@@ -713,16 +719,16 @@ export async function getPublicCreatorById(id: string) {
         } else {
             // 2. Try legacy InfluencerProfile table
             const profile = await db.influencerProfile.findFirst({
-                where: {
+                where: visibleInfluencerProfileWhereWith({
                     OR: [
                         { id: id },
                         { userId: id }
                     ]
-                },
+                }),
                 include: { user: true }
             });
 
-            if (profile) {
+            if (profile && isVisibleInfluencerProfile(profile)) {
                 creatorData = {
                     id: profile.userId,
                     name: (profile.user as any).name || "Influencer",
@@ -792,12 +798,14 @@ export async function inviteInfluencer(campaignId: string, influencerUserId: str
         let creatorData: any = null;
 
         // Try to find if this is a v2 Creator
-        const creator = await db.creator.findUnique({
-            where: { userId: influencerUserId }, // influencerUserId is often OtpUser.id
+        const creator = await db.creator.findFirst({
+            where: visibleCreatorWhereWith({
+                OR: [{ id: influencerUserId }, { userId: influencerUserId }]
+            }),
             include: { user: true }
         });
 
-        if (creator) {
+        if (creator && isVisibleCreatorProfile(creator)) {
             creatorData = creator;
             // Use email to link/find the NextAuth User
             const email = creator.email || (creator.user as any)?.email;
@@ -821,24 +829,30 @@ export async function inviteInfluencer(campaignId: string, influencerUserId: str
         }
 
         // 2. Find or Create InfluencerProfile linked to this (NextAuth) User
-        let profile = await db.influencerProfile.findUnique({
-            where: { userId: targetUserId }
+        let profile = await db.influencerProfile.findFirst({
+            where: visibleInfluencerProfileWhereWith({
+                OR: [{ id: targetUserId }, { userId: targetUserId }]
+            })
         });
 
         if (!profile) {
-            // Ensure we have a valid User ID before creating profile
-            // If targetUserId is still the OtpId but no User exists... we technically fail FK constraint.
-            // But strict migration implies we should have created the User above.
+            if (!creatorData) {
+                return { success: false, error: "Influencer profile not found" };
+            }
 
-            // Create dummy/migrated profile to allow campaign linkage
             profile = await db.influencerProfile.create({
                 data: {
-                    userId: targetUserId, // This MUST exist in "User" table
+                    userId: targetUserId,
                     niche: creatorData?.niche || 'General',
                     instagramHandle: creatorData?.instagramUrl,
-                    bio: creatorData?.bio
+                    bio: creatorData?.bio,
+                    onboardingCompleted: true
                 }
             });
+        }
+
+        if (!isVisibleInfluencerProfile(profile)) {
+            return { success: false, error: "Influencer profile not found" };
         }
 
         // 3. Check if already invited
@@ -879,7 +893,13 @@ export async function getBrandStats() {
     if (!session || session.user.role !== 'BRAND') return {
         totalSpent: 0,
         activeEscrow: 0,
-        completedCampaigns: 0
+        completedCampaigns: 0,
+        totalSpentChange: "+0%",
+        totalSpentProgress: 0,
+        activeEscrowStatus: "Stable",
+        activeEscrowHistory: [0, 0, 0, 0, 0],
+        completedCampaignsChange: "+0%",
+        completedCampaignsHistory: [0, 0, 0, 0, 0, 0]
     };
 
     try {
@@ -888,38 +908,185 @@ export async function getBrandStats() {
             select: { id: true }
         });
 
-        if (!brand) return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
+        if (!brand) return { 
+            totalSpent: 0, 
+            activeEscrow: 0, 
+            completedCampaigns: 0,
+            totalSpentChange: "+0%",
+            totalSpentProgress: 0,
+            activeEscrowStatus: "Stable",
+            activeEscrowHistory: [0, 0, 0, 0, 0],
+            completedCampaignsChange: "+0%",
+            completedCampaignsHistory: [0, 0, 0, 0, 0, 0]
+        };
 
-        const [campaigns, completedCampaigns] = await Promise.all([
-            db.campaign.findMany({
-                where: { brandId: brand.id },
-                select: {
-                    status: true,
-                    paymentStatus: true,
-                    candidates: {
-                        where: { brandDecision: "ACCEPTED" },
-                        select: { estimatedBrandCharge: true }
+        const campaigns = await db.campaign.findMany({
+            where: { brandId: brand.id },
+            include: {
+                candidates: {
+                    include: {
+                        contract: {
+                            include: {
+                                transactions: true
+                            }
+                        }
                     }
                 }
-            }),
-            db.campaign.count({
-                where: { brandId: brand.id, status: CampaignStatus.COMPLETED }
-            })
-        ]);
+            }
+        });
 
-        const totalSpent = campaigns
-            .filter((campaign) => campaign.paymentStatus === "PAID")
-            .reduce((sum, campaign) => sum + campaign.candidates.reduce((inner, candidate) => inner + (candidate.estimatedBrandCharge || 0), 0), 0);
+        const completedCampaignsCount = campaigns.filter(c => c.status === CampaignStatus.COMPLETED).length;
 
-        const activeEscrow = campaigns
-            .filter((campaign) => campaign.status === "ACTIVE")
-            .reduce((sum, campaign) => sum + campaign.candidates.reduce((inner, candidate) => inner + (candidate.estimatedBrandCharge || 0), 0), 0);
+        let totalSpent = 0;
+        let activeEscrow = 0;
 
-        return { totalSpent, activeEscrow, completedCampaigns };
+        campaigns.forEach(campaign => {
+            campaign.candidates.forEach(cand => {
+                if (cand.contract) {
+                    if (cand.contract.status === ContractStatus.COMPLETED) {
+                        totalSpent += cand.contract.totalAmount;
+                    } else if (cand.contract.status === ContractStatus.ACTIVE || cand.contract.status === ContractStatus.DISPUTED) {
+                        const fundedAmount = cand.contract.transactions
+                            .filter(t => t.status === "FUNDED")
+                            .reduce((sum, t) => sum + t.amount, 0);
+                        activeEscrow += fundedAmount;
+                    }
+                }
+            });
+        });
+
+        // Dynamic Progress Bar: Total Spent vs Total Budget of all campaigns
+        const totalBudget = campaigns.reduce((sum, campaign) => sum + (campaign.budget || 0), 0);
+        const totalSpentProgress = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+
+        // Dynamic Growth rates (comparing this month vs last month)
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+        let spentThisMonth = 0;
+        let spentLastMonth = 0;
+        let escrowsThisMonth = 0;
+        let escrowsLastMonth = 0;
+
+        campaigns.forEach(campaign => {
+            campaign.candidates.forEach(cand => {
+                if (cand.contract) {
+                    const isThisMonth = cand.contract.createdAt >= thirtyDaysAgo;
+                    const isLastMonth = cand.contract.createdAt >= sixtyDaysAgo && cand.contract.createdAt < thirtyDaysAgo;
+
+                    if (cand.contract.status === ContractStatus.COMPLETED) {
+                        if (isThisMonth) spentThisMonth += cand.contract.totalAmount;
+                        if (isLastMonth) spentLastMonth += cand.contract.totalAmount;
+                    } else if (cand.contract.status === ContractStatus.ACTIVE) {
+                        const fundedAmount = cand.contract.transactions
+                            .filter(t => t.status === "FUNDED")
+                            .reduce((sum, t) => sum + t.amount, 0);
+                        if (isThisMonth) escrowsThisMonth += fundedAmount;
+                        if (isLastMonth) escrowsLastMonth += fundedAmount;
+                    }
+                }
+            });
+        });
+
+        // 1. Total Spent Change
+        let totalSpentChange = "+0.0%";
+        if (spentLastMonth > 0) {
+            const pct = ((spentThisMonth - spentLastMonth) / spentLastMonth) * 100;
+            totalSpentChange = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
+        } else if (spentThisMonth > 0) {
+            totalSpentChange = "+100%";
+        }
+
+        // 2. Active Escrow Change
+        let activeEscrowStatus = "Stable";
+        if (escrowsLastMonth > 0) {
+            const pct = ((escrowsThisMonth - escrowsLastMonth) / escrowsLastMonth) * 100;
+            if (pct > 2) activeEscrowStatus = `Up ${pct.toFixed(0)}%`;
+            else if (pct < -2) activeEscrowStatus = `Down ${Math.abs(pct).toFixed(0)}%`;
+        } else if (escrowsThisMonth > 0) {
+            activeEscrowStatus = "Growing";
+        }
+
+        // 3. Completed Campaigns Change
+        const completedThisMonth = campaigns.filter(c => c.status === CampaignStatus.COMPLETED && c.createdAt >= thirtyDaysAgo).length;
+        const completedLastMonth = campaigns.filter(c => c.status === CampaignStatus.COMPLETED && c.createdAt >= sixtyDaysAgo && c.createdAt < thirtyDaysAgo).length;
+
+        let completedCampaignsChange = "+0%";
+        if (completedLastMonth > 0) {
+            const pct = ((completedThisMonth - completedLastMonth) / completedLastMonth) * 100;
+            completedCampaignsChange = (pct >= 0 ? "+" : "") + pct.toFixed(0) + "%";
+        } else if (completedThisMonth > 0) {
+            completedCampaignsChange = `+${completedThisMonth}`;
+        }
+
+        // Active Escrow History: 5 bars
+        const recentCampaigns = [...campaigns]
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, 5)
+            .reverse();
+
+        const activeEscrowHistory = [0, 0, 0, 0, 0];
+        const recentEscrows = recentCampaigns.map(c => {
+            let sum = 0;
+            c.candidates.forEach(cand => {
+                if (cand.contract && cand.contract.status === ContractStatus.ACTIVE) {
+                    sum += cand.contract.transactions
+                        .filter(t => t.status === "FUNDED")
+                        .reduce((acc, t) => acc + t.amount, 0);
+                }
+            });
+            return sum;
+        });
+
+        const maxEscrow = Math.max(...recentEscrows, 0);
+        for (let i = 0; i < 5; i++) {
+            const targetIdx = 5 - recentEscrows.length + i;
+            if (i < recentEscrows.length) {
+                const val = recentEscrows[i];
+                activeEscrowHistory[targetIdx] = maxEscrow > 0 ? Math.max(10, Math.floor((val / maxEscrow) * 100)) : 0;
+            }
+        }
+
+        // Completed Campaigns History: 6 bars (representing the last 6 months)
+        const completedCampaignsHistory = [0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < 6; i++) {
+            const mStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const mEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+            const count = campaigns.filter(c => c.status === CampaignStatus.COMPLETED && c.createdAt >= mStart && c.createdAt <= mEnd).length;
+            completedCampaignsHistory[5 - i] = count;
+        }
+
+        const maxCompleted = Math.max(...completedCampaignsHistory, 0);
+        const scaledCompletedHistory = completedCampaignsHistory.map(count => 
+            maxCompleted > 0 ? Math.max(15, Math.floor((count / maxCompleted) * 100)) : 0
+        );
+
+        return { 
+            totalSpent, 
+            activeEscrow, 
+            completedCampaigns: completedCampaignsCount,
+            totalSpentChange,
+            totalSpentProgress,
+            activeEscrowStatus,
+            activeEscrowHistory,
+            completedCampaignsChange,
+            completedCampaignsHistory: scaledCompletedHistory
+        };
 
     } catch (error) {
         console.error("Stats Error", error);
-        return { totalSpent: 0, activeEscrow: 0, completedCampaigns: 0 };
+        return { 
+            totalSpent: 0, 
+            activeEscrow: 0, 
+            completedCampaigns: 0,
+            totalSpentChange: "+0%",
+            totalSpentProgress: 0,
+            activeEscrowStatus: "Stable",
+            activeEscrowHistory: [0, 0, 0, 0, 0],
+            completedCampaignsChange: "+0%",
+            completedCampaignsHistory: [0, 0, 0, 0, 0, 0]
+        };
     }
 }
 
@@ -1522,11 +1689,11 @@ export async function getCheckoutData(influencerId: string) {
         let creatorData: any = null;
 
         const creator = await db.creator.findFirst({
-            where: { OR: [{ id: influencerId }, { userId: influencerId }] },
+            where: visibleCreatorWhereWith({ OR: [{ id: influencerId }, { userId: influencerId }] }),
             include: { user: true, socialAccounts: true }
         });
 
-        if (creator) {
+        if (creator && isVisibleCreatorProfile(creator)) {
             creatorData = creator;
             const email = creator.email || (creator.user as any)?.email;
 
@@ -1549,7 +1716,7 @@ export async function getCheckoutData(influencerId: string) {
 
         // 2. Find or Create InfluencerProfile linked to this (NextAuth) User
         let profile = await db.influencerProfile.findFirst({
-            where: { OR: [{ id: targetUserId }, { userId: targetUserId }] },
+            where: visibleInfluencerProfileWhereWith({ OR: [{ id: targetUserId }, { userId: targetUserId }] }),
             include: { user: true }
         });
 
@@ -1562,13 +1729,14 @@ export async function getCheckoutData(influencerId: string) {
                     instagramHandle: creatorData.instagramUrl ? creatorData.instagramUrl.split('/').pop() : 'creator',
                     bio: creatorData.bio,
                     followers: creatorData.followers || 0,
-                    pricing: creatorData.pricing || JSON.stringify({})
+                    pricing: creatorData.pricing || JSON.stringify({}),
+                    onboardingCompleted: true
                 },
                 include: { user: true }
             });
         }
 
-        if (!profile) return { success: false, error: "Influencer not found" };
+        if (!profile || !isVisibleInfluencerProfile(profile)) return { success: false, error: "Influencer not found" };
 
         // Normalize Pricing Data
         const PRICE_LABELS: Record<string, string> = {
@@ -1627,12 +1795,11 @@ export async function processDirectHire(influencerUserId: string, service: any, 
     try {
         const brand = await db.brandProfile.findUnique({ where: { userId: session.user.id } });
         // Use resolve logic for influencer profile ID
-        let influencer = await db.influencerProfile.findUnique({ where: { userId: influencerUserId } });
-
-        if (!influencer) {
-            // Try valid ID lookup just in case passed ID is profile ID
-            influencer = await db.influencerProfile.findUnique({ where: { id: influencerUserId } });
-        }
+        const influencer = await db.influencerProfile.findFirst({
+            where: visibleInfluencerProfileWhereWith({
+                OR: [{ userId: influencerUserId }, { id: influencerUserId }]
+            })
+        });
 
         if (!brand || !influencer) return { success: false, error: "Profile missing" };
 
@@ -1790,7 +1957,7 @@ export async function searchCreators(
 
         const [creators, total] = await Promise.all([
             db.creator.findMany({
-                where: whereClause,
+                where: visibleCreatorWhereWith(whereClause),
                 include: {
                     user: { select: { id: true, email: true } },
                     metrics: { orderBy: { fetchedAt: 'desc' }, take: 1 }
@@ -1801,10 +1968,10 @@ export async function searchCreators(
                     verifiedAt: 'desc' // Show recently verified first
                 }
             }),
-            db.creator.count({ where: whereClause })
+            db.creator.count({ where: visibleCreatorWhereWith(whereClause) })
         ]);
 
-        const formattedCreators = creators.map((creator) => ({
+        const formattedCreators = creators.filter(isVisibleCreatorProfile).map((creator) => ({
             id: creator.id,
             userId: creator.userId,
             fullName: creator.fullName,

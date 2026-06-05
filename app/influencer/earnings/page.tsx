@@ -5,6 +5,7 @@ import { ContractStatus, EscrowTransactionStatus } from "@/lib/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { visibleBrandProfileWhere } from "@/lib/profile-visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,8 @@ export default async function EarningsPage() {
     const jobs = await db.contract.findMany({
         where: {
             influencerId: influencerId,
-            status: { in: [ContractStatus.ACTIVE, ContractStatus.COMPLETED] }
+            status: { in: [ContractStatus.ACTIVE, ContractStatus.COMPLETED] },
+            brand: visibleBrandProfileWhere,
         },
         include: {
             brand: true,

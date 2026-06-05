@@ -30,7 +30,7 @@ const PlatformIcon = ({ provider, className }: { provider: string, className?: s
 
 export default async function SocialAccountsPage() {
     const userId = await getAuthenticatedCreatorId()
-    if (!userId) redirect("/verify")
+    if (!userId) redirect("/login")
 
     const creator = await db.creator.findUnique({
         where: { userId },

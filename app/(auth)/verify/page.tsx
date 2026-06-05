@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 
 import { db } from "@/lib/db"
 import { getVerifiedUserIdFromCookies } from "@/lib/session"
-import { VerifyClient } from "./VerifyClient"
 
 export default async function VerifyPage() {
   const userId = await getVerifiedUserIdFromCookies()
@@ -11,6 +10,6 @@ export default async function VerifyPage() {
     redirect(creator ? "/creator/dashboard" : "/creator/onboarding")
   }
 
-  return <VerifyClient />
+  redirect("/login")
 }
 

@@ -1,4 +1,8 @@
 import { db } from "@/lib/db";
+import {
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 export const MICRO_FOLLOWER_MIN = 10_000;
 export const MICRO_FOLLOWER_MAX = 500_000;
@@ -181,7 +185,7 @@ async function buildRankedPool(campaign: NonNullable<CampaignWithCandidates>) {
     const followerRange = parseFollowerRangeWindow(campaign.influencerType, campaign.minFollowers);
 
     const baseProfiles = await db.influencerProfile.findMany({
-        where: {
+        where: visibleInfluencerProfileWhereWith({
             followers: {
                 gte: followerRange.min,
                 lte: followerRange.max,
@@ -199,7 +203,7 @@ async function buildRankedPool(campaign: NonNullable<CampaignWithCandidates>) {
                 gte: Math.max(0, engagementMin - 2),
                 lte: engagementMax + 5,
             },
-        },
+        }),
         include: {
             user: {
                 select: {
@@ -216,7 +220,7 @@ async function buildRankedPool(campaign: NonNullable<CampaignWithCandidates>) {
     const emails = baseProfiles.map((profile) => profile.user?.email).filter((email): email is string => Boolean(email));
     const creators = emails.length
         ? await db.creator.findMany({
-            where: { email: { in: emails } },
+            where: visibleCreatorWhereWith({ email: { in: emails } }),
             include: {
                 metrics: { orderBy: { date: "desc" }, take: 6 },
                 selfReportedMetrics: { orderBy: { updatedAt: "desc" }, take: 1 },

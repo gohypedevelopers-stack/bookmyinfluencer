@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react"
 import { Toaster } from "sonner"
+import "@/lib/firebase"
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (

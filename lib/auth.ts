@@ -86,14 +86,135 @@ const providers: NextAuthOptions["providers"] = [
         credentials: {
             email: { label: "Email", type: "email" },
             password: { label: "Password", type: "password" },
+            isGoogleLogin: { label: "Is Google Login", type: "text" },
+            name: { label: "Name", type: "text" },
+            image: { label: "Image", type: "text" },
+            role: { label: "Role", type: "text" }
         },
         async authorize(credentials) {
-            if (!credentials?.email || !credentials?.password) {
-                console.warn("[AUTH][credentials] Missing credentials")
+            if (!credentials?.email) {
+                console.warn("[AUTH][credentials] Missing email")
                 return null
             }
 
             const normalizedEmail = credentials.email.trim().toLowerCase()
+            const isGoogle = credentials.isGoogleLogin === "true"
+
+            if (isGoogle) {
+                console.info("[AUTH][credentials] Google login attempt", { email: normalizedEmail })
+                try {
+                    let user = await db.user.findUnique({
+                        where: { email: normalizedEmail },
+                        include: {
+                            influencerProfile: true,
+                            brandProfile: true,
+                        }
+                    })
+
+                    const targetRole = (credentials.role || "INFLUENCER") as "INFLUENCER" | "BRAND"
+
+                    if (!user) {
+                        user = await db.user.create({
+                            data: {
+                                email: normalizedEmail,
+                                name: credentials.name || "User",
+                                image: credentials.image || null,
+                                role: targetRole,
+                            },
+                            include: {
+                                influencerProfile: true,
+                                brandProfile: true,
+                            }
+                        })
+                    }
+
+                    if (user.role === "INFLUENCER") {
+                        if (!user.influencerProfile) {
+                            await db.influencerProfile.create({
+                                data: {
+                                    userId: user.id,
+                                    niche: "General",
+                                    onboardingCompleted: true,
+                                }
+                            })
+                        }
+                        
+                        let otpUser = await db.otpUser.findUnique({
+                            where: { email: normalizedEmail },
+                            include: { creator: true }
+                        })
+
+                        if (!otpUser) {
+                            otpUser = await db.otpUser.create({
+                                data: {
+                                    email: normalizedEmail,
+                                    verifiedAt: new Date(),
+                                },
+                                include: { creator: true }
+                            })
+                        }
+
+                        if (!otpUser.creator) {
+                            await db.creator.create({
+                                data: {
+                                    userId: otpUser.id,
+                                    email: normalizedEmail,
+                                    fullName: credentials.name || "Creator",
+                                    displayName: credentials.name || "Creator",
+                                    profileImageUrl: credentials.image || null,
+                                    onboardingCompleted: true,
+                                    niche: "General",
+                                }
+                            })
+                        }
+                    } else if (user.role === "BRAND") {
+                        if (!user.brandProfile) {
+                            await db.brandProfile.create({
+                                data: {
+                                    userId: user.id,
+                                    companyName: credentials.name || "Brand",
+                                    onboardingCompleted: true,
+                                }
+                            })
+                        }
+
+                        const brandProfile = await db.brandProfile.findUnique({
+                            where: { userId: user.id },
+                            include: { brandWallet: true }
+                        })
+
+                        if (brandProfile && !brandProfile.brandWallet) {
+                            await db.brandWallet.create({
+                                data: {
+                                    brandId: brandProfile.id,
+                                    balance: 0,
+                                    currency: "INR",
+                                }
+                            })
+                        }
+                    }
+
+                    const authUser = await getDatabaseAuthUser(user.email)
+                    if (!authUser) return null
+
+                    console.info("[AUTH][credentials] Google login successful", {
+                        email: normalizedEmail,
+                        role: authUser.role,
+                        onboardingComplete: authUser.onboardingComplete,
+                    })
+
+                    return authUser
+                } catch (error) {
+                    console.error("[AUTH][credentials] Google authorize database error", error)
+                    return null
+                }
+            }
+
+            if (!credentials?.password) {
+                console.warn("[AUTH][credentials] Missing credentials password")
+                return null
+            }
+
             console.info("[AUTH][credentials] Login attempt", { email: normalizedEmail })
 
             try {

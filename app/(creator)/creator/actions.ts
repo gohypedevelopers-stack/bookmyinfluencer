@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { isVisibleBrandProfile, visibleBrandProfileWhere, visibleBrandProfileWhereWith } from "@/lib/profile-visibility";
 import { refillPaidCampaignInvitations } from "@/app/brand/campaigns/flow-actions";
 import { ensureCampaignSuggestions } from "@/lib/campaign-flow";
 
@@ -659,7 +660,12 @@ export async function getCreatorEarnings() {
         };
 
         const payoutRecords = await db.payoutRecord.findMany({
-            where: { creatorId: influencer.id },
+            where: {
+                creatorId: influencer.id,
+                campaign: {
+                    brand: visibleBrandProfileWhere,
+                },
+            },
             select: {
                 id: true, amount: true, paidAt: true, method: true, utr: true,
                 campaign: { select: { title: true, brand: { select: { companyName: true } } } }
@@ -669,7 +675,10 @@ export async function getCreatorEarnings() {
         });
 
         const contracts = await db.contract.findMany({
-            where: { influencerId: influencer.id },
+            where: {
+                influencerId: influencer.id,
+                brand: visibleBrandProfileWhere,
+            },
             select: {
                 id: true,
                 transactions: { select: { amount: true, status: true } }
@@ -994,12 +1003,12 @@ export async function getCreatorDashboardData(platform: string = "instagram", da
 export async function getPublicBrandById(id: string) {
     try {
         const brand = await db.brandProfile.findFirst({
-            where: {
+            where: visibleBrandProfileWhereWith({
                 OR: [
                     { id: id },
                     { userId: id }
                 ]
-            },
+            }),
             include: {
                 user: {
                     select: {
@@ -1019,7 +1028,7 @@ export async function getPublicBrandById(id: string) {
             }
         });
 
-        if (!brand) return { success: false, error: "Brand not found" };
+        if (!brand || !isVisibleBrandProfile(brand)) return { success: false, error: "Brand not found" };
 
         return { success: true, data: brand };
     } catch (error) {

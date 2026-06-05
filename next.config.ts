@@ -3,6 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+    ];
+  },
+
   // Pin Turbopack workspace root to the actual project directory.
   // Uses process.cwd() (evaluated at runtime when `npm run dev` runs)
   // which always points to C:\Users\User\Desktop\Bookmyinfluencers.

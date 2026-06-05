@@ -1,5 +1,11 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import {
+    isVisibleCreatorProfile,
+    isVisibleInfluencerProfile,
+    visibleCreatorWhere,
+    visibleInfluencerProfileWhere,
+} from "@/lib/profile-visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +37,7 @@ export async function GET() {
     try {
         // Get all creators from the Creator table (OTP auth system)
         const creators = await db.creator.findMany({
+            where: visibleCreatorWhere,
             include: {
                 user: true,
                 metrics: {
@@ -43,6 +50,7 @@ export async function GET() {
 
         // Also get creators from InfluencerProfile (NextAuth system)
         const influencerProfiles = await db.influencerProfile.findMany({
+            where: visibleInfluencerProfileWhere,
             include: {
                 user: true,
                 kyc: true
@@ -52,7 +60,7 @@ export async function GET() {
         const creatorMap = new Map();
 
         // Transform Creator data
-        creators.forEach(creator => {
+        creators.filter(isVisibleCreatorProfile).forEach(creator => {
             const latestMetric = creator.metrics[0];
             const followers = latestMetric?.followersCount
                 || creator.selfReportedMetrics?.[0]?.followersCount
@@ -98,7 +106,7 @@ export async function GET() {
         });
 
         // Transform and potentially overwrite/merge with InfluencerProfile data
-        influencerProfiles.forEach(inf => {
+        influencerProfiles.filter(isVisibleInfluencerProfile).forEach(inf => {
             const followers = inf.followers || 0;
             const fmtFollowers = followers > 1000000
                 ? `${(followers / 1000000).toFixed(1)}M`

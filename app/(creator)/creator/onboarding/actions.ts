@@ -14,7 +14,7 @@ export async function completeOnboarding(payload?: {
         console.log("completeOnboarding called", { userId, payload })
 
         if (!userId) {
-            redirect("/verify")
+            redirect("/login")
         }
 
         // Check if the verified onboarding user exists in the OTP auth table.

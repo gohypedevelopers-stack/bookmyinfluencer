@@ -1,4 +1,12 @@
 import { db } from "@/lib/db";
+import {
+    isVisibleCreatorProfile,
+    isVisibleInfluencerIndex,
+    isVisibleInfluencerProfile,
+    visibleCreatorWhere,
+    visibleInfluencerIndexWhereWith,
+    visibleInfluencerProfileWhere,
+} from "@/lib/profile-visibility";
 
 const CATEGORY_KEYWORDS = {
     fashion: ["fashion", "style", "apparel", "clothing", "wear", "luxury", "accessories"],
@@ -188,6 +196,7 @@ async function upsertInChunks(records, chunkSize = 25) {
 export async function syncInfluencerIndex() {
     const [creators, legacyProfiles] = await Promise.all([
         db.creator.findMany({
+            where: visibleCreatorWhere,
             select: {
                 id: true,
                 userId: true,
@@ -218,6 +227,7 @@ export async function syncInfluencerIndex() {
             },
         }),
         db.influencerProfile.findMany({
+            where: visibleInfluencerProfileWhere,
             select: {
                 id: true,
                 userId: true,
@@ -245,13 +255,13 @@ export async function syncInfluencerIndex() {
 
     const combined = new Map();
 
-    for (const creator of creators) {
+    for (const creator of creators.filter(isVisibleCreatorProfile)) {
         const record = buildFromCreator(creator);
         const existing = combined.get(record.sourceKey);
         combined.set(record.sourceKey, existing ? mergeInfluencerRecords(existing, record) : record);
     }
 
-    for (const profile of legacyProfiles) {
+    for (const profile of legacyProfiles.filter(isVisibleInfluencerProfile)) {
         const record = buildFromLegacyProfile(profile);
         const existing = combined.get(record.sourceKey);
         combined.set(record.sourceKey, existing ? mergeInfluencerRecords(existing, record) : record);
@@ -265,8 +275,7 @@ export async function syncInfluencerIndex() {
 
 async function queryInfluencers({ category, minFollowers, maxFollowers, limit, excludeInfluencerIds }) {
     return db.influencer.findMany({
-        where: {
-            active: true,
+        where: visibleInfluencerIndexWhereWith({
             followersCount: {
                 gte: minFollowers,
                 lte: maxFollowers,
@@ -283,7 +292,7 @@ async function queryInfluencers({ category, minFollowers, maxFollowers, limit, e
                     category,
                 }
                 : {}),
-        },
+        }),
         orderBy: [
             { engagementRate: "desc" },
             { followersCount: "desc" },
@@ -311,7 +320,7 @@ export async function getMatchedInfluencers({
     });
 
     if (exactMatches.length >= limit || normalizedCategory === "general") {
-        return exactMatches;
+        return exactMatches.filter(isVisibleInfluencerIndex);
     }
 
     const fallbackMatches = await queryInfluencers({
@@ -322,5 +331,5 @@ export async function getMatchedInfluencers({
         excludeInfluencerIds: [...excludeInfluencerIds, ...exactMatches.map((item) => item.id)],
     });
 
-    return [...exactMatches, ...fallbackMatches];
+    return [...exactMatches, ...fallbackMatches].filter(isVisibleInfluencerIndex);
 }

@@ -9,6 +9,7 @@ import Image from "next/image"
 import { ensureDevBrandSimulationAccount, inspectBrandLoginEmail } from "@/app/brand/auth-actions"
 import { CheckCircle2, Lock, Eye, EyeOff, Building2, Mail, ArrowRight, Loader2, Zap, Sparkles, Layers, TrendingUp, Users, BarChart3, Star } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { signInWithRedirectClient, handleRedirectResult } from "@/lib/firebase-auth-client"
 
 const GoogleIcon = ({ className = "" }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
@@ -36,10 +37,40 @@ function BrandLoginForm() {
         if (searchParams.get('registered') === 'true') {
             setSuccessMessage("Brand account created successfully. Please sign in.")
         }
-
         let active = true
 
         async function hydrateAuthState() {
+            try {
+                const firebaseUser = await handleRedirectResult();
+                if (firebaseUser) {
+                    setGoogleLoading(true);
+                    const result = await signIn("credentials", {
+                        redirect: false,
+                        email: firebaseUser.email,
+                        name: firebaseUser.displayName || "Brand",
+                        image: firebaseUser.photoURL || null,
+                        isGoogleLogin: "true",
+                        role: "BRAND",
+                        password: "bypass",
+                    });
+
+                    if (result?.error) {
+                        setError(result.error || "Google login failed");
+                        setGoogleLoading(false);
+                    } else {
+                        const session = await getSession();
+                        const accepted = await handleBrandSession(session);
+                        if (!accepted) {
+                            setGoogleLoading(false);
+                        }
+                        return;
+                    }
+                }
+            } catch (err: any) {
+                console.error("Redirect auth error:", err);
+                setError(err.message || "Failed to complete Google authentication");
+            }
+
             const [providers, session] = await Promise.all([
                 getProviders(),
                 getSession(),
@@ -47,7 +78,7 @@ function BrandLoginForm() {
 
             if (!active) return
 
-            setGoogleAvailable(Boolean(providers?.google))
+            setGoogleAvailable(true)
             setProvidersLoaded(true)
 
             if (session?.user) {
@@ -58,6 +89,7 @@ function BrandLoginForm() {
         hydrateAuthState().catch((err) => {
             console.error(err)
             if (!active) return
+            setGoogleAvailable(true)
             setProvidersLoaded(true)
         })
 
@@ -125,59 +157,15 @@ function BrandLoginForm() {
     }
 
     async function handleGoogleLogin() {
-        if (!providersLoaded) return
-
-        if (!googleAvailable) {
-            const isDev = process.env.NODE_ENV === "development"
-            if (isDev) {
-                setGoogleLoading(true)
-                setError("")
-                setSuccessMessage("")
-
-                try {
-                    const simulationAccount = await ensureDevBrandSimulationAccount()
-                    if (!simulationAccount.success) {
-                        setError(simulationAccount.error || "Unable to prepare the local brand simulation account.")
-                        setGoogleLoading(false)
-                        return
-                    }
-
-                    const result = await signIn("credentials", {
-                        redirect: false,
-                        email: simulationAccount.email,
-                        password: simulationAccount.password,
-                    })
-
-                    if (result?.error) {
-                        setError("Simulation failed: the local brand account could not be signed in.")
-                        setGoogleLoading(false)
-                    } else {
-                        const session = await getSession()
-                        const accepted = await handleBrandSession(session)
-                        if (!accepted) {
-                            setGoogleLoading(false)
-                        }
-                    }
-                } catch (err) {
-                    setError("Simulation error: " + String(err))
-                    setGoogleLoading(false)
-                }
-                return
-            }
-
-            setError("Google login is not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, then restart the server.")
-            return
-        }
-
         setGoogleLoading(true)
         setError("")
         setSuccessMessage("")
 
         try {
-            await signIn("google", { callbackUrl: "/brand/login" })
-        } catch (err) {
-            console.error(err)
-            setError("Unable to start Google login")
+            await signInWithRedirectClient()
+        } catch (error: any) {
+            console.error(error)
+            setError(error.message || "Unable to start Google login")
             setGoogleLoading(false)
         }
     }

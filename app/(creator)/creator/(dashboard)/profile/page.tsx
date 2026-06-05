@@ -6,7 +6,7 @@ import { ProfileEditor } from "./ProfileEditor"
 
 export default async function CreatorProfilePage() {
     const userId = await getAuthenticatedCreatorId()
-    if (!userId) redirect("/verify")
+    if (!userId) redirect("/login")
 
     const creator = await db.creator.findUnique({
         where: { userId },

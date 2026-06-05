@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Container } from "@/components/container"
 import { db } from "@/lib/db"
+import { visibleCreatorWhereWith } from "@/lib/profile-visibility"
 
 import { CreatorCarousel } from "./CreatorCarousel"
 
@@ -39,6 +40,9 @@ const talentCache = globalThis as unknown as {
 
 async function fetchTalentCreators() {
     return db.creator.findMany({
+        where: visibleCreatorWhereWith({
+            verificationStatus: "APPROVED",
+        }),
         select: {
             id: true,
             displayName: true,

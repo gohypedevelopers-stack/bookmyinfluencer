@@ -28,6 +28,8 @@ const RETRYABLE_DB_ERROR_PATTERNS = [
 ]
 
 const TRANSIENT_PRISMA_EVENT_PATTERNS = [
+    /can't reach database server/i,
+    /timed out fetching a new connection/i,
     /error in postgresql connection/i,
     /server has closed the connection/i,
     /connection terminated unexpectedly/i,

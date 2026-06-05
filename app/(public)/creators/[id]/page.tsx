@@ -3,6 +3,12 @@ import { db } from "@/lib/db";
 import InfluencerProfileClient from "../../../discover/[influencerId]/InfluencerProfileClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import {
+    isVisibleCreatorProfile,
+    isVisibleInfluencerProfile,
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +28,7 @@ export default async function CreatorPublicProfilePage({
 
     // Try to find in Creator table (standard for new system)
     let creator = await db.creator.findFirst({
-        where: { OR: [{ id: influencerId }, { userId: influencerId }] },
+        where: visibleCreatorWhereWith({ OR: [{ id: influencerId }, { userId: influencerId }] }),
         include: {
             user: true,
             metrics: {
@@ -35,17 +41,21 @@ export default async function CreatorPublicProfilePage({
         }
     });
 
+    if (creator && !isVisibleCreatorProfile(creator)) {
+        creator = null;
+    }
+
     if (!creator) {
         // Fallback to legacy InfluencerProfile
         const legacyProfile = await db.influencerProfile.findFirst({
-            where: { OR: [{ id: influencerId }, { userId: influencerId }] },
+            where: visibleInfluencerProfileWhereWith({ OR: [{ id: influencerId }, { userId: influencerId }] }),
             include: {
                 user: true,
                 kyc: { select: { status: true } }
             }
         });
 
-        if (legacyProfile) {
+        if (legacyProfile && isVisibleInfluencerProfile(legacyProfile)) {
             const profile = {
                 ...legacyProfile,
                 kycStatus: legacyProfile.kyc?.status || 'PENDING',

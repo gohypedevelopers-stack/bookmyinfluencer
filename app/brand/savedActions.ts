@@ -4,6 +4,11 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import {
+    isVisibleCreatorProfile,
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 export async function toggleSavedInfluencer(targetId: string) {
     try {
@@ -21,20 +26,24 @@ export async function toggleSavedInfluencer(targetId: string) {
         // The ID passed from the frontend is usually the User ID or Creator ID.
         // We must resolve it to an InfluencerProfile ID because SavedInfluencer requires it.
         let actualInfluencerId = targetId;
-        const profileByDirectId = await db.influencerProfile.findUnique({ where: { id: targetId }});
+        const profileByDirectId = await db.influencerProfile.findFirst({
+            where: visibleInfluencerProfileWhereWith({ id: targetId }),
+        });
         
         if (!profileByDirectId) {
             // Try by userId
-            const profileByUserId = await db.influencerProfile.findUnique({ where: { userId: targetId }});
+            const profileByUserId = await db.influencerProfile.findFirst({
+                where: visibleInfluencerProfileWhereWith({ userId: targetId }),
+            });
             if (profileByUserId) {
                 actualInfluencerId = profileByUserId.id;
             } else {
                 // If it's a Creator.id or Creator.userId, try to find the Creator
                 const creator = await db.creator.findFirst({
-                    where: { OR: [{ id: targetId }, { userId: targetId }] }
+                    where: visibleCreatorWhereWith({ OR: [{ id: targetId }, { userId: targetId }] })
                 });
                 
-                if (creator) {
+                if (creator && isVisibleCreatorProfile(creator)) {
                     // Create an empty InfluencerProfile for the user using Creator info so it can be saved in DB
                     // We don't fetch metrics deeply here; default to 0. The UI fetches actual metrics dynamically.
                     const newProfile = await db.influencerProfile.create({
@@ -42,6 +51,7 @@ export async function toggleSavedInfluencer(targetId: string) {
                             userId: creator.userId,
                             niche: creator.niche || 'General',
                             followers: 0,
+                            onboardingCompleted: true,
                         }
                     });
                     actualInfluencerId = newProfile.id;
@@ -104,7 +114,10 @@ export async function getSavedInfluencers() {
 
         // @ts-ignore
         const saved = await db.savedInfluencer.findMany({
-            where: { brandId: brand.id },
+            where: {
+                brandId: brand.id,
+                influencer: visibleInfluencerProfileWhereWith(),
+            },
             include: {
                 influencer: {
                     include: {

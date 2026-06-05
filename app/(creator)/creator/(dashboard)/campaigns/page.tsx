@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getAuthenticatedCreatorId } from "@/lib/onboarding-auth";
+import { visibleBrandProfileWhere } from "@/lib/profile-visibility";
 import CreatorCampaignsClient from "./CreatorCampaignsClient";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,9 @@ export default async function CreatorCampaignsPage() {
                                 gte: 10_000,
                                 lte: 500_000,
                             },
+                        },
+                        campaign: {
+                            brand: visibleBrandProfileWhere,
                         },
                         brandDecision: "ACCEPTED",
                     },

@@ -7,6 +7,7 @@ import { getR2SignedUrl } from "@/lib/storage";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createNotification } from "@/lib/audit";
+import { visibleBrandProfileWhere, visibleInfluencerProfileWhere, visibleUserWhereWith } from "@/lib/profile-visibility";
 
 export async function updateKYCStatus(submissionId: string, status: KYCStatus) {
     try {
@@ -187,6 +188,9 @@ export async function getAllCampaignsForAdmin() {
 
     try {
         const campaigns = await db.campaign.findMany({
+            where: {
+                brand: visibleBrandProfileWhere,
+            },
             select: {
                 id: true,
                 title: true,
@@ -196,7 +200,7 @@ export async function getAllCampaignsForAdmin() {
                 niche: true,
                 brand: { select: { id: true, companyName: true, userId: true, user: { select: { name: true, email: true, image: true } } } },
                 assignment: { select: { managerId: true, manager: { select: { id: true, name: true, email: true } } } },
-                _count: { select: { candidates: true } }
+                _count: { select: { candidates: { where: { influencer: visibleInfluencerProfileWhere } } } }
             },
             orderBy: { createdAt: 'desc' },
             take: 100
@@ -213,7 +217,7 @@ export async function getManagerUsers() {
 
     try {
         const managers = await db.user.findMany({
-            where: { role: "MANAGER" },
+            where: visibleUserWhereWith({ role: "MANAGER" }),
             select: { id: true, name: true, email: true, image: true }
         });
         return { success: true, data: managers };
@@ -280,7 +284,7 @@ export async function assignManagerToCampaign(campaignId: string, managerId: str
         // 4. Update Chat Threads (Make them Trio)
         // Find all candidates for this campaign
         const candidates = await db.campaignCandidate.findMany({
-            where: { campaignId },
+            where: { campaignId, influencer: visibleInfluencerProfileWhere },
             include: { influencer: { select: { userId: true } }, chatThread: true }
         });
 
@@ -335,13 +339,16 @@ export async function getAdminCampaignDetails(campaignId: string) {
     if (!session || session.user.role !== 'ADMIN') return { success: false, error: "Unauthorized" };
 
     try {
-        const campaign = await db.campaign.findUnique({
-            where: { id: campaignId },
+        const campaign = await db.campaign.findFirst({
+            where: { id: campaignId, brand: visibleBrandProfileWhere },
             include: {
                 brand: { select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, email: true, image: true } } } },
                 assignment: { include: { manager: { select: { id: true, name: true, email: true } } } },
                 payouts: { select: { id: true, amount: true, paidAt: true, method: true, utr: true }, orderBy: { paidAt: 'desc' }, take: 20 },
                 candidates: {
+                    where: {
+                        influencer: visibleInfluencerProfileWhere,
+                    },
                     include: {
                         influencer: { include: { user: { select: { id: true, name: true, email: true, image: true } } } },
                         contract: {
@@ -369,7 +376,7 @@ export async function getAdminCampaignDetails(campaignId: string) {
 
         // Payout Records (capped at 50)
         const payoutRecords = await db.payoutRecord.findMany({
-            where: { campaignId },
+            where: { campaignId, creator: visibleInfluencerProfileWhere },
             select: { id: true, amount: true, paidAt: true, method: true, utr: true, creator: { select: { id: true, user: { select: { name: true, email: true } } } } },
             orderBy: { paidAt: 'desc' },
             take: 50

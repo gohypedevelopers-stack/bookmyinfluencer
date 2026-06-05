@@ -75,8 +75,7 @@ export function BrandSidebar() {
                                 <Image
                                     src={session.user.image}
                                     alt={session.user.name || "Brand"}
-                                    width={40}
-                                    height={40}
+                                    fill
                                     className="object-cover"
                                 />
                             ) : (

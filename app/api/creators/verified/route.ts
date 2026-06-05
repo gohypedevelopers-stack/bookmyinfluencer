@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { visibleCreatorWhereWith } from '@/lib/profile-visibility';
 
 export async function GET(req: NextRequest) {
     try {
         // Get all verified creators with their metrics
         const verifiedCreators = await db.creator.findMany({
-            where: {
+            where: visibleCreatorWhereWith({
                 verificationStatus: 'APPROVED'
-            },
+            }),
             include: {
                 user: {
                     select: {

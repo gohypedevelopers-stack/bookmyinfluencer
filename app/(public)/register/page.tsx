@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -11,7 +11,9 @@ import {
     GraduationCap, Globe, Heart, IndianRupee, TrendingUp, Zap, Layers, Rocket
 } from 'lucide-react';
 import { registerUserAction } from './actions';
-import { signIn } from 'next-auth/react';
+import { signIn, getProviders, getSession } from 'next-auth/react';
+import type { Session } from 'next-auth';
+import { signInWithRedirectClient, handleRedirectResult } from '@/lib/firebase-auth-client';
 import { motion, AnimatePresence } from 'framer-motion';
 import LivePhotoCapture from "@/components/kyc/LivePhotoCapture";
 import {
@@ -20,7 +22,16 @@ import {
 } from "@/lib/onboarding-taxonomy";
 
 // Total steps
-const TOTAL_STEPS = 12;
+const TOTAL_STEPS = 11;
+
+const GoogleIcon = ({ className = "" }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
 const popularLocations = ["Pan India", "Maharashtra", "Delhi", "Karnataka", "Telangana", "Gujarat", "Tamil Nadu", "West Bengal"];
 const indiaLocations = [
@@ -174,6 +185,10 @@ export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [googleAvailable, setGoogleAvailable] = useState(false);
+    const [providersLoaded, setProvidersLoaded] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [error, setError] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
@@ -184,6 +199,93 @@ export default function RegisterPage() {
     const [kycCompleted, setKycCompleted] = useState(false);
     const [locationQuery, setLocationQuery] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const redirectAfterLogin = useCallback((session: Session | null) => {
+        if (session?.user?.role === 'ADMIN') router.push('/admin');
+        else if (session?.user?.role === 'MANAGER') router.push('/manager');
+        else if (session?.user?.role === 'BRAND') router.push('/brand/campaigns');
+        else if (session?.user?.role === 'INFLUENCER') {
+            const path = (session.user as any)?.onboardingComplete ? '/creator/dashboard' : '/creator/onboarding';
+            router.push(path);
+        } else {
+            router.push('/');
+        }
+        router.refresh();
+    }, [router]);
+
+    useEffect(() => {
+        let active = true;
+
+        async function hydrateAuthState() {
+            try {
+                const firebaseUser = await handleRedirectResult();
+                if (firebaseUser) {
+                    setGoogleLoading(true);
+                    const result = await signIn('credentials', {
+                        redirect: false,
+                        email: firebaseUser.email,
+                        name: firebaseUser.displayName || 'Creator',
+                        image: firebaseUser.photoURL || null,
+                        isGoogleLogin: 'true',
+                        role: 'INFLUENCER',
+                        password: 'bypass',
+                    });
+
+                    if (result?.error) {
+                        setError(result.error || 'Google login failed');
+                        setGoogleLoading(false);
+                    } else {
+                        const session = await getSession();
+                        redirectAfterLogin(session);
+                        return;
+                    }
+                }
+            } catch (err: any) {
+                console.error("Redirect auth error:", err);
+                setError(err.message || "Failed to complete Google authentication");
+            }
+
+            const [providers, session] = await Promise.all([
+                getProviders(),
+                getSession(),
+            ]);
+
+            if (!active) return;
+
+            setGoogleAvailable(true);
+            setProvidersLoaded(true);
+            setMounted(true);
+
+            if (session?.user) {
+                redirectAfterLogin(session);
+            }
+        }
+
+        hydrateAuthState().catch((error) => {
+            console.error(error);
+            if (!active) return;
+            setGoogleAvailable(true);
+            setProvidersLoaded(true);
+            setMounted(true);
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [redirectAfterLogin]);
+
+    const handleGoogleRegister = async () => {
+        setGoogleLoading(true);
+        setError('');
+
+        try {
+            await signInWithRedirectClient();
+        } catch (error: any) {
+            console.error(error);
+            setError(error.message || 'Unable to start Google login');
+            setGoogleLoading(false);
+        }
+    };
 
     const getDisplayStep = (step: number) => {
         return step;
@@ -293,7 +395,7 @@ export default function RegisterPage() {
 
             // Move to KYC step
             setDirection(1);
-            setCurrentStep(11);
+            setCurrentStep(10);
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
         } finally {
@@ -305,22 +407,21 @@ export default function RegisterPage() {
     const canProceed = (): boolean => {
         switch (currentStep) {
             case 1: return !!formData.fullName && !!formData.mobileNumber;
-            case 2: return true; // social handles are optional
-            case 3: return emailVerified;
-            case 4: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
-            case 5: return true; // Welcome
-            case 6: return onboardingData.platforms.length > 0;
-            case 7: return !!onboardingData.niche;
-            case 8: return !!onboardingData.location; // Location
-            case 9: return !!onboardingData.followers; // Followers
-            case 10: return true; // engagement optional
+            case 2: return emailVerified;
+            case 3: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
+            case 4: return true; // Welcome
+            case 5: return onboardingData.platforms.length > 0;
+            case 6: return !!onboardingData.niche;
+            case 7: return !!onboardingData.location; // Location
+            case 8: return !!onboardingData.followers; // Followers
+            case 9: return true; // engagement optional
             default: return true;
         }
     };
 
     const goNext = async () => {
         setError('');
-        if (currentStep === 10) {
+        if (currentStep === 9) {
             // Final step before success — submit everything
             await handleFinalSubmit();
             return;
@@ -340,20 +441,21 @@ export default function RegisterPage() {
 
     const sidebarContent = (): { icon: React.ReactNode; tag: string; title: string; desc: string } => {
         if (currentStep === 1) return { icon: <User className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Start your creator profile", desc: "Set up the essentials so brands can understand who you are from the first screen." };
-        if (currentStep === 2) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Social Presence", title: "Show your channels", desc: "Add your public handles so collaborations can connect to the audience you already built." };
-        if (currentStep === 3) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
-        if (currentStep === 4) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
-        if (currentStep === 5) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
-        if (currentStep === 6) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
-        if (currentStep === 7) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
-        if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
-        if (currentStep === 9) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
-        if (currentStep === 10) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
-        if (currentStep === 11) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
+        if (currentStep === 2) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
+        if (currentStep === 3) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
+        if (currentStep === 4) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
+        if (currentStep === 5) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
+        if (currentStep === 6) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
+        if (currentStep === 7) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
+        if (currentStep === 8) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
+        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
+        if (currentStep === 10) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Ready for discovery", desc: "Your creator profile is now ready to be seen by brands looking for the right voice and audience." };
     };
 
     const sidebar = sidebarContent();
+
+    if (!mounted) return null;
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans text-slate-900" style={{ background: "radial-gradient(ellipse at 20% 50%, #e6f4ea 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, #e0f2f1 0%, transparent 50%), radial-gradient(ellipse at 60% 80%, #f1f8e9 0%, transparent 50%), #f8fafc" }}>
@@ -445,7 +547,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex-1 bg-white/90 backdrop-blur-sm flex flex-col relative overflow-hidden min-h-[520px]">
-                    {currentStep > 1 && !isSubmitting && currentStep < 11 && (
+                    {currentStep > 1 && !isSubmitting && currentStep < 10 && (
                         <button
                             onClick={goBack}
                             className="absolute top-5 left-5 z-20 p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700"
@@ -455,7 +557,7 @@ export default function RegisterPage() {
                     )}
 
                     {/* Step Counter */}
-                    {currentStep < 11 && (
+                    {currentStep < 10 && (
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full z-20 uppercase tracking-widest shadow-sm">
                             Step {getDisplayStep(currentStep)} <span className="text-slate-200 mx-1">/</span> {TOTAL_STEPS}
                         </div>
@@ -479,6 +581,42 @@ export default function RegisterPage() {
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
+
+                                <button
+                                    type="button"
+                                    onClick={handleGoogleRegister}
+                                    disabled={!providersLoaded || googleLoading || loading}
+                                    title={!googleAvailable ? (process.env.NODE_ENV === 'development' ? 'Google signup [Simulation Mode]' : 'Google signup needs GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET') : 'Continue with Google'}
+                                    className="relative w-full overflow-hidden flex items-center justify-center gap-2 h-[52px] bg-white border border-slate-200/80 rounded-2xl text-slate-700 font-bold text-[15px] transition-all duration-400 hover:bg-slate-50 hover:border-slate-300 hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 group"
+                                >
+                                    {/* Click Ripple / Hover Glow Effect */}
+                                    <div className="absolute inset-0 bg-slate-100 opacity-0 group-active:opacity-100 transition-opacity duration-150" />
+                                    
+                                    <div className="relative z-10 flex items-center gap-2.5">
+                                        <div className="w-5 h-5 flex items-center justify-center">
+                                            {googleLoading ? (
+                                                <motion.div
+                                                    animate={{ rotate: 360 }}
+                                                    transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                                                >
+                                                    <GoogleIcon className="w-5 h-5 opacity-90 drop-shadow-sm" />
+                                                </motion.div>
+                                            ) : (
+                                                <GoogleIcon className="w-5 h-5 group-hover:scale-110 group-hover:drop-shadow-md transition-all duration-300" />
+                                            )}
+                                        </div>
+                                        <span className="group-hover:text-slate-900 transition-colors">
+                                            {googleLoading ? "Connecting..." : "Google"}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Subtle interactive shine */}
+                                    <div className="absolute top-0 -left-[100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/80 to-transparent -skew-x-[30deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out" />
+                                </button>
+
+                                <div className="flex items-center my-0 before:flex-1 before:border-t before:border-slate-200 before:mr-4 after:flex-1 after:border-t after:border-slate-200 after:ml-4">
+                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">OR CONTINUE WITH</span>
+                                </div>
 
                                 {/* Full Name */}
                                 <div className="space-y-1.5 w-full text-left">
@@ -507,15 +645,6 @@ export default function RegisterPage() {
                                 </div>
                                 <NextButton onClick={goNext} disabled={!canProceed()} />
 
-                                <div className="flex items-center my-0 before:flex-1 before:border-t before:border-slate-200 before:mr-4 after:flex-1 after:border-t after:border-slate-200 after:ml-4">
-                                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">OR CONTINUE WITH</span>
-                                </div>
-
-                                <button type="button" onClick={() => signIn('google', { callbackUrl: '/' })}
-                                    className="flex items-center justify-center gap-2 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-bold text-sm transition-all w-full shadow-sm">
-                                    <Chrome className="w-5 h-5" /> Google
-                                </button>
-
                                 <p className="text-center text-sm text-slate-500 pt-1">
                                     Already have an account?{' '}
                                     <Link href="/login" className="text-[#059669] font-bold hover:underline">Sign in</Link>
@@ -523,36 +652,9 @@ export default function RegisterPage() {
                             </div>
                         </CardWrapper>
                     )}
-
-                    {/* ===== STEP 2: Social Handles ===== */}
+                    {/* ===== STEP 2: Email Verification ===== */}
                     {currentStep === 2 && (
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step2" direction={direction} progressPercentage={progressPercentage}>
-                            <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Social Handles</h2>
-                                <p className="text-center text-slate-400 text-sm mb-3">Link your social profiles to get discovered.</p>
-
-                                <div className="relative group">
-                                    <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
-                                    <input name="instagramUrl" type="url" value={formData.instagramUrl} onChange={handleInputChange}
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
-                                        placeholder="Instagram handle" autoFocus />
-                                </div>
-
-                                <div className="relative group">
-                                    <Youtube className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
-                                    <input name="youtubeUrl" type="url" value={formData.youtubeUrl} onChange={handleInputChange}
-                                        className="w-full pl-11 pr-4 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
-                                        placeholder="YouTube channel URL" />
-                                </div>
-
-                                <NextButton onClick={goNext} disabled={!canProceed()} />
-                            </div>
-                        </CardWrapper>
-                    )}
-
-                    {/* ===== STEP 3: Email Verification ===== */}
-                    {currentStep === 3 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Verify Email</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">We'll send an OTP to confirm your email.</p>
@@ -653,9 +755,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 4: Password ===== */}
-                    {currentStep === 4 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 3: Password ===== */}
+                    {currentStep === 3 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
                                 <p className="text-center text-slate-400 text-sm mb-3">Choose a strong password to protect your account.</p>
@@ -721,9 +823,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 5: Welcome (Onboarding Start) ===== */}
-                    {currentStep === 5 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 4: Welcome (Onboarding Start) ===== */}
+                    {currentStep === 4 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-20 h-20 rounded-2xl rotate-3 shadow-xl shadow-emerald-200/60 flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
                                     <Sparkles className="w-12 h-12 text-white" />
@@ -739,9 +841,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 6: Platforms Selection ===== */}
-                    {currentStep === 6 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 5: Platforms Selection ===== */}
+                    {currentStep === 5 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step5" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-4">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Which platforms?</h2>
@@ -782,9 +884,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 7: Niche ===== */}
-                    {currentStep === 7 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 6: Niche ===== */}
+                    {currentStep === 6 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step6" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Your Primary Niche?</h2>
                                 {!isCustomNiche ? (
@@ -805,7 +907,7 @@ export default function RegisterPage() {
                                                     }
                                                 }}
                                                 className={`p-3 rounded-xl border flex items-center gap-3 transition-all text-left cursor-pointer
-                                ${onboardingData.niche === item.name
+                                 ${onboardingData.niche === item.name
                                                         ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
                                                         : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
                                                     }`}
@@ -845,9 +947,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 8: Location ===== */}
-                    {currentStep === 8 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 7: Location ===== */}
+                    {currentStep === 7 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step7" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col items-center">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Where are you based?</h2>
                                 <div className="grid grid-cols-2 gap-2.5 w-full z-10 relative">
@@ -924,9 +1026,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 9: Followers ===== */}
-                    {currentStep === 9 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 8: Followers ===== */}
+                    {currentStep === 8 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step8" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>How many followers?</h2>
                                 <div className="grid grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
@@ -940,10 +1042,10 @@ export default function RegisterPage() {
                                                 goNext()
                                             }}
                                             className={`w-full py-4 px-4 rounded-2xl border-2 flex justify-between items-center transition-all cursor-pointer hover:translate-y-[-1px]
-                                ${onboardingData.followers === range.label
-                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
-                                                    : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
-                                                }`}
+                                 ${onboardingData.followers === range.label
+                                                     ? "bg-emerald-50 text-emerald-600 border-emerald-400 shadow-md shadow-emerald-100/60 ring-1 ring-emerald-200"
+                                                     : "bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-slate-700 transition-all"
+                                                 }`}
                                         >
                                             <span className="font-bold text-base">{range.label}</span>
                                             {onboardingData.followers === range.label && <Check />}
@@ -954,9 +1056,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 10: Engagement ===== */}
-                    {currentStep === 10 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step10" direction={direction} progressPercentage={progressPercentage}>
+                    {/* ===== STEP 9: Engagement ===== */}
+                    {currentStep === 9 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step9" direction={direction} progressPercentage={progressPercentage}>
                             <div className="w-full space-y-3">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-extrabold mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Average Engagement?</h2>
@@ -992,9 +1094,9 @@ export default function RegisterPage() {
                     )}
 
 
-                    {/* ===== STEP 11: Live Photo KYC ===== */}
-                    {currentStep === 11 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step11" direction={direction} progressPercentage={90}>
+                    {/* ===== STEP 10: Live Photo KYC ===== */}
+                    {currentStep === 10 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step10" direction={direction} progressPercentage={90}>
                             <div className="w-full max-w-[520px] space-y-6 flex flex-col justify-center items-center relative z-10 text-white">
                                 <div className="text-center space-y-2 mb-2 w-full">
                                     <h2 className="text-3xl md:text-3xl font-bold text-slate-900 drop-shadow-sm">Identity Verification</h2>
@@ -1006,13 +1108,13 @@ export default function RegisterPage() {
                                         onUploadSuccess={(key: string) => {
                                             setKycCompleted(true);
                                             setDirection(1);
-                                            setCurrentStep(12);
+                                            setCurrentStep(11);
                                         }}
                                     />
                                 </div>
                                 <button onClick={() => {
                                     setDirection(1);
-                                    setCurrentStep(12);
+                                    setCurrentStep(11);
                                 }} className="text-slate-400 hover:text-emerald-600 font-medium text-sm transition-colors text-center w-full mt-4 underline decoration-slate-200">
                                     Skip for now (Do this later from Dashboard)
                                 </button>
@@ -1020,9 +1122,9 @@ export default function RegisterPage() {
                         </CardWrapper>
                     )}
 
-                    {/* ===== STEP 12: Final Success ===== */}
-                    {currentStep === 12 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step12" direction={direction} progressPercentage={100}>
+                    {/* ===== STEP 11: Final Success ===== */}
+                    {currentStep === 11 && (
+                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step11" direction={direction} progressPercentage={100}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-24 h-24 rounded-full flex items-center justify-center relative shadow-xl shadow-emerald-200/60" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
                                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring" }}>

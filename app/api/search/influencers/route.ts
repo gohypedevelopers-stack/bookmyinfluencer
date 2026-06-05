@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import {
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -13,28 +17,28 @@ export async function GET(req: NextRequest) {
     try {
         // Search legacy InfluencerProfile table
         const profiles = await db.influencerProfile.findMany({
-            where: {
+            where: visibleInfluencerProfileWhereWith({
                 OR: [
                     { instagramHandle: { contains: query } },
                     { user: { name: { contains: query } } },
                     { niche: { contains: query } },
                     { location: { contains: query } },
                 ]
-            },
+            }),
             include: { user: { select: { id: true, name: true, image: true } } },
             take: 5,
         });
 
         // Search Creator table
         const creators = await db.creator.findMany({
-            where: {
+            where: visibleCreatorWhereWith({
                 OR: [
                     { fullName: { contains: query } },
                     { displayName: { contains: query } },
                     { niche: { contains: query } },
                     { instagramUrl: { contains: query } },
                 ]
-            },
+            }),
             include: { user: { select: { id: true } } },
             take: 5,
         });

@@ -14,6 +14,7 @@ import {
     parseFollowerRangeWindow,
     summarizeCampaignFlow,
 } from "@/lib/campaign-flow";
+import { visibleInfluencerProfileWhereWith } from "@/lib/profile-visibility";
 
 function parseNumber(value: FormDataEntryValue | null, fallback = 0) {
     if (!value || typeof value !== "string") return fallback;
@@ -100,7 +101,7 @@ async function getReplacementInfluencerProfile(args: {
     const followerRange = parseFollowerRangeWindow(campaign.influencerType, campaign.minFollowers);
 
     return db.influencerProfile.findFirst({
-        where: {
+        where: visibleInfluencerProfileWhereWith({
             id: { notIn: excludeInfluencerIds },
             followers: {
                 gte: followerRange.min,
@@ -113,7 +114,7 @@ async function getReplacementInfluencerProfile(args: {
                 gte: Math.max(0, (campaign.engagementMin ?? DEFAULT_ENGAGEMENT_MIN) - 2),
                 lte: (campaign.engagementMax ?? DEFAULT_ENGAGEMENT_MAX) + 5,
             },
-        },
+        }),
         orderBy: [
             { engagementRate: "desc" },
             { followers: "desc" },
@@ -469,6 +470,9 @@ export async function getCampaignMatchState(campaignId: string) {
         },
         include: {
             candidates: {
+                where: {
+                    influencer: visibleInfluencerProfileWhereWith(),
+                },
                 include: {
                     influencer: {
                         include: {
@@ -540,6 +544,7 @@ export async function decideCampaignMatch(campaignId: string, candidateId: strin
             id: candidateId,
             campaignId,
             campaign: { brand: { userId: session.user.id } },
+            influencer: visibleInfluencerProfileWhereWith(),
         },
         include: {
             campaign: { select: { id: true, paymentStatus: true } },
@@ -611,6 +616,7 @@ export async function shuffleAcceptedCampaignInfluencer(campaignId: string, cand
             id: candidateId,
             campaignId,
             campaign: { brand: { userId: session.user.id } },
+            influencer: visibleInfluencerProfileWhereWith(),
         },
         include: {
             campaign: {
@@ -695,6 +701,9 @@ export async function activateCampaignPayment(campaignId: string) {
         },
         include: {
             candidates: {
+                where: {
+                    influencer: visibleInfluencerProfileWhereWith(),
+                },
                 include: {
                     influencer: { select: { id: true, userId: true, followers: true } },
                 },

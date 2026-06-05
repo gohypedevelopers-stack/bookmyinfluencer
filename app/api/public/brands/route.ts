@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { isVisibleBrandProfile, visibleBrandProfileWhere } from "@/lib/profile-visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,7 @@ export async function GET() {
     try {
         // Get all brand profiles from the database
         const brandProfiles = await db.brandProfile.findMany({
+            where: visibleBrandProfileWhere,
             include: {
                 user: true,
                 campaigns: {
@@ -18,7 +20,7 @@ export async function GET() {
         });
 
         // Transform data for public display
-        const dbBrands = brandProfiles.map(brand => {
+        const dbBrands = brandProfiles.filter(isVisibleBrandProfile).map(brand => {
             // Calculate total spent from campaigns
             const totalSpent = brand.campaigns.reduce((sum, campaign) => {
                 return sum + (campaign.budget || 0);

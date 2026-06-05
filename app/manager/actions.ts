@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { visibleBrandProfileWhere, visibleInfluencerProfileWhere } from "@/lib/profile-visibility";
 
 async function requireManagerSession() {
     const session = await getServerSession(authOptions);
@@ -17,8 +18,13 @@ export async function getManagerStats() {
     try {
         const session = await requireManagerSession();
 
+        const assignmentWhere =
+            session.user.role === "ADMIN"
+                ? { campaign: { brand: visibleBrandProfileWhere } }
+                : { managerId: session.user.id, campaign: { brand: visibleBrandProfileWhere } };
+
         const assignments = await db.campaignAssignment.findMany({
-            where: session.user.role === "ADMIN" ? undefined : { managerId: session.user.id },
+            where: assignmentWhere,
             select: { campaignId: true },
         });
 
@@ -34,6 +40,7 @@ export async function getManagerStats() {
                 where: {
                     campaignId: { in: campaignIds },
                     managerReviewStatus: "SUBMITTED",
+                    influencer: visibleInfluencerProfileWhere,
                 },
             }),
         ]);
@@ -48,8 +55,13 @@ export async function getManagerCampaigns() {
     try {
         const session = await requireManagerSession();
 
+        const assignmentWhere =
+            session.user.role === "ADMIN"
+                ? { campaign: { brand: visibleBrandProfileWhere } }
+                : { managerId: session.user.id, campaign: { brand: visibleBrandProfileWhere } };
+
         const assignments = await db.campaignAssignment.findMany({
-            where: session.user.role === "ADMIN" ? undefined : { managerId: session.user.id },
+            where: assignmentWhere,
             select: {
                 campaign: {
                     select: {
@@ -61,7 +73,7 @@ export async function getManagerCampaigns() {
                         paymentStatus: true,
                         createdAt: true,
                         brand: { select: { id: true, companyName: true, user: { select: { name: true, image: true } } } },
-                        _count: { select: { candidates: true } },
+                        _count: { select: { candidates: { where: { influencer: visibleInfluencerProfileWhere } } } },
                     },
                 },
             },
@@ -85,12 +97,15 @@ export async function getManagerCampaignDetails(id: string) {
             }
         }
 
-        const campaign = await db.campaign.findUnique({
-            where: { id },
+        const campaign = await db.campaign.findFirst({
+            where: { id, brand: visibleBrandProfileWhere },
             include: {
                 brand: { select: { id: true, companyName: true, userId: true, user: { select: { id: true, name: true, email: true, image: true } } } },
                 assignment: { include: { manager: { select: { id: true, name: true, email: true } } } },
                 candidates: {
+                    where: {
+                        influencer: visibleInfluencerProfileWhere,
+                    },
                     include: {
                         influencer: {
                             select: {
@@ -183,8 +198,8 @@ export async function sendManagerBrandMessage(campaignId: string, content: strin
             return { success: false, error: "Message is required." };
         }
 
-        const campaign = await db.campaign.findUnique({
-            where: { id: campaignId },
+        const campaign = await db.campaign.findFirst({
+            where: { id: campaignId, brand: visibleBrandProfileWhere },
             select: {
                 id: true,
                 title: true,
@@ -260,8 +275,12 @@ export async function sendManagerCreatorMessage(candidateId: string, content: st
         const trimmed = String(content || "").trim();
         if (!trimmed) return { success: false, error: "Message is required." };
 
-        const candidate = await db.campaignCandidate.findUnique({
-            where: { id: candidateId },
+        const candidate = await db.campaignCandidate.findFirst({
+            where: {
+                id: candidateId,
+                influencer: visibleInfluencerProfileWhere,
+                campaign: { brand: visibleBrandProfileWhere },
+            },
             include: {
                 campaign: {
                     select: {
@@ -337,8 +356,12 @@ export async function reviewCandidateSubmission(candidateId: string, decision: "
     try {
         const session = await requireManagerSession();
 
-        const candidate = await db.campaignCandidate.findUnique({
-            where: { id: candidateId },
+        const candidate = await db.campaignCandidate.findFirst({
+            where: {
+                id: candidateId,
+                influencer: visibleInfluencerProfileWhere,
+                campaign: { brand: visibleBrandProfileWhere },
+            },
             include: {
                 campaign: {
                     include: {
@@ -446,7 +469,7 @@ export async function reviewCandidateSubmission(candidateId: string, decision: "
 export async function getManagerPayouts() {
     try {
         const session = await requireManagerSession();
-        const whereClause =
+        const scopeWhere =
             session.user.role === "ADMIN"
                 ? {}
                 : {
@@ -455,6 +478,15 @@ export async function getManagerPayouts() {
                         { campaign: { assignment: { managerId: session.user.id } } },
                     ],
                 };
+        const whereClause = {
+            AND: [
+                scopeWhere,
+                {
+                    campaign: { brand: visibleBrandProfileWhere },
+                    creator: visibleInfluencerProfileWhere,
+                },
+            ],
+        };
 
         const payouts = await db.payoutRecord.findMany({
             where: whereClause,

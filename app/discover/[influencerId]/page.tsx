@@ -4,6 +4,12 @@ import InfluencerProfileClient from "./InfluencerProfileClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import {
+    isVisibleCreatorProfile,
+    isVisibleInfluencerProfile,
+    visibleCreatorWhereWith,
+    visibleInfluencerProfileWhereWith,
+} from "@/lib/profile-visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +32,7 @@ export default async function InfluencerProfilePage({
 
     // 1. Try to find in legacy InfluencerProfile table (by ID or UserID)
     let profileData = await db.influencerProfile.findFirst({
-        where: { OR: [{ id: influencerId }, { userId: influencerId }] },
+        where: visibleInfluencerProfileWhereWith({ OR: [{ id: influencerId }, { userId: influencerId }] }),
         include: {
             user: true,
             kyc: { select: { status: true } }
@@ -34,14 +40,16 @@ export default async function InfluencerProfilePage({
     });
 
     let profile: any = profileData;
-    if (profileData) {
+    if (profileData && isVisibleInfluencerProfile(profileData)) {
         profile.kycStatus = profileData.kyc?.status || 'PENDING';
+    } else {
+        profile = null;
     }
 
     // 2. If not found, try to find in new Creator table (by ID or UserID)
     if (!profile) {
         const creator = await db.creator.findFirst({
-            where: { OR: [{ id: influencerId }, { userId: influencerId }] },
+            where: visibleCreatorWhereWith({ OR: [{ id: influencerId }, { userId: influencerId }] }),
             include: {
                 user: true,
                 metrics: {
@@ -54,7 +62,7 @@ export default async function InfluencerProfilePage({
             }
         });
 
-        if (creator) {
+        if (creator && isVisibleCreatorProfile(creator)) {
             // Map Creator to InfluencerProfile-compatible format for the client component
             const latestMetric = creator.metrics[0];
             const followers = latestMetric?.followersCount

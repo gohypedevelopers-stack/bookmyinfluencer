@@ -58,7 +58,7 @@ export function OnboardingClient({ initialInstagramUrl = "", initialYoutubeUrl =
         if (res.error?.includes("Session invalid")) {
           // Force re-login if session is stale - clear cookie first
           await logoutAction()
-          router.push('/verify')
+          router.push('/login')
           return
         }
         setIgError(res.error || "Failed to fetch Instagram stats")
@@ -83,7 +83,7 @@ export function OnboardingClient({ initialInstagramUrl = "", initialYoutubeUrl =
         if (res.error?.includes("Session invalid")) {
           // Force re-login if session is stale - clear cookie first  
           await logoutAction()
-          router.push('/verify')
+          router.push('/login')
           return
         }
         setYtError(res.error || "Failed to fetch YouTube stats")

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { visibleBrandProfileWhere, visibleInfluencerProfileWhere } from "@/lib/profile-visibility";
 import TransactionsClient from "./TransactionsClient";
 
 export const dynamic = "force-dynamic";
@@ -6,6 +7,12 @@ export const dynamic = "force-dynamic";
 export default async function TransactionsPage() {
     // 1. Fetch Escrow Transactions
     const escrowTransactions = await db.escrowTransaction.findMany({
+        where: {
+            contract: {
+                brand: visibleBrandProfileWhere,
+                influencer: visibleInfluencerProfileWhere,
+            },
+        },
         include: {
             contract: {
                 include: {
@@ -27,6 +34,12 @@ export default async function TransactionsPage() {
 
     // 3. Fetch Payout Records
     const payoutRecords = await db.payoutRecord.findMany({
+        where: {
+            campaign: {
+                brand: visibleBrandProfileWhere,
+            },
+            creator: visibleInfluencerProfileWhere,
+        },
         include: {
             campaign: { select: { title: true } },
             creator: { select: { user: { select: { name: true, email: true } } } }

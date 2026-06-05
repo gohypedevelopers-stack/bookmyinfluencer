@@ -131,12 +131,11 @@ export default function CampaignKanbanClient({ candidates }: CampaignKanbanClien
                         </button>
                     </div>
                     <div className="h-8 w-px bg-gray-200"></div>
-                    <div className="w-10 h-10 rounded-xl border-2 border-teal-600 overflow-hidden cursor-pointer">
+                    <div className="w-10 h-10 rounded-xl border-2 border-teal-600 overflow-hidden cursor-pointer relative">
                         <Image
                             src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150&h=150"
                             alt="Profile"
-                            width={40}
-                            height={40}
+                            fill
                             className="object-cover"
                         />
                     </div>

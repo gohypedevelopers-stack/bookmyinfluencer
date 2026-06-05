@@ -7,7 +7,7 @@ import KYCOnboardingClient from "./KYCOnboardingClient";
 
 export default async function KYCOnboardingPage() {
     const userId = await getAuthenticatedCreatorId();
-    if (!userId) redirect("/verify");
+    if (!userId) redirect("/login");
 
     const creator = await db.creator.findUnique({
         where: { userId },

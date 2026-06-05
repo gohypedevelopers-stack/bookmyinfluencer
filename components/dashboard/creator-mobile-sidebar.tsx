@@ -131,8 +131,7 @@ export function CreatorMobileSidebar() {
                                                 <Image
                                                     src={session.user.image}
                                                     alt={session.user.name || "User"}
-                                                    width={40}
-                                                    height={40}
+                                                    fill
                                                     className="object-cover"
                                                 />
                                             ) : (

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { db, DEFAULT_TX_OPTIONS } from "@/lib/db";
 import { getMatchedInfluencers, normalizeCategory } from "@/services/influencerMatcher";
+import { isVisibleInfluencerIndex } from "@/lib/profile-visibility";
 
 export const REQUEST_EXPIRY_HOURS = 24;
 export const REQUEST_STATUS = {
@@ -69,6 +70,10 @@ function buildCountSummary(requests) {
             [REQUEST_STATUS.ARCHIVED]: 0,
         },
     );
+}
+
+function getVisibleRequests(requests = []) {
+    return requests.filter((request) => isVisibleInfluencerIndex(request.influencer));
 }
 
 function mapRequest(request) {
@@ -140,6 +145,7 @@ export async function topUpCollaborationRequests(campaignId) {
                 select: {
                     influencerId: true,
                     status: true,
+                    influencer: true,
                 },
             },
         },
@@ -150,8 +156,9 @@ export async function topUpCollaborationRequests(campaignId) {
     }
 
     const targets = getDynamicCampaignTargets(campaign);
-    const acceptedCount = campaign.requests.filter((request) => request.status === REQUEST_STATUS.ACCEPTED).length;
-    const pendingCount = campaign.requests.filter((request) => request.status === REQUEST_STATUS.PENDING).length;
+    const visibleRequests = getVisibleRequests(campaign.requests);
+    const acceptedCount = visibleRequests.filter((request) => request.status === REQUEST_STATUS.ACCEPTED).length;
+    const pendingCount = visibleRequests.filter((request) => request.status === REQUEST_STATUS.PENDING).length;
     const remainingAcceptedSlots = Math.max(targets.targetAcceptedCount - acceptedCount, 0);
     const desiredPendingCount = Math.min(targets.activeRequestLimit, remainingAcceptedSlots);
     const requestCountToCreate = Math.max(desiredPendingCount - pendingCount, 0);
@@ -247,7 +254,8 @@ export async function topUpCollaborationRequests(campaignId) {
 }
 
 function buildWorkflowSummaryFromCampaign(campaign) {
-    const counts = buildCountSummary(campaign.requests);
+    const visibleRequests = getVisibleRequests(campaign.requests);
+    const counts = buildCountSummary(visibleRequests);
     const targets = getDynamicCampaignTargets(campaign);
 
     return {
@@ -270,11 +278,11 @@ function buildWorkflowSummaryFromCampaign(campaign) {
         },
         counts: {
             ...counts,
-            sent: campaign.requests.length,
+            sent: visibleRequests.length,
             remainingAcceptedSlots: Math.max(targets.targetAcceptedCount - counts[REQUEST_STATUS.ACCEPTED], 0),
         },
-        sentRequests: campaign.requests.map(mapRequest),
-        acceptedInfluencers: campaign.requests
+        sentRequests: visibleRequests.map(mapRequest),
+        acceptedInfluencers: visibleRequests
             .filter((request) => request.status === REQUEST_STATUS.ACCEPTED)
             .map((request) => mapRequest(request).influencer),
     };
@@ -321,7 +329,7 @@ export async function getBrandCampaignQueueDashboard(userId) {
         .filter((campaign) => String(campaign.status || "").toLowerCase() === "active")
         .map((campaign) => {
             const targets = getDynamicCampaignTargets(campaign);
-            const counts = buildCountSummary(campaign.requests);
+            const counts = buildCountSummary(getVisibleRequests(campaign.requests));
             const acceptedCount = counts[REQUEST_STATUS.ACCEPTED] || 0;
             const pendingCount = counts[REQUEST_STATUS.PENDING] || 0;
             const remainingAcceptedSlots = Math.max(targets.targetAcceptedCount - acceptedCount, 0);

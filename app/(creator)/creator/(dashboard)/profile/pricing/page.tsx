@@ -12,7 +12,7 @@ import PaymentHistory from "./PaymentHistory"
 
 export default async function PricingPayoutsPage() {
     const userId = await getAuthenticatedCreatorId()
-    if (!userId) redirect("/verify")
+    if (!userId) redirect("/login")
 
     const creator = await db.creator.findUnique({
         where: { userId },

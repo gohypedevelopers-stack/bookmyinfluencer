@@ -6,7 +6,7 @@ import { redirect } from "next/navigation"
 
 export default async function VerificationPage() {
     const userId = await getAuthenticatedCreatorId()
-    if (!userId) redirect("/verify")
+    if (!userId) redirect("/login")
 
     return <VerificationClient />
 }

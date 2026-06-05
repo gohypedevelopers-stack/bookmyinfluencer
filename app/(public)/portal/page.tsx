@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { getProviders, getSession, signIn } from "next-auth/react"
 import type { Session } from "next-auth"
+import { signInWithRedirectClient, handleRedirectResult } from "@/lib/firebase-auth-client"
 import Link from "next/link"
 import { CheckCircle2, Lock, Eye, EyeOff, Mail, ArrowRight, Loader2, Zap, Building2, User, Layers } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -50,12 +51,48 @@ function UnifiedLoginForm() {
         }
         let active = true
         async function hydrateAuthState() {
+            try {
+                const firebaseUser = await handleRedirectResult();
+                if (firebaseUser) {
+                    setGoogleLoading(true);
+                    // Restore the portal mode that was active before the Google redirect
+                    const savedMode = sessionStorage.getItem('portalGoogleMode') || 'creator'
+                    sessionStorage.removeItem('portalGoogleMode')
+                    const result = await signIn("credentials", {
+                        redirect: false,
+                        email: firebaseUser.email,
+                        name: firebaseUser.displayName || (savedMode === "brand" ? "Brand" : "Creator"),
+                        image: firebaseUser.photoURL || null,
+                        isGoogleLogin: "true",
+                        role: savedMode === "brand" ? "BRAND" : "INFLUENCER",
+                        password: "bypass",
+                    })
+
+                    if (result?.error) {
+                        setError(result.error || "Google login failed")
+                        setGoogleLoading(false)
+                    } else {
+                        const session = await getSession()
+                        if (session?.user) {
+                            router.push(getPostLoginPath(session))
+                            router.refresh()
+                        } else {
+                            setGoogleLoading(false)
+                        }
+                        return
+                    }
+                }
+            } catch (err: any) {
+                console.error("Redirect auth error:", err)
+                setError(err.message || "Failed to complete Google authentication")
+            }
+
             const [providers, session] = await Promise.all([
                 getProviders(),
                 getSession(),
             ])
             if (!active) return
-            setGoogleAvailable(Boolean(providers?.google))
+            setGoogleAvailable(true)
             setProvidersLoaded(true)
             if (session?.user) {
                 router.push(getPostLoginPath(session))
@@ -65,6 +102,7 @@ function UnifiedLoginForm() {
         hydrateAuthState().catch((err) => {
             console.error(err)
             if (!active) return
+            setGoogleAvailable(true)
             setProvidersLoaded(true)
         })
         return () => { active = false }
@@ -105,49 +143,17 @@ function UnifiedLoginForm() {
     }
 
     async function handleGoogleLogin() {
-        if (!providersLoaded) return
-
-        if (!googleAvailable) {
-            const isDev = process.env.NODE_ENV === "development"
-            if (isDev) {
-                setGoogleLoading(true)
-                setError("")
-                setSuccessMessage("")
-                try {
-                    const simulatedEmail = mode === "brand" ? "demo@brand.com" : "dheerajsorout02@gmail.com"
-                    const result = await signIn("credentials", {
-                        redirect: false,
-                        email: simulatedEmail,
-                        password: "password123",
-                    })
-
-                    if (result?.error) {
-                        setError(`Simulation failed: test account ${simulatedEmail} not found.`)
-                        setGoogleLoading(false)
-                    } else {
-                        const session = await getSession()
-                        router.push(getPostLoginPath(session))
-                        router.refresh()
-                    }
-                } catch (err) {
-                    setError("Simulation error: " + String(err))
-                    setGoogleLoading(false)
-                }
-                return
-            }
-            setError("Google login is not configured.")
-            return
-        }
-
         setGoogleLoading(true)
         setError("")
         setSuccessMessage("")
 
         try {
-            await signIn("google", { callbackUrl: "/portal" })
-        } catch (err) {
-            console.error(err)
-            setError("Unable to start Google login")
+            // Persist current mode before redirect so we can restore it after
+            sessionStorage.setItem('portalGoogleMode', mode)
+            await signInWithRedirectClient()
+        } catch (error: any) {
+            console.error(error)
+            setError(error.message || "Unable to start Google login")
             setGoogleLoading(false)
         }
     }

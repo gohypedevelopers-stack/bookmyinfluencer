@@ -1,11 +1,13 @@
 
 import { db } from "@/lib/db";
+import { visibleUserWhere } from "@/lib/profile-visibility";
 import UsersClient from "./UsersClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
     const users = await db.user.findMany({
+        where: visibleUserWhere,
         select: {
             id: true,
             name: true,

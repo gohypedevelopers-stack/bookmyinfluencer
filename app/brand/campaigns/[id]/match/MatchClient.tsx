@@ -122,9 +122,9 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                                         <p className="text-xs font-bold text-slate-700 text-center">Make payment to unlock creator details and start project.</p>
                                     </div>
                                 )}
-                                <div className={`w-12 h-12 rounded-full overflow-hidden bg-white ${!paid ? 'blur-sm' : ''}`}>
+                                <div className={`w-12 h-12 rounded-full overflow-hidden bg-white ${!paid ? 'blur-sm' : ''} relative`}>
                                     {match.image ? (
-                                        <Image src={match.image} alt={match.name} width={48} height={48} className="w-full h-full object-cover" />
+                                        <Image src={match.image} alt={match.name} fill className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-teal-700 font-bold">{match.name?.[0] || 'C'}</div>
                                     )}
@@ -157,9 +157,9 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                     <div className="grid md:grid-cols-2 gap-4">
                         {awaitingCreatorMatches.map((match: any) => (
                             <div key={match.id} className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white relative">
                                     {match.image ? (
-                                        <Image src={match.image} alt={match.name} width={48} height={48} className="w-full h-full object-cover" />
+                                        <Image src={match.image} alt={match.name} fill className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-amber-700 font-bold">{match.name?.[0] || 'C'}</div>
                                     )}
@@ -188,9 +188,9 @@ export default function MatchClient({ campaignId, budget, paymentStatus }: Match
                     <div className="space-y-4">
                         {pendingMatches.map((match: any) => (
                             <div key={match.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center gap-4">
-                                <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100">
+                                <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 relative">
                                     {match.image ? (
-                                        <Image src={match.image} alt={match.name} width={56} height={56} className="w-full h-full object-cover" />
+                                        <Image src={match.image} alt={match.name} fill className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">{match.name?.[0] || 'C'}</div>
                                     )}

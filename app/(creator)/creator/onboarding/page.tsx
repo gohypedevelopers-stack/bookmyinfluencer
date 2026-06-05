@@ -9,7 +9,7 @@ import { OnboardingClient } from "./OnboardingClient"
 
 export default async function CreatorOnboardingPage() {
   const userId = await getAuthenticatedCreatorId()
-  if (!userId) redirect("/verify")
+  if (!userId) redirect("/login")
 
   console.log("Onboarding Page - UserID:", userId);
 

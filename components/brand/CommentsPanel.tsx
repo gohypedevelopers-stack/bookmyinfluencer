@@ -132,8 +132,8 @@ export function CommentsPanel({ isOpen, onClose }: CommentsPanelProps) {
                             {comments.map((comment) => (
                                 <div key={comment.id} className="space-y-4">
                                     <div className="flex gap-3 group">
-                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 shrink-0 ring-2 ring-white shadow-sm">
-                                            <Image src={comment.avatar} alt={comment.author} width={32} height={32} className="object-cover" />
+                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-200 shrink-0 ring-2 ring-white shadow-sm relative">
+                                            <Image src={comment.avatar} alt={comment.author} fill className="object-cover" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="bg-white p-3.5 rounded-2xl rounded-tl-sm border border-slate-100 shadow-sm relative group-hover:border-indigo-100 transition-colors">
@@ -162,8 +162,8 @@ export function CommentsPanel({ isOpen, onClose }: CommentsPanelProps) {
                                         <div className="pl-10 space-y-4">
                                             {comment.replies.map(reply => (
                                                 <div key={reply.id} className="flex gap-3 group">
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 shrink-0 ring-2 ring-white shadow-sm mt-1">
-                                                        <Image src={reply.avatar} alt={reply.author} width={24} height={24} className="object-cover" />
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 shrink-0 ring-2 ring-white shadow-sm mt-1 relative">
+                                                        <Image src={reply.avatar} alt={reply.author} fill className="object-cover" />
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="bg-slate-100/80 p-3 rounded-2xl rounded-tl-sm border border-slate-100/50 shadow-sm relative group-hover:border-indigo-100 transition-colors">

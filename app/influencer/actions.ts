@@ -6,6 +6,7 @@ import { DeliverableStatus, PayoutStatus, CandidateStatus, CampaignStatus } from
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { visibleBrandProfileWhere } from "@/lib/profile-visibility";
 
 
 export async function getInfluencerCampaigns() {
@@ -22,7 +23,10 @@ export async function getInfluencerCampaigns() {
 
         const campaigns = await db.campaignCandidate.findMany({
             where: {
-                influencerId: profile.id
+                influencerId: profile.id,
+                campaign: {
+                    brand: visibleBrandProfileWhere,
+                },
             },
             include: {
                 campaign: {
