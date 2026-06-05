@@ -121,7 +121,7 @@ function withPrismaConnectionDefaults(rawUrl?: string) {
         }
 
         if (isNeonPooledUrl && !url.searchParams.has("connection_limit")) {
-            url.searchParams.set("connection_limit", process.env.PRISMA_CONNECTION_LIMIT || "3")
+            url.searchParams.set("connection_limit", process.env.PRISMA_CONNECTION_LIMIT || "10")
         }
 
         return url.toString()

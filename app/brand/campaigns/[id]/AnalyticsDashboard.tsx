@@ -14,7 +14,7 @@ import {
     Download,
     ArrowUpRight,
     ArrowDownRight,
-    Sparkles,
+    Star,
     Activity,
 } from "lucide-react";
 
@@ -75,7 +75,7 @@ export function AnalyticsDashboard({ data, campaignTitle, campaignStatus }: Anal
                     <div className="space-y-6">
                         <div className="flex flex-wrap items-center gap-3">
                             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-cyan-100">
-                                <Sparkles className="h-3.5 w-3.5" />
+                                <Star className="h-3.5 w-3.5" />
                                 Campaign Command Center
                             </span>
                             <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] ${getStatusTone(campaignStatus)}`}>

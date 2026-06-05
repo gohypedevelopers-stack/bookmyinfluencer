@@ -6,7 +6,7 @@ import { Container } from "@/components/container"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
 import { GateReveal } from "@/components/GateReveal"
-import { Building2, UserCircle, ArrowRight, Sparkles } from "lucide-react"
+import { Building2, UserCircle, ArrowRight, Star } from "lucide-react"
 
 export default function SignupPage() {
   return (
@@ -39,7 +39,7 @@ export default function SignupPage() {
                 transition={{ delay: 0.2, duration: 0.5 }}
                 className="inline-flex items-center justify-center p-3 mb-6 rounded-2xl bg-indigo-50 border border-indigo-100 shadow-sm"
               >
-                <Sparkles className="w-6 h-6 text-indigo-500" />
+                <Star className="w-6 h-6 text-indigo-500" />
               </motion.div>
               <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 mb-8 tracking-tight pb-2">
                 Join BookMyInfluencer

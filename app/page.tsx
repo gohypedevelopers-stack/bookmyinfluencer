@@ -34,10 +34,12 @@ export default function Home() {
 
       
       <Reveal>
-        <CallToAction />
+        <TrustedBySection />
       </Reveal>
       
-      <TrustedBySection />
+      <Reveal>
+        <CallToAction />
+      </Reveal>
       
       <Footer />
     </div>

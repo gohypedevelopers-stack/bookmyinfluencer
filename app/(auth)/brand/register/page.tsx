@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
     Eye, EyeOff, Building2, Mail, Lock, CheckCircle, ArrowRight, Loader2,
     Check, ChevronLeft, Target, Megaphone, Smartphone, IndianRupee, Users,
-    Instagram, Youtube, Sparkles, TrendingUp, Globe, Zap, Rocket, X
+    Instagram, Youtube, Star, TrendingUp, Globe, Zap, Rocket, X
 } from 'lucide-react';
 import { registerBrand, sendEmailOtp, verifyEmailOtp, ensureDevBrandSimulationAccount, completeGoogleBrandOnboarding } from '@/app/brand/auth-actions';
 import { signIn, getProviders, getSession } from 'next-auth/react';
@@ -469,7 +469,7 @@ export default function BrandRegisterPage() {
         if (currentStep === 1) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Scale your Impact", desc: "Start by introducing your brand. Our internal project managers handle the entire execution, from matching to delivery." };
         if (currentStep === 2) return { icon: <ArrowRight className="w-8 h-8 text-white" />, tag: "Account Security", title: "Join the Club", desc: "Enter your work email so we can verify you and grant access to our elite creator network." };
         if (currentStep === 3) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Account Setup", title: "Protect your Account", desc: "Create a secure password to keep your campaigns and data safe." };
-        if (currentStep === 4) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Onboarding", title: "Perfect Start", desc: "Your basic account is ready. Let's fine-tune your platform to match your specific needs." };
+        if (currentStep === 4) return { icon: <Star className="w-8 h-8 text-white" />, tag: "Onboarding", title: "Perfect Start", desc: "Your basic account is ready. Let's fine-tune your platform to match your specific needs." };
         if (currentStep === 5) return { icon: <Building2 className="w-8 h-8 text-white" />, tag: "Profile", title: "Personal Branding", desc: "How should creators see you? Your public name is the first thing they'll notice." };
         if (currentStep === 6) return { icon: <Target className="w-8 h-8 text-white" />, tag: "Campaigns", title: "Strategy First", desc: "Different goals require different creators. Let's define what success looks like for you." };
         if (currentStep === 7) return { icon: <IndianRupee className="w-8 h-8 text-white" />, tag: "Planning", title: "Smart Budgeting", desc: "We match you with creators who provide the best ROI within your target range." };
@@ -1629,7 +1629,7 @@ export default function BrandRegisterPage() {
                                             >
                                                 {/* Shimmer overlay */}
                                                 <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 pointer-events-none" />
-                                                <Sparkles size={17} className="text-amber-300 group-hover:rotate-12 transition-transform duration-300 shrink-0" />
+                                                <Star size={17} className="text-amber-300 group-hover:rotate-12 transition-transform duration-300 shrink-0" />
                                                 Go to Dashboard
                                             </button>
                                             

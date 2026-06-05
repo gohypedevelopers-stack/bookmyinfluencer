@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-    ArrowRight, Check, ChevronLeft, Sparkles, Instagram, Youtube, Facebook,
+    ArrowRight, Check, ChevronLeft, Star, Instagram, Youtube, Facebook,
     Twitter, Linkedin, Gamepad2, Dumbbell, Utensils, Laptop, Shirt,
     GraduationCap, Globe, Heart, IndianRupee, TrendingUp, User, Zap
 } from "lucide-react"
@@ -181,7 +181,7 @@ export default function CreatorOnboarding() {
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             >
                                 <div className="w-24 h-24 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-2xl rotate-3 shadow-lg flex items-center justify-center mb-2">
-                                    <Sparkles className="w-12 h-12 text-white" />
+                                    <Star className="w-12 h-12 text-white" />
                                 </div>
                                 <div>
                                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 drop-shadow-md">
@@ -319,7 +319,7 @@ export default function CreatorOnboarding() {
                                             <div className={`p-2 rounded-lg ${formData.niche === item ? "bg-purple-100" : "bg-white/10"}`}>
                                                 {item === "Tech & Gadgets" && <Laptop size={20} />}
                                                 {item === "Fashion & Style" && <Shirt size={20} />}
-                                                {item === "Beauty & Makeup" && <Sparkles size={20} />}
+                                                {item === "Beauty & Makeup" && <Star size={20} />}
                                                 {item === "Fitness & Health" && <Dumbbell size={20} />}
                                                 {item === "Food & Culinary" && <Utensils size={20} />}
                                                 {item === "Travel & Lifestyle" && <Globe size={20} />}

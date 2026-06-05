@@ -53,7 +53,7 @@ export function WorkflowSection() {
 
 
     return (
-        <section className="w-full py-16 md:py-24 bg-transparent text-center overflow-hidden transition-colors duration-500">
+        <section className="w-full py-12 md:py-16 bg-transparent text-center overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -64,13 +64,13 @@ export function WorkflowSection() {
                     <h2 className="text-3xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
                         Streamlined <span className="text-indigo-600">Workflow</span>
                     </h2>
-                    <p className="text-lg sm:text-xl text-slate-600 mb-12 sm:mb-16 max-w-2xl mx-auto font-medium">
+                    <p className="text-lg sm:text-xl text-slate-600 mb-12 md:mb-16 max-w-2xl mx-auto font-medium">
                         Clear, manager-led operations for brands and creators with controlled communication and predictable outcomes.
                     </p>
                 </motion.div>
 
                 {/* Dynamic Toggle - Refined Light Mode */}
-                <div className="flex justify-center mb-24">
+                <div className="flex justify-center mb-16">
                     <div className="bg-slate-100 border border-slate-200 p-2 rounded-[2rem] inline-flex relative shadow-inner">
                         {/* Animated Background Pill */}
                         <motion.div

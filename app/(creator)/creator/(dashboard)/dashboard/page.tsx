@@ -19,7 +19,7 @@ import {
   Instagram,
   Linkedin,
   Loader2,
-  Sparkles,
+  Star,
   Target,
   TrendingUp,
   Twitter,
@@ -354,7 +354,7 @@ export default function CreatorDashboardPage() {
 
                 <div className="mt-7 rounded-[28px] border border-slate-200 bg-[linear-gradient(135deg,#f8fbff_0%,#f8fafc_45%,#eef2ff_100%)] p-6">
                   <div className="flex items-center gap-2 text-slate-950">
-                    <Sparkles className="h-4 w-4 text-violet-500" />
+                    <Star className="h-4 w-4 text-violet-500" />
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">What to improve next</p>
                   </div>
                   <div className="mt-5 space-y-4">
@@ -380,7 +380,7 @@ export default function CreatorDashboardPage() {
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-500">Quick Actions</p>
                   <div className="mt-5 space-y-3">
                     <QuickLink href="/creator/campaigns" title="Review campaign requests" description="Respond fast to manager-led invites and keep the queue moving." icon={Handshake} gradient="from-violet-500 to-indigo-600" />
-                    <QuickLink href="/creator/profile" title="Polish your profile" description="Sharper niche, bio, and proof points improve shortlist quality." icon={Sparkles} gradient="from-amber-400 to-orange-500" />
+                    <QuickLink href="/creator/profile" title="Polish your profile" description="Sharper niche, bio, and proof points improve shortlist quality." icon={Star} gradient="from-amber-400 to-orange-500" />
                     <QuickLink href="/creator/earnings" title="Track payouts" description="See released amounts and upcoming earnings workflow updates." icon={IndianRupee} gradient="from-emerald-400 to-teal-500" />
                   </div>
                 </Card>

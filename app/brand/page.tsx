@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Layers3, Plus, Sparkles } from "lucide-react";
+import { Layers3, Plus, Star } from "lucide-react";
 import Link from "next/link";
 import { BrandStats } from "@/components/brand/dashboard/brand-stats";
 import { RecommendedInfluencers } from "@/components/brand/dashboard/recommended-influencers";
@@ -66,7 +66,7 @@ export default async function BrandDashboardPage() {
                 <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/60 backdrop-blur-md border border-indigo-100 rounded-full text-[11px] font-black uppercase tracking-widest text-indigo-600 shadow-sm mb-3">
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Star className="w-3.5 h-3.5" />
                             Command Center
                         </div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Brand Overview</h1>

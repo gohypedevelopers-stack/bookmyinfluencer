@@ -14,7 +14,7 @@ import {
     Loader2,
     MessageSquare,
     Send,
-    Sparkles,
+    Star,
     X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -178,7 +178,7 @@ export default function ManagerChatModal({ isOpen, onClose, candidate }: Manager
                     {!canChat ? (
                         <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-violet-100 text-violet-600">
-                                <Sparkles className="h-6 w-6" />
+                                <Star className="h-6 w-6" />
                             </div>
                             <h3 className="mt-4 text-xl font-black tracking-tight text-slate-950">Manager room is not open yet</h3>
                             <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">

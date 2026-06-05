@@ -3,7 +3,7 @@
 import { useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, SendHorizontal, ShieldCheck, Sparkles } from "lucide-react";
+import { Lock, SendHorizontal, ShieldCheck, Star } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { sendBrandManagerConversationMessage } from "@/app/brand/campaigns/flow-actions";
 
@@ -132,7 +132,7 @@ export default function BrandManagerChatCard({
                                 </div>
                             </div>
                             <span className="inline-flex items-center gap-2 rounded-full border border-white bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-slate-600 shadow-sm">
-                                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                                <Star className="h-3.5 w-3.5 text-amber-500" />
                                 High Signal Updates
                             </span>
                         </div>

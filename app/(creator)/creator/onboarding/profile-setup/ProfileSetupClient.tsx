@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Instagram, Rocket, Sparkles, TrendingUp, User, Youtube } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Instagram, Rocket, Star, TrendingUp, User, Youtube } from 'lucide-react'
 import { saveProfileSetup } from './actions'
 import {
     SHARED_CREATOR_FOLLOWER_RANGES,
@@ -143,7 +143,7 @@ export default function ProfileSetupClient({ userId }: { userId: string }) {
                         {currentSlide === 0 && (
                             <div className="text-center">
                                 <div className="w-20 h-20 mx-auto mb-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/30">
-                                    <Sparkles className="w-10 h-10 text-white" />
+                                    <Star className="w-10 h-10 text-white" />
                                 </div>
                                 <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">Welcome Creator</h1>
                                 <p className="text-white/60 text-lg mb-10 max-w-sm mx-auto leading-relaxed">Set up your micro-influencer profile for manager-led campaign assignments.</p>

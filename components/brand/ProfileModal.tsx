@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     X, Camera, Edit2, Save, LogOut, BarChart3, ShieldCheck,
-    IndianRupee, Bell, Lock, ChevronRight, Sparkles, User
+    IndianRupee, Bell, Lock, ChevronRight, Star, User
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -78,7 +78,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                             <div className="absolute bottom-0 left-8 w-32 h-32 rounded-full bg-indigo-300/20 blur-xl" />
                             {/* glitter sparkles */}
                             <div className="absolute top-5 right-20 text-white/40">
-                                <Sparkles className="w-5 h-5 animate-pulse" />
+                                <Star className="w-5 h-5 animate-pulse" />
                             </div>
                             {/* close */}
                             <button

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     Eye, EyeOff, User, Phone, Instagram, Youtube, Mail, Lock,
-    CheckCircle, ArrowRight, Loader2, Chrome, Github, Sparkles,
+    CheckCircle, ArrowRight, Loader2, Chrome, Github, Star,
     Check, ChevronLeft, Facebook, Twitter, Linkedin,
     Gamepad2, Dumbbell, Utensils, Laptop, Shirt, Smartphone,
     GraduationCap, Globe, Heart, IndianRupee, TrendingUp, Zap, Layers, Rocket
@@ -69,7 +69,7 @@ const creatorPlatformCards = [
 const creatorNicheCards = [
     { name: "Tech & Gadgets", icon: Laptop },
     { name: "Fashion & Style", icon: Shirt },
-    { name: "Beauty & Makeup", icon: Sparkles },
+    { name: "Beauty & Makeup", icon: Star },
     { name: "Fitness & Health", icon: Dumbbell },
     { name: "Food & Culinary", icon: Utensils },
     { name: "Travel & Lifestyle", icon: Globe },
@@ -77,7 +77,7 @@ const creatorNicheCards = [
     { name: "Education", icon: GraduationCap },
     { name: "Gaming", icon: Gamepad2 },
     { name: "Parenting", icon: Heart },
-    { name: "Other", icon: Sparkles },
+    { name: "Other", icon: Star },
 ] as const;
 
 const CardWrapper = ({ children, stepKey, direction, progressPercentage, currentStep, totalSteps }: { children: React.ReactNode; stepKey: string; direction: number; progressPercentage: number; currentStep?: number; totalSteps?: number }) => (
@@ -490,15 +490,16 @@ export default function RegisterPage() {
 
     const sidebarContent = (): { icon: React.ReactNode; tag: string; title: string; desc: string } => {
         if (currentStep === 1) return { icon: <User className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Start your creator profile", desc: "Set up the essentials so brands can understand who you are from the first screen." };
-        if (currentStep === 2) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
-        if (currentStep === 3) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
-        if (currentStep === 4) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
-        if (currentStep === 5) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
-        if (currentStep === 6) return { icon: <Sparkles className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
-        if (currentStep === 7) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
-        if (currentStep === 8) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
-        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
-        if (currentStep === 10) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
+        if (currentStep === 2) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Social Presence", title: "Show your channels", desc: "Add your public handles so collaborations can connect to the audience you already built." };
+        if (currentStep === 3) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
+        if (currentStep === 4) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
+        if (currentStep === 5) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
+        if (currentStep === 6) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
+        if (currentStep === 7) return { icon: <Star className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
+        if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
+        if (currentStep === 9) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
+        if (currentStep === 10) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
+        if (currentStep === 11) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Ready for discovery", desc: "Your creator profile is now ready to be seen by brands looking for the right voice and audience." };
     };
 
@@ -877,7 +878,7 @@ export default function RegisterPage() {
                         <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step4" direction={direction} progressPercentage={progressPercentage}>
                             <div className="flex flex-col items-center text-center space-y-8">
                                 <div className="w-20 h-20 rounded-2xl rotate-3 shadow-xl shadow-emerald-200/60 flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
-                                    <Sparkles className="w-12 h-12 text-white" />
+                                    <Star className="w-12 h-12 text-white" />
                                 </div>
                                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                                     Welcome Creator!
@@ -971,7 +972,7 @@ export default function RegisterPage() {
                                 ) : (
                                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 w-full pt-4">
                                         <div className="relative group">
-                                            <Sparkles className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 w-6 h-6 transition-colors" />
+                                            <Star className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 w-6 h-6 transition-colors" />
                                             <input
                                                 type="text"
                                                 value={onboardingData.niche}
