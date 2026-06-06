@@ -57,7 +57,7 @@ export function Footer() {
                                     B
                                 </div>
                                 <span className="font-bold text-3xl tracking-tighter text-slate-900 transition-all duration-300">
-                                    Bookmy<span className="text-indigo-600">influencer</span>
+                                    Book<span className="text-indigo-600">my</span><span className="text-[#27ae60]">influencer</span>
                                 </span>
                             </Link>
                             <p className="text-slate-500 mb-8 max-w-xs leading-relaxed text-base">

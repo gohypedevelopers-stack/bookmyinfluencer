@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
                 <Container className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="w-7 h-7 bg-indigo-600 rounded-tr-[8px] rounded-bl-[8px] flex items-center justify-center text-white font-bold text-xs">B</div>
-                        <span className="font-bold text-slate-900 tracking-tight">Bookmyinfluencer</span>
+                        <span className="font-bold text-slate-900 tracking-tight">Book<span className="text-indigo-600">my</span><span className="text-[#27ae60]">influencer</span></span>
                     </Link>
                     <div className="flex gap-6 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                         <Link href="/privacy-policy" className="text-indigo-600">Privacy</Link>

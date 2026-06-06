@@ -154,40 +154,40 @@ const STATS: StatCardProps[] = [
 
 const TESTIMONIALS = [
     {
-        name: "Ali Genth",
+        name: "Aditya Mehta",
         role: "President & Co-founder",
-        image: "https://i.pravatar.cc/150?img=47",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?fit=crop&w=150&h=150&q=80",
+        content: "BookMyInfluencer transformed our marketing campaigns. We scaled our reach across tier-2 and tier-3 cities in India seamlessly, finding high-quality local creators in minutes.",
     },
     {
-        name: "John Smith",
+        name: "Priya Sharma",
         role: "Co-founder",
-        image: "https://i.pravatar.cc/150?img=11",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1594744803329-e58b31de215f?fit=crop&w=150&h=150&q=80",
+        content: "The platform's deep analytics and automated payouts saved us hours of manual collaboration tracking. It is by far the most reliable influencer marketing tool in India.",
     },
     {
-        name: "Marissa Lowe",
+        name: "Ananya Iyer",
         role: "Operations Manager",
-        image: "https://i.pravatar.cc/150?img=5",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1621594539744-477cf90cb46f?fit=crop&w=150&h=150&q=80",
+        content: "Collaborating with regional creators used to be an operational nightmare. With BookMyInfluencer, onboarding, KYC verification, and payouts are completely streamlined.",
     },
     {
-        name: "Jim Watson",
+        name: "Rohan Malhotra",
         role: "Sales Manager",
-        image: "https://i.pravatar.cc/150?img=12",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?fit=crop&w=150&h=150&q=80",
+        content: "Our campaign ROI increased by 40% after switching to BookMyInfluencer. Filtering creators by niche, engagement, and city helped us target the right customer base.",
     },
     {
-        name: "Gary Doe",
+        name: "Kabir Verma",
         role: "Web Developer",
-        image: "https://i.pravatar.cc/150?img=15",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1618018352910-72bdafdc72a8?fit=crop&w=150&h=150&q=80",
+        content: "Integrating campaign flows via their dashboard is incredibly smooth. Real-time updates and notifications keep our developers and brand managers in perfect sync.",
     },
     {
-        name: "Steve Burns",
+        name: "Ishaan Goel",
         role: "Graphic Designer",
-        image: "https://i.pravatar.cc/150?img=33",
-        content: "Consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat. Lorem ipsum dolor sit amet consectet.",
+        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?fit=crop&w=150&h=150&q=80",
+        content: "The dynamic media kit feature is state-of-the-art. It makes presenting creative portfolios and real-time social metrics to prospective brands look highly premium.",
     }
 ]
 

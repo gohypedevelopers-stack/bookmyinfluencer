@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-    Eye, EyeOff, User, Phone, Instagram, Youtube, Mail, Lock,
+    User, Phone, Instagram, Youtube, Mail,
     CheckCircle, ArrowRight, Loader2, Chrome, Github, Star,
     Check, ChevronLeft, Facebook, Twitter, Linkedin,
     Gamepad2, Dumbbell, Utensils, Laptop, Shirt, Smartphone,
@@ -26,7 +26,7 @@ import {
 } from "@/lib/onboarding-taxonomy";
 
 // Total steps
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 10;
 
 const GoogleIcon = ({ className = "" }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
@@ -173,9 +173,6 @@ export default function RegisterPage() {
         instagramUrl: '',
         youtubeUrl: '',
         email: '',
-        password: '',
-        confirmPassword: '',
-        agreeToTerms: false,
     });
 
     const [onboardingData, setOnboardingData] = useState({
@@ -186,8 +183,6 @@ export default function RegisterPage() {
         engagement: '',
     });
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [googleAvailable, setGoogleAvailable] = useState(false);
@@ -323,9 +318,7 @@ export default function RegisterPage() {
         }
     };
 
-    const getDisplayStep = (step: number) => {
-        return step;
-    };
+    const getDisplayStep = (step: number) => step > 3 ? step - 1 : step;
     const displayStep = getDisplayStep(currentStep);
     const progressPercentage = ((displayStep - 1) / TOTAL_STEPS) * 100;
 
@@ -400,7 +393,6 @@ export default function RegisterPage() {
 
         const fd = new FormData();
         fd.append('email', formData.email);
-        fd.append('password', formData.password);
         fd.append('fullName', formData.fullName);
         fd.append('mobileNumber', formData.mobileNumber);
         fd.append('primaryPlatform', formData.primaryPlatform);
@@ -433,13 +425,6 @@ export default function RegisterPage() {
                     role: 'INFLUENCER',
                     password: 'bypass',
                 });
-            } else {
-                // Log the user in silently to establish session for KYC upload API
-                await signIn('credentials', {
-                    email: formData.email,
-                    password: formData.password,
-                    redirect: false,
-                });
             }
 
             // Move to KYC step
@@ -457,7 +442,6 @@ export default function RegisterPage() {
         switch (currentStep) {
             case 1: return !!formData.fullName && !!formData.mobileNumber;
             case 2: return emailVerified;
-            case 3: return !!formData.password && formData.password === formData.confirmPassword && formData.password.length >= 6 && formData.agreeToTerms;
             case 4: return true; // Welcome
             case 5: return onboardingData.platforms.length > 0;
             case 6: return !!onboardingData.niche;
@@ -475,31 +459,29 @@ export default function RegisterPage() {
             await handleFinalSubmit();
             return;
         }
-        if (currentStep < TOTAL_STEPS) {
+        if (currentStep < 11) {
             setDirection(1);
-            setCurrentStep(prev => prev + 1);
+            setCurrentStep(prev => prev === 2 ? 4 : prev + 1);
         }
     };
 
     const goBack = () => {
         if (currentStep > 1 && !isSubmitting) {
             setDirection(-1);
-            setCurrentStep(prev => prev - 1);
+            setCurrentStep(prev => prev === 4 ? 2 : prev - 1);
         }
     };
 
     const sidebarContent = (): { icon: React.ReactNode; tag: string; title: string; desc: string } => {
         if (currentStep === 1) return { icon: <User className="w-8 h-8 text-white" />, tag: "Getting Started", title: "Start your creator profile", desc: "Set up the essentials so brands can understand who you are from the first screen." };
         if (currentStep === 2) return { icon: <Instagram className="w-8 h-8 text-white" />, tag: "Social Presence", title: "Show your channels", desc: "Add your public handles so collaborations can connect to the audience you already built." };
-        if (currentStep === 3) return { icon: <Mail className="w-8 h-8 text-white" />, tag: "Account Security", title: "Verify your email", desc: "Secure your creator account and unlock the next onboarding steps with a verified email." };
-        if (currentStep === 4) return { icon: <Lock className="w-8 h-8 text-white" />, tag: "Protection", title: "Keep it secure", desc: "A strong password protects your deals, profile data, and future earnings." };
-        if (currentStep === 5) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your basic account is ready. Now shape the profile details brands use to shortlist creators." };
-        if (currentStep === 6) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
-        if (currentStep === 7) return { icon: <Star className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
-        if (currentStep === 8) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
-        if (currentStep === 9) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
-        if (currentStep === 10) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
-        if (currentStep === 11) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
+        if (currentStep === 4) return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Onboarding", title: "You are in motion", desc: "Your verified account is ready. Now shape the profile details brands use to shortlist creators." };
+        if (currentStep === 5) return { icon: <Layers className="w-8 h-8 text-white" />, tag: "Platforms", title: "Pick your platforms", desc: "Tell us where you create so matching works around your strongest content formats." };
+        if (currentStep === 6) return { icon: <Star className="w-8 h-8 text-white" />, tag: "Positioning", title: "Define your niche", desc: "Your niche helps brands instantly understand your style, category, and audience fit." };
+        if (currentStep === 7) return { icon: <Globe className="w-8 h-8 text-white" />, tag: "Location", title: "Where are you based?", desc: "Brands look for creators in specific regions for localized campaigns." };
+        if (currentStep === 8) return { icon: <Heart className="w-8 h-8 text-white" />, tag: "Audience", title: "Show your reach", desc: "Follower size gives brands a quick signal about campaign scale and creator tier." };
+        if (currentStep === 9) return { icon: <TrendingUp className="w-8 h-8 text-white" />, tag: "Performance", title: "Highlight engagement", desc: "Engagement quality helps you stand out beyond raw follower numbers." };
+        if (currentStep === 10) return { icon: <CheckCircle className="w-8 h-8 text-white" />, tag: "Verification", title: "Build trust faster", desc: "A quick selfie verification adds credibility and makes your profile more brand-ready." };
         return { icon: <Rocket className="w-8 h-8 text-white" />, tag: "Success", title: "Ready for discovery", desc: "Your creator profile is now ready to be seen by brands looking for the right voice and audience." };
     };
 
@@ -542,7 +524,7 @@ export default function RegisterPage() {
                             <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
                                 <User size={22} className="text-white" />
                             </div>
-                            <span className="text-xl font-black tracking-tight">Bookmyinfluencer</span>
+                            <span className="text-xl font-black tracking-tight">Book<span className="text-violet-200">my</span><span className="text-emerald-200">influencer</span></span>
                         </div>
 
                         <div className="flex-1 flex flex-col justify-center">
@@ -786,89 +768,12 @@ export default function RegisterPage() {
                                 )}
 
                                 <div className="space-y-3 pt-4">
-                                    {emailVerified ? (
-                                        <NextButton onClick={goNext} disabled={!canProceed()} />
-                                    ) : (
-                                        <div className="pt-8">
-                                            <button
-                                                type="button"
-                                                onClick={goNext}
-                                                disabled={!formData.email}
-                                                className="w-full py-4 text-slate-400 hover:text-emerald-600 font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                                            >
-                                                Skip Verification
-                                            </button>
-                                        </div>
-                                    )}
+                                    <NextButton
+                                        label={emailVerified ? "Continue" : "Verify Email to Continue"}
+                                        onClick={goNext}
+                                        disabled={!emailVerified}
+                                    />
                                 </div>
-                            </div>
-                        </CardWrapper>
-                    )}
-
-                    {/* ===== STEP 3: Password ===== */}
-                    {currentStep === 3 && (
-                        <CardWrapper currentStep={currentStep} totalSteps={TOTAL_STEPS} stepKey="step3" direction={direction} progressPercentage={progressPercentage}>
-                            <div className="w-full space-y-3">
-                                <h2 className="text-3xl font-extrabold text-center mb-1 tracking-tight" style={{ background: "linear-gradient(135deg, #1e293b 0%, #059669 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Secure Account</h2>
-                                <p className="text-center text-slate-400 text-sm mb-3">Choose a strong password to protect your account.</p>
-
-                                <AnimatePresence mode="wait">
-                                    {error && (
-                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                                            className="p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-sm font-medium">
-                                            {error}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                {/* Password */}
-                                <div className="space-y-1.5 w-full text-left">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Password</label>
-                                    <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
-                                        <input name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-11 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
-                                            placeholder="Min. 6 characters" required autoFocus />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
-                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Confirm Password */}
-                                <div className="space-y-1.5 w-full text-left">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Confirm Password</label>
-                                    <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#059669] w-5 h-5 transition-colors" />
-                                        <input name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} value={formData.confirmPassword} onChange={handleInputChange}
-                                            className="w-full pl-11 pr-11 py-2.5 bg-[#ecfdf5]/50 border border-[#e2e8f0] rounded-2xl text-base placeholder-slate-400 focus:bg-white focus:border-[#059669] focus:ring-1 focus:ring-[#059669] focus:outline-none transition-all text-slate-900"
-                                            placeholder="Repeat your password" required />
-                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1">
-                                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Password Match Indicator */}
-                                {formData.password && formData.confirmPassword && (
-                                    <div className={`text-sm font-medium flex items-center gap-1.5 pl-2 ${formData.password === formData.confirmPassword ? 'text-emerald-400' : 'text-red-400'}`}>
-                                        {formData.password === formData.confirmPassword ? <Check className="w-4 h-4" /> : <span className="w-4 h-4 font-bold">✕</span>}
-                                        {formData.password === formData.confirmPassword ? 'Passwords match' : 'Passwords do not match'}
-                                    </div>
-                                )}
-
-                                {/* Terms */}
-                                <div className="flex items-start gap-3 px-1">
-                                    <input type="checkbox" id="agreeToTerms" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange}
-                                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#059669] accent-[#059669] focus:ring-[#059669] cursor-pointer" />
-                                    <label htmlFor="agreeToTerms" className="text-sm text-slate-500 leading-relaxed cursor-pointer">
-                                        I agree to the <Link href="/terms" className="text-[#059669] font-semibold hover:underline">Terms</Link> and <Link href="/privacy" className="text-[#059669] font-semibold hover:underline">Privacy Policy</Link>.
-                                    </label>
-                                </div>
-
-                                <NextButton onClick={goNext} disabled={!canProceed()} />
                             </div>
                         </CardWrapper>
                     )}

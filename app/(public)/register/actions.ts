@@ -3,13 +3,14 @@
 import { db } from "@/lib/db"
 import { ensureCreatorAuthUser, syncCreatorProfileByEmail } from "@/lib/auth-sync"
 import { authOptions } from "@/lib/auth"
+import { verifySession } from "@/lib/session"
 import {
     estimateFollowersCountFromRange,
     normalizeSharedNiche,
     normalizeSharedPlatformId,
     parseEngagementRate,
 } from "@/lib/onboarding-taxonomy"
-import bcrypt from "bcryptjs"
+import { cookies } from "next/headers"
 import { getServerSession } from "next-auth"
 
 function normalizeEmail(value: FormDataEntryValue | null) {
@@ -109,21 +110,34 @@ async function saveCreatorSelfReportedMetric(
 export async function registerUserAction(formData: FormData) {
     try {
         const email = normalizeEmail(formData.get("email"))
-        const password = formData.get("password") as string
         const parsed = parseCreatorOnboardingForm(formData)
 
         // Validate required fields
-        if (!email || !password || !parsed.fullName) {
+        if (!email || !parsed.fullName) {
             throw new Error("Missing required fields")
         }
 
-        // Hash password
-        const passwordHash = await bcrypt.hash(password, 10)
+        const cookieStore = await cookies()
+        const token = cookieStore.get("session")?.value
+        const payload = token ? verifySession(token) : null
+
+        if (!payload?.userId) {
+            throw new Error("Please verify your email before continuing")
+        }
+
+        const verifiedUser = await db.otpUser.findUnique({
+            where: { id: payload.userId },
+            select: { email: true },
+        })
+
+        if (verifiedUser?.email !== email) {
+            throw new Error("Verified email does not match this registration")
+        }
+
         const verifiedAt = new Date()
         const { otpUser } = await ensureCreatorAuthUser({
             email,
             name: parsed.fullName,
-            passwordHash,
             otpVerifiedAt: verifiedAt,
         })
 

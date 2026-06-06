@@ -122,10 +122,11 @@ export async function sendOtpEmail({
 
         console.log("[Mailer] Email sent info:", info.response)
 
+        const smtpConfig = getSafeSmtpConfig()
         return {
-            provider: "gmail",
+            provider: smtpConfig.host.includes("gmail") ? "gmail" : "smtp",
             messageId: info.messageId,
-            meta: { host: "smtp.gmail.com", response: info.response },
+            meta: { host: smtpConfig.host, response: info.response },
         }
     } catch (error) {
         console.error("[Mailer] Nodemailer send failed:", error)

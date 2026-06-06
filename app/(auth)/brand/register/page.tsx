@@ -540,7 +540,7 @@ export default function BrandRegisterPage() {
                             <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
                                 <Building2 size={22} className="text-white" />
                             </div>
-                            <span className="text-xl font-black tracking-tight">Bookmyinfluencer</span>
+                            <span className="text-xl font-black tracking-tight">Book<span className="text-violet-200">my</span><span className="text-emerald-300">influencer</span></span>
                         </div>
 
                         {/* Dynamic Step Content */}

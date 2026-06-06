@@ -10,6 +10,7 @@ import { sendOtpEmail } from "@/lib/mailer"
 
 const bodySchema = z.object({
   email: z.string().email(),
+  purpose: z.enum(["signup", "login"]).optional().default("signup"),
 })
 
 const OTP_EXPIRES_MINUTES = 10
@@ -24,15 +25,55 @@ export async function POST(req: Request) {
     }
 
     const email = parsed.data.email.trim().toLowerCase()
+    const purpose = parsed.data.purpose
     const now = new Date()
 
     // 1. Get or Create User
-    const user = await db.otpUser.upsert({
-      where: { email },
-      update: {},
-      create: { email },
-      select: { id: true },
-    })
+    let user = null
+    if (purpose === "login") {
+      const mainUser = await db.user.findUnique({
+        where: { email },
+        select: { id: true, role: true },
+      })
+
+      if (mainUser) {
+        user = await db.otpUser.upsert({
+          where: { email },
+          update: {},
+          create: { email },
+          select: { id: true },
+        })
+      } else {
+        const otpUser = await db.otpUser.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            creator: { select: { id: true } },
+          },
+        })
+        if (otpUser && otpUser.creator) {
+          user = otpUser
+        }
+      }
+    } else {
+      user = await db.otpUser.upsert({
+        where: { email },
+        update: {},
+        create: { email },
+        select: { id: true },
+      })
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "ACCOUNT_NOT_FOUND",
+          message: "No account found for this email. Please sign up first.",
+        },
+        { status: 404 }
+      )
+    }
 
     // 2. Check Rate Limit
     const existing = await db.emailOtp.findUnique({
@@ -79,23 +120,6 @@ export async function POST(req: Request) {
     })
 
     cacheDevOtp(email, otp, expiresAt)
-
-    if (!env.isProduction) {
-      console.info("[OTP] falling back to local dev OTP delivery", {
-        userId: user.id,
-        email,
-        resendIn: RESEND_LIMIT_SECONDS,
-      })
-
-      return NextResponse.json({
-        ok: true,
-        resendIn: RESEND_LIMIT_SECONDS,
-        provider: "dev",
-        devOtpAvailable: true,
-        message: "Code generated successfully",
-        infoMessage: "Email was not sent. For local testing, use the OTP printed in the server console.",
-      })
-    }
 
     // 5. Send Email via Gmail
     console.info("[OTP] sending email", { email })

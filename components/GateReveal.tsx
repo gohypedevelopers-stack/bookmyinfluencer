@@ -97,7 +97,7 @@ export function GateReveal({ children }: { children: React.ReactNode }) {
                 transition={{ duration: 0.3 }}
               >
                 <span className="font-bold text-2xl tracking-tighter text-white">
-                  Bookmy<span className="text-indigo-400">influencer</span>
+                  Book<span className="text-indigo-400">my</span><span className="text-emerald-300">influencer</span>
                 </span>
               </motion.div>
             </motion.div>

@@ -23,7 +23,7 @@ export function Navbar() {
           <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 rounded-tr-[10px] rounded-bl-[10px] flex items-center justify-center text-white font-bold text-lg sm:text-xl min-w-[32px] sm:min-w-[36px] shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform duration-500">
             B
           </div>
-          <span className="font-bold text-lg sm:text-2xl tracking-tighter text-slate-900">Bookmy<span className="text-indigo-600">influencer</span></span>
+          <span className="font-bold text-lg sm:text-2xl tracking-tighter text-slate-900">Book<span className="text-indigo-600">my</span><span className="text-[#27ae60]">influencer</span></span>
         </Link>
 
         {/* Desktop Links */}
