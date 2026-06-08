@@ -2245,4 +2245,82 @@ export async function activateCampaignPayment(campaignId: string) {
     }
 }
 
+export async function getBrandProfile() {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') {
+        return { success: false, error: 'Unauthorized' };
+    }
 
+    try {
+        const brand = await db.brandProfile.findUnique({
+            where: { userId: session.user.id },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true,
+                        image: true
+                    }
+                }
+            }
+        });
+
+        if (!brand) return { success: false, error: 'Brand not found' };
+
+        return { success: true, data: brand };
+    } catch (error) {
+        console.error("Get Brand Profile Error", error);
+        return { success: false, error: "Failed to fetch brand profile" };
+    }
+}
+
+export async function updateBrandProfile(data: {
+    companyName: string;
+    website?: string;
+    industry?: string;
+    description?: string;
+    location?: string;
+    niche?: string;
+    campaignType?: string;
+    campaignBudget?: string;
+    targetPlatforms?: string;
+    preferredCreatorType?: string;
+    campaignGoals?: string;
+}) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'BRAND') {
+        return { success: false, error: 'Unauthorized' };
+    }
+
+    try {
+        const updated = await db.brandProfile.update({
+            where: { userId: session.user.id },
+            data: {
+                companyName: data.companyName,
+                website: data.website || null,
+                industry: data.industry || null,
+                description: data.description || null,
+                location: data.location || null,
+                niche: data.niche || null,
+                campaignType: data.campaignType || null,
+                campaignBudget: data.campaignBudget || null,
+                targetPlatforms: data.targetPlatforms || null,
+                preferredCreatorType: data.preferredCreatorType || null,
+                campaignGoals: data.campaignGoals || null,
+            }
+        });
+
+        // Also update name in User table
+        await db.user.update({
+            where: { id: session.user.id },
+            data: { name: data.companyName }
+        });
+
+        revalidatePath('/brand/profile');
+        revalidatePath('/brand/dashboard');
+        return { success: true, data: updated };
+    } catch (error) {
+        console.error("Update Brand Profile Error", error);
+        return { success: false, error: "Failed to update brand profile" };
+    }
+}

@@ -8,7 +8,7 @@ import { Eye, EyeOff, Layers, LogIn, Mail, Lock, ArrowRight, Chrome, Building2, 
 import { signIn, getSession, getProviders } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from 'next-auth';
-import { signInWithRedirectClient, handleRedirectResult } from '@/lib/firebase-auth-client';
+import { signInWithGooglePopup, signInWithRedirectClient, handleRedirectResult } from '@/lib/firebase-auth-client';
 
 function getPostLoginPath(session: Session | null) {
     if (session?.user?.role === 'ADMIN') return '/admin';
@@ -46,6 +46,8 @@ export default function LoginPage() {
     const [mounted, setMounted] = useState(false);
     const [googleAvailable, setGoogleAvailable] = useState(false);
     const [providersLoaded, setProvidersLoaded] = useState(false);
+    const [isExiting, setIsExiting] = useState(false);
+    const [activeTab, setActiveTab] = useState<'creator' | 'brand'>('creator');
 
     const router = useRouter();
 
@@ -158,10 +160,57 @@ export default function LoginPage() {
         setError('');
 
         try {
-            await signInWithRedirectClient();
+            const firebaseUser = await signInWithGooglePopup();
+            if (!firebaseUser || !firebaseUser.email) {
+                throw new Error("Failed to retrieve email from Google authentication");
+            }
+
+            // Check if user email already exists in DB
+            const checkEmailRes = await fetch("/api/custom-auth/check-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: firebaseUser.email })
+            });
+            const checkEmailData = await checkEmailRes.json();
+
+            if (checkEmailData.exists) {
+                // User exists, log them in immediately using their existing role in the database
+                const targetRole = checkEmailData.role || (activeTab === 'brand' ? 'BRAND' : 'INFLUENCER');
+                const result = await signIn('credentials', {
+                    redirect: false,
+                    email: firebaseUser.email,
+                    name: firebaseUser.displayName || (targetRole === 'BRAND' ? 'Brand' : 'Creator'),
+                    image: firebaseUser.photoURL || null,
+                    isGoogleLogin: 'true',
+                    role: targetRole,
+                    password: 'bypass',
+                });
+
+                if (result?.error) {
+                    setError(result.error || 'Google login failed');
+                    setGoogleLoading(false);
+                } else {
+                    const session = await getSession();
+                    redirectAfterLogin(session);
+                }
+            } else {
+                // User does not exist, redirect to registration with prefilled query parameters
+                const targetRole = activeTab; // 'creator' or 'brand'
+                const encodedEmail = encodeURIComponent(firebaseUser.email);
+                const encodedName = encodeURIComponent(firebaseUser.displayName || '');
+                if (targetRole === 'brand') {
+                    router.push(`/brand/register?googleEmail=${encodedEmail}&googleName=${encodedName}`);
+                } else {
+                    router.push(`/register?googleEmail=${encodedEmail}&googleName=${encodedName}`);
+                }
+            }
         } catch (error: any) {
             console.error(error);
-            setError(error.message || 'Unable to start Google login');
+            if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+                setError('');
+            } else {
+                setError(error.message || 'Unable to complete Google login');
+            }
             setGoogleLoading(false);
         }
     };
@@ -339,9 +388,9 @@ export default function LoginPage() {
 
                 {/* Login Card */}
                 <motion.div 
-                    initial={{ opacity: 0, y: 20 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    initial={{ opacity: 0, x: -50 }} 
+                    animate={isExiting ? { opacity: 0, x: 50, filter: "blur(4px)" } : { opacity: 1, x: 0, filter: "blur(0px)" }} 
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full max-w-[400px] relative"
                 >
                     {/* Glow behind card */}
@@ -365,21 +414,43 @@ export default function LoginPage() {
                         </div>
 
                         {/* Creator/Brand Toggle */}
-                        <div className="grid grid-cols-2 p-1 bg-slate-100/70 rounded-2xl mb-5 border border-slate-200/30">
+                        <div className="grid grid-cols-2 p-1 bg-slate-100/70 rounded-2xl mb-5 border border-slate-200/30 relative overflow-hidden z-10">
+                            {/* Animated Background Pill */}
+                            <motion.div
+                                className="absolute inset-y-1 bg-white rounded-xl shadow-sm border border-slate-200/50 z-0"
+                                layoutId="activeAuthTabBackground"
+                                initial={false}
+                                animate={{
+                                    left: activeTab === 'creator' ? '4px' : '50%',
+                                    width: 'calc(50% - 4px)',
+                                }}
+                                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                            />
+
                             <button
                                 type="button"
-                                onClick={() => router.push('/login')}
-                                className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all duration-300 bg-white text-violet-600 shadow-sm border border-slate-200/50"
+                                onClick={() => {
+                                    if (activeTab === 'creator') return;
+                                    setActiveTab('creator');
+                                }}
+                                className={`relative z-10 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'creator' ? 'text-violet-600' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <User className="w-4 h-4 text-violet-600" />
+                                <User className={`w-4 h-4 transition-colors ${activeTab === 'creator' ? 'text-violet-600' : 'text-slate-400'}`} />
                                 Creator
                             </button>
                             <button
                                 type="button"
-                                onClick={() => router.push('/brand/login')}
-                                className="flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all duration-300 text-slate-500 hover:text-slate-700"
+                                onClick={() => {
+                                    if (activeTab === 'brand') return;
+                                    setActiveTab('brand');
+                                    setIsExiting(true);
+                                    setTimeout(() => {
+                                        router.push('/brand/login');
+                                    }, 250);
+                                }}
+                                className={`relative z-10 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'brand' ? 'text-violet-600' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <Building2 className="w-4 h-4 text-slate-400" />
+                                <Building2 className={`w-4 h-4 transition-colors ${activeTab === 'brand' ? 'text-violet-600' : 'text-slate-400'}`} />
                                 Brand
                             </button>
                         </div>

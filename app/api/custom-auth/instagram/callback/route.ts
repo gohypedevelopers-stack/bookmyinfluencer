@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
         const appId = process.env.META_APP_ID;
         const appSecret = process.env.META_APP_SECRET;
-        const redirectUri = `${baseUrl}/api/auth/instagram/callback`;
+        const redirectUri = `${baseUrl}/api/custom-auth/instagram/callback`;
 
         // 1. Exchange code for short-lived token
         const tokenUrl = `https://graph.facebook.com/v19.0/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${appSecret}&code=${code}`;

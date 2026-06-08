@@ -100,7 +100,7 @@ export default async function BrandDashboardPage() {
                     <div className="w-full shrink-0 flex flex-col gap-8 xl:w-[360px] animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both">
                         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 p-8 text-white shadow-xl shadow-indigo-200/50 group">
                             {/* Animated Background Gradients */}
-                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
+                            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20viewBox=%220%200%20200%20200%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter%20id=%22noiseFilter%22%3E%3CfeTurbulence%20type=%22fractalNoise%22%20baseFrequency=%220.8%22%20numOctaves=%223%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22100%25%22%20height=%22100%25%22%20filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')] opacity-10 mix-blend-overlay pointer-events-none" />
                             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-400/40 blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:translate-x-5" />
                             <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-400/40 blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-110 group-hover:-translate-x-5" />
                             

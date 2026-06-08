@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Eye, EyeOff, Building2, Mail, Lock, CheckCircle, ArrowRight, Loader2,
     Check, ChevronLeft, Target, Megaphone, Smartphone, IndianRupee, Users,
@@ -117,8 +117,9 @@ const indiaLocations = [
     "Mumbai", "Bangalore", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat", "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", "Visakhapatnam", "Pimpri-Chinchwad", "Patna", "Vadodara", "Ghaziabad", "Ludhiana", "Agra", "Nashik", "Faridabad", "Meerut", "Rajkot", "Kalyan-Dombivli", "Vasai-Virar", "Varanasi", "Srinagar", "Aurangabad", "Dhanbad", "Amritsar", "Navi Mumbai", "Allahabad", "Howrah", "Ranchi", "Gwalior", "Jabalpur", "Coimbatore", "Vijayawada", "Jodhpur", "Madurai", "Raipur", "Kota", "Guwahati", "Chandigarh", "Solapur", "Hubli-Dharwad", "Mysore", "Tiruchirappalli", "Bareilly", "Aligarh", "Tiruppur", "Gurgaon", "Moradabad", "Jalandhar", "Bhubaneswar", "Salem", "Warangal", "Mira-Bhayandar", "Jalgaon", "Guntur", "Thiruvananthapuram", "Bhiwandi", "Saharanpur", "Gorakhpur", "Bikaner", "Amravati", "Noida", "Jamshedpur", "Bhilai", "Cuttack", "Firozabad", "Kochi", "Nellore", "Bhavnagar", "Dehradun", "Durgapur", "Asansol", "Rourkela", "Nanded", "Kolhapur", "Ajmer", "Akola", "Gulbarga", "Jamnagar", "Ujjain", "Loni", "Siliguri", "Jhansi", "Ulhasnagar", "Jammu", "Sangli-Miraj & Kupwad", "Mangalore", "Erode", "Belgaum", "Ambattur", "Tirunelveli", "Malegaon", "Gaya", "Jalgaon", "Udaipur", "Maheshtala", "Davanagere", "Kozhikode", "Kurnool", "Rajpur Sonarpur", "Rajahmundry", "Bokaro", "South Dumdum", "Bellary", "Patiala", "Gopalpur", "Agartala", "Bhagalpur", "Muzaffarnagar", "Bhatpara", "Panihati", "Latur", "Dhule", "Tirupati", "Rohtak", "Korba", "Bhilwara", "Berhampur", "Muzaffarpur", "Ahmednagar", "Mathura", "Kollam", "Avadi", "Kadapa", "Kamarhati", "Sambalpur", "Bilaspur", "Shahjahanpur", "Satara", "Bijapur", "Rampur", "Shivamogga", "Chandrapur", "Junagadh", "Thrissur", "Alwar", "Bardhaman", "Kulti", "Kakinada", "Nizamabad", "Parbhani", "Tumkur", "Khammam", "Ozhukarai", "Bihar Sharif", "Panipat", "Darbhanga", "Bally", "Aizawl", "Dewas", "Ichalkaranji", "Karnal", "Bathinda", "Jalna", "Eluru", "Kirari Suleman Nagar", "Barasat", "Purnia", "Satna", "Mau", "Sonipat", "Farrukhabad", "Sagar", "Rourkela", "Durg", "Imphal", "Ratlam", "Hapur", "Arrah", "Karimnagar", "Anantapur", "Etawah", "Ambernath", "North Dumdum", "Bharatpur", "Begusarai", "New Delhi", "Gandhidham", "Baranagar", "Tiruvottiyur", "Puducherry", "Sikar", "Thoothukudi", "Rewa", "Mirzapur", "Raichur", "Pali", "Ramagundam", "Haridwar", "Vijayanagaram", "Katihar", "Nagercoil", "Sri Ganganagar", "Karawal Nagar"
 ];
 
-export default function BrandRegisterPage() {
+function BrandRegisterPageContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState(1);
     const [direction, setDirection] = useState(0);
 
@@ -164,6 +165,21 @@ export default function BrandRegisterPage() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [emailVerified, setEmailVerified] = useState(false);
+
+    // Listen for prefilled Google credentials
+    useEffect(() => {
+        const googleEmail = searchParams.get('googleEmail');
+        const googleName = searchParams.get('googleName');
+        if (googleEmail) {
+            setFormData(prev => ({
+                ...prev,
+                email: googleEmail,
+                companyName: googleName || prev.companyName
+            }));
+            setIsGoogleUser(true);
+            setEmailVerified(true);
+        }
+    }, [searchParams]);
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
@@ -379,6 +395,21 @@ export default function BrandRegisterPage() {
         fd.append('priceType', onboardingData.priceType);
 
         if (isGoogleUser) {
+            // First authenticate to establish NextAuth session and create shadow user record
+            const signInResult = await signIn('credentials', {
+                redirect: false,
+                email: formData.email,
+                name: formData.companyName || 'Brand',
+                isGoogleLogin: 'true',
+                role: 'BRAND',
+                password: 'bypass',
+            });
+            if (signInResult?.error) {
+                setError(signInResult.error || 'Failed to authenticate Google session.');
+                setIsSubmitting(false);
+                return;
+            }
+
             // Google user: account already created — just update profile + create campaign
             const res = await completeGoogleBrandOnboarding(fd);
             if (res.success) {
@@ -446,14 +477,22 @@ export default function BrandRegisterPage() {
         }
         if (currentStep < TOTAL_STEPS) {
             setDirection(1);
-            setCurrentStep(prev => prev + 1);
+            if (isGoogleUser && currentStep === 1) {
+                setCurrentStep(4);
+            } else {
+                setCurrentStep(prev => prev + 1);
+            }
         }
     };
 
     const goBack = () => {
         if (currentStep > 1 && !isSubmitting) {
             setDirection(-1);
-            setCurrentStep(prev => prev - 1);
+            if (isGoogleUser && currentStep === 4) {
+                setCurrentStep(1);
+            } else {
+                setCurrentStep(prev => prev - 1);
+            }
         }
     };
 
@@ -1658,6 +1697,18 @@ export default function BrandRegisterPage() {
                 Trusted by 10,000+ brands worldwide
             </div>
         </div>
+    );
+}
+
+export default function BrandRegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen w-full flex items-center justify-center bg-slate-900">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+            </div>
+        }>
+            <BrandRegisterPageContent />
+        </Suspense>
     );
 }
 

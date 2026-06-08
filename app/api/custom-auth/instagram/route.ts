@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Configuration Error: META_APP_ID missing" }, { status: 500 });
         }
 
-        const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/instagram/callback`;
+        const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/custom-auth/instagram/callback`;
         const scope = "instagram_basic,instagram_manage_insights,pages_show_list,pages_read_engagement";
         const state = creator.id; // Using creator ID as state for simplicity (CSRF protection is handled by matching user session in callback)
 

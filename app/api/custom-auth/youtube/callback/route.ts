@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         const creator = await db.creator.findUnique({ where: { userId } });
         if (!creator) return NextResponse.redirect(new URL("/creator/dashboard?error=no_creator", req.url));
 
-        const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/youtube/callback`;
+        const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/custom-auth/youtube/callback`;
         const oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,

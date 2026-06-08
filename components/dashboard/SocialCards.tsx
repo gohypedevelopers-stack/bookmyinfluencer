@@ -116,7 +116,7 @@ export function SocialCards({
                             {!showYtInput ? (
                                 <>
                                     <p className="text-sm text-slate-600">Connect your YouTube channel for full insights.</p>
-                                    <Link href="/api/auth/youtube">
+                                    <Link href="/api/custom-auth/youtube">
                                         <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
                                             Connect YouTube
                                         </Button>
@@ -226,7 +226,7 @@ export function SocialCards({
                             {!showIgInput ? (
                                 <>
                                     <p className="text-sm text-slate-600">Connect your Instagram (Business/Creator) account.</p>
-                                    <Link href="/api/auth/instagram">
+                                    <Link href="/api/custom-auth/instagram">
                                         <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
                                             Connect Instagram
                                         </Button>

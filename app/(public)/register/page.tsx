@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     User, Phone, Instagram, Youtube, Mail,
     CheckCircle, ArrowRight, Loader2, Chrome, Github, Star,
@@ -161,8 +161,9 @@ const ProceedButton = ({
 )
 
 
-export default function RegisterPage() {
+function RegisterPageContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState(1);
     const [direction, setDirection] = useState(0);
 
@@ -206,6 +207,21 @@ export default function RegisterPage() {
     const [kycCompleted, setKycCompleted] = useState(false);
     const [locationQuery, setLocationQuery] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Listen for prefilled Google credentials
+    useEffect(() => {
+        const googleEmail = searchParams.get('googleEmail');
+        const googleName = searchParams.get('googleName');
+        if (googleEmail) {
+            setFormData(prev => ({
+                ...prev,
+                email: googleEmail,
+                fullName: googleName || prev.fullName
+            }));
+            setIsGoogleUser(true);
+            setEmailVerified(true);
+        }
+    }, [searchParams]);
 
     const redirectAfterLogin = useCallback((session: Session | null) => {
         if (session?.user?.role === 'ADMIN') router.push('/admin');
@@ -359,7 +375,7 @@ export default function RegisterPage() {
         setOtpLoading(true);
         setError("");
         try {
-            const res = await fetch("/api/auth/request-otp", {
+            const res = await fetch("/api/custom-auth/request-otp", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ email: formData.email }),
@@ -380,7 +396,7 @@ export default function RegisterPage() {
         setOtpLoading(true);
         setError("");
         try {
-            const res = await fetch("/api/auth/verify-otp", {
+            const res = await fetch("/api/custom-auth/verify-otp", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ email: formData.email, otp }),
@@ -413,6 +429,22 @@ export default function RegisterPage() {
         fd.append('engagement', onboardingData.engagement);
 
         try {
+            if (isGoogleUser) {
+                const signInResult = await signIn('credentials', {
+                    redirect: false,
+                    email: formData.email,
+                    name: formData.fullName || 'Creator',
+                    isGoogleLogin: 'true',
+                    role: 'INFLUENCER',
+                    password: 'bypass',
+                });
+                if (signInResult?.error) {
+                    setError(signInResult.error || 'Failed to authenticate Google session.');
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
             const res = isGoogleUser
                 ? await completeGoogleCreatorOnboarding(fd)
                 : await registerUserAction(fd);
@@ -421,17 +453,6 @@ export default function RegisterPage() {
                 setError(res?.error || 'Registration failed. Please try again.');
                 setIsSubmitting(false);
                 return;
-            }
-
-            if (isGoogleUser) {
-                await signIn('credentials', {
-                    redirect: false,
-                    email: formData.email,
-                    name: formData.fullName || 'Creator',
-                    isGoogleLogin: 'true',
-                    role: 'INFLUENCER',
-                    password: 'bypass',
-                });
             }
 
             // Move to KYC step
@@ -469,14 +490,22 @@ export default function RegisterPage() {
         }
         if (currentStep < 11) {
             setDirection(1);
-            setCurrentStep(prev => prev + 1);
+            if (isGoogleUser && currentStep === 1) {
+                setCurrentStep(4);
+            } else {
+                setCurrentStep(prev => prev + 1);
+            }
         }
     };
 
     const goBack = () => {
         if (currentStep > 1 && !isSubmitting) {
             setDirection(-1);
-            setCurrentStep(prev => prev - 1);
+            if (isGoogleUser && currentStep === 4) {
+                setCurrentStep(1);
+            } else {
+                setCurrentStep(prev => prev - 1);
+            }
         }
     };
 
@@ -1195,5 +1224,17 @@ export default function RegisterPage() {
                 <p>Trusted by 10,000+ creators worldwide</p>
             </div>
         </div >
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a1a]">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+            </div>
+        }>
+            <RegisterPageContent />
+        </Suspense>
     );
 }

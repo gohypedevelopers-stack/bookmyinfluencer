@@ -134,7 +134,7 @@ export function VerifyClient() {
     setProviderInfo(null)
 
     try {
-      const res = await fetch("/api/auth/request-otp", {
+      const res = await fetch("/api/custom-auth/request-otp", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email }),
@@ -187,7 +187,7 @@ export function VerifyClient() {
     setError(null)
     setMessage(null)
     try {
-      const res = await fetch("/api/auth/verify-otp", {
+      const res = await fetch("/api/custom-auth/verify-otp", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email, otp }),
