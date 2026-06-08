@@ -9,7 +9,7 @@ import {
     Instagram, Youtube, Star, TrendingUp, Globe, Zap, Rocket, X
 } from 'lucide-react';
 import { registerBrand, sendEmailOtp, verifyEmailOtp, ensureDevBrandSimulationAccount, completeGoogleBrandOnboarding } from '@/app/brand/auth-actions';
-import { signIn, getProviders, getSession } from 'next-auth/react';
+import { signIn, getProviders, getSession, useSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import { signInWithGooglePopup } from '@/lib/firebase-auth-client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,6 +120,7 @@ const indiaLocations = [
 function BrandRegisterPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { update } = useSession();
     const [currentStep, setCurrentStep] = useState(1);
     const [direction, setDirection] = useState(0);
 
@@ -416,6 +417,10 @@ function BrandRegisterPageContent() {
                 setCampaignWorkflow(res.workflowSummary ?? null);
                 setAutoCampaignId(res.campaignId ?? null);
                 setWorkflowWarning(res.workflowError || '');
+
+                // Update session to reflect completed onboarding
+                await update({ onboardingComplete: true });
+
                 setDirection(1);
                 setCurrentStep(13);
             } else {

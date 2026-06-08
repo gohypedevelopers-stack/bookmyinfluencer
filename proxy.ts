@@ -51,6 +51,10 @@ async function verifyOtpSession(token: string): Promise<OtpSessionPayload | null
 
 export default withAuth(
   async function proxy(req) {
+    if (req.method !== "GET") {
+      return NextResponse.next()
+    }
+
     const token = req.nextauth.token as AuthToken | null
     const otpSessionCookie = req.cookies.get("session")?.value
     let otpUser: OtpSessionPayload | null = null
@@ -116,6 +120,13 @@ export default withAuth(
         if (userRole === "INFLUENCER") {
           return NextResponse.redirect(new URL("/creator-onboarding", req.url))
         }
+      } else if (onboardingComplete && isOnboardingPage) {
+        if (userRole === "BRAND") {
+          return NextResponse.redirect(new URL("/brand/dashboard", req.url))
+        }
+        if (userRole === "INFLUENCER") {
+          return NextResponse.redirect(new URL("/creator/dashboard", req.url))
+        }
       }
     }
 
@@ -161,6 +172,8 @@ export const config = {
     "/register",
     "/signup",
     "/brand/login",
-    "/brand/register"
+    "/brand/register",
+    "/creator-onboarding",
+    "/brand-onboarding"
   ],
 }

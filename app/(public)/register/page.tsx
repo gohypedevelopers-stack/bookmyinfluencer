@@ -12,7 +12,7 @@ import {
     Lock, Eye, EyeOff
 } from 'lucide-react';
 import { completeGoogleCreatorOnboarding, registerUserAction } from './actions';
-import { signIn, getProviders, getSession } from 'next-auth/react';
+import { signIn, getProviders, getSession, useSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import {
     handleRedirectResult,
@@ -164,6 +164,7 @@ const ProceedButton = ({
 function RegisterPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { update } = useSession();
     const [currentStep, setCurrentStep] = useState(1);
     const [direction, setDirection] = useState(0);
 
@@ -453,6 +454,24 @@ function RegisterPageContent() {
                 setError(res?.error || 'Registration failed. Please try again.');
                 setIsSubmitting(false);
                 return;
+            }
+
+            if (isGoogleUser) {
+                // Update session to reflect completed onboarding
+                await update({ onboardingComplete: true });
+            } else {
+                // For email/password registration, sign in via NextAuth now
+                const signInResult = await signIn('credentials', {
+                    redirect: false,
+                    email: formData.email,
+                    password: formData.password,
+                    role: 'INFLUENCER',
+                });
+                if (signInResult?.error) {
+                    setError(signInResult.error || 'Failed to authenticate session.');
+                    setIsSubmitting(false);
+                    return;
+                }
             }
 
             // Move to KYC step
