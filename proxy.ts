@@ -64,12 +64,41 @@ export default withAuth(
 
     const path = req.nextUrl.pathname
 
-    if (path === "/brand/login" || path === "/brand/register") {
+    // 1. Handle auth/login pages redirection if already authenticated
+    const authPages = ["/login", "/register", "/brand/login", "/brand/register", "/signup"]
+    if (authPages.includes(path)) {
+      if (token || otpUser) {
+        const userRole = token?.role || (otpUser ? "INFLUENCER" : null)
+        if (userRole === "BRAND") {
+          return NextResponse.redirect(new URL("/brand/dashboard", req.url))
+        } else if (userRole === "INFLUENCER") {
+          return NextResponse.redirect(new URL("/creator/dashboard", req.url))
+        } else if (userRole === "ADMIN") {
+          return NextResponse.redirect(new URL("/admin", req.url))
+        }
+      }
       return NextResponse.next()
     }
 
+    const isPublicBrandPath =
+      path === "/brand/login" ||
+      path === "/brand/register" ||
+      path.startsWith("/brand/discover")
+
+    const isBrandPath = path.startsWith("/brand") && !isPublicBrandPath
+    const isCreatorPath = path.startsWith("/creator") || path.startsWith("/influencer")
+    const isAdminPath = path.startsWith("/admin")
+    const isManagerPath = path.startsWith("/manager")
+
+    // 2. Redirect if not logged in
     if (!token && !otpUser) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      if (isBrandPath) {
+        return NextResponse.redirect(new URL("/brand/login", req.url))
+      }
+      if (isCreatorPath || isAdminPath || isManagerPath) {
+        return NextResponse.redirect(new URL("/login", req.url))
+      }
+      return NextResponse.next()
     }
 
     const userRole = token?.role || (otpUser ? "INFLUENCER" : null)
@@ -90,27 +119,25 @@ export default withAuth(
       }
     }
 
-    if (path.startsWith("/brand") && !path.startsWith("/brand/login") && !path.startsWith("/brand/register")) {
-      if (userRole !== "BRAND" && userRole !== "ADMIN") {
-        return NextResponse.redirect(new URL("/", req.url))
-      }
+    // Role verification guards
+    if (isBrandPath && userRole !== "BRAND" && userRole !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", req.url))
     }
 
-    if (path.startsWith("/influencer")) {
+    if (isCreatorPath) {
       if (userRole !== "INFLUENCER" && userRole !== "ADMIN") {
         return NextResponse.redirect(new URL("/", req.url))
       }
-
-      if (token && userRole === "INFLUENCER" && !path.startsWith("/influencer/kyc") && token.kycStatus !== "APPROVED") {
+      if (token && userRole === "INFLUENCER" && path.startsWith("/influencer") && !path.startsWith("/influencer/kyc") && token.kycStatus !== "APPROVED") {
         return NextResponse.redirect(new URL("/influencer/kyc", req.url))
       }
     }
 
-    if (path.startsWith("/admin") && userRole !== "ADMIN") {
+    if (isAdminPath && userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/", req.url))
     }
 
-    if (path.startsWith("/manager") && userRole !== "MANAGER" && userRole !== "ADMIN") {
+    if (isManagerPath && userRole !== "MANAGER" && userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/", req.url))
     }
 
@@ -124,5 +151,16 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ["/brand/:path*", "/influencer/:path*", "/admin/:path*", "/manager/:path*"],
+  matcher: [
+    "/brand/:path*",
+    "/influencer/:path*",
+    "/creator/:path*",
+    "/admin/:path*",
+    "/manager/:path*",
+    "/login",
+    "/register",
+    "/signup",
+    "/brand/login",
+    "/brand/register"
+  ],
 }

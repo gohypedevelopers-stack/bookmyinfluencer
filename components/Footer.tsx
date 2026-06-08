@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { Container } from "@/components/container"
-import { motion } from "framer-motion"
 import { Instagram, Youtube, Mail } from "lucide-react"
 
 const ABOUT_LINKS = [
@@ -132,13 +131,13 @@ export function Footer() {
                             
                             <div>
                                 <h4 className="text-slate-900 font-bold mb-6 text-sm uppercase tracking-wider">Contact</h4>
-                                <a href="mailto:contact@bookmyinfluencer.com" className="group inline-flex flex-col items-start gap-4">
+                                <a href="mailto:support@bookmyinfluencer.in" className="group inline-flex flex-col items-start gap-4">
                                     <div className="flex items-center gap-3 text-slate-500 text-sm md:text-base hover:text-indigo-600 transition-colors duration-300">
                                         <div className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:bg-indigo-600 group-hover:border-indigo-600 group-hover:text-white transition-all duration-300 shrink-0 group-hover:shadow-[0_10px_20px_rgba(79,70,229,0.3)]">
                                             <Mail className="w-4 h-4 group-hover:animate-pulse" />
                                         </div>
                                         <span className="relative font-bold tracking-wide">
-                                            BookMyInfluencer
+                                            support@bookmyinfluencer.in
                                         </span>
                                     </div>
                                 </a>
@@ -148,19 +147,19 @@ export function Footer() {
                 </Container>
             </div>
 
-            {/* Bottom Bar - Dark Premium */}
-            <div className="relative z-10 border-t border-slate-800 bg-slate-950 shadow-[0_-5px_30px_rgba(0,0,0,0.1)]">
+            {/* Bottom Bar - Off-White */}
+            <div className="relative z-10 border-t border-slate-200 bg-slate-50 shadow-[0_-5px_30px_rgba(0,0,0,0.02)]">
                 <Container>
                     <div className="py-6 flex flex-col items-center justify-center">
-                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs md:text-sm font-medium text-slate-400">
+                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs md:text-sm font-medium text-slate-500">
                             {BOTTOM_LINKS.map((link, idx) => (
                                 <Link 
                                     key={idx} 
                                     href={link.href}
-                                    className="hover:text-indigo-400 transition-colors duration-300 relative group"
+                                    className="hover:text-indigo-600 transition-colors duration-300 relative group py-1"
                                 >
                                     {link.label}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-indigo-500 group-hover:w-full transition-all duration-300 rounded-full opacity-80" />
+                                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-indigo-600 group-hover:w-full transition-all duration-300 rounded-full opacity-80" />
                                 </Link>
                             ))}
                         </div>

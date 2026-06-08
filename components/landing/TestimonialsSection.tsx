@@ -156,37 +156,37 @@ const TESTIMONIALS = [
     {
         name: "Aditya Mehta",
         role: "President & Co-founder",
-        image: "https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&h=256&q=80",
         content: "BookMyInfluencer transformed our marketing campaigns. We scaled our reach across tier-2 and tier-3 cities in India seamlessly, finding high-quality local creators in minutes.",
     },
     {
         name: "Priya Sharma",
         role: "Co-founder",
-        image: "https://images.unsplash.com/photo-1594744803329-e58b31de215f?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&h=256&q=80",
         content: "The platform's deep analytics and automated payouts saved us hours of manual collaboration tracking. It is by far the most reliable influencer marketing tool in India.",
     },
     {
         name: "Ananya Iyer",
         role: "Operations Manager",
-        image: "https://images.unsplash.com/photo-1621594539744-477cf90cb46f?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&h=256&q=80",
         content: "Collaborating with regional creators used to be an operational nightmare. With BookMyInfluencer, onboarding, KYC verification, and payouts are completely streamlined.",
     },
     {
         name: "Rohan Malhotra",
         role: "Sales Manager",
-        image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&h=256&q=80",
         content: "Our campaign ROI increased by 40% after switching to BookMyInfluencer. Filtering creators by niche, engagement, and city helped us target the right customer base.",
     },
     {
         name: "Kabir Verma",
         role: "Web Developer",
-        image: "https://images.unsplash.com/photo-1618018352910-72bdafdc72a8?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=256&h=256&q=80",
         content: "Integrating campaign flows via their dashboard is incredibly smooth. Real-time updates and notifications keep our developers and brand managers in perfect sync.",
     },
     {
         name: "Ishaan Goel",
         role: "Graphic Designer",
-        image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?fit=crop&w=150&h=150&q=80",
+        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=256&h=256&q=80",
         content: "The dynamic media kit feature is state-of-the-art. It makes presenting creative portfolios and real-time social metrics to prospective brands look highly premium.",
     }
 ]
@@ -194,9 +194,9 @@ const TESTIMONIALS = [
 // ─── Section ──────────────────────────────────────────────────────────────────
 export function TestimonialsSection() {
     return (
-        <section className="w-full relative overflow-hidden transition-colors duration-500 bg-slate-50">
+        <section id="testimonials-section" className="w-full relative overflow-x-hidden transition-colors duration-500 bg-slate-50">
             {/* Stats Container */}
-            <div className="py-12 md:py-16">
+            <div className="py-16 md:py-24">
                 <Container>
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -204,7 +204,7 @@ export function TestimonialsSection() {
                         viewport={{ once: true }}
                         className="text-center mb-12 md:mb-16"
                     >
-                        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
+                        <h2 className="text-3xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
                             Proven Results for <span className="text-indigo-600">Industry Leaders</span>
                         </h2>
                         <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
@@ -221,18 +221,21 @@ export function TestimonialsSection() {
             </div>
 
             {/* Matching Image Design - Testimonials Container */}
-            <div className="py-20 md:py-32 bg-[#A9B6B9]">
+            <div className="py-16 md:py-24 bg-slate-50 overflow-visible">
                 <Container>
                     {/* Header */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-center mb-32"
+                        className="text-center mb-24 md:mb-32"
                     >
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 uppercase tracking-wider drop-shadow-sm">
-                            Customer Testimonials
+                        <h2 className="text-3xl md:text-6xl font-bold text-slate-900 mb-6 uppercase tracking-wider">
+                            Customer <span className="text-indigo-600">Testimonials</span>
                         </h2>
+                        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium mt-4">
+                            See how brands and creators are achieving outstanding success and growth through our platform.
+                        </p>
                     </motion.div>
 
                     {/* Cards Grid with Perspective for 3D effect */}
@@ -250,7 +253,7 @@ export function TestimonialsSection() {
                                 }
                             }
                         }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-20 max-w-4xl mx-auto [perspective:1200px]"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-24 max-w-4xl mx-auto [perspective:1200px] overflow-visible"
                     >
                         {TESTIMONIALS.map((t, i) => (
                             <motion.div 
@@ -277,15 +280,16 @@ export function TestimonialsSection() {
                                         } 
                                     }
                                 }}
-                                className="relative pt-12 origin-top"
+                                className="relative pt-14 origin-top overflow-visible"
                             >
                                 {/* Avatar */}
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-10 w-[100px] h-[100px] rounded-full border-[5px] border-white overflow-hidden z-20 shadow-[0_8px_20px_rgba(0,0,0,0.12)] bg-slate-200 group-hover:scale-105 transition-transform duration-500">
-                                    <Image src={t.image} alt={t.name} width={100} height={100} className="w-full h-full object-cover" />
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[96px] h-[96px] rounded-full border-[4px] border-white overflow-hidden z-30 shadow-[0_8px_20px_rgba(0,0,0,0.18)] bg-slate-200 transition-all duration-500 ease-out hover:scale-[1.25] hover:rotate-6 hover:border-indigo-500 hover:shadow-[0_15px_30px_rgba(99,102,241,0.4)] cursor-pointer group/avatar">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={t.image} alt={t.name} width={96} height={96} className="w-full h-full object-cover object-top transition-transform duration-500 ease-out group-hover/avatar:scale-110" />
                                 </div>
 
                                 {/* Card Body */}
-                                <div className="bg-white rounded-[20px] pt-16 shadow-[0_15px_35px_-5px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.2)] text-center overflow-hidden flex flex-col h-full hover:-translate-y-3 transition-all duration-500 border border-slate-100 group relative z-10">
+                                <div className="bg-white rounded-[20px] pt-14 shadow-[0_15px_35px_-5px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.2)] text-center overflow-hidden flex flex-col h-full hover:-translate-y-3 transition-all duration-500 border border-slate-100 group relative z-10">
                                     <div className="px-5 pb-8 flex-1">
                                         <h3 className="text-lg font-black text-slate-900 uppercase mb-1 tracking-wide">{t.name}</h3>
                                         <p className="text-[9px] font-bold text-[#27ae60] uppercase tracking-[0.1em] mb-4">{t.role}</p>

@@ -215,7 +215,7 @@ export default function BrandRegisterPage() {
 
     async function handleBrandSession(session: Session | null) {
         if (session?.user?.role === "BRAND" || session?.user?.role === "ADMIN") {
-            router.push("/brand")
+            router.push("/brand/dashboard")
             router.refresh()
             return true;
         }
@@ -522,7 +522,7 @@ export default function BrandRegisterPage() {
             </div>
             {/* Split-panel card */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-xl md:max-w-[840px] relative z-10 rounded-[2rem] overflow-hidden flex shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] border border-slate-200/60 ring-1 ring-slate-200/50 min-h-[520px]">
+                className="w-full max-w-[95vw] sm:max-w-xl md:max-w-[840px] relative z-10 rounded-[2rem] overflow-hidden flex shadow-[0_32px_80px_-16px_rgba(30,41,59,0.15)] border border-slate-200/60 ring-1 ring-slate-200/50 min-h-[520px]">
 
                 {/* LEFT: Premium Sidebar (Visible on Desktop) */}
                 <div className="hidden md:flex flex-col w-[35%] relative overflow-hidden overflow-y-auto"
@@ -621,7 +621,7 @@ export default function BrandRegisterPage() {
                     )}
 
                     {/* Scrollable form area */}
-                    <div className="flex-1 flex flex-col justify-center px-5 pt-16 pb-8 md:px-8 md:py-8 overflow-y-auto">
+                    <div className="flex-1 flex flex-col justify-center px-4 sm:px-7 pt-16 pb-8 md:px-10 md:py-8 overflow-y-auto">
                         <ErrorDisplay />
                         <AnimatePresence initial={false} custom={direction} mode="wait">
 
@@ -630,7 +630,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step1" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-6">
-                                            <h2 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Enter Brand Details</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Enter Brand Details</h2>
                                             <p className="text-sm text-slate-400 mt-1">Tell us about your company to get started.</p>
                                         </div>
 
@@ -800,7 +800,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step2" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Verify company email</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Verify company email</h2>
                                             <p className="text-sm text-slate-400 mt-1">Security Check</p>
                                         </div>
 
@@ -872,7 +872,7 @@ export default function BrandRegisterPage() {
                                                                     (inputs?.[focusIdx] as HTMLInputElement)?.focus();
                                                                 }
                                                             }}
-                                                            className="w-12 h-12 md:w-14 md:h-14 text-center text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 bg-slate-50 focus:bg-white transition-all text-slate-800"
+                                                            className="w-9 h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 text-center text-base sm:text-xl font-bold border border-slate-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 bg-slate-50 focus:bg-white transition-all text-slate-800"
                                                         />
                                                     ))}
                                                 </div>
@@ -919,7 +919,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step3" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Create secure password</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Create secure password</h2>
                                             <p className="text-sm text-slate-400 mt-1">Finalize Account</p>
                                         </div>
 
@@ -995,7 +995,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step5" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is your Brand Name?</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is your Brand Name?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Defining Identity</p>
                                         </div>
                                         <div className="relative">
@@ -1016,7 +1016,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step6" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What type of campaign?</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What type of campaign?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Campaign Strategy</p>
                                         </div>
                                         <div className="grid grid-cols-1 gap-3 pb-2">
@@ -1052,7 +1052,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step7" direction={direction}>
                                     <div className="space-y-5">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Total campaign budget?</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Total campaign budget?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Budget Planning</p>
                                         </div>
                                         <div className="space-y-3">
@@ -1086,7 +1086,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step8" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Where are creators based?</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">Where are creators based?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Select the target location.</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 pb-2 z-10 relative">
@@ -1168,7 +1168,7 @@ export default function BrandRegisterPage() {
                                 <CardWrapper stepKey="step9" direction={direction}>
                                     <div className="space-y-6">
                                         <div className="text-center mb-4">
-                                            <h2 className="text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is the campaign niche?</h2>
+                                            <h2 className="text-2xl sm:text-3xl font-black mb-1 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600">What is the campaign niche?</h2>
                                             <p className="text-sm text-slate-400 mt-1">Select the main category for this campaign.</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 pb-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">

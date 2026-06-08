@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { ensureCreatorAuthUser, syncCreatorProfileByEmail } from "@/lib/auth-sync"
 import { authOptions } from "@/lib/auth"
 import { verifySession } from "@/lib/session"
+import bcrypt from "bcryptjs"
 import {
     estimateFollowersCountFromRange,
     normalizeSharedNiche,
@@ -134,10 +135,17 @@ export async function registerUserAction(formData: FormData) {
             throw new Error("Verified email does not match this registration")
         }
 
+        const password = stringValue(formData.get("password"))
+        let passwordHash: string | null = null
+        if (password) {
+            passwordHash = await bcrypt.hash(password, 10)
+        }
+
         const verifiedAt = new Date()
         const { otpUser } = await ensureCreatorAuthUser({
             email,
             name: parsed.fullName,
+            passwordHash,
             otpVerifiedAt: verifiedAt,
         })
 

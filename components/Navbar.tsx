@@ -17,17 +17,20 @@ export function Navbar() {
   return (
 
     <nav className="border-b border-slate-200/50 sticky top-0 z-[100] bg-white/80 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-      <Container className="h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          {/* Logo placeholder - using text/icon */}
-          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 rounded-tr-[10px] rounded-bl-[10px] flex items-center justify-center text-white font-bold text-lg sm:text-xl min-w-[32px] sm:min-w-[36px] shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform duration-500">
-            B
-          </div>
-          <span className="font-bold text-lg sm:text-2xl tracking-tighter text-slate-900">Book<span className="text-indigo-600">my</span><span className="text-[#27ae60]">influencer</span></span>
-        </Link>
+      <Container className="h-20 grid grid-cols-2 md:grid-cols-3 items-center">
+        {/* Left: Logo */}
+        <div className="flex justify-start">
+          <Link href="/" className="flex items-center gap-2 group">
+            {/* Logo placeholder - using text/icon */}
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-indigo-600 rounded-tr-[10px] rounded-bl-[10px] flex items-center justify-center text-white font-bold text-lg sm:text-xl min-w-[32px] sm:min-w-[36px] shadow-lg shadow-indigo-100 group-hover:scale-110 transition-transform duration-500">
+              B
+            </div>
+            <span className="font-bold text-lg sm:text-2xl tracking-tighter text-slate-900">Book<span className="text-indigo-600">my</span><span className="text-[#27ae60]">influencer</span></span>
+          </Link>
+        </div>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-10 text-sm font-bold tracking-wide text-slate-600">
+        {/* Center: Desktop Links */}
+        <div className="hidden md:flex items-center justify-center gap-10 text-sm font-bold tracking-wide text-slate-600">
           <Link href="/discover" className="hover:text-indigo-600 transition-colors">
             Marketplace
           </Link>
@@ -39,27 +42,30 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link 
-            href="/login"
-            className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors tracking-wide cursor-pointer bg-transparent border-0"
-          >
-            Log In
-          </Link>
-          <Button
-            onClick={() => setIsJoinModalOpen(true)}
-            className="font-bold bg-slate-900 text-white hover:bg-slate-800 px-8 h-12 rounded-xl text-sm tracking-wide transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200"
-          >
-            Join Now
-          </Button>
-        </div>
+        {/* Right: Auth / Menu Toggle */}
+        <div className="flex items-center justify-end">
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link 
+              href="/login"
+              className="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors tracking-wide cursor-pointer bg-transparent border-0"
+            >
+              Log In
+            </Link>
+            <Button
+              onClick={() => setIsJoinModalOpen(true)}
+              className="font-bold bg-slate-900 text-white hover:bg-slate-800 px-8 h-12 rounded-xl text-sm tracking-wide transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200"
+            >
+              Join Now
+            </Button>
+          </div>
 
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="text-slate-900 hover:bg-slate-100" aria-label="Toggle Menu">
-            {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
-          </Button>
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden flex items-center">
+            <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="text-slate-900 hover:bg-slate-100" aria-label="Toggle Menu">
+              {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+            </Button>
+          </div>
         </div>
       </Container>
 

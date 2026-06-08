@@ -1,17 +1,51 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Container } from "@/components/container"
-import { motion } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { ContactSalesModal } from "./ContactSalesModal"
 import { ArrowRight, Star, Users, Zap, Globe } from "lucide-react"
+
+function CountUp({ value, decimals = 0, suffix = "" }: { value: number; decimals?: number; suffix?: string }) {
+    const [count, setCount] = useState(0)
+    const ref = useRef<HTMLSpanElement>(null)
+    const isInView = useInView(ref, { once: true })
+
+    useEffect(() => {
+        if (!isInView) return
+        let startTime: number
+        const duration = 2000 // 2 seconds
+        
+        const animate = (timestamp: number) => {
+            if (!startTime) startTime = timestamp
+            const progress = Math.min((timestamp - startTime) / duration, 1)
+            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+            setCount(eased * value)
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate)
+            } else {
+                setCount(value)
+            }
+        }
+        
+        requestAnimationFrame(animate)
+    }, [isInView, value])
+
+    return (
+        <span ref={ref} className="tabular-nums font-black">
+            {decimals > 0 ? count.toFixed(decimals) : Math.floor(count).toLocaleString()}
+            {suffix}
+        </span>
+    )
+}
 
 export function CallToAction() {
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     return (
-        <section className="w-full py-12 md:py-16 bg-transparent relative overflow-hidden transition-colors duration-500">
+        <section className="w-full py-16 md:py-24 bg-transparent relative overflow-hidden transition-colors duration-500">
             <Container>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -67,14 +101,18 @@ export function CallToAction() {
                             transition={{ delay: 0.1, duration: 0.5 }}
                             className="flex justify-center mb-6"
                         >
-                            <div className="relative inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[10px] font-bold uppercase tracking-[0.18em] shadow-lg">
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById('trusted-by-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="relative inline-flex items-center gap-2.5 px-4.5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[12px] sm:text-xs font-bold uppercase tracking-[0.18em] shadow-lg cursor-pointer hover:bg-white/25 hover:scale-[1.03] hover:border-white/40 active:scale-98 transition-all duration-300 select-none group"
+                            >
                                 <motion.div
                                     animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
                                     transition={{ duration: 2, repeat: Infinity }}
-                                    className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.6)]"
+                                    className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.6)]"
                                 />
-                                <span>Trusted by 25,000+ Brands</span>
-                            </div>
+                                <span>Trusted by <CountUp value={25000} suffix="+" /> Brands</span>
+                            </button>
                         </motion.div>
 
                         {/* Headline */}
@@ -92,25 +130,30 @@ export function CallToAction() {
                             </span>
                         </motion.h2>
 
-
-
                         {/* Inline stat pills */}
                         <motion.div
                             initial={{ opacity: 0, y: 14 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.38, duration: 0.6 }}
-                            className="flex flex-wrap justify-center gap-2.5 mb-8"
+                            className="flex flex-wrap justify-center gap-3.5 mb-10"
                         >
                             {[
-                                { icon: Users, label: "850M+ Reach" },
-                                { icon: Zap, label: "12K+ Campaigns" },
-                                { icon: Globe, label: "6.2% Avg Eng." },
-                            ].map(({ icon: Icon, label }, i) => (
-                                <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/[0.14] text-white/80 text-[11px] font-semibold backdrop-blur-sm">
-                                    <Icon className="w-3 h-3 text-indigo-200" />
-                                    {label}
-                                </div>
+                                { icon: Users, val: 850, dec: 0, suff: "M+", label: "Reach" },
+                                { icon: Zap, val: 12, dec: 0, suff: "K+", label: "Campaigns" },
+                                { icon: Globe, val: 6.2, dec: 1, suff: "%", label: "Avg Eng." },
+                            ].map(({ icon: Icon, val, dec, suff, label }, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => document.getElementById('testimonials-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.08] border border-white/[0.14] text-white/80 text-[13px] sm:text-sm font-semibold backdrop-blur-sm cursor-pointer hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 hover:text-white transition-all duration-300 select-none"
+                                >
+                                    <Icon className="w-4 h-4 text-indigo-200" />
+                                    <span>
+                                        <CountUp value={val} decimals={dec} suffix={suff} /> {label}
+                                    </span>
+                                </button>
                             ))}
                         </motion.div>
 

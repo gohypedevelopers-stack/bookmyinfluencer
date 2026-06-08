@@ -24,10 +24,8 @@ const GoogleIcon = ({ className = "" }: { className?: string }) => (
 function getPostLoginPath(session: Session | null) {
     if (session?.user?.role === 'ADMIN') return '/admin'
     if (session?.user?.role === 'MANAGER') return '/manager'
-    if (session?.user?.role === 'BRAND') return '/brand/campaigns'
-    if (session?.user?.role === 'INFLUENCER') {
-        return (session.user as any)?.onboardingComplete ? '/creator/dashboard' : '/creator/onboarding'
-    }
+    if (session?.user?.role === 'BRAND') return '/brand/dashboard'
+    if (session?.user?.role === 'INFLUENCER') return '/creator/dashboard'
     return '/'
 }
 
